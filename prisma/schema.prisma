@@ -1,0 +1,50 @@
+
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String   @id @default(cuid())
+  email            String   @unique
+  credits          Int      @default(5000)
+  subscriptionType String   @default("free") // "free", "basic", "premium", "pro"
+  subscriptionEnds DateTime?
+  monthlyReset     DateTime @default(now())
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  transactions CreditTransaction[]
+  generations  Generation[]
+}
+
+model CreditTransaction {
+  id          String   @id @default(cuid())
+  userId      String
+  amount      Int      // positive for purchase, negative for usage
+  type        String   // "purchase", "usage", "bonus", "monthly_reset"
+  description String?
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Generation {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // "image", "video", "text", "audio", "code", "logo", "presentation", "music", "voice", "design"
+  prompt    String
+  cost      Int      // credits consumed
+  status    String   // "pending", "completed", "failed"
+  result    String?  // URL or file path
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
