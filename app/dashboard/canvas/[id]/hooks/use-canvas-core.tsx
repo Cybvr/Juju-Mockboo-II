@@ -155,7 +155,7 @@ export function useCanvasCore(documentId: string, document: Document | null) {
 
       // Debug logs for text objects
       console.log("🔍 Saving canvas state - Raw data:", rawCanvasData)
-      const textObjects = rawCanvasData.objects?.filter(obj => obj.type === 'textbox' || obj.type === 'text')
+      const textObjects = rawCanvasData.objects?.filter(obj => obj.type === 'i-text' || obj.type === 'textbox' || obj.type === 'text')
       console.log("📝 Text objects found:", textObjects)
       textObjects?.forEach((textObj, index) => {
         console.log(`📝 Text ${index + 1}:`, {
@@ -171,7 +171,7 @@ export function useCanvasCore(documentId: string, document: Document | null) {
 
       console.log("💾 Saving to Firebase with data:", {
         canvasData: cleanCanvasData,
-        textObjectsCount: cleanCanvasData.objects?.filter(obj => obj.type === 'textbox' || obj.type === 'text').length
+        textObjectsCount: cleanCanvasData.objects?.filter(obj => obj.type === 'i-text' || obj.type === 'textbox' || obj.type === 'text').length
       })
 
       await documentService.updateDocument(documentId, {
