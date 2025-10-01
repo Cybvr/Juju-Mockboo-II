@@ -142,7 +142,7 @@ export function useInteractionHook({
         if (!activeObject) {
           return
         }
-        
+
         activeObject.clone().then((cloned: any) => {
           window.copiedObjects = cloned
         })
@@ -160,7 +160,7 @@ export function useInteractionHook({
               top: clonedObj.top + 10,
               evented: true,
             })
-            
+
             // Preserve custom properties
             if (window.copiedObjects.stickyNoteGroup) {
               clonedObj.stickyNoteGroup = true
@@ -169,7 +169,7 @@ export function useInteractionHook({
             if (window.copiedObjects.isTextObject) {
               clonedObj.isTextObject = true
             }
-            
+
             import("fabric").then(({ ActiveSelection }) => {
               if (clonedObj instanceof ActiveSelection) {
                 clonedObj.canvas = canvas
@@ -265,7 +265,7 @@ export function useInteractionHook({
     if (!fabricCanvasRef.current) return null
     const canvas = fabricCanvasRef.current
     const canvasElement = canvas.getElement()
-    let isPanning = false, isZooming = false, lastPanX = 0, lastPanY = 0, lastDistance = 0
+    let isPanning = false, lastPanX = 0, lastPanY = 0, lastDistance = 0
     const getDistance = (touch1: Touch, touch2: Touch) => {
       const dx = touch1.clientX - touch2.clientX
       const dy = touch1.clientY - touch2.clientY
@@ -279,7 +279,6 @@ export function useInteractionHook({
       } else if (e.touches.length === 2) {
         e.preventDefault()
         isPanning = true
-        isZooming = false
         canvas.selection = false
         const touch1 = e.touches[0], touch2 = e.touches[1]
         lastPanX = (touch1.clientX + touch2.clientX) / 2
@@ -293,12 +292,32 @@ export function useInteractionHook({
         const touch1 = e.touches[0], touch2 = e.touches[1]
         const centerX = (touch1.clientX + touch2.clientX) / 2
         const centerY = (touch1.clientY + touch2.clientY) / 2
-        
-        const vpt = canvas.viewportTransform
-        vpt[4] += centerX - lastPanX
-        vpt[5] += centerY - lastPanY
-        canvas.requestRenderAll()
-        
+        const currentDistance = getDistance(touch1, touch2)
+
+        // Check if this is a pinch gesture (distance changed significantly)
+        const distanceChange = Math.abs(currentDistance - lastDistance)
+        const threshold = 5 // pixels
+
+        if (distanceChange > threshold) {
+          // Pinch to zoom
+          const scale = currentDistance / lastDistance
+          let zoom = canvas.getZoom() * scale
+          zoom = Math.max(0.2, Math.min(5, zoom))
+
+          import("fabric").then((FabricModule) => {
+            const fabric = FabricModule
+            canvas.zoomToPoint(new fabric.Point(centerX, centerY), zoom)
+          })
+
+          lastDistance = currentDistance
+        } else {
+          // Two-finger pan
+          const vpt = canvas.viewportTransform
+          vpt[4] += centerX - lastPanX
+          vpt[5] += centerY - lastPanY
+          canvas.requestRenderAll()
+        }
+
         lastPanX = centerX
         lastPanY = centerY
       }
@@ -306,7 +325,6 @@ export function useInteractionHook({
     const handleTouchEnd = () => {
       setTimeout(() => {
         isPanning = false
-        isZooming = false
         canvas.selection = true
       }, 100)
     }
