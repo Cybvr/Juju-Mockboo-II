@@ -1,22 +1,18 @@
 "use client"
 import { useEffect, useState, useCallback } from "react"
 import type { Document } from "@/types/firebase"
-import type { useCanvasState, useCanvasOperations } from "./canvas-hooks"
 import { useInteractionHook } from "./hooks/use-interaction-hook"
-import { useDragAndDrop } from "./hooks/canvas-drag-drop"
-import { useSnapGrid } from "./hooks/use-snap-grid"
+import { useCanvasCore } from "./hooks/use-canvas-core"
 import { useImageOperations } from "./hooks/use-image-operations"
-import { setupUndoRedo, setupCanvasEvents, setupResizeHandler } from "./hooks/canvas-initialization"
 import { FloatingToolbar } from "./floating-toolbar"
 import { DrawingToolbar } from "../common/drawing-toolbar" // Added drawing toolbar import
 
 export function useFabricCanvas(
   documentData: Document | null,
   documentId: string,
-  canvasState: ReturnType<typeof useCanvasState>,
-  operations: ReturnType<typeof useCanvasOperations>,
   onSelectedImagesChange?: (images: string[]) => void,
 ) {
+  const canvasCore = useCanvasCore(documentId, documentData)
   const {
     canvasRef,
     fabricCanvasRef,
@@ -30,30 +26,33 @@ export function useFabricCanvas(
     setBrushSize,
     setBrushColor,
     setDrawingMode,
-  } = canvasState // Added drawing state
-  const { handleCanvasChange } = operations
-  const [selectedObjects, setSelectedObjects] = useState<any[]>([])
+    selectedObjects,
+    setSelectedObjects,
+    setupUndoRedo,
+    setupCanvasEvents,
+    setupResizeHandler,
+    autoSaveIntervalRef,
+    saveCanvasState,
+  } = canvasCore
+
   const [isGeneratingVariations, setIsGeneratingVariations] = useState(false)
 
   const imageOps = useImageOperations({
     fabricCanvasRef,
-    handleCanvasChange,
-    userId: canvasState.userId,
+    handleCanvasChange: canvasCore.handleCanvasChange,
+    userId: canvasCore.userId,
   })
-
-  const dragDropHook = useDragAndDrop(fabricCanvasRef.current, handleCanvasChange, imageOps.handleFileUpload)
 
   const interactionHook = useInteractionHook({
     fabricCanvasRef,
-    handleCanvasChange,
+    handleCanvasChange: canvasCore.handleCanvasChange,
     activeToolRef,
     isDrawingRef,
     setIsDrawing,
-    setActiveTool: canvasState.setActiveTool,
+    setActiveTool: canvasCore.setActiveTool,
     brushSize,
     brushColor,
     drawingMode,
-    
   })
 
   const snapGrid = useSnapGrid({
@@ -134,11 +133,11 @@ export function useFabricCanvas(
         canvas.freeDrawingBrush.width = brushSize
         canvas.freeDrawingBrush.color = brushColor
 
-        // Setup undo/redo system
-        const { saveState } = setupUndoRedo(canvas, canvasState)
+        // Setup undo/redo
+        const { saveState } = setupUndoRedo(canvas)
 
-        // Setup canvas event handlers
-        setupCanvasEvents(canvas, handleCanvasChange, setSelectedObjects, onSelectedImagesChange, saveState)
+        // Setup canvas events
+        setupCanvasEvents(canvas, canvasCore.handleCanvasChange, setSelectedObjects, onSelectedImagesChange, saveState)
 
         // Setup interaction handlers
         const cleanupInteractions = interactionHook.setupInteractions()
@@ -150,11 +149,7 @@ export function useFabricCanvas(
         const cleanupResize = setupResizeHandler(canvas)
 
         // Setup drag and drop using centralized image operations
-        let cleanupDragDrop = () => {}
-        if (fabricCanvasRef.current) {
-          const updatedDragDropHook = useDragAndDrop(fabricCanvasRef.current, handleCanvasChange, imageOps.handleFileUpload)
-          cleanupDragDrop = updatedDragDropHook.setupDragAndDrop()
-        }
+        const cleanupDragDrop = imageOps.setupDragAndDrop()
 
         // Setup canvas actions using centralized image operations
         canvas._duplicateHandler = imageOps.duplicateSelectedImages
@@ -193,15 +188,15 @@ export function useFabricCanvas(
   }, [documentData])
 
   useEffect(() => {
-    if (canvasState.fabricLoaded && documentData) {
-      canvasState.autoSaveIntervalRef.current = setInterval(operations.saveCanvasState, 60000)
+    if (canvasCore.fabricLoaded && documentData) {
+      autoSaveIntervalRef.current = setInterval(saveCanvasState, 60000)
       return () => {
-        if (canvasState.autoSaveIntervalRef.current) {
-          clearInterval(canvasState.autoSaveIntervalRef.current)
+        if (autoSaveIntervalRef.current) {
+          clearInterval(autoSaveIntervalRef.current)
         }
       }
     }
-  }, [canvasState.fabricLoaded, documentData])
+  }, [canvasCore.fabricLoaded, documentData])
 
   const FloatingToolbarComponent = () => (
     <>
@@ -219,7 +214,7 @@ export function useFabricCanvas(
         isGeneratingVariations={isGeneratingVariations}
       />
       <DrawingToolbar
-        isVisible={canvasState.activeTool === "pen"}
+        isVisible={canvasCore.activeTool === "pen"}
         onBrushSizeChange={setBrushSize}
         onColorChange={setBrushColor}
         onModeChange={setDrawingMode}

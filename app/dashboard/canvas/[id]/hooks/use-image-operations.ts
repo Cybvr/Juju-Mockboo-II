@@ -1,3 +1,4 @@
+
 import { useCallback } from "react"
 import type { Canvas } from "fabric"
 
@@ -62,9 +63,7 @@ export function useImageOperations({
 
     try {
       const { storageService } = require('@/services/storageService')
-      console.log('Uploading image to Firebase Storage...')
       const uploadedUrls = await storageService.uploadImages([imageUrl], userId)
-      console.log('Image uploaded successfully:', uploadedUrls[0])
       return uploadedUrls[0]
     } catch (uploadError) {
       console.warn('Failed to upload to storage, using original URL:', uploadError)
@@ -86,13 +85,10 @@ export function useImageOperations({
     const { replaceObjects, position, immediate } = options
 
     try {
-      // Always upload large data URLs to storage AND compress for canvas
       let persistentImageUrl = imageUrl
       if (imageUrl.startsWith('data:') && imageUrl.length > 100000) {
-        console.log('Uploading large image to storage to prevent canvas corruption');
         persistentImageUrl = await uploadImageToStorage(imageUrl)
       } else if (imageUrl.startsWith('data:') && imageUrl.length > 50000) {
-        console.log('Compressing medium-sized image for canvas');
         persistentImageUrl = await compressImage(new File([imageUrl], 'image.jpg'), 800, 600, 0.7);
       }
 
@@ -134,12 +130,8 @@ export function useImageOperations({
               canvas.setActiveObject(fabricImage)
               canvas.renderAll()
 
-              // Trigger canvas change to save state immediately
               if (handleCanvasChange) {
-                console.log('ImageOps: Triggering canvas save after adding image');
                 handleCanvasChange();
-
-                // Fire canvas events to ensure persistence
                 canvas.fire('path:created', { path: fabricImage });
                 canvas.fire('object:added', { target: fabricImage });
               }
@@ -149,7 +141,6 @@ export function useImageOperations({
 
             imgElement.onerror = () => {
               if (src === persistentImageUrl && src !== imageUrl) {
-                // Fallback to original URL
                 loadImage(imageUrl)
               } else {
                 console.error('Failed to load image')
@@ -193,6 +184,128 @@ export function useImageOperations({
     }
   }, [addImageToCanvas, compressImage])
 
+  // Drag and drop setup
+  const setupDragAndDrop = useCallback(() => {
+    if (!fabricCanvasRef.current) return () => {}
+
+    const canvas = fabricCanvasRef.current
+    const canvasElement = canvas.getElement()
+    if (!canvasElement) return () => {}
+
+    const canvasContainer = canvasElement.parentElement || canvasElement
+
+    const handleDragOver = (e: DragEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      e.dataTransfer!.dropEffect = "copy"
+      canvas.getElement().style.opacity = "0.8"
+    }
+
+    const handleDragEnter = (e: DragEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      canvas.getElement().style.opacity = "0.8"
+    }
+
+    const handleDragLeave = (e: DragEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      if (!canvasElement.contains(e.relatedTarget as Node)) {
+        canvas.getElement().style.opacity = "1"
+      }
+    }
+
+    const handleDrop = async (e: DragEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      canvas.getElement().style.opacity = "1"
+
+      const files = Array.from(e.dataTransfer?.files || [])
+      const imageFiles = files.filter((file) => file.type.startsWith("image/"))
+
+      const rect = canvasElement.getBoundingClientRect()
+      const dropX = e.clientX - rect.left
+      const dropY = e.clientY - rect.top
+
+      for (const file of imageFiles) {
+        try {
+          await handleFileUpload(file, { x: dropX - 200, y: dropY - 200 })
+        } catch (error) {
+          console.error("Error processing dropped file:", error)
+        }
+      }
+    }
+
+    const handlePaste = async (e: ClipboardEvent) => {
+      e.preventDefault()
+      const items = Array.from(e.clipboardData?.items || [])
+      const imageItems = items.filter((item) => item.type.startsWith("image/"))
+
+      for (const item of imageItems) {
+        const file = item.getAsFile()
+        if (!file) continue
+
+        try {
+          await handleFileUpload(file)
+        } catch (error) {
+          console.error("Error processing pasted image:", error)
+        }
+      }
+    }
+
+    canvasContainer.setAttribute("tabindex", "0")
+    canvasContainer.style.outline = "none"
+
+    const handleCanvasClick = () => {
+      canvasContainer.focus()
+    }
+
+    // Setup event listeners
+    canvasElement.addEventListener("dragover", handleDragOver)
+    canvasElement.addEventListener("dragenter", handleDragEnter)
+    canvasElement.addEventListener("dragleave", handleDragLeave)
+    canvasElement.addEventListener("drop", handleDrop)
+    canvasElement.addEventListener("click", handleCanvasClick)
+    canvasContainer.addEventListener("dragover", handleDragOver)
+    canvasContainer.addEventListener("dragenter", handleDragEnter)
+    canvasContainer.addEventListener("dragleave", handleDragLeave)
+    canvasContainer.addEventListener("drop", handleDrop)
+    canvasContainer.addEventListener("paste", handlePaste)
+    canvasContainer.addEventListener("click", handleCanvasClick)
+
+    const preventDefaults = (e: DragEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+
+    let documentListenersAdded = false
+    if (typeof window !== "undefined" && typeof document !== "undefined") {
+      document.addEventListener("dragover", preventDefaults)
+      document.addEventListener("drop", preventDefaults)
+      documentListenersAdded = true
+    }
+
+    return () => {
+      canvasElement.removeEventListener("dragover", handleDragOver)
+      canvasElement.removeEventListener("dragenter", handleDragEnter)
+      canvasElement.removeEventListener("dragleave", handleDragLeave)
+      canvasElement.removeEventListener("drop", handleDrop)
+      canvasElement.removeEventListener("click", handleCanvasClick)
+      canvasContainer.removeEventListener("dragover", handleDragOver)
+      canvasContainer.removeEventListener("dragenter", handleDragEnter)
+      canvasContainer.removeEventListener("dragleave", handleDragLeave)
+      canvasContainer.removeEventListener("drop", handleDrop)
+      canvasContainer.removeEventListener("paste", handlePaste)
+      canvasContainer.removeEventListener("click", handleCanvasClick)
+
+      if (documentListenersAdded && typeof document !== "undefined") {
+        document.removeEventListener("dragover", preventDefaults)
+        document.removeEventListener("drop", preventDefaults)
+      }
+    }
+  }, [fabricCanvasRef, handleFileUpload])
+
+  // Image operations
   const downloadSelectedImages = useCallback(() => {
     if (!fabricCanvasRef.current) return
 
@@ -201,7 +314,6 @@ export function useImageOperations({
     const imageObjects = activeObjects.filter((obj: any) => obj.type === 'image')
 
     if (imageObjects.length === 0) {
-      // Download entire canvas if no images selected
       const dataURL = canvas.toDataURL({ format: "png" })
       const link = document.createElement('a')
       link.href = dataURL
@@ -212,7 +324,6 @@ export function useImageOperations({
       return
     }
 
-    // Download selected images
     imageObjects.forEach((obj: any, index: number) => {
       if (obj.getSrc) {
         const link = document.createElement('a')
@@ -284,7 +395,6 @@ export function useImageOperations({
       const data = await response.json()
 
       if (data.success && data.multiplies) {
-        // Add variations directly to canvas - canvas saves state automatically
         for (let i = 0; i < data.multiplies.length; i++) {
           const multiply = data.multiplies[i]
           await addImageToCanvas(multiply.url, {
@@ -294,7 +404,6 @@ export function useImageOperations({
             }
           })
         }
-        // Canvas auto-saves - no need to create separate documents
       }
     } catch (error) {
       console.error('Error generating variations:', error)
@@ -342,7 +451,6 @@ export function useImageOperations({
             y: firstImage.top + 50
           }
         })
-        // Canvas auto-saves - no need to create separate documents
       }
     } catch (error) {
       console.error('Error applying style:', error)
@@ -363,12 +471,9 @@ export function useImageOperations({
     if (!firstImage.getSrc) return
 
     try {
-      // Always convert to PNG format for clipboard compatibility
       const dataURL = firstImage.toDataURL({ format: 'png' })
       const response = await fetch(dataURL)
       const blob = await response.blob()
-
-      // Ensure we're using PNG format for clipboard
       const pngBlob = new Blob([blob], { type: 'image/png' })
 
       await navigator.clipboard.write([
@@ -376,26 +481,20 @@ export function useImageOperations({
           'image/png': pngBlob
         })
       ])
-
-      console.log('Image copied to clipboard successfully')
     } catch (error) {
       console.error('Failed to copy image to clipboard:', error)
-
-      // Fallback: copy image URL as text
       try {
         await navigator.clipboard.writeText(firstImage.getSrc())
-        console.log('Image URL copied to clipboard as fallback')
       } catch (fallbackError) {
         console.error('Failed to copy image URL:', fallbackError)
       }
     }
   }, [fabricCanvasRef])
 
-  // Variations are saved as part of canvas state, not separate documents
-
   return {
     addImageToCanvas,
     handleFileUpload,
+    setupDragAndDrop,
     compressImage,
     uploadImageToStorage,
     downloadSelectedImages,
