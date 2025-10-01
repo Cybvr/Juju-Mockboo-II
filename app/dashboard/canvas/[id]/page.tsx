@@ -121,7 +121,7 @@ export default function CanvasEditor() {
 
   // Initialize Fabric.js canvas
   useEffect(() => {
-    if (!canvasCore.canvasRef.current || !document || canvasCore.fabricLoaded) return
+    if (!canvasCore.canvasRef.current || !document) return
 
     import("fabric").then((FabricModule) => {
       const fabric = FabricModule.fabric || FabricModule
@@ -172,7 +172,7 @@ export default function CanvasEditor() {
         canvas.dispose()
       }
     })
-  }, [document, canvasCore.fabricLoaded])
+  }, [document])
 
   // Load document from Firebase
   useEffect(() => {
