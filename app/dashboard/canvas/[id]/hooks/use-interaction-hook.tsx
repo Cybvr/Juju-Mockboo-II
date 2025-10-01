@@ -144,9 +144,12 @@ export function useInteractionHook({
         }
         
         try {
-          activeObject.clone((cloned: any) => {
-            window.copiedObjects = [cloned.toObject()]
-          })
+          if (activeObject.type === "activeSelection") {
+            const objects = (activeObject as any).getObjects()
+            window.copiedObjects = objects.map((obj: any) => obj.toObject())
+          } else {
+            window.copiedObjects = [activeObject.toObject()]
+          }
         } catch (error) {
           console.error("Copy failed:", error)
         }
