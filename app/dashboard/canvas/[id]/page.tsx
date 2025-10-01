@@ -129,7 +129,7 @@ export default function CanvasEditor() {
     const cleanupPanZoom = setupPanAndZoom()
     const cleanupTouch = setupTouchHandlers()
     const cleanupDragDrop = imageOps.setupDragAndDrop()
-    const cleanupTextTool = setupTextTool()
+    const cleanupTextTool = setupTextInteractions()
     const cleanupStickyNote = setupStickyNoteInteractions()
 
     return () => {
@@ -141,7 +141,7 @@ export default function CanvasEditor() {
       if (cleanupTextTool) cleanupTextTool()
       if (cleanupStickyNote) cleanupStickyNote()
     }
-  }, [canvasCore.fabricLoaded, setupInteractions, setupKeyboardHandlers, setupPanAndZoom, setupTouchHandlers, imageOps.setupDragAndDrop, setupTextTool])
+  }, [canvasCore.fabricLoaded, setupInteractions, setupKeyboardHandlers, setupPanAndZoom, setupTouchHandlers, imageOps.setupDragAndDrop, setupTextInteractions])
 
   // Canvas initialization is handled by useFabricCanvas hook
 
