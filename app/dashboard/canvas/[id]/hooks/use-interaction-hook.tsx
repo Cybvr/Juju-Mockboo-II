@@ -170,13 +170,15 @@ export function useInteractionHook({
         e.preventDefault()
         if (window.copiedObjects?.length > 0) {
           window.copiedObjects.forEach((obj: any) => {
-            obj.clone((cloned: any) => {
-              cloned.set({ left: cloned.left + 20, top: cloned.top + 20 })
-              canvas.add(cloned)
-              canvas.setActiveObject(cloned)
-              canvas.renderAll()
-              handleCanvasChange()
-            })
+            if (obj && typeof obj.clone === 'function') {
+              obj.clone((cloned: any) => {
+                cloned.set({ left: cloned.left + 20, top: cloned.top + 20 })
+                canvas.add(cloned)
+                canvas.setActiveObject(cloned)
+                canvas.renderAll()
+                handleCanvasChange()
+              })
+            }
           })
         }
         return
