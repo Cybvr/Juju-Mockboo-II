@@ -105,20 +105,13 @@ export default function CanvasEditor() {
     drawingMode: canvasCore.drawingMode,
   })
 
-  // Text tool hook  
+  // Text tool hook
   const { useTextTool } = require("./hooks/use-text-tool")
-  const { createTextBox, setupTextInteractions } = useTextTool({
+  const { setupTextTool } = useTextTool({
     fabricCanvasRef: canvasCore.fabricCanvasRef,
-    handleCanvasChange: canvasCore.handleCanvasChange
+    handleCanvasChange: canvasCore.handleCanvasChange,
+    activeTool: canvasCore.activeTool
   })
-
-  // Expose text tool to global for interaction hook
-  useEffect(() => {
-    window.textToolHook = { createTextBox }
-    return () => {
-      delete window.textToolHook
-    }
-  }, [createTextBox])
 
   // Setup interactions after canvas is loaded
   useEffect(() => {
@@ -129,7 +122,7 @@ export default function CanvasEditor() {
     const cleanupPanZoom = setupPanAndZoom()
     const cleanupTouch = setupTouchHandlers()
     const cleanupDragDrop = imageOps.setupDragAndDrop()
-    const cleanupTextTool = setupTextInteractions()
+    const cleanupTextTool = setupTextTool()
     const cleanupStickyNote = setupStickyNoteInteractions()
 
     return () => {
@@ -141,7 +134,7 @@ export default function CanvasEditor() {
       if (cleanupTextTool) cleanupTextTool()
       if (cleanupStickyNote) cleanupStickyNote()
     }
-  }, [canvasCore.fabricLoaded, setupInteractions, setupKeyboardHandlers, setupPanAndZoom, setupTouchHandlers, imageOps.setupDragAndDrop, setupTextInteractions])
+  }, [canvasCore.fabricLoaded, setupInteractions, setupKeyboardHandlers, setupPanAndZoom, setupTouchHandlers, imageOps.setupDragAndDrop, setupTextTool])
 
   // Canvas initialization is handled by useFabricCanvas hook
 
