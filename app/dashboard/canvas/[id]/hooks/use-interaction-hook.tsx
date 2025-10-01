@@ -162,7 +162,16 @@ export function useInteractionHook({
         e.preventDefault()
         const activeObjects = canvas.getActiveObjects()
         if (activeObjects?.length > 0) {
-          window.copiedObjects = activeObjects
+          // Store cloned objects instead of references
+          const clonedObjects: any[] = []
+          activeObjects.forEach((obj: any) => {
+            if (obj && typeof obj.clone === 'function') {
+              obj.clone((cloned: any) => {
+                clonedObjects.push(cloned)
+              })
+            }
+          })
+          window.copiedObjects = clonedObjects
         }
         return
       }
@@ -170,14 +179,31 @@ export function useInteractionHook({
       if ((e.ctrlKey || e.metaKey) && e.key === "v") {
         e.preventDefault()
         if (window.copiedObjects?.length > 0) {
+          canvas.discardActiveObject()
+          const newObjects: any[] = []
+          
           window.copiedObjects.forEach((obj: any) => {
             if (obj && typeof obj.clone === 'function') {
               obj.clone((cloned: any) => {
-                cloned.set({ left: cloned.left + 20, top: cloned.top + 20 })
+                cloned.set({ 
+                  left: cloned.left + 20, 
+                  top: cloned.top + 20 
+                })
                 canvas.add(cloned)
-                canvas.setActiveObject(cloned)
-                canvas.renderAll()
-                handleCanvasChange()
+                newObjects.push(cloned)
+                
+                if (newObjects.length === window.copiedObjects.length) {
+                  if (newObjects.length === 1) {
+                    canvas.setActiveObject(newObjects[0])
+                  } else if (newObjects.length > 1) {
+                    const selection = new (canvas.constructor as any).ActiveSelection(newObjects, {
+                      canvas: canvas
+                    })
+                    canvas.setActiveObject(selection)
+                  }
+                  canvas.renderAll()
+                  handleCanvasChange()
+                }
               })
             }
           })
