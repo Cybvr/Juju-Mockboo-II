@@ -97,6 +97,7 @@ export function useStickyNote({ fabricCanvasRef, handleCanvasChange }: StickyNot
           // Set text as active and enter editing
           canvas.setActiveObject(textObj)
           textObj.enterEditing()
+          textObj.hiddenTextarea?.focus()
           textObj.selectAll()
 
           // Save changes when editing exits
