@@ -1,4 +1,3 @@
-
 import { useCallback } from "react"
 import type { Canvas } from "fabric"
 
@@ -119,6 +118,12 @@ export function useImageOperations({
               fabricImage.set({
                 scaleX: scale,
                 scaleY: scale,
+                lockUniScaling: true, // Force uniform scaling
+                centeredScaling: false,
+                centeredRotation: true,
+                lockScalingFlip: true, // Prevent flipping
+                lockSkewingX: true, // Prevent skewing
+                lockSkewingY: true  // Prevent skewing
               })
 
               if (replaceObjects) {
