@@ -129,6 +129,14 @@ export function useFabricCanvas(
       canvas.on('object:added', canvasCore.handleCanvasChange)
       canvas.on('object:removed', canvasCore.handleCanvasChange)
 
+      // Handle double-click to enter text editing
+      canvas.on('mouse:dblclick', (e) => {
+        if (e.target && (e.target.type === 'textbox' || e.target.type === 'text')) {
+          e.target.enterEditing()
+          e.target.selectAll()
+        }
+      })
+
       // Load canvas data if exists
       if (documentData.content?.canvasData && Object.keys(documentData.content.canvasData).length > 0) {
         canvas.loadFromJSON(documentData.content.canvasData, () => {
