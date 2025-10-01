@@ -17,6 +17,7 @@ import {
   RotateCcw,
   Hand,
   Pen,
+  Type,
   ChevronDown,
   Plus,
   Copy,
@@ -33,6 +34,7 @@ import { ProfileDropdown } from "@/app/common/dashboard/ProfileDropdown"
 import { ShareModal } from "@/components/ShareModal"
 import { useSnapGrid } from "./hooks/use-snap-grid"
 import { FloatingToolbar } from "./floating-toolbar"
+import { TextToolbar } from "./text-toolbar"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,7 +44,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import Image from "next/image"
 
-type Tool = "select" | "pan" | "pen" | "square" | "circle"
+type Tool = "select" | "pan" | "text" | "pen" | "square" | "circle"
 
 export default function CanvasEditor() {
   const params = useParams()
@@ -88,6 +90,14 @@ export default function CanvasEditor() {
     drawingMode: canvasCore.drawingMode,
   })
 
+  // Text tool hook
+  const { useTextTool } = require("./hooks/use-text-tool")
+  const { setupTextTool } = useTextTool({
+    fabricCanvasRef: canvasCore.fabricCanvasRef,
+    handleCanvasChange: canvasCore.handleCanvasChange,
+    activeTool: canvasCore.activeTool
+  })
+
   // Setup interactions after canvas is loaded
   useEffect(() => {
     if (!canvasCore.fabricLoaded || !canvasCore.fabricCanvasRef.current) return
@@ -97,6 +107,7 @@ export default function CanvasEditor() {
     const cleanupPanZoom = setupPanAndZoom()
     const cleanupTouch = setupTouchHandlers()
     const cleanupDragDrop = imageOps.setupDragAndDrop()
+    const cleanupTextTool = setupTextTool()
 
     return () => {
       if (cleanupInteractions) cleanupInteractions()
@@ -104,8 +115,9 @@ export default function CanvasEditor() {
       if (cleanupPanZoom) cleanupPanZoom()
       if (cleanupTouch) cleanupTouch()
       if (cleanupDragDrop) cleanupDragDrop()
+      if (cleanupTextTool) cleanupTextTool()
     }
-  }, [canvasCore.fabricLoaded, setupInteractions, setupKeyboardHandlers, setupPanAndZoom, setupTouchHandlers, imageOps.setupDragAndDrop])
+  }, [canvasCore.fabricLoaded, setupInteractions, setupKeyboardHandlers, setupPanAndZoom, setupTouchHandlers, imageOps.setupDragAndDrop, setupTextTool])
 
   // Initialize Fabric.js canvas
   useEffect(() => {
@@ -190,6 +202,7 @@ export default function CanvasEditor() {
   const tools = [
     { id: "select" as Tool, icon: MousePointer2, label: "Select" },
     { id: "pan" as Tool, icon: Hand, label: "Pan" },
+    { id: "text" as Tool, icon: Type, label: "Text" },
     { id: "pen" as Tool, icon: Pen, label: "Draw" },
     { id: "square" as Tool, icon: Square, label: "Rectangle" },
     { id: "circle" as Tool, icon: Circle, label: "Circle" },
@@ -419,6 +432,16 @@ export default function CanvasEditor() {
           onStyleApply={(style) => imageOps.applyStyleToImage(style)}
           onVideo={() => {}}
           onUpscale={() => {}}
+        />
+      )}
+
+      {/* Text Toolbar */}
+      {!isViewOnly && (
+        <TextToolbar
+          isVisible={canvasCore.activeTool === "text" && canvasCore.selectedObjects.length === 1 && canvasCore.selectedObjects[0]?.type === "textbox"}
+          selectedTextObject={canvasCore.selectedObjects.find(obj => obj.type === "textbox")}
+          fabricCanvas={canvasCore.fabricCanvasRef.current}
+          onTextChange={canvasCore.handleCanvasChange}
         />
       )}
 
