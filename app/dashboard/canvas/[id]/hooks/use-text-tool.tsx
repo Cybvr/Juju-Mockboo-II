@@ -18,6 +18,8 @@ export function useTextTool({
   const addTextAtPosition = useCallback((x: number, y: number) => {
     if (!fabricCanvasRef.current || activeTool !== "text") return
 
+    console.log("🆕 Creating new text at position:", { x, y })
+
     import("fabric").then((FabricModule) => {
       const fabric = FabricModule.fabric || FabricModule
       
@@ -34,6 +36,8 @@ export function useTextTool({
         hasBorders: true,
       })
 
+      console.log("📝 Text object created:", text)
+      
       fabricCanvasRef.current.add(text)
       fabricCanvasRef.current.setActiveObject(text)
       fabricCanvasRef.current.renderAll()
@@ -41,6 +45,8 @@ export function useTextTool({
       // Enter editing mode immediately
       text.enterEditing()
       text.selectAll()
+      
+      console.log("✏️ Text entered editing mode")
       
       handleCanvasChange()
     })

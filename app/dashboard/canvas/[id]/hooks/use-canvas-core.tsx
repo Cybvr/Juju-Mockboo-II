@@ -1,4 +1,3 @@
-
 "use client"
 
 import type React from "react"
@@ -148,24 +147,40 @@ export function useCanvasCore(documentId: string, document: Document | null) {
 
     try {
       setIsSaving(true)
-      const canvasData = fabricCanvasRef.current.toJSON()
-      
-      // Always generate thumbnail for previews
-      const thumbnail = fabricCanvasRef.current.toDataURL({
-        format: "png",
-        quality: 0.6,
-        multiplier: 0.3,
+      const rawCanvasData = fabricCanvasRef.current.toJSON()
+
+      // Debug logs for text objects
+      console.log("🔍 Saving canvas state - Raw data:", rawCanvasData)
+      const textObjects = rawCanvasData.objects?.filter(obj => obj.type === 'textbox' || obj.type === 'text')
+      console.log("📝 Text objects found:", textObjects)
+      textObjects?.forEach((textObj, index) => {
+        console.log(`📝 Text ${index + 1}:`, {
+          text: textObj.text,
+          type: textObj.type,
+          fontSize: textObj.fontSize,
+          fontFamily: textObj.fontFamily
+        })
+      })
+
+      // Clean the canvas data for Firestore
+      const cleanCanvasData = JSON.parse(JSON.stringify(rawCanvasData))
+
+      console.log("💾 Saving to Firebase with data:", {
+        canvasData: cleanCanvasData,
+        textObjectsCount: cleanCanvasData.objects?.filter(obj => obj.type === 'textbox' || obj.type === 'text').length
       })
 
       await documentService.updateDocument(documentId, {
         content: {
-          canvasData: canvasData,
-          thumbnail: thumbnail,
-          canvasVersion: "1.0"
+          ...document.content,
+          canvasData: cleanCanvasData,
+          ...(thumbnail && { thumbnail }),
         },
       })
 
-      setLastSaved(new Date())
+      console.log("✅ Canvas saved to Firebase successfully")
+      const now = new Date()
+      setLastSaved(now)
     } catch (error) {
       console.error("Error saving canvas:", error)
     } finally {
@@ -230,13 +245,13 @@ export function useCanvasCore(documentId: string, document: Document | null) {
 
     if (fabricCanvasRef.current) {
       const canvas = fabricCanvasRef.current
-      
+
       // Reset canvas state
       canvas.isDrawingMode = false
       canvas.selection = true
       canvas.defaultCursor = "default"
       canvas.hoverCursor = "move"
-      
+
       // Make all objects selectable by default
       canvas.forEachObject((obj: any) => {
         obj.selectable = true
@@ -276,7 +291,7 @@ export function useCanvasCore(documentId: string, document: Document | null) {
           obj.selectable = false
         })
       }
-      
+
       canvas.renderAll()
     }
   }, [brushSize, brushColor])
@@ -341,18 +356,18 @@ export function useCanvasCore(documentId: string, document: Document | null) {
     drawingMode,
     setDrawingMode,
     selectedObjects,
-    
+
     // Refs
     activeToolRef,
     isDrawingRef,
     autoSaveIntervalRef,
-    
+
     // State setters
     setIsDrawing,
     setCanUndo,
     setCanRedo,
     setSelectedObjects,
-    
+
     // Operations
     saveCanvasState,
     handleCanvasChange,
@@ -363,7 +378,7 @@ export function useCanvasCore(documentId: string, document: Document | null) {
     handleDuplicate,
     handleUndo,
     handleRedo,
-    
+
     // Setup functions
     setupUndoRedo,
     setupCanvasEvents,

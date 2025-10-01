@@ -169,15 +169,16 @@ export function useInteractionHook({
       const canvas = fabricCanvasRef.current
       if (!canvas) return
 
-
-
       // Check if user is typing in regular HTML inputs OR editing text in canvas
       const activeElement = document.activeElement
       const isEditingText = canvas && canvas.getActiveObject() && canvas.getActiveObject().isEditing
+      console.log("Is editing text:", isEditingText); // Log for debugging text editing
+      console.log("Saving text to Firebase. Text content:", canvas.getActiveObject() ? canvas.getActiveObject().text : 'No text object active'); // Log for debugging text saving
+
       if (
         activeElement &&
-        (activeElement.tagName === "INPUT" || 
-         activeElement.tagName === "TEXTAREA" || 
+        (activeElement.tagName === "INPUT" ||
+         activeElement.tagName === "TEXTAREA" ||
          activeElement.isContentEditable) ||
         isEditingText
       ) {
@@ -188,6 +189,7 @@ export function useInteractionHook({
       if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
         e.preventDefault()
         if (canvas.undo) canvas.undo()
+        console.log("Undo action performed."); // Log for debugging undo
         return
       }
 
@@ -195,6 +197,7 @@ export function useInteractionHook({
       if ((e.ctrlKey || e.metaKey) && (e.key === "y" || (e.key === "z" && e.shiftKey))) {
         e.preventDefault()
         if (canvas.redo) canvas.redo()
+        console.log("Redo action performed."); // Log for debugging redo
         return
       }
 
@@ -213,6 +216,7 @@ export function useInteractionHook({
         const activeObjects = canvas.getActiveObjects()
         if (activeObjects && activeObjects.length > 0) {
           activeObjects.forEach((obj: any) => {
+            console.log("Removing object:", obj); // Log for debugging object removal
             canvas.remove(obj)
           })
 
