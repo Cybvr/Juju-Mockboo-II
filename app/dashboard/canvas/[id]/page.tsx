@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useEffect, useState } from "react"
@@ -15,20 +16,17 @@ import {
   ZoomOut,
   RotateCcw,
   Hand,
-  FileText,
   Pen,
   ChevronDown,
   Plus,
   Copy,
   Trash2,
 } from "lucide-react"
-import { cn } from "@/lib/utils"
 import ChatterBox from "../common/chatterbox"
 import { documentService } from "@/services/documentService"
 import { useAuth } from "@/hooks/useAuth"
-import type { Document } from "@/types/document"
-import { useCanvasState, useCanvasOperations } from "./canvas-hooks"
-import { useFabricCanvas } from "./canvas-fabric"
+import type { Document } from "@/types/firebase"
+import { useCanvasCore } from "./hooks/use-canvas-core"
 import { useImageOperations } from "./hooks/use-image-operations"
 import { GeneratingMedia } from "./GeneratingMedia"
 import { ProfileDropdown } from "@/app/common/dashboard/ProfileDropdown"
@@ -42,7 +40,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import Image from "next/image"
 
-type Tool = "select" | "pan" | "sticky" | "text" | "square" | "circle" | "pen"
+type Tool = "select" | "pan" | "pen" | "square" | "circle"
 
 export default function CanvasEditor() {
   const params = useParams()
@@ -57,20 +55,70 @@ export default function CanvasEditor() {
 
   const documentId = params.id as string
 
-  // Use extracted hooks
-  const canvasState = useCanvasState()
-  const operations = useCanvasOperations(canvasState.fabricCanvasRef, documentId, document, canvasState)
+  // Use canvas core hook
+  const canvasCore = useCanvasCore(documentId, document)
 
   // Image operations hook
   const imageOps = useImageOperations({
-    fabricCanvasRef: canvasState.fabricCanvasRef,
-    handleCanvasChange: operations.handleCanvasChange,
+    fabricCanvasRef: canvasCore.fabricCanvasRef,
+    handleCanvasChange: canvasCore.handleCanvasChange,
     userId: user?.uid,
   })
 
   // Initialize Fabric.js canvas
-  const fabricHook = useFabricCanvas(document, documentId, canvasState, operations, setSelectedImages)
-  const { snapGrid } = fabricHook
+  useEffect(() => {
+    if (!canvasCore.canvasRef.current || !document || canvasCore.fabricLoaded) return
+
+    import("fabric").then((FabricModule) => {
+      const fabric = FabricModule.fabric || FabricModule
+      
+      // Dispose existing canvas
+      if (canvasCore.fabricCanvasRef.current) {
+        canvasCore.fabricCanvasRef.current.dispose()
+        canvasCore.fabricCanvasRef.current = null
+      }
+
+      const canvas = new fabric.Canvas(canvasCore.canvasRef.current, {
+        width: window.innerWidth,
+        height: window.innerHeight,
+        backgroundColor: "white",
+      })
+
+      canvasCore.fabricCanvasRef.current = canvas
+      canvasCore.setFabricLoaded(true)
+
+      // Setup drawing brush
+      canvas.freeDrawingBrush = new fabric.PencilBrush(canvas)
+      canvas.freeDrawingBrush.width = canvasCore.brushSize
+      canvas.freeDrawingBrush.color = canvasCore.brushColor
+
+      // Setup undo/redo
+      const { saveState } = canvasCore.setupUndoRedo(canvas)
+
+      // Setup canvas events
+      canvasCore.setupCanvasEvents(canvas, canvasCore.handleCanvasChange, (images) => {
+        setSelectedImages(images)
+      })
+
+      // Setup resize handler
+      const cleanupResize = canvasCore.setupResizeHandler(canvas)
+
+      // Load canvas data if exists
+      if (document.content?.canvasData && Object.keys(document.content.canvasData).length > 0) {
+        canvas.loadFromJSON(document.content.canvasData, () => {
+          canvas.renderAll()
+          if (saveState) saveState()
+        })
+      } else {
+        if (saveState) saveState()
+      }
+
+      return () => {
+        cleanupResize()
+        canvas.dispose()
+      }
+    })
+  }, [document, canvasCore.fabricLoaded])
 
   // Load document from Firebase
   useEffect(() => {
@@ -87,7 +135,6 @@ export default function CanvasEditor() {
         setDocument(doc)
         setTitleValue(doc.title)
 
-        // Only set view-only for non-owners with view access
         const isOwner = user && doc.userId === user.uid
         setIsViewOnly(!isOwner && doc.shareSettings?.accessLevel === "view")
       } catch (error) {
@@ -175,11 +222,11 @@ export default function CanvasEditor() {
               <Trash2 className="h-3 w-3 mr-1.5" />
               Move to Trash
             </DropdownMenuItem>
-            {!isViewOnly && canvasState.lastSaved && (
+            {!isViewOnly && canvasCore.lastSaved && (
               <>
                 <DropdownMenuSeparator />
                 <div className="px-2 py-1 text-xs text-muted-foreground">
-                  {canvasState.isSaving ? "Saving..." : `Saved ${canvasState.lastSaved.toLocaleTimeString()}`}
+                  {canvasCore.isSaving ? "Saving..." : `Saved ${canvasCore.lastSaved.toLocaleTimeString()}`}
                 </div>
               </>
             )}
@@ -224,19 +271,19 @@ export default function CanvasEditor() {
       {/* Controls Panel */}
       <div className="absolute right-4 top-1/2 z-10 -translate-y-1/2">
         <div className="flex flex-col gap-2 rounded-lg bg-card p-2 shadow-lg border w-12">
-          <Button variant="ghost" size="icon" onClick={operations.handleZoomIn} className="h-8 w-8" title="Zoom In">
+          <Button variant="ghost" size="icon" onClick={canvasCore.handleZoomIn} className="h-8 w-8" title="Zoom In">
             <ZoomIn className="h-4 w-4" />
           </Button>
           <div className="text-xs text-center text-muted-foreground px-1">
-            {Math.round(canvasState.zoomLevel * 100)}%
+            {Math.round(canvasCore.zoomLevel * 100)}%
           </div>
-          <Button variant="ghost" size="icon" onClick={operations.handleZoomOut} className="h-8 w-8" title="Zoom Out">
+          <Button variant="ghost" size="icon" onClick={canvasCore.handleZoomOut} className="h-8 w-8" title="Zoom Out">
             <ZoomOut className="h-4 w-4" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
-            onClick={operations.handleResetZoom}
+            onClick={canvasCore.handleResetZoom}
             className="h-8 w-8"
             title="Reset Zoom"
           >
@@ -256,10 +303,10 @@ export default function CanvasEditor() {
               return (
                 <Button
                   key={tool.id}
-                  variant={canvasState.activeTool === tool.id ? "default" : "ghost"}
+                  variant={canvasCore.activeTool === tool.id ? "default" : "ghost"}
                   size="icon"
                   onClick={() => {
-                    operations.setActiveTool(tool.id)
+                    canvasCore.setActiveTool(tool.id)
                   }}
                   className="h-10 w-10"
                   title={tool.label}
@@ -299,24 +346,16 @@ export default function CanvasEditor() {
           <ChatterBox
             selectedImages={selectedImages}
             onImageGenerated={async (imageUrl) => {
-              console.log("Page: Received generated image, handling storage and canvas:", imageUrl)
-
               try {
-                // Just add to canvas - it will auto-save the canvas state
-                if (fabricHook.addImageToCanvas) {
-                  await fabricHook.addImageToCanvas(imageUrl)
-                  // Force canvas save immediately to persist the new image
+                if (imageOps.addImageToCanvas) {
+                  await imageOps.addImageToCanvas(imageUrl)
                   setTimeout(() => {
-                    operations.saveCanvasState()
-                    console.log("Page: Canvas state saved after image generation")
+                    canvasCore.saveCanvasState()
                   }, 500)
-                } else {
-                  console.error("Page: addImageToCanvas function not available")
                 }
               } catch (error) {
-                console.error("Page: Failed to add image to canvas:", error)
+                console.error("Failed to add image to canvas:", error)
               }
-
               setIsGenerating(false)
             }}
             onGenerationStart={() => setIsGenerating(true)}
@@ -328,7 +367,7 @@ export default function CanvasEditor() {
       {/* Canvas area */}
       <div className="fixed inset-0 w-screen h-screen overflow-hidden" style={{ zIndex: 0 }}>
         <canvas
-          ref={canvasState.canvasRef}
+          ref={canvasCore.canvasRef}
           className="block border-none outline-none"
           style={{ 
             width: "100vw", 
@@ -341,8 +380,6 @@ export default function CanvasEditor() {
         />
 
         {isGenerating && <GeneratingMedia isVisible={true} message="Generating image..." />}
-
-        {fabricHook.FloatingToolbarComponent()}
       </div>
 
       {/* Share Modal */}
