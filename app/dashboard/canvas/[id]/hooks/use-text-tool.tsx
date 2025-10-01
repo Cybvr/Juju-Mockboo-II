@@ -45,6 +45,7 @@ export function useTextTool({ fabricCanvasRef, handleCanvasChange }: TextToolHoo
       // Auto-enter editing mode
       setTimeout(() => {
         textObj.enterEditing()
+        textObj.hiddenTextarea?.focus()
         textObj.selectAll()
       }, 100)
     })
@@ -58,6 +59,7 @@ export function useTextTool({ fabricCanvasRef, handleCanvasChange }: TextToolHoo
       const target = e.target
       if (target && (target.type === "textbox" || target.type === "i-text" || target.isTextObject)) {
         target.enterEditing()
+        target.hiddenTextarea?.focus()
         target.selectAll()
       }
     }
