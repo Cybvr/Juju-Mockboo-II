@@ -223,10 +223,16 @@ export function useCanvasOperations(
         fabricCanvasRef.current.hoverCursor = "text"
         fabricCanvasRef.current.selection = true
         fabricCanvasRef.current.isDrawingMode = false
+
+        // Make all text objects selectable and editable
         fabricCanvasRef.current.forEachObject((obj: any) => {
-          if (obj.type === 'textbox' || obj.type === 'text') {
+          if (obj.type === "i-text" || obj.type === "textbox" || obj.type === "text") {
             obj.selectable = true
             obj.editable = true
+            obj.lockMovementX = false
+            obj.lockMovementY = false
+            obj.hasControls = true
+            obj.hasBorders = true
           } else {
             obj.selectable = false
           }
