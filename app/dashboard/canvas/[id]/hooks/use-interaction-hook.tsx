@@ -278,7 +278,8 @@ export function useInteractionHook({
         lastPanY = touch.clientY
       } else if (e.touches.length === 2) {
         e.preventDefault()
-        isPanning = isZooming = true
+        isPanning = true
+        isZooming = false
         canvas.selection = false
         const touch1 = e.touches[0], touch2 = e.touches[1]
         lastPanX = (touch1.clientX + touch2.clientX) / 2
@@ -287,35 +288,25 @@ export function useInteractionHook({
       }
     }
     const handleTouchMove = (e: TouchEvent) => {
-      if (e.touches.length === 2 && (isPanning || isZooming)) {
+      if (e.touches.length === 2 && isPanning) {
         e.preventDefault()
         const touch1 = e.touches[0], touch2 = e.touches[1]
         const centerX = (touch1.clientX + touch2.clientX) / 2
         const centerY = (touch1.clientY + touch2.clientY) / 2
-        const currentDistance = getDistance(touch1, touch2)
-        if (isPanning) {
-          const vpt = canvas.viewportTransform
-          vpt[4] += centerX - lastPanX
-          vpt[5] += centerY - lastPanY
-          canvas.requestRenderAll()
-        }
-        if (isZooming && Math.abs(currentDistance - lastDistance) > 5) {
-          const zoom = canvas.getZoom() + (currentDistance - lastDistance) / 200
-          const newZoom = Math.max(0.2, Math.min(5, zoom))
-          import("fabric").then((FabricModule) => {
-            const fabric = FabricModule
-            const rect = canvasElement.getBoundingClientRect()
-            canvas.zoomToPoint(new fabric.Point(centerX - rect.left, centerY - rect.top), newZoom)
-          })
-        }
+        
+        const vpt = canvas.viewportTransform
+        vpt[4] += centerX - lastPanX
+        vpt[5] += centerY - lastPanY
+        canvas.requestRenderAll()
+        
         lastPanX = centerX
         lastPanY = centerY
-        lastDistance = currentDistance
       }
     }
     const handleTouchEnd = () => {
       setTimeout(() => {
-        isPanning = isZooming = false
+        isPanning = false
+        isZooming = false
         canvas.selection = true
       }, 100)
     }
