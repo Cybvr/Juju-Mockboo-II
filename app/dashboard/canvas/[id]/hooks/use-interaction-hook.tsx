@@ -174,6 +174,7 @@ export function useInteractionHook({
               return new Promise((resolve) => {
                 const adjustedData = {
                   ...objData,
+                  type: objData.type.toLowerCase(),
                   left: (objData.left || 0) + 20,
                   top: (objData.top || 0) + 20,
                 }
