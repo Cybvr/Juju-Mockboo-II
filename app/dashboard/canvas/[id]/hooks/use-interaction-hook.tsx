@@ -161,17 +161,25 @@ export function useInteractionHook({
       // Copy
       if ((e.ctrlKey || e.metaKey) && e.key === "c") {
         e.preventDefault()
-        const activeObjects = canvas.getActiveObjects() || []
-        const objectsArray = Array.isArray(activeObjects) ? activeObjects : [activeObjects].filter(Boolean)
+        const activeObject = canvas.getActiveObject()
 
-        if (objectsArray.length > 0) {
-          Promise.all(
-            objectsArray.map((obj: any) => 
-              new Promise(resolve => obj.clone(resolve))
-            )
-          ).then(cloned => {
-            window.copiedObjects = cloned
-          })
+        if (activeObject) {
+          if (activeObject.type === 'activeSelection') {
+            // Multiple objects selected
+            const objects = activeObject.getObjects()
+            Promise.all(
+              objects.map((obj: any) => 
+                new Promise(resolve => obj.clone(resolve))
+              )
+            ).then(cloned => {
+              window.copiedObjects = cloned
+            })
+          } else {
+            // Single object selected
+            activeObject.clone((cloned: any) => {
+              window.copiedObjects = [cloned]
+            })
+          }
         }
         return
       }
@@ -213,10 +221,17 @@ export function useInteractionHook({
       // Delete
       if (e.key === "Delete" || e.key === "Backspace") {
         e.preventDefault()
-        const activeObjects = canvas.getActiveObjects()
+        const activeObject = canvas.getActiveObject()
 
-        if (activeObjects.length > 0) {
-          activeObjects.forEach((obj: any) => canvas.remove(obj))
+        if (activeObject) {
+          if (activeObject.type === 'activeSelection') {
+            // Multiple objects selected
+            const objects = activeObject.getObjects()
+            objects.forEach((obj: any) => canvas.remove(obj))
+          } else {
+            // Single object selected
+            canvas.remove(activeObject)
+          }
           canvas.discardActiveObject()
           canvas.renderAll()
           handleCanvasChange()
