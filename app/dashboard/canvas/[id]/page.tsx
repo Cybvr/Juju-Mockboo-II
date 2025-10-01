@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
   MousePointer2,
-  Type,
   Square,
   Circle,
   Upload,
@@ -104,7 +103,6 @@ export default function CanvasEditor() {
     { id: "pan" as Tool, icon: Hand, label: "Pan" },
     { id: "pen" as Tool, icon: Pen, label: "Draw" },
     { id: "sticky" as Tool, icon: FileText, label: "Sticky Note" },
-    { id: "text" as Tool, icon: Type, label: "Text" },
     { id: "square" as Tool, icon: Square, label: "Rectangle" },
     { id: "circle" as Tool, icon: Circle, label: "Circle" },
   ]

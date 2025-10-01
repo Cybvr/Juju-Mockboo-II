@@ -93,19 +93,7 @@ export function setupCanvasEvents(
     saveState()
   })
 
-  // Handle text editing events
-  canvas.on("text:editing:entered", (e: any) => {
-    if (e.target) {
-      e.target.__isEditing = true
-    }
-  })
-
-  canvas.on("text:editing:exited", (e: any) => {
-    if (e.target) {
-      e.target.__isEditing = false
-      handleCanvasChange()
-    }
-  })
+  
 
   canvas.on("selection:updated", (e) => {
     const activeObjects = canvas.getActiveObjects()

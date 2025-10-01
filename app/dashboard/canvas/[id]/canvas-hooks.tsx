@@ -9,7 +9,7 @@ import { documentService } from "@/services/documentService"
 import type { Document } from "@/types/firebase"
 import { useStickyNotes } from "./hooks/use-sticky-notes"
 
-type Tool = "select" | "sticky" | "text" | "square" | "circle" | "pan" | "pen"
+type Tool = "select" | "sticky" | "square" | "circle" | "pan" | "pen"
 
 export function useCanvasState() {
   const canvasRef = useRef<HTMLCanvasElement>(null)

@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Canvas, Rect, Circle, Triangle, Text, FabricImage, Object as FabricObject } from 'fabric';
 
-export type Tool = 'cursor' | 'hand' | 'pen' | 'rectangle' | 'circle' | 'line' | 'triangle' | 'star' | 'hexagon' | 'text' | 'image';
+export type Tool = 'cursor' | 'hand' | 'pen' | 'rectangle' | 'circle' | 'line' | 'triangle' | 'star' | 'hexagon' | 'image';
 
 interface CanvasState {
   selectedTool: Tool;
