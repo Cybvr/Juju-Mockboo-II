@@ -166,14 +166,14 @@ export function useInteractionHook({
         if (activeObject) {
           if (activeObject.type === "activeSelection") {
             const objects = activeObject.getObjects()
-            Promise.all(objects.map(obj => new Promise(resolve => obj.clone(resolve, ["id", "selectable", "evented"]))))
+            Promise.all(objects.map(obj => new Promise(resolve => obj.clone(resolve))))
               .then(cloned => {
                 window.copiedObjects = cloned
               })
           } else {
             activeObject.clone((cloned: any) => {
               window.copiedObjects = [cloned]
-            }, ["id", "selectable", "evented"])
+            })
           }
         }
         return
@@ -187,18 +187,18 @@ export function useInteractionHook({
           canvas.discardActiveObject()
           const clonedObjects: any[] = []
 
-          window.copiedObjects.forEach((obj: any, index: number) => {
+          window.copiedObjects.forEach((obj: any) => {
             obj.clone((clonedObj: any) => {
               clonedObj.set({
-                left: (obj.left || 0) + 20,
-                top: (obj.top || 0) + 20,
+                left: (clonedObj.left || 0) + 20,
+                top: (clonedObj.top || 0) + 20,
                 evented: true,
-                selectable: true
+                selectable: true,
               })
               canvas.add(clonedObj)
               clonedObjects.push(clonedObj)
 
-              // If this is the last object
+              // When all objects cloned
               if (clonedObjects.length === window.copiedObjects!.length) {
                 if (clonedObjects.length === 1) {
                   canvas.setActiveObject(clonedObjects[0])
@@ -211,7 +211,7 @@ export function useInteractionHook({
                 canvas.requestRenderAll()
                 handleCanvasChange()
               }
-            }, ["id", "selectable", "evented"])
+            })
           })
         }
         return
