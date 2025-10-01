@@ -39,6 +39,9 @@ export function useInteractionHook({
     let activeShape: any = null
 
     const handleMouseDown = (e: any) => {
+      // Skip if text tool is active - let Fabric handle text interactions
+      if (activeToolRef.current === "text") return
+      
       if (activeToolRef.current === "pen") {
         canvas.isDrawingMode = true
         if (canvas.freeDrawingBrush) {
@@ -54,7 +57,7 @@ export function useInteractionHook({
         return
       }
 
-      if (activeToolRef.current === "select" || activeToolRef.current === "pan" || activeToolRef.current === "text") return
+      if (activeToolRef.current === "select" || activeToolRef.current === "pan") return
 
       const pointer = canvas.getPointer(e.e)
       startX = pointer.x

@@ -60,8 +60,11 @@ export function useTextTool({
     const handleCanvasClick = (e: any) => {
       if (activeTool !== "text") return
       
-      // Don't add text if clicking on an existing object
-      if (e.target && e.target !== canvas) return
+      // Don't add text if clicking on an existing object - let Fabric handle text editing
+      if (e.target && e.target !== canvas) {
+        // Let Fabric handle the text object click for editing
+        return
+      }
 
       const pointer = canvas.getPointer(e.e)
       addTextAtPosition(pointer.x, pointer.y)
