@@ -278,8 +278,10 @@ export function useInteractionHook({
         lastPanY = touch.clientY
       } else if (e.touches.length === 2) {
         e.preventDefault()
+        e.stopPropagation()
         isPanning = true
         canvas.selection = false
+        canvas.discardActiveObject()
         const touch1 = e.touches[0], touch2 = e.touches[1]
         lastPanX = (touch1.clientX + touch2.clientX) / 2
         lastPanY = (touch1.clientY + touch2.clientY) / 2
@@ -289,6 +291,7 @@ export function useInteractionHook({
     const handleTouchMove = (e: TouchEvent) => {
       if (e.touches.length === 2 && isPanning) {
         e.preventDefault()
+        e.stopPropagation()
         const touch1 = e.touches[0], touch2 = e.touches[1]
         const centerX = (touch1.clientX + touch2.clientX) / 2
         const centerY = (touch1.clientY + touch2.clientY) / 2
@@ -328,9 +331,9 @@ export function useInteractionHook({
         canvas.selection = true
       }, 100)
     }
-    canvasElement.addEventListener("touchstart", handleTouchStart, { passive: false })
-    canvasElement.addEventListener("touchmove", handleTouchMove, { passive: false })
-    canvasElement.addEventListener("touchend", handleTouchEnd, { passive: false })
+    canvasElement.addEventListener("touchstart", handleTouchStart, { passive: false, capture: true })
+    canvasElement.addEventListener("touchmove", handleTouchMove, { passive: false, capture: true })
+    canvasElement.addEventListener("touchend", handleTouchEnd, { passive: false, capture: true })
     return () => {
       canvasElement.removeEventListener("touchstart", handleTouchStart)
       canvasElement.removeEventListener("touchmove", handleTouchMove)

@@ -40,6 +40,8 @@ export function useFabricCanvas(
           width: window.innerWidth,
           height: window.innerHeight,
           backgroundColor: "white",
+          allowTouchScrolling: false,
+          stopContextMenu: true,
         })
 
         canvasCore.fabricCanvasRef.current = canvas
