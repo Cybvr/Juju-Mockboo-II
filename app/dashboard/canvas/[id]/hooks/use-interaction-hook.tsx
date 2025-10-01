@@ -145,19 +145,13 @@ export function useInteractionHook({
         }
         
         try {
-          const jsonData = JSON.stringify(canvas.toJSON())
-          const canvasData = JSON.parse(jsonData)
-          
           if (activeObject.type === "activeSelection") {
             const objects = (activeObject as any).getObjects()
-            window.copiedObjects = objects.map((obj: any) => {
-              const objData = canvasData.objects.find((o: any) => o === obj.toObject() || JSON.stringify(o) === JSON.stringify(obj.toObject()))
-              return obj.toObject()
-            })
+            window.copiedObjects = objects.map((obj: any) => JSON.parse(JSON.stringify(obj.toObject(['text', 'fontSize', 'fontFamily', 'fontWeight', 'fontStyle', 'fill', 'stroke', 'strokeWidth']))))
             console.log("Copied multiple objects:", window.copiedObjects.length)
           } else {
-            window.copiedObjects = [activeObject.toObject()]
-            console.log("Copied single object:", activeObject.type)
+            window.copiedObjects = [JSON.parse(JSON.stringify(activeObject.toObject(['text', 'fontSize', 'fontFamily', 'fontWeight', 'fontStyle', 'fill', 'stroke', 'strokeWidth'])))]
+            console.log("Copied single object:", activeObject.type, window.copiedObjects[0])
           }
         } catch (error) {
           console.error("Copy failed:", error)
@@ -171,40 +165,48 @@ export function useInteractionHook({
 
         if (window.copiedObjects?.length > 0) {
           canvas.discardActiveObject()
-          console.log("Creating temporary canvas for loading...")
-          
-          const tempData = {
-            version: '6.7.1',
-            objects: window.copiedObjects!.map((obj: any) => ({
-              ...obj,
-              left: (obj.left || 0) + 20,
-              top: (obj.top || 0) + 20,
-            }))
-          }
+          console.log("Objects to paste:", JSON.stringify(window.copiedObjects, null, 2))
           
           import("fabric").then((FabricModule) => {
             const fabric = FabricModule
-            const tempCanvas = new fabric.Canvas(null)
             
-            tempCanvas.loadFromJSON(tempData, () => {
-              console.log("Loaded to temp canvas, objects:", tempCanvas.getObjects().length)
-              const clonedObjects = tempCanvas.getObjects()
+            const pastePromises = window.copiedObjects!.map((objData: any) => {
+              return new Promise((resolve) => {
+                const adjustedData = {
+                  ...objData,
+                  left: (objData.left || 0) + 20,
+                  top: (objData.top || 0) + 20,
+                }
+                
+                fabric.util.enlivenObjects([adjustedData], (enlivened: any[]) => {
+                  if (enlivened && enlivened.length > 0) {
+                    console.log("Enlivened object:", enlivened[0].type)
+                    resolve(enlivened[0])
+                  } else {
+                    console.log("Failed to enliven object")
+                    resolve(null)
+                  }
+                })
+              })
+            })
+            
+            Promise.all(pastePromises).then((objects: any[]) => {
+              const validObjects = objects.filter(obj => obj !== null)
+              console.log("Valid objects to add:", validObjects.length)
               
-              clonedObjects.forEach((obj: any) => {
-                tempCanvas.remove(obj)
+              validObjects.forEach((obj: any) => {
                 canvas.add(obj)
               })
               
-              if (clonedObjects.length === 1) {
-                canvas.setActiveObject(clonedObjects[0])
-              } else if (clonedObjects.length > 1) {
-                const sel = new fabric.ActiveSelection(clonedObjects, { canvas })
+              if (validObjects.length === 1) {
+                canvas.setActiveObject(validObjects[0])
+              } else if (validObjects.length > 1) {
+                const sel = new fabric.ActiveSelection(validObjects, { canvas })
                 canvas.setActiveObject(sel)
               }
               
               canvas.requestRenderAll()
               handleCanvasChange()
-              tempCanvas.dispose()
               console.log("Paste complete!")
             })
           })
