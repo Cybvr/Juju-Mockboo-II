@@ -5,6 +5,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Slider } from "@/components/ui/slider"
 import { Type, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useState, useEffect } from "react"
 
 interface TextToolbarProps {
   isVisible: boolean
@@ -28,6 +29,22 @@ export function TextToolbar({
   fabricCanvas,
   onTextChange
 }: TextToolbarProps) {
+  const [position, setPosition] = useState({ x: 0, y: 0 })
+
+  useEffect(() => {
+    if (!fabricCanvas || !selectedTextObject || !isVisible) return
+
+    const objBounds = selectedTextObject.getBoundingRect()
+    const zoom = fabricCanvas.getZoom()
+    const vpt = fabricCanvas.viewportTransform || [1, 0, 0, 1, 0, 0]
+    
+    const centerX = objBounds.left + objBounds.width / 2
+    const viewportX = centerX * zoom + vpt[4]
+    const viewportY = Math.max(40, (objBounds.top - 60) * zoom + vpt[5])
+    
+    setPosition({ x: viewportX, y: viewportY })
+  }, [selectedTextObject, fabricCanvas, isVisible])
+
   if (!isVisible || !selectedTextObject) return null
 
   const updateTextProperty = (property: string, value: any) => {
@@ -58,7 +75,14 @@ export function TextToolbar({
   }
 
   return (
-    <div className="absolute left-1/2 top-20 z-10 -translate-x-1/2">
+    <div 
+      className="absolute z-50"
+      style={{
+        left: `${position.x}px`,
+        top: `${position.y}px`,
+        transform: "translateX(-50%)",
+      }}
+    >
       <div className="flex flex-row gap-2 rounded-lg bg-card p-2 shadow-lg border">
         {/* Font Size */}
         <Popover>
