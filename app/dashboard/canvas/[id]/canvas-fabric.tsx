@@ -55,11 +55,11 @@ export function useFabricCanvas(
     drawingMode,
   })
 
-  const snapGrid = useSnapGrid({
-    fabricCanvasRef,
-    gridSize: 20,
+  // Grid functionality - temporarily disabled until useSnapGrid is implemented
+  const snapGrid = {
     enabled: true,
-  })
+    gridSize: 20
+  }
 
   const addImageToCanvas = useCallback(
     (imageUrl: string, replaceObjects?: any) => {
