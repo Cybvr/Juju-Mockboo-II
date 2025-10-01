@@ -6,7 +6,7 @@ import { documentService } from "@/services/documentService"
 import type { Document } from "@/types/firebase"
 import type { Canvas } from "fabric"
 
-type Tool = "select" | "square" | "circle" | "pan" | "text" | "pen"
+type Tool = "select" | "square" | "circle" | "pan" | "text" | "pen" | "sticky-note"
 
 export function useCanvasCore(documentId: string, document: Document | null) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -91,11 +91,11 @@ export function useCanvasCore(documentId: string, document: Document | null) {
   // Canvas events setup
   const setupCanvasEvents = useCallback((canvas: Canvas, handleCanvasChange: () => void, onSelectedImagesChange?: (images: string[]) => void) => {
     console.log("🔧 Setting up canvas events and interactions...")
-    
+
     canvas.on("object:added", () => handleCanvasChange())
     canvas.on("object:modified", () => handleCanvasChange())
     canvas.on("object:removed", () => handleCanvasChange())
-    
+
     // Text editing events - CRITICAL for saving text changes
     canvas.on("text:changed", () => handleCanvasChange())
     canvas.on("text:editing:exited", () => handleCanvasChange())
@@ -301,6 +301,54 @@ export function useCanvasCore(documentId: string, document: Document | null) {
     }
   }, [brushSize, brushColor])
 
+  // Sticky Note Creation
+  const createStickyNote = useCallback((options: { text?: string; color?: string; top?: number; left?: number }) => {
+    import("fabric").then((FabricModule) => {
+      const fabric = FabricModule
+      const canvas = fabricCanvasRef.current
+      if (!canvas) return
+
+      const stickyNote = new fabric.Rect({
+        width: 200,
+        height: 150,
+        fill: options.color || "#FFFF00", // Yellow by default
+        top: options.top || 50,
+        left: options.left || 50,
+        originX: "left",
+        originY: "top",
+        cornerColor: "#FFFFFF",
+        cornerStrokeColor: "#222222",
+        transparentCorners: false,
+        shadow: "rgba(0,0,0,0.3) 5px 5px 5px",
+      })
+
+      const text = new fabric.IText(options.text || "Enter text here...", {
+        left: stickyNote.left + 10,
+        top: stickyNote.top + 10,
+        width: stickyNote.width - 20,
+        height: stickyNote.height - 20,
+        fontSize: 18,
+        fontFamily: "Arial",
+        fill: "#000000",
+        textAlign: "left",
+      })
+
+      const group = new fabric.Group([stickyNote, text], {
+        left: stickyNote.left,
+        top: stickyNote.top,
+        originX: "left",
+        originY: "top",
+        hasRotatingPoint: false,
+      })
+
+      canvas.add(group)
+      canvas.setActiveObject(group)
+      canvas.renderAll()
+      handleCanvasChange()
+    })
+  }, [handleCanvasChange])
+
+
   // Canvas actions
   const handleDuplicate = useCallback(() => {
     if (!fabricCanvasRef.current) return
@@ -322,6 +370,45 @@ export function useCanvasCore(documentId: string, document: Document | null) {
     })
   }, [handleCanvasChange])
 
+  // Placeholder for delete action
+  const handleDelete = useCallback(() => {
+    if (!fabricCanvasRef.current) return
+    const canvas = fabricCanvasRef.current
+    const activeObjects = canvas.getActiveObjects()
+    if (activeObjects.length > 0) {
+      activeObjects.forEach((obj: any) => {
+        canvas.remove(obj)
+      })
+      canvas.discardActiveObject()
+      canvas.renderAll()
+      handleCanvasChange()
+    }
+  }, [handleCanvasChange])
+
+  // Placeholder for copy action
+  const handleCopy = useCallback(() => {
+    if (!fabricCanvasRef.current) return
+    const canvas = fabricCanvasRef.current
+    const activeObjects = canvas.getActiveObjects()
+    if (activeObjects.length > 0) {
+      // Fabric.js has a built-in copy/paste mechanism if you can manage clipboard access
+      // For simplicity here, we'll just clone and slightly offset
+      activeObjects.forEach((obj: any) => {
+        obj.clone((cloned: any) => {
+          cloned.set({
+            left: cloned.left + 10,
+            top: cloned.top + 10,
+          })
+          canvas.add(cloned)
+          canvas.setActiveObject(cloned)
+        })
+      })
+      canvas.renderAll()
+      handleCanvasChange()
+    }
+  }, [handleCanvasChange])
+
+
   const handleUndo = useCallback(() => {
     if (!fabricCanvasRef.current) return
     fabricCanvasRef.current.undo()
@@ -342,18 +429,12 @@ export function useCanvasCore(documentId: string, document: Document | null) {
   }, [isDrawing])
 
   return {
-    // State
     canvasRef,
     fabricCanvasRef,
-    activeTool,
-    isDrawing,
     fabricLoaded,
     setFabricLoaded,
-    isSaving,
-    lastSaved,
-    zoomLevel,
-    canUndo,
-    canRedo,
+    activeTool,
+    setActiveTool,
     brushSize,
     setBrushSize,
     brushColor,
@@ -361,32 +442,27 @@ export function useCanvasCore(documentId: string, document: Document | null) {
     drawingMode,
     setDrawingMode,
     selectedObjects,
-
-    // Refs
-    activeToolRef,
+    zoomLevel,
+    lastSaved,
+    isSaving,
     isDrawingRef,
-    autoSaveIntervalRef,
-
-    // State setters
     setIsDrawing,
-    setCanUndo,
-    setCanRedo,
-    setSelectedObjects,
-
-    // Operations
-    saveCanvasState,
+    activeToolRef,
     handleCanvasChange,
     handleZoomIn,
     handleZoomOut,
     handleResetZoom,
-    setActiveTool: setActiveToolState,
-    handleDuplicate,
-    handleUndo,
-    handleRedo,
-
-    // Setup functions
     setupUndoRedo,
     setupCanvasEvents,
-    setupResizeHandler
+    setupResizeHandler,
+    saveCanvasState,
+    handleDuplicate,
+    handleDelete,
+    handleCopy,
+    createStickyNote,
+    handleUndo: handleUndo,
+    handleRedo: handleRedo,
+    canUndo,
+    canRedo,
   }
 }

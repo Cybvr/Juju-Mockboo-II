@@ -18,6 +18,7 @@ import {
   Hand,
   Pen,
   Type,
+  StickyNote,
   ChevronDown,
   Plus,
   Copy,
@@ -35,6 +36,7 @@ import { ShareModal } from "@/components/ShareModal"
 import { useSnapGrid } from "./hooks/use-snap-grid"
 import { FloatingToolbar } from "./floating-toolbar"
 import { TextToolbar } from "./text-toolbar"
+import { StickyNoteToolbar } from "../common/sticky-note-toolbar"
 import { useFabricCanvas } from "./canvas-fabric"
 import {
   DropdownMenu,
@@ -45,7 +47,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import Image from "next/image"
 
-type Tool = "select" | "pan" | "text" | "pen" | "square" | "circle"
+type Tool = "select" | "pan" | "text" | "pen" | "sticky" | "square" | "circle"
 
 export default function CanvasEditor() {
   const params = useParams()
@@ -73,6 +75,14 @@ export default function CanvasEditor() {
     handleCanvasChange: canvasCore.handleCanvasChange,
     userId: user?.uid,
   })
+
+  // Expose canvasCore to global for interaction hook
+  useEffect(() => {
+    window.canvasCore = canvasCore
+    return () => {
+      delete window.canvasCore
+    }
+  }, [canvasCore])
 
   // Import and setup interaction hook
   const { useInteractionHook } = require("./hooks/use-interaction-hook")
@@ -149,6 +159,7 @@ export default function CanvasEditor() {
     { id: "pan" as Tool, icon: Hand, label: "Pan" },
     { id: "text" as Tool, icon: Type, label: "Text" },
     { id: "pen" as Tool, icon: Pen, label: "Draw" },
+    { id: "sticky" as Tool, icon: StickyNote, label: "Sticky Note" },
     { id: "square" as Tool, icon: Square, label: "Rectangle" },
     { id: "circle" as Tool, icon: Circle, label: "Circle" },
   ]
@@ -387,6 +398,16 @@ export default function CanvasEditor() {
           selectedTextObject={canvasCore.selectedObjects.find(obj => obj.type === "textbox")}
           fabricCanvas={canvasCore.fabricCanvasRef.current}
           onTextChange={canvasCore.handleCanvasChange}
+        />
+      )}
+
+      {/* Sticky Note Toolbar */}
+      {!isViewOnly && (
+        <StickyNoteToolbar
+          isVisible={canvasCore.selectedObjects.length === 1 && canvasCore.selectedObjects[0]?.stickyNoteGroup}
+          selectedStickyNote={canvasCore.selectedObjects.find(obj => obj.stickyNoteGroup)}
+          fabricCanvas={canvasCore.fabricCanvasRef.current}
+          onNoteChange={canvasCore.handleCanvasChange}
         />
       )}
 

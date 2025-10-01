@@ -41,8 +41,8 @@ export function useInteractionHook({
     const handleMouseDown = (e: any) => {
       // Skip if text tool is active - let Fabric handle text interactions
       if (activeToolRef.current === "text") return
-      
-      
+
+
       if (activeToolRef.current === "pen") {
         canvas.isDrawingMode = true
         if (canvas.freeDrawingBrush) {
@@ -146,11 +146,84 @@ export function useInteractionHook({
       }
     })
 
+    // Tool specific mouse down handlers
+    const handleToolMouseDown = (e: any) => {
+      const activeTool = activeToolRef.current
+      if (activeTool === "text") {
+        const pointer = canvas.getPointer(e.e)
+        const { useTextTool } = require("./use-text-tool")
+        const { addTextAtPosition } = useTextTool({
+          fabricCanvasRef,
+          handleCanvasChange,
+          activeTool
+        })
+        addTextAtPosition(pointer.x, pointer.y)
+      } else if (activeTool === "sticky") {
+        const pointer = canvas.getPointer(e.e)
+        // We need to get createStickyNote from the canvas core
+        // This will be passed through the interaction hook
+        if (window.canvasCore?.createStickyNote) {
+          window.canvasCore.createStickyNote(pointer.x, pointer.y)
+        }
+      }
+    }
+    canvas.on("mouse:down", handleToolMouseDown)
+
+
+    // Tool specific cursor and selection handlers
+    const setupToolInteractions = useCallback(() => {
+      const canvas = fabricCanvasRef.current
+      if (!canvas) return
+
+      const tool = activeToolRef.current
+
+      if (tool === "select") {
+        canvas.defaultCursor = "default"
+        canvas.hoverCursor = "default"
+        canvas.selection = true
+        canvas.forEachObject((obj: any) => {
+          obj.selectable = true
+        })
+      } else if (tool === "pan") {
+        canvas.defaultCursor = "grab"
+        canvas.hoverCursor = "grab"
+        canvas.selection = false
+        canvas.forEachObject((obj: any) => {
+          obj.selectable = false
+        })
+      } else if (tool === "pen") {
+        canvas.defaultCursor = "crosshair"
+        canvas.hoverCursor = "crosshair"
+        canvas.selection = false
+        canvas.forEachObject((obj: any) => {
+          obj.selectable = false
+        })
+      } else if (tool === "text") {
+        canvas.defaultCursor = "text"
+        canvas.hoverCursor = "text"
+        canvas.selection = false
+        canvas.forEachObject((obj: any) => {
+          obj.selectable = false
+        })
+      } else if (tool === "sticky") {
+        canvas.defaultCursor = "crosshair"
+        canvas.hoverCursor = "crosshair"
+        canvas.selection = false
+        canvas.forEachObject((obj: any) => {
+          obj.selectable = false
+        })
+      }
+    }, [activeToolRef, fabricCanvasRef])
+
+    setupToolInteractions()
+
+
     return () => {
       canvas.off("mouse:down", handleMouseDown)
       canvas.off("mouse:move", handleMouseMove)
       canvas.off("mouse:up", handleMouseUp)
       canvas.off("path:created")
+      canvas.off("mouse:down", handleToolMouseDown)
     }
   }, [
     fabricCanvasRef,
