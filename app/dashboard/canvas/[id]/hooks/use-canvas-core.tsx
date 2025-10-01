@@ -149,10 +149,18 @@ export function useCanvasCore(documentId: string, document: Document | null) {
     try {
       setIsSaving(true)
       const canvasData = fabricCanvasRef.current.toJSON()
+      
+      // Always generate thumbnail for previews
+      const thumbnail = fabricCanvasRef.current.toDataURL({
+        format: "png",
+        quality: 0.6,
+        multiplier: 0.3,
+      })
 
       await documentService.updateDocument(documentId, {
         content: {
           canvasData: canvasData,
+          thumbnail: thumbnail,
           canvasVersion: "1.0"
         },
       })
