@@ -105,13 +105,20 @@ export default function CanvasEditor() {
     drawingMode: canvasCore.drawingMode,
   })
 
-  // Text tool hook
+  // Text tool hook  
   const { useTextTool } = require("./hooks/use-text-tool")
-  const { setupTextTool } = useTextTool({
+  const { createTextBox, setupTextInteractions } = useTextTool({
     fabricCanvasRef: canvasCore.fabricCanvasRef,
-    handleCanvasChange: canvasCore.handleCanvasChange,
-    activeTool: canvasCore.activeTool
+    handleCanvasChange: canvasCore.handleCanvasChange
   })
+
+  // Expose text tool to global for interaction hook
+  useEffect(() => {
+    window.textToolHook = { createTextBox }
+    return () => {
+      delete window.textToolHook
+    }
+  }, [createTextBox])
 
   // Setup interactions after canvas is loaded
   useEffect(() => {

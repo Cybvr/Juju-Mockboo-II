@@ -7,6 +7,7 @@ declare global {
   interface Window {
     copiedObjects?: any[]
     stickyNoteHook?: any
+    textToolHook?: any
   }
 }
 
@@ -44,29 +45,7 @@ export function useInteractionHook({
 
       if (tool === "text") {
         const pointer = canvas.getPointer(e.e)
-        
-        // Create text directly without hook call
-        import("fabric").then((FabricModule) => {
-          const fabric = FabricModule.fabric || FabricModule
-          
-          const text = new fabric.Textbox("Type here...", {
-            left: pointer.x,
-            top: pointer.y,
-            width: 200,
-            fontSize: 20,
-            fontFamily: "Arial",
-            fill: "#000000",
-            editable: true,
-            selectable: true
-          })
-          
-          canvas.add(text)
-          canvas.setActiveObject(text)
-          text.enterEditing()
-          text.selectAll()
-          canvas.renderAll()
-          handleCanvasChange()
-        })
+        window.textToolHook?.createTextBox?.(pointer.x, pointer.y)
         return
       }
 
