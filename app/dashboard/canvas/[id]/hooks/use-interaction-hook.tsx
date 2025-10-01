@@ -54,8 +54,12 @@ export function useInteractionHook({
         return
       }
 
-
-
+      // Logic for text tool selection is handled in setupInteractions
+      if (activeToolRef.current === "text") {
+        // If text tool is active, we want to be able to select and edit text
+        // This is handled by making text objects selectable in the tool setup
+        return;
+      }
 
 
       if (activeToolRef.current === "select" || activeToolRef.current === "pan") return
