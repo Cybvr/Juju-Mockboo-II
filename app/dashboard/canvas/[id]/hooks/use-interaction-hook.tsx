@@ -140,6 +140,7 @@ export function useInteractionHook({
         const activeObject = canvas.getActiveObject()
 
         if (!activeObject) {
+          console.log("No object selected to copy")
           return
         }
         
@@ -147,8 +148,10 @@ export function useInteractionHook({
           if (activeObject.type === "activeSelection") {
             const objects = (activeObject as any).getObjects()
             window.copiedObjects = objects.map((obj: any) => obj.toObject())
+            console.log("Copied multiple objects:", window.copiedObjects.length)
           } else {
             window.copiedObjects = [activeObject.toObject()]
+            console.log("Copied single object:", activeObject.type)
           }
         } catch (error) {
           console.error("Copy failed:", error)
@@ -158,14 +161,17 @@ export function useInteractionHook({
       // Paste
       if ((e.ctrlKey || e.metaKey) && e.key === "v") {
         e.preventDefault()
+        console.log("Paste triggered, objects available:", window.copiedObjects?.length)
 
         if (window.copiedObjects?.length > 0) {
           canvas.discardActiveObject()
 
           import("fabric").then((FabricModule) => {
             const fabric = FabricModule
+            console.log("Fabric loaded, enlivening objects...")
             
             fabric.util.enlivenObjects(window.copiedObjects!, (enlivenedObjects: any[]) => {
+              console.log("Enlivened objects:", enlivenedObjects.length)
               enlivenedObjects.forEach((obj: any) => {
                 obj.set({
                   left: (obj.left || 0) + 20,
@@ -185,8 +191,11 @@ export function useInteractionHook({
               
               canvas.requestRenderAll()
               handleCanvasChange()
+              console.log("Paste complete!")
             })
           })
+        } else {
+          console.log("No objects to paste")
         }
         return
       }
