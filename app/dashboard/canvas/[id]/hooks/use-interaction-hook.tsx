@@ -191,28 +191,32 @@ export function useInteractionHook({
         if (window.copiedObjects?.length > 0) {
           canvas.discardActiveObject()
 
-          Promise.all(
-            window.copiedObjects.map((obj: any) =>
-              new Promise(resolve => obj.clone(resolve))
-            )
-          ).then((cloned: any[]) => {
-            cloned.forEach((obj: any) => {
-              obj.set({ left: obj.left + 20, top: obj.top + 20 })
-              canvas.add(obj)
-            })
-
-            if (cloned.length === 1) {
-              canvas.setActiveObject(cloned[0])
-            } else if (cloned.length > 1) {
-              import("fabric").then((FabricModule) => {
-                const fabric = FabricModule
-                const selection = new fabric.ActiveSelection(cloned, { canvas })
-                canvas.setActiveObject(selection)
+          const cloned: any[] = []
+          
+          window.copiedObjects.forEach((obj: any) => {
+            obj.clone((clonedObj: any) => {
+              clonedObj.set({ 
+                left: clonedObj.left + 20, 
+                top: clonedObj.top + 20 
               })
-            }
-
-            canvas.renderAll()
-            handleCanvasChange()
+              canvas.add(clonedObj)
+              cloned.push(clonedObj)
+              
+              // If this is the last object to be cloned
+              if (cloned.length === window.copiedObjects.length) {
+                if (cloned.length === 1) {
+                  canvas.setActiveObject(cloned[0])
+                } else if (cloned.length > 1) {
+                  import("fabric").then((FabricModule) => {
+                    const fabric = FabricModule
+                    const selection = new fabric.ActiveSelection(cloned, { canvas })
+                    canvas.setActiveObject(selection)
+                  })
+                }
+                canvas.renderAll()
+                handleCanvasChange()
+              }
+            })
           })
         }
         return
