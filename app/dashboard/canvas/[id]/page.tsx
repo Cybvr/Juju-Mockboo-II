@@ -60,15 +60,12 @@ export default function CanvasEditor() {
 
   const documentId = params.id as string
 
-  // Use canvas core hook
-  const canvasCore = useCanvasCore(documentId, document)
-  
-  // Add snap grid functionality
-  const snapGrid = useSnapGrid({
-    fabricCanvasRef: canvasCore.fabricCanvasRef,
-    gridSize: 5,
-    enabled: true
-  })
+  // Use fabric canvas hook for canvas initialization - this includes canvasCore internally
+  const { FloatingToolbarComponent, addImageToCanvas, canvasRef: fabricCanvasRef, snapGrid, canvasCore } = useFabricCanvas(
+    document,
+    documentId,
+    (images) => setSelectedImages(images)
+  )
   
   // Image operations hook
   const imageOps = useImageOperations({
@@ -76,13 +73,6 @@ export default function CanvasEditor() {
     handleCanvasChange: canvasCore.handleCanvasChange,
     userId: user?.uid,
   })
-
-  // Use fabric canvas hook for canvas initialization
-  const { FloatingToolbarComponent, addImageToCanvas, canvasRef: fabricCanvasRef } = useFabricCanvas(
-    document,
-    documentId,
-    (images) => setSelectedImages(images)
-  )
 
   // Import and setup interaction hook
   const { useInteractionHook } = require("./hooks/use-interaction-hook")
