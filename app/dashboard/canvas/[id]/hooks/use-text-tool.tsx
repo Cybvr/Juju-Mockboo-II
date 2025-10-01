@@ -34,6 +34,7 @@ export function useTextTool({
         selectable: true,
         hasControls: true,
         hasBorders: true,
+        evented: true
       })
 
       console.log("📝 Text object created:", text)

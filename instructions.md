@@ -1,0 +1,1 @@
+Explain one line marketing stakeholder speak Like im 15 years old. No tech jargon. explain big picture. shorter responses. When I ask about an error, identify which specific feature is broken. dont add bloat or overengineer. dont error handle or add debug, dont bloat my code. just Fix

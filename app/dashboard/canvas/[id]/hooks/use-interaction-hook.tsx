@@ -42,6 +42,7 @@ export function useInteractionHook({
       // Skip if text tool is active - let Fabric handle text interactions
       if (activeToolRef.current === "text") return
       
+      
       if (activeToolRef.current === "pen") {
         canvas.isDrawingMode = true
         if (canvas.freeDrawingBrush) {
