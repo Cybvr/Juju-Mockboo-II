@@ -34,6 +34,10 @@ const stickyColors = [
 
 const fontSizes = [12, 14, 16, 18, 20, 24, 28]
 
+const fontFamilies = [
+  "Arial", "Helvetica", "Times New Roman", "Georgia", "Verdana", "Comic Sans MS", "Impact", "Courier New"
+]
+
 export function StickyNoteToolbar({ 
   isVisible, 
   selectedStickyNote, 
@@ -44,6 +48,7 @@ export function StickyNoteToolbar({
   const [noteText, setNoteText] = useState("")
   const [currentColor, setCurrentColor] = useState("yellow")
   const [currentFontSize, setCurrentFontSize] = useState(16)
+  const [currentFontFamily, setCurrentFontFamily] = useState("Arial")
   const [currentAlignment, setCurrentAlignment] = useState("left")
 
   useEffect(() => {
@@ -67,6 +72,7 @@ export function StickyNoteToolbar({
       if (textObj) {
         setNoteText(textObj.text || "")
         setCurrentFontSize(textObj.fontSize || 16)
+        setCurrentFontFamily(textObj.fontFamily || "Arial")
         setCurrentAlignment(textObj.textAlign || "left")
       }
       setCurrentColor(selectedStickyNote.stickyColor || "yellow")
@@ -118,6 +124,20 @@ export function StickyNoteToolbar({
       const textObj = selectedStickyNote.getObjects().find((obj: any) => obj.type === "textbox")
       if (textObj) {
         textObj.set({ fontSize: size })
+        fabricCanvas.renderAll()
+        onNoteChange()
+      }
+    }
+  }
+
+  const handleFontFamilyChange = (fontFamily: string) => {
+    setCurrentFontFamily(fontFamily)
+    if (!selectedStickyNote || !fabricCanvas) return
+
+    if (selectedStickyNote.type === "group" && selectedStickyNote.stickyNoteGroup) {
+      const textObj = selectedStickyNote.getObjects().find((obj: any) => obj.type === "textbox")
+      if (textObj) {
+        textObj.set({ fontFamily: fontFamily })
         fabricCanvas.renderAll()
         onNoteChange()
       }
@@ -197,6 +217,31 @@ export function StickyNoteToolbar({
                   onClick={() => handleFontSizeChange(size)}
                 >
                   {size}px
+                </Button>
+              ))}
+            </div>
+          </PopoverContent>
+        </Popover>
+
+        {/* Font Family */}
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+              <Type className="h-4 w-4" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-2">
+            <div className="flex flex-col gap-1 max-h-48 overflow-y-auto">
+              {fontFamilies.map((font) => (
+                <Button
+                  key={font}
+                  variant={currentFontFamily === font ? "default" : "ghost"}
+                  size="sm"
+                  className="justify-start text-left"
+                  style={{ fontFamily: font }}
+                  onClick={() => handleFontFamilyChange(font)}
+                >
+                  {font}
                 </Button>
               ))}
             </div>
