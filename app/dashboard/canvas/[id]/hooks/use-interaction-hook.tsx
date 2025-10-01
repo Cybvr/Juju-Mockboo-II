@@ -196,6 +196,15 @@ export function useInteractionHook({
 
   const setupKeyboardHandlers = useCallback(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      const canvas = fabricCanvasRef.current
+      if (!canvas) return
+
+      // Check if user is editing a Fabric textbox
+      const activeObject = canvas.getActiveObject()
+      if (activeObject && activeObject.isEditing) {
+        return // Don't handle if user is editing text in Fabric
+      }
+
       // Only handle keyboard events when canvas is focused or no input elements are focused
       const activeElement = document.activeElement
       if (
@@ -204,9 +213,6 @@ export function useInteractionHook({
       ) {
         return // Don't handle if user is typing in an input
       }
-
-      const canvas = fabricCanvasRef.current
-      if (!canvas) return
 
       // Handle Ctrl+Z (undo) and Ctrl+Y (redo)
       if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
