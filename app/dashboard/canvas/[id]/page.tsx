@@ -87,14 +87,16 @@ export default function CanvasEditor() {
     const cleanupKeyboard = setupKeyboardHandlers()
     const cleanupPanZoom = setupPanAndZoom()
     const cleanupTouch = setupTouchHandlers()
+    const cleanupDragDrop = imageOps.setupDragAndDrop()
 
     return () => {
       if (cleanupInteractions) cleanupInteractions()
       if (cleanupKeyboard) cleanupKeyboard()
       if (cleanupPanZoom) cleanupPanZoom()
       if (cleanupTouch) cleanupTouch()
+      if (cleanupDragDrop) cleanupDragDrop()
     }
-  }, [canvasCore.fabricLoaded, setupInteractions, setupKeyboardHandlers, setupPanAndZoom, setupTouchHandlers])
+  }, [canvasCore.fabricLoaded, setupInteractions, setupKeyboardHandlers, setupPanAndZoom, setupTouchHandlers, imageOps.setupDragAndDrop])
 
   // Initialize Fabric.js canvas
   useEffect(() => {
