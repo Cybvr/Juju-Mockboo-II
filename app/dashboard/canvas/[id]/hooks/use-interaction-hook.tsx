@@ -168,52 +168,44 @@ export function useInteractionHook({
     canvas.on("mouse:down", handleToolMouseDown)
 
 
-    // Tool specific cursor and selection handlers
-    const setupToolInteractions = useCallback(() => {
-      const canvas = fabricCanvasRef.current
-      if (!canvas) return
-
-      const tool = activeToolRef.current
-
-      if (tool === "select") {
-        canvas.defaultCursor = "default"
-        canvas.hoverCursor = "default"
-        canvas.selection = true
-        canvas.forEachObject((obj: any) => {
-          obj.selectable = true
-        })
-      } else if (tool === "pan") {
-        canvas.defaultCursor = "grab"
-        canvas.hoverCursor = "grab"
-        canvas.selection = false
-        canvas.forEachObject((obj: any) => {
-          obj.selectable = false
-        })
-      } else if (tool === "pen") {
-        canvas.defaultCursor = "crosshair"
-        canvas.hoverCursor = "crosshair"
-        canvas.selection = false
-        canvas.forEachObject((obj: any) => {
-          obj.selectable = false
-        })
-      } else if (tool === "text") {
-        canvas.defaultCursor = "text"
-        canvas.hoverCursor = "text"
-        canvas.selection = false
-        canvas.forEachObject((obj: any) => {
-          obj.selectable = false
-        })
-      } else if (tool === "sticky-note") {
-        canvas.defaultCursor = "crosshair"
-        canvas.hoverCursor = "crosshair"
-        canvas.selection = false
-        canvas.forEachObject((obj: any) => {
-          obj.selectable = false
-        })
-      }
-    }, [activeToolRef, fabricCanvasRef])
-
-    setupToolInteractions()
+    // Set tool-specific cursor and selection behavior
+    const tool = activeToolRef.current
+    if (tool === "select") {
+      canvas.defaultCursor = "default"
+      canvas.hoverCursor = "default"
+      canvas.selection = true
+      canvas.forEachObject((obj: any) => {
+        obj.selectable = true
+      })
+    } else if (tool === "pan") {
+      canvas.defaultCursor = "grab"
+      canvas.hoverCursor = "grab"
+      canvas.selection = false
+      canvas.forEachObject((obj: any) => {
+        obj.selectable = false
+      })
+    } else if (tool === "pen") {
+      canvas.defaultCursor = "crosshair"
+      canvas.hoverCursor = "crosshair"
+      canvas.selection = false
+      canvas.forEachObject((obj: any) => {
+        obj.selectable = false
+      })
+    } else if (tool === "text") {
+      canvas.defaultCursor = "text"
+      canvas.hoverCursor = "text"
+      canvas.selection = false
+      canvas.forEachObject((obj: any) => {
+        obj.selectable = false
+      })
+    } else if (tool === "sticky-note") {
+      canvas.defaultCursor = "crosshair"
+      canvas.hoverCursor = "crosshair"
+      canvas.selection = false
+      canvas.forEachObject((obj: any) => {
+        obj.selectable = false
+      })
+    }
 
 
     return () => {
