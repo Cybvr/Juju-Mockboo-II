@@ -1,8 +1,6 @@
 "use client"
-
 import type React from "react"
 import { useCallback } from "react"
-
 declare global {
   interface Window {
     copiedObjects?: any[]
@@ -10,7 +8,6 @@ declare global {
     textToolHook?: any
   }
 }
-
 interface InteractionHookProps {
   fabricCanvasRef: React.MutableRefObject<any>
   handleCanvasChange: () => void
@@ -22,7 +19,6 @@ interface InteractionHookProps {
   brushColor?: string
   drawingMode?: "draw" | "erase"
 }
-
 export function useInteractionHook({
   fabricCanvasRef,
   handleCanvasChange,
@@ -33,28 +29,22 @@ export function useInteractionHook({
   brushColor = "#000000",
   drawingMode = "draw",
 }: InteractionHookProps) {
-
   const setupInteractions = useCallback(() => {
     if (!fabricCanvasRef.current) return null
-
     const canvas = fabricCanvasRef.current
     let startX = 0, startY = 0, activeShape: any = null
-
     const handleMouseDown = (e: any) => {
       const tool = activeToolRef.current
-
       if (tool === "sticky-note") {
         const pointer = canvas.getPointer(e.e)
         window.stickyNoteHook?.createStickyNote?.(pointer.x, pointer.y)
         return
       }
-
       if (tool === "text") {
         const pointer = canvas.getPointer(e.e)
         window.textToolHook?.createTextObject?.(pointer.x, pointer.y)
         return
       }
-
       if (tool === "pen") {
         canvas.isDrawingMode = true
         if (canvas.freeDrawingBrush) {
@@ -64,14 +54,11 @@ export function useInteractionHook({
         }
         return
       }
-
       if (tool === "select" || tool === "pan") return
-
       const pointer = canvas.getPointer(e.e)
       startX = pointer.x
       startY = pointer.y
       setIsDrawing(true)
-
       import("fabric").then((FabricModule) => {
         const fabric = FabricModule
         if (tool === "square") {
@@ -88,13 +75,11 @@ export function useInteractionHook({
         if (activeShape) canvas.add(activeShape)
       })
     }
-
     const handleMouseMove = (e: any) => {
       if (!isDrawingRef.current || !activeShape) return
       const pointer = canvas.getPointer(e.e)
       const width = Math.abs(pointer.x - startX)
       const height = Math.abs(pointer.y - startY)
-
       if (activeToolRef.current === "square") {
         activeShape.set({
           width, height,
@@ -107,7 +92,6 @@ export function useInteractionHook({
       }
       canvas.renderAll()
     }
-
     const handleMouseUp = () => {
       if (isDrawingRef.current && activeShape) {
         canvas.setActiveObject(activeShape)
@@ -116,14 +100,12 @@ export function useInteractionHook({
       setIsDrawing(false)
       activeShape = null
     }
-
     canvas.on("mouse:down", handleMouseDown)
     canvas.on("mouse:move", handleMouseMove)
     canvas.on("mouse:up", handleMouseUp)
     canvas.on("path:created", () => {
       if (activeToolRef.current === "pen") handleCanvasChange()
     })
-
     return () => {
       canvas.off("mouse:down", handleMouseDown)
       canvas.off("mouse:move", handleMouseMove)
@@ -131,81 +113,61 @@ export function useInteractionHook({
       canvas.off("path:created")
     }
   }, [fabricCanvasRef, handleCanvasChange, activeToolRef, isDrawingRef, setIsDrawing, brushSize, brushColor, drawingMode])
-
   const setupKeyboardHandlers = useCallback(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const canvas = fabricCanvasRef.current
       if (!canvas) return
-
       const activeElement = document.activeElement
       const isEditingText = canvas.getActiveObject()?.isEditing
-
       if (activeElement && (activeElement.tagName === "INPUT" || activeElement.tagName === "TEXTAREA" || activeElement.isContentEditable) || isEditingText) {
         return
       }
-
       // Undo
       if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
         e.preventDefault()
         canvas.undo?.()
         return
       }
-
       // Redo
       if ((e.ctrlKey || e.metaKey) && (e.key === "y" || (e.key === "z" && e.shiftKey))) {
         e.preventDefault()
         canvas.redo?.()
         return
       }
-
       // Copy
       if ((e.ctrlKey || e.metaKey) && e.key === "c") {
         e.preventDefault()
         const activeObject = canvas.getActiveObject()
-
         if (activeObject) {
-          if (activeObject.type === "activeSelection") {
-            const objects = activeObject.getObjects()
-            Promise.all(objects.map(obj => new Promise(resolve => obj.clone(resolve))))
-              .then(cloned => {
-                window.copiedObjects = cloned
-              })
-          } else {
-            activeObject.clone((cloned: any) => {
-              window.copiedObjects = [cloned]
-            })
-          }
+          activeObject.clone((cloned: any) => {
+            window.copiedObjects = [cloned]
+          })
         }
         return
       }
-
       // Paste
       if ((e.ctrlKey || e.metaKey) && e.key === "v") {
         e.preventDefault()
-
         if (window.copiedObjects?.length > 0) {
           canvas.discardActiveObject()
-          const clonedObjects: any[] = []
-
+          const clonedArr: any[] = []
           window.copiedObjects.forEach((obj: any) => {
             obj.clone((clonedObj: any) => {
               clonedObj.set({
                 left: (clonedObj.left || 0) + 20,
                 top: (clonedObj.top || 0) + 20,
                 evented: true,
-                selectable: true,
+                selectable: true
               })
               canvas.add(clonedObj)
-              clonedObjects.push(clonedObj)
-
-              // When all objects cloned
-              if (clonedObjects.length === window.copiedObjects!.length) {
-                if (clonedObjects.length === 1) {
-                  canvas.setActiveObject(clonedObjects[0])
+              clonedArr.push(clonedObj)
+              if (clonedArr.length === window.copiedObjects.length) {
+                if (clonedArr.length === 1) {
+                  canvas.setActiveObject(clonedArr[0])
                 } else {
                   import("fabric").then(({ ActiveSelection }) => {
-                    const selection = new ActiveSelection(clonedObjects, { canvas })
-                    canvas.setActiveObject(selection)
+                    const sel = new ActiveSelection(clonedArr, { canvas })
+                    canvas.setActiveObject(sel)
                   })
                 }
                 canvas.requestRenderAll()
@@ -216,49 +178,39 @@ export function useInteractionHook({
         }
         return
       }
-
       // Delete
       if (e.key === "Delete" || e.key === "Backspace") {
         e.preventDefault()
-        const activeObject = canvas.getActiveObject()
-
-        if (activeObject) {
-          if (activeObject.type === 'activeSelection') {
-            // Multiple objects selected
-            const objects = activeObject.getObjects()
-            objects.forEach((obj: any) => canvas.remove(obj))
+        const active = canvas.getActiveObject()
+        if (active) {
+          if (active.type === "activeSelection") {
+            active.getObjects().forEach((o: any) => canvas.remove(o))
           } else {
-            // Single object selected
-            canvas.remove(activeObject)
+            canvas.remove(active)
           }
           canvas.discardActiveObject()
-          canvas.renderAll()
+          canvas.requestRenderAll()
           handleCanvasChange()
         }
       }
     }
-
     document.addEventListener("keydown", handleKeyDown)
     return () => document.removeEventListener("keydown", handleKeyDown)
   }, [fabricCanvasRef, handleCanvasChange])
-
   const setupPanAndZoom = useCallback(() => {
     if (!fabricCanvasRef.current) return null
     const canvas = fabricCanvasRef.current
     let isPanning = false, lastPanX = 0, lastPanY = 0
-
     const handleMouseWheel = (opt: any) => {
       const delta = opt.e.deltaY
       let zoom = canvas.getZoom() * (0.999 ** delta)
       zoom = Math.max(0.2, Math.min(5, zoom))
-
       import("fabric").then((FabricModule) => {
         const fabric = FabricModule
         canvas.zoomToPoint(new fabric.Point(canvas.width / 2, canvas.height / 2), zoom)
       })
       opt.e.preventDefault()
     }
-
     const handleMouseDown = (opt: any) => {
       const evt = opt.e as MouseEvent
       if (evt.altKey || evt.ctrlKey || activeToolRef.current === "pan") {
@@ -268,7 +220,6 @@ export function useInteractionHook({
         lastPanY = evt.clientY
       }
     }
-
     const handleMouseMove = (opt: any) => {
       if (isPanning && !opt.e.touches) {
         const e = opt.e as MouseEvent
@@ -280,7 +231,6 @@ export function useInteractionHook({
         lastPanY = e.clientY
       }
     }
-
     const handleMouseUp = () => {
       if (isPanning) {
         canvas.setViewportTransform(canvas.viewportTransform)
@@ -288,12 +238,10 @@ export function useInteractionHook({
         canvas.selection = true
       }
     }
-
     canvas.on("mouse:wheel", handleMouseWheel)
     canvas.on("mouse:down", handleMouseDown)
     canvas.on("mouse:move", handleMouseMove)
     canvas.on("mouse:up", handleMouseUp)
-
     return () => {
       canvas.off("mouse:wheel", handleMouseWheel)
       canvas.off("mouse:down", handleMouseDown)
@@ -301,19 +249,16 @@ export function useInteractionHook({
       canvas.off("mouse:up", handleMouseUp)
     }
   }, [fabricCanvasRef, activeToolRef])
-
   const setupTouchHandlers = useCallback(() => {
     if (!fabricCanvasRef.current) return null
     const canvas = fabricCanvasRef.current
     const canvasElement = canvas.getElement()
     let isPanning = false, isZooming = false, lastPanX = 0, lastPanY = 0, lastDistance = 0
-
     const getDistance = (touch1: Touch, touch2: Touch) => {
       const dx = touch1.clientX - touch2.clientX
       const dy = touch1.clientY - touch2.clientY
       return Math.sqrt(dx * dx + dy * dy)
     }
-
     const handleTouchStart = (e: TouchEvent) => {
       if (e.touches.length === 1) {
         const touch = e.touches[0]
@@ -329,7 +274,6 @@ export function useInteractionHook({
         lastDistance = getDistance(touch1, touch2)
       }
     }
-
     const handleTouchMove = (e: TouchEvent) => {
       if (e.touches.length === 2 && (isPanning || isZooming)) {
         e.preventDefault()
@@ -337,14 +281,12 @@ export function useInteractionHook({
         const centerX = (touch1.clientX + touch2.clientX) / 2
         const centerY = (touch1.clientY + touch2.clientY) / 2
         const currentDistance = getDistance(touch1, touch2)
-
         if (isPanning) {
           const vpt = canvas.viewportTransform
           vpt[4] += centerX - lastPanX
           vpt[5] += centerY - lastPanY
           canvas.requestRenderAll()
         }
-
         if (isZooming && Math.abs(currentDistance - lastDistance) > 5) {
           const zoom = canvas.getZoom() + (currentDistance - lastDistance) / 200
           const newZoom = Math.max(0.2, Math.min(5, zoom))
@@ -354,30 +296,25 @@ export function useInteractionHook({
             canvas.zoomToPoint(new fabric.Point(centerX - rect.left, centerY - rect.top), newZoom)
           })
         }
-
         lastPanX = centerX
         lastPanY = centerY
         lastDistance = currentDistance
       }
     }
-
     const handleTouchEnd = () => {
       setTimeout(() => {
         isPanning = isZooming = false
         canvas.selection = true
       }, 100)
     }
-
     canvasElement.addEventListener("touchstart", handleTouchStart, { passive: false })
     canvasElement.addEventListener("touchmove", handleTouchMove, { passive: false })
     canvasElement.addEventListener("touchend", handleTouchEnd, { passive: false })
-
     return () => {
       canvasElement.removeEventListener("touchstart", handleTouchStart)
       canvasElement.removeEventListener("touchmove", handleTouchMove)
       canvasElement.removeEventListener("touchend", handleTouchEnd)
     }
   }, [fabricCanvasRef])
-
   return { setupInteractions, setupKeyboardHandlers, setupPanAndZoom, setupTouchHandlers }
 }
