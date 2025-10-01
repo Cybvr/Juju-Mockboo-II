@@ -1,4 +1,4 @@
-'use client';
+['use client';
 
 import { useEffect, useRef, useState } from 'react';
 import { Canvas, Rect, PencilBrush } from 'fabric';
@@ -25,7 +25,7 @@ export default function DrawingCanvas({ documentId, documentName, initialCanvasD
   const [name, setName] = useState(documentName);
   const [message, setMessage] = useState('');
   const router = useRouter();
-  const saveTimeoutRef = useRef<NodeJS.Timeout>();
+  const save]TimeoutRef = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
     if (!canvasRef.current) return;
