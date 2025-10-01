@@ -158,7 +158,6 @@ export function useInteractionHook({
     const handleMouseUp = () => {
       if (isDrawingRef.current && activeShape) {
         canvas.setActiveObject(activeShape)
-        setActiveTool("select")
         handleCanvasChange()
       }
       setIsDrawing(false)
