@@ -218,11 +218,24 @@ export function useCanvasOperations(
         fabricCanvasRef.current.forEachObject((obj: any) => {
           obj.selectable = false
         })
+      } else if (tool === "text") {
+        fabricCanvasRef.current.defaultCursor = "text"
+        fabricCanvasRef.current.hoverCursor = "text"
+        fabricCanvasRef.current.selection = true
+        fabricCanvasRef.current.isDrawingMode = false
+        fabricCanvasRef.current.forEachObject((obj: any) => {
+          if (obj.type === 'textbox' || obj.type === 'text') {
+            obj.selectable = true
+            obj.editable = true
+          } else {
+            obj.selectable = false
+          }
+        })
       } else {
         fabricCanvasRef.current.defaultCursor = "crosshair"
         fabricCanvasRef.current.hoverCursor = "crosshair"
         fabricCanvasRef.current.selection = false
-        fabricCanvasRef.current.isDrawingMode = false // Disable drawing mode for other tools
+        fabricCanvasRef.current.isDrawingMode = false
         fabricCanvasRef.current.forEachObject((obj: any) => {
           obj.selectable = false
         })

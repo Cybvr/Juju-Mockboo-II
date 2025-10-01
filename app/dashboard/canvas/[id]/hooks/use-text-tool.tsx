@@ -29,6 +29,9 @@ export function useTextTool({
         fontFamily: "Arial",
         fill: "#000000",
         editable: true,
+        selectable: true,
+        hasControls: true,
+        hasBorders: true,
       })
 
       fabricCanvasRef.current.add(text)
