@@ -144,9 +144,12 @@ export function useInteractionHook({
         }
         
         try {
-          activeObject.clone((cloned: any) => {
-            window.copiedObjects = [cloned]
-          })
+          if (activeObject.type === "activeSelection") {
+            const objects = (activeObject as any).getObjects()
+            window.copiedObjects = objects.map((obj: any) => obj)
+          } else {
+            window.copiedObjects = [activeObject]
+          }
         } catch (error) {
           console.error("Copy failed:", error)
         }
@@ -155,66 +158,43 @@ export function useInteractionHook({
       // Paste
       if ((e.ctrlKey || e.metaKey) && e.key === "v") {
         e.preventDefault()
-        console.log("🟢 PASTE: Starting paste operation")
-        console.log("🟢 PASTE: Copied objects available:", window.copiedObjects?.length || 0)
-        console.log("🟢 PASTE: Copied objects:", window.copiedObjects)
 
         if (window.copiedObjects?.length > 0) {
           canvas.discardActiveObject()
           const clonedObjects: any[] = []
+          let processedCount = 0
 
-          window.copiedObjects.forEach((obj: any, index: number) => {
-            console.log(`🟢 PASTE: Processing object ${index + 1}/${window.copiedObjects!.length}`)
-            console.log("🟢 PASTE: Object type:", obj?.type)
-            console.log("🟢 PASTE: Object valid:", !!obj)
-            console.log("🟢 PASTE: Object has clone method:", typeof obj?.clone === 'function')
-
+          window.copiedObjects.forEach((obj: any) => {
             if (!obj || typeof obj.clone !== 'function') {
-              console.error("🔴 PASTE ERROR: Invalid object or missing clone method:", obj)
+              processedCount++
               return
             }
 
-            try {
-              obj.clone((clonedObj: any) => {
-                console.log(`🟢 PASTE: Object ${index + 1} cloned successfully:`, clonedObj)
-                console.log("🟢 PASTE: Cloned object type:", clonedObj?.type)
-
-                clonedObj.set({
-                  left: (clonedObj.left || 0) + 20,
-                  top: (clonedObj.top || 0) + 20,
-                  evented: true,
-                  selectable: true,
-                })
-                console.log("🟢 PASTE: Adding cloned object to canvas")
-                canvas.add(clonedObj)
-                clonedObjects.push(clonedObj)
-
-                console.log(`🟢 PASTE: Progress: ${clonedObjects.length}/${window.copiedObjects!.length} objects pasted`)
-
-                // When all objects cloned
-                if (clonedObjects.length === window.copiedObjects!.length) {
-                  console.log("🟢 PASTE: All objects pasted, setting selection")
-                  if (clonedObjects.length === 1) {
-                    canvas.setActiveObject(clonedObjects[0])
-                    console.log("🟢 PASTE: Single object selected")
-                  } else {
-                    import("fabric").then(({ ActiveSelection }) => {
-                      const sel = new ActiveSelection(clonedObjects, { canvas })
-                      canvas.setActiveObject(sel)
-                      console.log("🟢 PASTE: Multiple objects selected")
-                    })
-                  }
-                  canvas.requestRenderAll()
-                  handleCanvasChange()
-                  console.log("🟢 PASTE: Paste operation completed successfully")
-                }
+            obj.clone((clonedObj: any) => {
+              clonedObj.set({
+                left: (clonedObj.left || 0) + 20,
+                top: (clonedObj.top || 0) + 20,
+                evented: true,
+                selectable: true,
               })
-            } catch (error) {
-              console.error(`🔴 PASTE ERROR: Failed to clone object ${index + 1}:`, error)
-            }
+              canvas.add(clonedObj)
+              clonedObjects.push(clonedObj)
+              processedCount++
+
+              if (processedCount === window.copiedObjects!.length) {
+                if (clonedObjects.length === 1) {
+                  canvas.setActiveObject(clonedObjects[0])
+                } else if (clonedObjects.length > 1) {
+                  import("fabric").then(({ ActiveSelection }) => {
+                    const sel = new ActiveSelection(clonedObjects, { canvas })
+                    canvas.setActiveObject(sel)
+                  })
+                }
+                canvas.requestRenderAll()
+                handleCanvasChange()
+              }
+            })
           })
-        } else {
-          console.log("🔴 PASTE: No objects to paste!")
         }
         return
       }
