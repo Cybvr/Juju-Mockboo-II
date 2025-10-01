@@ -299,7 +299,7 @@ export function useInteractionHook({
 
         // Calculate distance change ratio for pinch detection
         const distanceRatio = currentDistance / lastDistance
-        const pinchThreshold = 0.05 // 5% change = pinch gesture
+        const pinchThreshold = 0.1 // 10% change = pinch gesture
 
         // If distance is changing significantly, it's a pinch (zoom)
         if (Math.abs(distanceRatio - 1) > pinchThreshold) {
@@ -313,13 +313,13 @@ export function useInteractionHook({
           })
 
           lastDistance = currentDistance
+        } else {
+          // Two fingers moving together = pan (only when no significant pinch)
+          const vpt = canvas.viewportTransform
+          vpt[4] += centerX - lastPanX
+          vpt[5] += centerY - lastPanY
+          canvas.requestRenderAll()
         }
-        
-        // Always pan (primary gesture)
-        const vpt = canvas.viewportTransform
-        vpt[4] += centerX - lastPanX
-        vpt[5] += centerY - lastPanY
-        canvas.requestRenderAll()
 
         lastPanX = centerX
         lastPanY = centerY
