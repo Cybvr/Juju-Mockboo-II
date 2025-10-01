@@ -137,6 +137,19 @@ export function useFabricCanvas(
         }
       })
 
+      // Handle single click for text objects when text tool is active
+      canvas.on('mouse:down', (e) => {
+        if (e.target && (e.target.type === 'textbox' || e.target.type === 'text')) {
+          // If clicking on existing text with text tool, enter editing mode
+          if (canvasCore.activeTool === "text") {
+            setTimeout(() => {
+              e.target.enterEditing()
+              e.target.selectAll()
+            }, 100)
+          }
+        }
+      })
+
       // Load canvas data if exists
       if (documentData.content?.canvasData && Object.keys(documentData.content.canvasData).length > 0) {
         canvas.loadFromJSON(documentData.content.canvasData, () => {
