@@ -25,10 +25,10 @@ export function useInteractionHook({
   isDrawingRef,
   setIsDrawing,
   setActiveTool,
-  brushSize = 5, // Added brush size with default
-  brushColor = "#000000", // Added brush color with default
-  drawingMode = "draw", // Added drawing mode with default
-  stickyNotes, // Use passed sticky notes functions
+  brushSize = 5,
+  brushColor = "#000000",
+  drawingMode = "draw",
+  stickyNotes,
 }: InteractionHookProps) {
   const setupInteractions = useCallback(() => {
     if (!fabricCanvasRef.current) return null
@@ -81,7 +81,9 @@ export function useInteractionHook({
           canvas.add(textbox)
           canvas.setActiveObject(textbox)
           textbox.enterEditing()
+          textbox.selectAll()
           handleCanvasChange()
+          setActiveTool("select")
         })
         return
       }
