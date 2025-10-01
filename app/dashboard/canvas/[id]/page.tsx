@@ -35,6 +35,7 @@ import { ShareModal } from "@/components/ShareModal"
 import { useSnapGrid } from "./hooks/use-snap-grid"
 import { FloatingToolbar } from "./floating-toolbar"
 import { TextToolbar } from "./text-toolbar"
+import { useFabricCanvas } from "./canvas-fabric"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -77,8 +78,7 @@ export default function CanvasEditor() {
   })
 
   // Use fabric canvas hook for canvas initialization
-  const { useFabricCanvas } = require("./canvas-fabric")
-  const { FloatingToolbarComponent, addImageToCanvas } = useFabricCanvas(
+  const { FloatingToolbarComponent, addImageToCanvas, canvasRef: fabricCanvasRef } = useFabricCanvas(
     document,
     documentId,
     (images) => setSelectedImages(images)
@@ -403,7 +403,7 @@ export default function CanvasEditor() {
       {/* Canvas area */}
       <div className="fixed inset-0 w-screen h-screen overflow-hidden" style={{ zIndex: 0 }}>
         <canvas
-          ref={canvasCore.canvasRef}
+          ref={fabricCanvasRef}
           className="block border-none outline-none"
           style={{ 
             width: "100vw", 

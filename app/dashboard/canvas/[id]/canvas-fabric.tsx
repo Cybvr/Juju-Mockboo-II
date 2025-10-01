@@ -227,5 +227,6 @@ export function useFabricCanvas(
     FloatingToolbarComponent,
     addImageToCanvas,
     snapGrid,
+    canvasRef,
   }
 }
