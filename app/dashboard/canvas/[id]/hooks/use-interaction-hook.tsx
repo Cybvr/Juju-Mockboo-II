@@ -161,6 +161,15 @@ export function useInteractionHook({
               evented: true,
             })
             
+            // Preserve custom properties
+            if (window.copiedObjects.stickyNoteGroup) {
+              clonedObj.stickyNoteGroup = true
+              clonedObj.stickyColor = window.copiedObjects.stickyColor
+            }
+            if (window.copiedObjects.isTextObject) {
+              clonedObj.isTextObject = true
+            }
+            
             import("fabric").then(({ ActiveSelection }) => {
               if (clonedObj instanceof ActiveSelection) {
                 clonedObj.canvas = canvas
