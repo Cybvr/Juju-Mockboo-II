@@ -203,16 +203,16 @@ export default function CanvasEditor() {
   return (
     <div className="relative h-full w-full overflow-hidden" data-user-id={user?.uid}>
       {/* Floating Toolbar */}
-      <div className="flex items-center gap-4 absolute left-4 top-4 z-10 bg-card rounded-xl px-4 py-2">
+      <div className="flex items-center gap-2 absolute left-4 top-4 z-10 bg-card rounded-xl px-4 py-2">
         {/* Logo Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button 
               variant="ghost" 
               size="sm" 
-              className="h-8 px-2 flex items-center gap-2"
+              className=" px-2 flex items-center gap-2"
             >
-              <div className="relative w-6 h-6">
+              <div className="relative w-4 h-4">
                 <Image
                   src="/assets/images/logowhite.png"
                   alt="Logo"
@@ -254,10 +254,10 @@ export default function CanvasEditor() {
         </DropdownMenu>
 
         {/* Title */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-left gap-2">
           {isViewOnly ? (
             <div className="flex items-center gap-2">
-              <h1 className="text-lg font-bold">{titleValue}</h1>
+              <h1 className="text-sm font-normal">{titleValue}</h1>
               <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">View Only</span>
             </div>
           ) : (
@@ -272,8 +272,8 @@ export default function CanvasEditor() {
                   e.currentTarget.blur()
                 }
               }}
-              className="h-8 text-lg font-bold bg-transparent border-none px-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-              style={{ width: `${Math.max(titleValue.length * 12, 120)}px` }}
+              className="h-6 text-sm font-semibold bg-transparent border-none px-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+              style={{ width: `${Math.max(titleValue.length * 12, 90)}px` }}
             />
           )}
         </div>
@@ -350,11 +350,6 @@ export default function CanvasEditor() {
                 }}
                 className="hidden"
               />
-              <Button variant="ghost" size="icon" className="h-10 w-10" title="Upload Image" asChild>
-                <div>
-                  <Upload className="h-5 w-5" />
-                </div>
-              </Button>
             </label>
           </div>
         </div>

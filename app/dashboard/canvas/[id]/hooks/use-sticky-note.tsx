@@ -1,6 +1,4 @@
-
 "use client"
-
 import { useCallback } from "react"
 import type { Canvas } from "fabric"
 
@@ -10,7 +8,7 @@ interface StickyNoteHookProps {
 }
 
 export function useStickyNote({ fabricCanvasRef, handleCanvasChange }: StickyNoteHookProps) {
-  
+
   const createStickyNote = useCallback((x: number, y: number, options?: { text?: string; color?: string }) => {
     import("fabric").then((FabricModule) => {
       const fabric = FabricModule
@@ -27,27 +25,14 @@ export function useStickyNote({ fabricCanvasRef, handleCanvasChange }: StickyNot
       ]
 
       const selectedColor = stickyColors.find(c => c.name === (options?.color || "yellow")) || stickyColors[0]
-      
+
       // Create main note background
       const noteBackground = new fabric.Rect({
         width: 200,
         height: 160,
         fill: selectedColor.bg,
-        stroke: selectedColor.border,
-        strokeWidth: 1,
         rx: 4,
         ry: 4,
-        left: 0,
-        top: 0,
-      })
-
-      // Create folded corner
-      const foldTriangle = new fabric.Polygon([
-        { x: 170, y: 0 },
-        { x: 200, y: 0 },
-        { x: 200, y: 30 }
-      ], {
-        fill: selectedColor.border,
         left: 0,
         top: 0,
       })
@@ -66,13 +51,19 @@ export function useStickyNote({ fabricCanvasRef, handleCanvasChange }: StickyNot
       })
 
       // Group all elements
-      const stickyGroup = new fabric.Group([noteBackground, foldTriangle, textObj], {
+      const stickyGroup = new fabric.Group([noteBackground, textObj], {
         left: x,
         top: y,
         selectable: true,
         hasControls: true,
-        hasBorders: true,
+        hasBorders: false,
         lockRotation: true,
+        shadow: {
+          color: "rgba(0, 0, 0, 0.15)",
+          blur: 8,
+          offsetX: 0,
+          offsetY: 2,
+        },
       })
 
       // Mark as sticky note for toolbar detection
@@ -95,25 +86,25 @@ export function useStickyNote({ fabricCanvasRef, handleCanvasChange }: StickyNot
       if (target && target.stickyNoteGroup) {
         const objects = target.getObjects()
         const textObj = objects.find((obj: any) => obj.type === "textbox")
-        
+
         if (textObj) {
           // Make text editable directly in the group
           textObj.set({
             editable: true,
             selectable: true
           })
-          
+
           // Set text as active and enter editing
           canvas.setActiveObject(textObj)
           textObj.enterEditing()
           textObj.selectAll()
-          
+
           // Save changes when editing exits
           const onEditExit = () => {
             textObj.off("editing:exited", onEditExit)
             handleCanvasChange()
           }
-          
+
           textObj.on("editing:exited", onEditExit)
         }
       }
