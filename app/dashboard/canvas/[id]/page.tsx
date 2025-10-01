@@ -37,6 +37,7 @@ import { useSnapGrid } from "./hooks/use-snap-grid"
 import { FloatingToolbar } from "./floating-toolbar"
 
 import { StickyNoteToolbar } from "../common/sticky-note-toolbar"
+import { TextToolbar } from "./text-toolbar"
 import { useFabricCanvas } from "./canvas-fabric"
 import {
   DropdownMenu,
@@ -47,7 +48,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import Image from "next/image"
 
-type Tool = "select" | "pan" | "pen" | "sticky-note" | "square" | "circle"
+type Tool = "select" | "pan" | "pen" | "text" | "sticky-note" | "square" | "circle"
 
 export default function CanvasEditor() {
   const params = useParams()
@@ -83,13 +84,22 @@ export default function CanvasEditor() {
     handleCanvasChange: canvasCore.handleCanvasChange,
   })
 
+  // Text tool hook
+  const { useTextTool } = require("./hooks/use-text-tool")
+  const { createTextObject, setupTextInteractions } = useTextTool({
+    fabricCanvasRef: canvasCore.fabricCanvasRef,
+    handleCanvasChange: canvasCore.handleCanvasChange,
+  })
+
   // Expose hooks to global for interaction hook
   useEffect(() => {
     window.stickyNoteHook = { createStickyNote }
+    window.textToolHook = { createTextObject }
     return () => {
       delete window.stickyNoteHook
+      delete window.textToolHook
     }
-  }, [createStickyNote])
+  }, [createStickyNote, createTextObject])
 
   // Import and setup interaction hook
   const { useInteractionHook } = require("./hooks/use-interaction-hook")
@@ -117,6 +127,7 @@ export default function CanvasEditor() {
     const cleanupTouch = setupTouchHandlers()
     const cleanupDragDrop = imageOps.setupDragAndDrop()
     const cleanupStickyNote = setupStickyNoteInteractions()
+    const cleanupTextTool = setupTextInteractions()
 
     return () => {
       if (cleanupInteractions) cleanupInteractions()
@@ -125,6 +136,7 @@ export default function CanvasEditor() {
       if (cleanupTouch) cleanupTouch()
       if (cleanupDragDrop) cleanupDragDrop()
       if (cleanupStickyNote) cleanupStickyNote()
+      if (cleanupTextTool) cleanupTextTool()
     }
   }, [canvasCore.fabricLoaded, setupInteractions, setupKeyboardHandlers, setupPanAndZoom, setupTouchHandlers, imageOps.setupDragAndDrop])
 
@@ -159,6 +171,7 @@ export default function CanvasEditor() {
     { id: "select" as Tool, icon: MousePointer2, label: "Select" },
     { id: "pan" as Tool, icon: Hand, label: "Pan" },
     { id: "pen" as Tool, icon: Pen, label: "Draw" },
+    { id: "text" as Tool, icon: Type, label: "Text" },
     { id: "sticky-note" as Tool, icon: StickyNote, label: "Sticky Note" },
     { id: "square" as Tool, icon: Square, label: "Rectangle" },
     { id: "circle" as Tool, icon: Circle, label: "Circle" },
@@ -395,6 +408,16 @@ export default function CanvasEditor() {
           selectedStickyNote={canvasCore.selectedObjects.find(obj => obj.stickyNoteGroup)}
           fabricCanvas={canvasCore.fabricCanvasRef.current}
           onNoteChange={canvasCore.handleCanvasChange}
+        />
+      )}
+
+      {/* Text Toolbar */}
+      {!isViewOnly && (
+        <TextToolbar
+          isVisible={canvasCore.selectedObjects.length === 1 && (canvasCore.selectedObjects[0]?.type === "textbox" || canvasCore.selectedObjects[0]?.type === "i-text" || canvasCore.selectedObjects[0]?.isTextObject)}
+          selectedTextObject={canvasCore.selectedObjects.find(obj => obj.type === "textbox" || obj.type === "i-text" || obj.isTextObject)}
+          fabricCanvas={canvasCore.fabricCanvasRef.current}
+          onTextChange={canvasCore.handleCanvasChange}
         />
       )}
 

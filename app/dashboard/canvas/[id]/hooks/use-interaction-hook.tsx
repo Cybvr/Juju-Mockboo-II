@@ -7,6 +7,7 @@ declare global {
   interface Window {
     copiedObjects?: any[]
     stickyNoteHook?: any
+    textToolHook?: any
   }
 }
 
@@ -47,6 +48,12 @@ export function useInteractionHook({
       if (tool === "sticky-note") {
         const pointer = canvas.getPointer(e.e)
         window.stickyNoteHook?.createStickyNote?.(pointer.x, pointer.y)
+        return
+      }
+
+      if (tool === "text") {
+        const pointer = canvas.getPointer(e.e)
+        window.textToolHook?.createTextObject?.(pointer.x, pointer.y)
         return
       }
 
