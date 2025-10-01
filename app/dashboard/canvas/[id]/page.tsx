@@ -404,8 +404,8 @@ export default function CanvasEditor() {
       {/* Sticky Note Toolbar */}
       {!isViewOnly && (
         <StickyNoteToolbar
-          isVisible={canvasCore.selectedObjects.length === 1 && canvasCore.selectedObjects[0]?.stickyNoteGroup}
-          selectedStickyNote={canvasCore.selectedObjects.find(obj => obj.stickyNoteGroup)}
+          isVisible={canvasCore.selectedObjects.length === 1 && (canvasCore.selectedObjects[0]?.stickyNoteGroup === true || (canvasCore.selectedObjects[0]?.type === "group" && canvasCore.selectedObjects[0]?.stickyNoteGroup))}
+          selectedStickyNote={canvasCore.selectedObjects.find(obj => obj.stickyNoteGroup === true || (obj.type === "group" && obj.stickyNoteGroup))}
           fabricCanvas={canvasCore.fabricCanvasRef.current}
           onNoteChange={canvasCore.handleCanvasChange}
         />

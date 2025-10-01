@@ -274,7 +274,7 @@ export function useCanvasCore(documentId: string, document: Document | null) {
         canvas.forEachObject((obj: any) => {
           obj.selectable = false
         })
-      
+
       } else if (tool === "pan") {
         canvas.defaultCursor = "grab"
         canvas.hoverCursor = "grab"
@@ -302,7 +302,7 @@ export function useCanvasCore(documentId: string, document: Document | null) {
     }
   }, [brushSize, brushColor])
 
-  
+
 
 
   // Canvas actions
