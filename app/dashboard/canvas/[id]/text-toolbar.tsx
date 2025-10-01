@@ -58,8 +58,8 @@ export function TextToolbar({
   }
 
   return (
-    <div className="absolute left-20 top-1/2 z-10 -translate-y-1/2">
-      <div className="flex flex-col gap-2 rounded-lg bg-card p-2 shadow-lg border">
+    <div className="absolute left-1/2 top-20 z-10 -translate-x-1/2">
+      <div className="flex flex-row gap-2 rounded-lg bg-card p-2 shadow-lg border">
         {/* Font Size */}
         <Popover>
           <PopoverTrigger asChild>
@@ -108,8 +108,6 @@ export function TextToolbar({
           </PopoverContent>
         </Popover>
 
-        <div className="h-px bg-border my-1"></div>
-
         {/* Text Formatting */}
         <Button
           variant={selectedTextObject?.fontWeight === 'bold' ? "default" : "ghost"}
@@ -140,8 +138,6 @@ export function TextToolbar({
         >
           <Underline className="h-4 w-4" />
         </Button>
-
-        <div className="h-px bg-border my-1"></div>
 
         {/* Text Alignment */}
         <Button

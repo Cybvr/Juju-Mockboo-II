@@ -33,9 +33,13 @@ export function useTextTool({
 
       fabricCanvasRef.current.add(text)
       fabricCanvasRef.current.setActiveObject(text)
-      text.enterEditing()
-      text.selectAll()
       fabricCanvasRef.current.renderAll()
+      
+      // Enter editing mode after a short delay
+      setTimeout(() => {
+        text.enterEditing()
+        text.selectAll()
+      }, 100)
       
       handleCanvasChange()
     })
