@@ -335,9 +335,9 @@ export function useInteractionHook({
         canvas.selection = true
       }, 100)
     }
-    canvasElement.addEventListener("touchstart", handleTouchStart, { passive: false, capture: true })
-    canvasElement.addEventListener("touchmove", handleTouchMove, { passive: false, capture: true })
-    canvasElement.addEventListener("touchend", handleTouchEnd, { passive: false, capture: true })
+    canvasElement.addEventListener("touchstart", handleTouchStart, { passive: false })
+    canvasElement.addEventListener("touchmove", handleTouchMove, { passive: false })
+    canvasElement.addEventListener("touchend", handleTouchEnd, { passive: false })
     return () => {
       canvasElement.removeEventListener("touchstart", handleTouchStart)
       canvasElement.removeEventListener("touchmove", handleTouchMove)
