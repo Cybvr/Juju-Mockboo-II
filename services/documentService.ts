@@ -27,201 +27,20 @@ export class DocumentService {
   }
 
 
-  private cleanObjectForFirestore(obj: any, depth: number = 0, seen: Set<any> = new Set()): any {
-    if (depth > 10 || seen.has(obj)) {
-      return null;
-    }
+  // Simple clean function like CanvasX - just handle dates and basic types
+  private cleanObjectForFirestore(obj: any): any {
     if (obj === null || obj === undefined) {
       return null;
     }
     if (obj instanceof Date) {
       return Timestamp.fromDate(obj);
     }
-    if (typeof obj === 'function' || typeof obj === 'symbol' || typeof obj === 'bigint') {
-      return undefined;
-    }
     if (typeof obj !== 'object') {
       return obj;
     }
-    seen.add(obj);
-    try {
-      if (Array.isArray(obj)) {
-        const result = obj
-          .map(item => this.cleanObjectForFirestore(item, depth + 1, new Set(seen)))
-          .filter(item => item !== undefined);
-        return result;
-      }
-      if (typeof window !== 'undefined') {
-        if (obj instanceof File || obj instanceof Blob ||
-            obj instanceof HTMLElement || obj instanceof Element ||
-            obj instanceof Event || obj instanceof EventTarget ||
-            obj.constructor.name === 'File' || obj.constructor.name === 'Blob' ||
-            obj.constructor.name.includes('HTML') || obj.constructor.name.includes('Element')) {
-          return undefined;
-        }
-      }
-      const constructorName = obj.constructor?.name || '';
-      if (obj && typeof obj === 'object' && obj.objects && Array.isArray(obj.objects)) {
-        const cleanedCanvas: any = {
-          version: obj.version || '1.0',
-          background: typeof obj.background === 'string' ? obj.background : '#ffffff',
-          objects: obj.objects.map((canvasObj: any) => {
-            if (!canvasObj || typeof canvasObj !== 'object') return null;
-            const safeObj: any = {
-              type: canvasObj.type || 'object'
-            };
-            const safeProps = ['left', 'top', 'width', 'height', 'scaleX', 'scaleY', 'angle', 'opacity', 'fill', 'stroke', 'strokeWidth', 'text', 'fontFamily', 'fontSize', 'textAlign', 'backgroundColor', 'rx', 'ry'];
-            safeProps.forEach(prop => {
-              if (canvasObj[prop] !== undefined && (typeof canvasObj[prop] === 'string' || typeof canvasObj[prop] === 'number' || typeof canvasObj[prop] === 'boolean')) {
-                safeObj[prop] = canvasObj[prop];
-              }
-            });
-            if (canvasObj.shadow && typeof canvasObj.shadow === 'object') {
-              safeObj.shadow = {
-                color: typeof canvasObj.shadow.color === 'string' ? canvasObj.shadow.color : undefined,
-                blur: typeof canvasObj.shadow.blur === 'number' ? canvasObj.shadow.blur : undefined,
-                offsetX: typeof canvasObj.shadow.offsetX === 'number' ? canvasObj.shadow.offsetX : undefined,
-                offsetY: typeof canvasObj.shadow.offsetY === 'number' ? canvasObj.shadow.offsetY : undefined
-              };
-            }
-            if (canvasObj.objects && Array.isArray(canvasObj.objects)) {
-              safeObj.objects = canvasObj.objects.map((groupObj: any) => {
-                if (!groupObj || typeof groupObj !== 'object') return null;
-                const safeGroupObj: any = { type: groupObj.type || 'object' };
-                safeProps.forEach(prop => {
-                  if (groupObj[prop] !== undefined && (typeof groupObj[prop] === 'string' || typeof groupObj[prop] === 'number' || typeof groupObj[prop] === 'boolean')) {
-                    safeGroupObj[prop] = groupObj[prop];
-                  }
-                });
-                if (groupObj.shadow && typeof groupObj.shadow === 'object') {
-                  safeGroupObj.shadow = {
-                    color: typeof groupObj.shadow.color === 'string' ? groupObj.shadow.color : undefined,
-                    blur: typeof groupObj.shadow.blur === 'number' ? groupObj.shadow.blur : undefined,
-                    offsetX: typeof groupObj.shadow.offsetX === 'number' ? groupObj.shadow.offsetX : undefined,
-                    offsetY: typeof groupObj.shadow.offsetY === 'number' ? groupObj.shadow.offsetY : undefined
-                  };
-                }
-                return safeGroupObj;
-              }).filter(obj => obj !== null);
-            }
-            if (canvasObj.src && typeof canvasObj.src === 'string') {
-              // Compress large images instead of corrupting them
-              if (canvasObj.src.startsWith('data:') && canvasObj.src.length > 50000) {
-                // Compress the image data URL
-                try {
-                  const compressedSrc = this.compressImageDataURL(canvasObj.src);
-                  safeObj.src = compressedSrc;
-                } catch (error) {
-                  console.warn('Failed to compress image, using original:', error);
-                  safeObj.src = canvasObj.src;
-                }
-              } else {
-                safeObj.src = canvasObj.src;
-              }
-            }
-            return safeObj;
-          }).filter(obj => obj !== null)
-        }
-
-        // Only include width/height if they exist and are valid numbers
-        if (typeof obj.width === 'number' && obj.width > 0) {
-          cleanedCanvas.width = obj.width
-        }
-        if (typeof obj.height === 'number' && obj.height > 0) {
-          cleanedCanvas.height = obj.height
-        }
-
-        return cleanedCanvas;
-      }
-      if (obj.generatedImages && Array.isArray(obj.generatedImages)) {
-        const cleanImages = obj.generatedImages
-          .filter((img: any) => img && typeof img === 'object')
-          .map((img: any) => ({
-            url: typeof img.url === 'string' ? img.url : undefined,
-            id: typeof img.id === 'string' ? img.id : undefined,
-            prompt: typeof img.prompt === 'string' ? img.prompt : undefined,
-            createdAt: img.createdAt instanceof Date ? Timestamp.fromDate(img.createdAt) :
-                      (typeof img.createdAt === 'string' ? img.createdAt : undefined)
-          }))
-          .filter((img: any) => img.url);
-        return cleanImages.length > 0 ? cleanImages : undefined;
-      }
-      if (constructorName === 'fabric' || obj.fabric || obj._fabric) {
-        return undefined;
-      }
-      if (constructorName === 'Image' && obj.getSrc && typeof obj.getSrc === 'function') {
-        return {
-          type: 'image',
-          src: obj.getSrc?.() || obj.src || undefined,
-          left: typeof obj.left === 'number' ? obj.left : 0,
-          top: typeof obj.top === 'number' ? obj.top : 0,
-          width: typeof obj.width === 'number' ? obj.width : 100,
-          height: typeof obj.height === 'number' ? obj.height : 100,
-          scaleX: typeof obj.scaleX === 'number' ? obj.scaleX : 1,
-          scaleY: typeof obj.scaleY === 'number' ? obj.scaleY : 1,
-          angle: typeof obj.angle === 'number' ? obj.angle : 0,
-          opacity: typeof obj.opacity === 'number' ? obj.opacity : 1
-        };
-      }
-      if (constructorName.includes('Canvas') || constructorName.includes('Context') ||
-          obj.getContext || obj.canvas) {
-        return undefined;
-      }
-      if (obj.toObject && typeof obj.toObject === 'function') {
-        try {
-          const serialized = obj.toObject();
-          return this.cleanObjectForFirestore(serialized, depth + 1, new Set(seen));
-        } catch (error) {
-        }
-      }
-      if (obj.toJSON && typeof obj.toJSON === 'function') {
-        try {
-          const serialized = obj.toJSON();
-          return this.cleanObjectForFirestore(serialized, depth + 1, new Set(seen));
-        } catch (error) {
-        }
-      }
-      if (constructorName && constructorName !== 'Object' && constructorName !== 'Array') {
-        const cleaned: any = {};
-        const safeKeys = ['type', 'id', 'name', 'value', 'text', 'url', 'src', 'data',
-                         'left', 'top', 'width', 'height', 'x', 'y', 'scaleX', 'scaleY',
-                         'angle', 'opacity', 'fill', 'stroke', 'strokeWidth'];
-        for (const key of safeKeys) {
-          if (key in obj) {
-            const value = obj[key];
-            if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
-              cleaned[key] = value;
-            } else if (value && typeof value === 'object') {
-              const cleanedNested = this.cleanObjectForFirestore(value, depth + 1, new Set(seen));
-              if (cleanedNested !== undefined && cleanedNested !== null) {
-                cleaned[key] = cleanedNested;
-              }
-            }
-          }
-        }
-        return Object.keys(cleaned).length > 0 ? cleaned : undefined;
-      }
-      const cleaned: any = {};
-      for (const [key, value] of Object.entries(obj)) {
-        if (value !== undefined &&
-            key !== '__proto__' &&
-            key !== 'constructor' &&
-            key !== 'prototype' &&
-            !key.startsWith('_') &&
-            !key.includes('$')
-          ) {
-          const cleanedValue = this.cleanObjectForFirestore(value, depth + 1, new Set(seen));
-          if (cleanedValue !== undefined) {
-            cleaned[key] = cleanedValue;
-          }
-        }
-      }
-      return cleaned;
-    } catch (error) {
-      return null;
-    } finally {
-      seen.delete(obj);
-    }
+    
+    // Simple JSON parsing to remove non-serializable properties
+    return JSON.parse(JSON.stringify(obj));
   }
 
   async createDocument(userId: string, document: Omit<Document, 'id' | 'userId' | 'createdAt' | 'updatedAt'>): Promise<string> {
@@ -523,9 +342,11 @@ export class DocumentService {
   }
 
   async updateCanvasData(documentId: string, canvasData: any): Promise<void> {
+    // Simple approach like CanvasX - direct JSON storage
+    const cleanData = JSON.parse(JSON.stringify(canvasData));
     await this.updateDocument(documentId, {
       content: {
-        canvasData: canvasData,
+        canvasData: cleanData,
         canvasVersion: "1.0"
       },
       updatedAt: new Date()
