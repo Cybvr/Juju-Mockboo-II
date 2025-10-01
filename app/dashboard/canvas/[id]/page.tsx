@@ -140,6 +140,9 @@ export default function CanvasEditor() {
 
       canvasCore.fabricCanvasRef.current = canvas
       canvasCore.setFabricLoaded(true)
+      
+      console.log("🎉 CANVAS LOADED ON PAGE LOAD HURRAY!! Canvas initialized successfully")
+      console.log("📐 Canvas dimensions:", { width: canvas.width, height: canvas.height })
 
       // Setup drawing brush
       canvas.freeDrawingBrush = new fabric.PencilBrush(canvas)
@@ -167,11 +170,14 @@ export default function CanvasEditor() {
 
       // Load canvas data if exists
       if (document.content?.canvasData && Object.keys(document.content.canvasData).length > 0) {
+        console.log("📂 Loading existing canvas data from Firebase...")
         canvas.loadFromJSON(document.content.canvasData, () => {
           canvas.renderAll()
+          console.log("✅ CANVAS DATA LOADED SUCCESSFULLY! Objects count:", canvas.getObjects().length)
           if (saveState) saveState()
         })
       } else {
+        console.log("🆕 Fresh canvas - no existing data to load")
         if (saveState) saveState()
       }
 

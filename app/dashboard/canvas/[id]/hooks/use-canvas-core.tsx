@@ -90,6 +90,8 @@ export function useCanvasCore(documentId: string, document: Document | null) {
 
   // Canvas events setup
   const setupCanvasEvents = useCallback((canvas: Canvas, handleCanvasChange: () => void, onSelectedImagesChange?: (images: string[]) => void) => {
+    console.log("🔧 Setting up canvas events and interactions...")
+    
     canvas.on("object:added", () => handleCanvasChange())
     canvas.on("object:modified", () => handleCanvasChange())
     canvas.on("object:removed", () => handleCanvasChange())
