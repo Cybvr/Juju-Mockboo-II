@@ -47,7 +47,10 @@ export function useTextTool({
     const canvas = fabricCanvasRef.current
 
     const handleCanvasClick = (e: any) => {
-      if (activeTool !== "text" || !e.pointer) return
+      if (activeTool !== "text") return
+      
+      // Don't add text if clicking on an existing object
+      if (e.target && e.target !== canvas) return
 
       const pointer = canvas.getPointer(e.e)
       addTextAtPosition(pointer.x, pointer.y)

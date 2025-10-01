@@ -438,7 +438,7 @@ export default function CanvasEditor() {
       {/* Text Toolbar */}
       {!isViewOnly && (
         <TextToolbar
-          isVisible={canvasCore.activeTool === "text" && canvasCore.selectedObjects.length === 1 && canvasCore.selectedObjects[0]?.type === "textbox"}
+          isVisible={canvasCore.selectedObjects.length === 1 && canvasCore.selectedObjects[0]?.type === "textbox"}
           selectedTextObject={canvasCore.selectedObjects.find(obj => obj.type === "textbox")}
           fabricCanvas={canvasCore.fabricCanvasRef.current}
           onTextChange={canvasCore.handleCanvasChange}
