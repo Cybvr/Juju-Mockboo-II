@@ -7,6 +7,7 @@ import { documentService } from "@/services/documentService"
 import type { Document } from "@/types/firebase"
 import { toast } from "sonner"
 import { Plus } from "lucide-react"
+import { useRouter } from "next/navigation"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -52,6 +53,7 @@ interface FlattenedDocument {
 export function DocumentGallery({
   emptyStateMessage = "No documents found. Start creating!"
 }: DocumentGalleryProps) {
+  const router = useRouter()
   const [documents, setDocuments] = useState<Document[]>([])
   const [loading, setLoading] = useState(true)
   const [user] = useAuthState(auth)
@@ -101,7 +103,7 @@ export function DocumentGallery({
         shared: false,
         category: 'UGC' as const,
       });
-      window.location.href = `/dashboard/canvas/${canvasDocument}`;
+      router.push(`/dashboard/canvas/${canvasDocument}`);
     } catch (error) {
       console.error('Error creating new canvas:', error);
       toast.error("Failed to create new canvas");
@@ -258,11 +260,11 @@ export function DocumentGallery({
     if (!flatDoc) return
     const document = flatDoc.originalDoc
     if (document?.type === "canvas") {
-      window.location.href = `/dashboard/canvas/${flatDoc.originalDocId}`
+      router.push(`/dashboard/canvas/${flatDoc.originalDocId}`)
     } else if (document?.type === "scenes" || (document?.type === "video" && document?.content?.scenes)) {
-      window.location.href = `/dashboard/scenes/${flatDoc.originalDocId}`
+      router.push(`/dashboard/scenes/${flatDoc.originalDocId}`)
     } else {
-      window.location.href = `/m/${flatDoc.originalDocId}`
+      router.push(`/m/${flatDoc.originalDocId}`)
     }
   }
 
