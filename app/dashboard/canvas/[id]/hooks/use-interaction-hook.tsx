@@ -158,12 +158,10 @@ export function useInteractionHook({
           activeTool
         })
         addTextAtPosition(pointer.x, pointer.y)
-      } else if (activeTool === "sticky") {
+      } else if (activeTool === "sticky-note") {
         const pointer = canvas.getPointer(e.e)
-        // We need to get createStickyNote from the canvas core
-        // This will be passed through the interaction hook
-        if (window.canvasCore?.createStickyNote) {
-          window.canvasCore.createStickyNote(pointer.x, pointer.y)
+        if (window.stickyNoteHook?.createStickyNote) {
+          window.stickyNoteHook.createStickyNote(pointer.x, pointer.y)
         }
       }
     }
@@ -205,7 +203,7 @@ export function useInteractionHook({
         canvas.forEachObject((obj: any) => {
           obj.selectable = false
         })
-      } else if (tool === "sticky") {
+      } else if (tool === "sticky-note") {
         canvas.defaultCursor = "crosshair"
         canvas.hoverCursor = "crosshair"
         canvas.selection = false

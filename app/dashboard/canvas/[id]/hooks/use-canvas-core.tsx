@@ -301,52 +301,7 @@ export function useCanvasCore(documentId: string, document: Document | null) {
     }
   }, [brushSize, brushColor])
 
-  // Sticky Note Creation
-  const createStickyNote = useCallback((options: { text?: string; color?: string; top?: number; left?: number }) => {
-    import("fabric").then((FabricModule) => {
-      const fabric = FabricModule
-      const canvas = fabricCanvasRef.current
-      if (!canvas) return
-
-      const stickyNote = new fabric.Rect({
-        width: 200,
-        height: 150,
-        fill: options.color || "#FFFF00", // Yellow by default
-        top: options.top || 50,
-        left: options.left || 50,
-        originX: "left",
-        originY: "top",
-        cornerColor: "#FFFFFF",
-        cornerStrokeColor: "#222222",
-        transparentCorners: false,
-        shadow: "rgba(0,0,0,0.3) 5px 5px 5px",
-      })
-
-      const text = new fabric.IText(options.text || "Enter text here...", {
-        left: stickyNote.left + 10,
-        top: stickyNote.top + 10,
-        width: stickyNote.width - 20,
-        height: stickyNote.height - 20,
-        fontSize: 18,
-        fontFamily: "Arial",
-        fill: "#000000",
-        textAlign: "left",
-      })
-
-      const group = new fabric.Group([stickyNote, text], {
-        left: stickyNote.left,
-        top: stickyNote.top,
-        originX: "left",
-        originY: "top",
-        hasRotatingPoint: false,
-      })
-
-      canvas.add(group)
-      canvas.setActiveObject(group)
-      canvas.renderAll()
-      handleCanvasChange()
-    })
-  }, [handleCanvasChange])
+  
 
 
   // Canvas actions
@@ -459,7 +414,6 @@ export function useCanvasCore(documentId: string, document: Document | null) {
     handleDuplicate,
     handleDelete,
     handleCopy,
-    createStickyNote,
     handleUndo: handleUndo,
     handleRedo: handleRedo,
     canUndo,

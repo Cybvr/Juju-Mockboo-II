@@ -47,7 +47,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import Image from "next/image"
 
-type Tool = "select" | "pan" | "text" | "pen" | "sticky" | "square" | "circle"
+type Tool = "select" | "pan" | "text" | "pen" | "sticky-note" | "square" | "circle"
 
 export default function CanvasEditor() {
   const params = useParams()
@@ -76,13 +76,20 @@ export default function CanvasEditor() {
     userId: user?.uid,
   })
 
-  // Expose canvasCore to global for interaction hook
+  // Sticky note hook
+  const { useStickyNote } = require("./hooks/use-sticky-note")
+  const { createStickyNote, setupStickyNoteInteractions } = useStickyNote({
+    fabricCanvasRef: canvasCore.fabricCanvasRef,
+    handleCanvasChange: canvasCore.handleCanvasChange,
+  })
+
+  // Expose hooks to global for interaction hook
   useEffect(() => {
-    window.canvasCore = canvasCore
+    window.stickyNoteHook = { createStickyNote }
     return () => {
-      delete window.canvasCore
+      delete window.stickyNoteHook
     }
-  }, [canvasCore])
+  }, [createStickyNote])
 
   // Import and setup interaction hook
   const { useInteractionHook } = require("./hooks/use-interaction-hook")
@@ -116,6 +123,7 @@ export default function CanvasEditor() {
     const cleanupTouch = setupTouchHandlers()
     const cleanupDragDrop = imageOps.setupDragAndDrop()
     const cleanupTextTool = setupTextTool()
+    const cleanupStickyNote = setupStickyNoteInteractions()
 
     return () => {
       if (cleanupInteractions) cleanupInteractions()
@@ -124,6 +132,7 @@ export default function CanvasEditor() {
       if (cleanupTouch) cleanupTouch()
       if (cleanupDragDrop) cleanupDragDrop()
       if (cleanupTextTool) cleanupTextTool()
+      if (cleanupStickyNote) cleanupStickyNote()
     }
   }, [canvasCore.fabricLoaded, setupInteractions, setupKeyboardHandlers, setupPanAndZoom, setupTouchHandlers, imageOps.setupDragAndDrop, setupTextTool])
 
@@ -159,7 +168,7 @@ export default function CanvasEditor() {
     { id: "pan" as Tool, icon: Hand, label: "Pan" },
     { id: "text" as Tool, icon: Type, label: "Text" },
     { id: "pen" as Tool, icon: Pen, label: "Draw" },
-    { id: "sticky" as Tool, icon: StickyNote, label: "Sticky Note" },
+    { id: "sticky-note" as Tool, icon: StickyNote, label: "Sticky Note" },
     { id: "square" as Tool, icon: Square, label: "Rectangle" },
     { id: "circle" as Tool, icon: Circle, label: "Circle" },
   ]
