@@ -294,14 +294,14 @@ export function useInteractionHook({
         const centerY = (touch1.clientY + touch2.clientY) / 2
         const currentDistance = getDistance(touch1, touch2)
 
-        // Check if this is a pinch gesture (distance changed significantly)
-        const distanceChange = Math.abs(currentDistance - lastDistance)
-        const threshold = 5 // pixels
+        // Calculate distance change ratio for pinch detection
+        const distanceRatio = currentDistance / lastDistance
+        const pinchThreshold = 0.05 // 5% change = pinch gesture
 
-        if (distanceChange > threshold) {
+        // If distance is changing significantly, it's a pinch (zoom)
+        if (Math.abs(distanceRatio - 1) > pinchThreshold) {
           // Pinch to zoom
-          const scale = currentDistance / lastDistance
-          let zoom = canvas.getZoom() * scale
+          let zoom = canvas.getZoom() * distanceRatio
           zoom = Math.max(0.2, Math.min(5, zoom))
 
           import("fabric").then((FabricModule) => {
@@ -310,13 +310,13 @@ export function useInteractionHook({
           })
 
           lastDistance = currentDistance
-        } else {
-          // Two-finger pan
-          const vpt = canvas.viewportTransform
-          vpt[4] += centerX - lastPanX
-          vpt[5] += centerY - lastPanY
-          canvas.requestRenderAll()
         }
+        
+        // Always pan (primary gesture)
+        const vpt = canvas.viewportTransform
+        vpt[4] += centerX - lastPanX
+        vpt[5] += centerY - lastPanY
+        canvas.requestRenderAll()
 
         lastPanX = centerX
         lastPanY = centerY
