@@ -31,6 +31,7 @@ import { useImageOperations } from "./hooks/use-image-operations"
 import { GeneratingMedia } from "./GeneratingMedia"
 import { ProfileDropdown } from "@/app/common/dashboard/ProfileDropdown"
 import { ShareModal } from "@/components/ShareModal"
+import { FloatingToolbar } from "./floating-toolbar"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -395,6 +396,22 @@ export default function CanvasEditor() {
             onGenerationEnd={() => setIsGenerating(false)}
           />
         </div>
+      )}
+
+      {/* Floating Toolbar for Selected Images */}
+      {!isViewOnly && (
+        <FloatingToolbar
+          selectedObjects={canvasCore.selectedObjects}
+          fabricCanvas={canvasCore.fabricCanvasRef.current}
+          onCopy={() => imageOps.copyImageToClipboard()}
+          onDuplicate={() => imageOps.duplicateSelectedImages()}
+          onDownload={() => imageOps.downloadSelectedImages()}
+          onRegenerate={() => imageOps.generateImageVariations()}
+          onVariations={() => imageOps.generateImageVariations()}
+          onStyleApply={(style) => imageOps.applyStyleToImage(style)}
+          onVideo={() => {}}
+          onUpscale={() => {}}
+        />
       )}
 
       {/* Canvas area */}

@@ -96,23 +96,24 @@ export function useCanvasCore(documentId: string, document: Document | null) {
     canvas.on("object:removed", () => handleCanvasChange())
 
     canvas.on("selection:created", (e: any) => {
-      setSelectedObjects(e.selected || [])
+      const selected = e.selected || e.target ? [e.target] : []
+      setSelectedObjects(selected)
       if (onSelectedImagesChange) {
-        const selectedImages = (e.selected || [])
+        const selectedImages = selected
           .filter((obj: any) => obj.type === "image")
-          .map((obj: any) => obj.src)
+          .map((obj: any) => obj.getSrc ? obj.getSrc() : obj.src)
         onSelectedImagesChange(selectedImages)
       }
     })
 
-    canvas.on("selection:updated", (e) => {
-      const activeObjects = canvas.getActiveObjects()
-      setSelectedObjects(activeObjects)
-      const imageUrls = activeObjects
-        .filter((obj: any) => obj.type === 'image' && obj.getSrc)
-        .map((obj: any) => obj.getSrc())
+    canvas.on("selection:updated", (e: any) => {
+      const selected = e.selected || canvas.getActiveObjects()
+      setSelectedObjects(selected)
       if (onSelectedImagesChange) {
-        onSelectedImagesChange(imageUrls)
+        const selectedImages = selected
+          .filter((obj: any) => obj.type === "image")
+          .map((obj: any) => obj.getSrc ? obj.getSrc() : obj.src)
+        onSelectedImagesChange(selectedImages)
       }
     })
 
