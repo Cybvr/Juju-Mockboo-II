@@ -31,6 +31,7 @@ import { useImageOperations } from "./hooks/use-image-operations"
 import { GeneratingMedia } from "./GeneratingMedia"
 import { ProfileDropdown } from "@/app/common/dashboard/ProfileDropdown"
 import { ShareModal } from "@/components/ShareModal"
+import { useSnapGrid } from "./hooks/use-snap-grid"
 import { FloatingToolbar } from "./floating-toolbar"
 import {
   DropdownMenu,
@@ -58,7 +59,14 @@ export default function CanvasEditor() {
 
   // Use canvas core hook
   const canvasCore = useCanvasCore(documentId, document)
-
+  // Add snap grid functionality
+  const { useSnapGrid } = require("./hooks/use-snap-grid")
+  const snapGrid = useSnapGrid({
+    fabricCanvasRef: canvasCore.fabricCanvasRef,
+    gridSize: 20,
+    enabled: true
+  })
+  
   // Image operations hook
   const imageOps = useImageOperations({
     fabricCanvasRef: canvasCore.fabricCanvasRef,
