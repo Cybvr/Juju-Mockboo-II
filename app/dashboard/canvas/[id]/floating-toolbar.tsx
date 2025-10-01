@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { VisualRestylePanel } from "../common/visual-restyle-panel"
 import { cn } from "@/lib/utils"
-import { useStickyNotes } from "./hooks/use-sticky-notes"
+
 
 interface FloatingToolbarProps {
   selectedObjects: any[]
@@ -23,16 +23,7 @@ interface FloatingToolbarProps {
   isGeneratingVariations?: boolean
 }
 
-const stickyColors = [
-  { bg: "#ffeb3b", border: "#fbc02d", name: "yellow", label: "Yellow" },
-  { bg: "#4caf50", border: "#388e3c", name: "green", label: "Green" },
-  { bg: "#2196f3", border: "#1976d2", name: "blue", label: "Blue" },
-  { bg: "#ff9800", border: "#f57c00", name: "orange", label: "Orange" },
-  { bg: "#e91e63", border: "#c2185b", name: "pink", label: "Pink" },
-  { bg: "#9c27b0", border: "#7b1fa2", name: "purple", label: "Purple" },
-]
 
-const fontSizes = [12, 14, 16, 18, 20, 24]
 
 export function FloatingToolbar({
   selectedObjects,
@@ -54,22 +45,10 @@ export function FloatingToolbar({
   const [isColorOpen, setIsColorOpen] = useState(false)
   const [isFontOpen, setIsFontOpen] = useState(false)
 
-  const {
-    hasStickyNotes,
-    currentStickyNote,
-    handleStickyColorChange,
-    handleStickyFontSizeChange,
-    handleStickyDelete,
-  } = useStickyNotes(selectedObjects, fabricCanvas, stickyColors)
+  
 
   const hasImages = selectedObjects.some((obj: any) => obj.type === "image")
-  // const hasStickyNotes = selectedObjects.some(
-  //   (obj: any) =>
-  //     (obj.type === "group" && obj.stickyNoteGroup) || obj.stickyNote || obj.stickyNoteText || obj.stickyNoteFold,
-  // )
-  // const currentStickyNote = selectedObjects.find(
-  //   (obj: any) => (obj.type === "group" && obj.stickyNoteGroup) || obj.stickyNote || obj.stickyNoteText,
-  // )
+  const hasStickyNotes = false // Sticky notes feature disabled
 
   useEffect(() => {
     if (!fabricCanvas || selectedObjects.length === 0) {

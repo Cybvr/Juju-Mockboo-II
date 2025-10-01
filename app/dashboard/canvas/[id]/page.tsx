@@ -102,7 +102,6 @@ export default function CanvasEditor() {
     { id: "select" as Tool, icon: MousePointer2, label: "Select" },
     { id: "pan" as Tool, icon: Hand, label: "Pan" },
     { id: "pen" as Tool, icon: Pen, label: "Draw" },
-    { id: "sticky" as Tool, icon: FileText, label: "Sticky Note" },
     { id: "square" as Tool, icon: Square, label: "Rectangle" },
     { id: "circle" as Tool, icon: Circle, label: "Circle" },
   ]

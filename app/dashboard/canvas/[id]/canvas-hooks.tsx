@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from "react"
 import { documentService } from "@/services/documentService"
 import type { Document } from "@/types/firebase"
 
-type Tool = "select" | "sticky" | "square" | "circle" | "pan" | "pen"
+type Tool = "select" | "square" | "circle" | "pan" | "pen"
 
 export function useCanvasState() {
   const canvasRef = useRef<HTMLCanvasElement>(null)

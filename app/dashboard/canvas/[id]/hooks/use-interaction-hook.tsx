@@ -54,11 +54,7 @@ export function useInteractionHook({
         return
       }
 
-      if (activeToolRef.current === "sticky") {
-        const pointer = canvas.getPointer(e.e)
-        stickyNotes.createStickyNote(pointer)
-        return
-      }
+      
 
       
 
