@@ -265,12 +265,8 @@ export function useInteractionHook({
     if (!fabricCanvasRef.current) return null
     const canvas = fabricCanvasRef.current
     const canvasElement = canvas.getElement()
-    let isPanning = false, lastPanX = 0, lastPanY = 0, lastDistance = 0
-    const getDistance = (touch1: Touch, touch2: Touch) => {
-      const dx = touch1.clientX - touch2.clientX
-      const dy = touch1.clientY - touch2.clientY
-      return Math.sqrt(dx * dx + dy * dy)
-    }
+    let isPanning = false, lastPanX = 0, lastPanY = 0
+    
     const handleTouchStart = (e: TouchEvent) => {
       if (e.touches.length === 1) {
         const touch = e.touches[0]
@@ -285,7 +281,6 @@ export function useInteractionHook({
         const touch1 = e.touches[0], touch2 = e.touches[1]
         lastPanX = (touch1.clientX + touch2.clientX) / 2
         lastPanY = (touch1.clientY + touch2.clientY) / 2
-        lastDistance = getDistance(touch1, touch2)
       }
     }
     const handleTouchMove = (e: TouchEvent) => {
@@ -295,31 +290,12 @@ export function useInteractionHook({
         const touch1 = e.touches[0], touch2 = e.touches[1]
         const centerX = (touch1.clientX + touch2.clientX) / 2
         const centerY = (touch1.clientY + touch2.clientY) / 2
-        const currentDistance = getDistance(touch1, touch2)
 
-        // Calculate distance change ratio for pinch detection
-        const distanceRatio = currentDistance / lastDistance
-        const pinchThreshold = 0.1 // 10% change = pinch gesture
-
-        // If distance is changing significantly, it's a pinch (zoom)
-        if (Math.abs(distanceRatio - 1) > pinchThreshold) {
-          // Pinch to zoom
-          let zoom = canvas.getZoom() * distanceRatio
-          zoom = Math.max(0.2, Math.min(5, zoom))
-
-          import("fabric").then((FabricModule) => {
-            const fabric = FabricModule
-            canvas.zoomToPoint(new fabric.Point(centerX, centerY), zoom)
-          })
-
-          lastDistance = currentDistance
-        } else {
-          // Two fingers moving together = pan (only when no significant pinch)
-          const vpt = canvas.viewportTransform
-          vpt[4] += centerX - lastPanX
-          vpt[5] += centerY - lastPanY
-          canvas.requestRenderAll()
-        }
+        // Two fingers = pan only
+        const vpt = canvas.viewportTransform
+        vpt[4] += centerX - lastPanX
+        vpt[5] += centerY - lastPanY
+        canvas.requestRenderAll()
 
         lastPanX = centerX
         lastPanY = centerY
