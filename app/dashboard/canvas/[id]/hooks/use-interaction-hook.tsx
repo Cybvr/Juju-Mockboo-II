@@ -164,21 +164,16 @@ export function useInteractionHook({
         const activeObject = canvas.getActiveObject()
 
         if (activeObject) {
-          if (activeObject.type === 'activeSelection') {
-            // Multiple objects selected
+          if (activeObject.type === "activeSelection") {
             const objects = activeObject.getObjects()
-            Promise.all(
-              objects.map((obj: any) => 
-                new Promise(resolve => obj.clone(resolve))
-              )
-            ).then(cloned => {
-              window.copiedObjects = cloned
-            })
+            Promise.all(objects.map(obj => new Promise(resolve => obj.clone(resolve, ["id", "selectable", "evented"]))))
+              .then(cloned => {
+                window.copiedObjects = cloned
+              })
           } else {
-            // Single object selected
             activeObject.clone((cloned: any) => {
               window.copiedObjects = [cloned]
-            })
+            }, ["id", "selectable", "evented"])
           }
         }
         return
@@ -190,33 +185,33 @@ export function useInteractionHook({
 
         if (window.copiedObjects?.length > 0) {
           canvas.discardActiveObject()
+          const clonedObjects: any[] = []
 
-          const cloned: any[] = []
-          
-          window.copiedObjects.forEach((obj: any) => {
+          window.copiedObjects.forEach((obj: any, index: number) => {
             obj.clone((clonedObj: any) => {
-              clonedObj.set({ 
-                left: clonedObj.left + 20, 
-                top: clonedObj.top + 20 
+              clonedObj.set({
+                left: (obj.left || 0) + 20,
+                top: (obj.top || 0) + 20,
+                evented: true,
+                selectable: true
               })
               canvas.add(clonedObj)
-              cloned.push(clonedObj)
-              
-              // If this is the last object to be cloned
-              if (cloned.length === window.copiedObjects.length) {
-                if (cloned.length === 1) {
-                  canvas.setActiveObject(cloned[0])
-                } else if (cloned.length > 1) {
-                  import("fabric").then((FabricModule) => {
-                    const fabric = FabricModule
-                    const selection = new fabric.ActiveSelection(cloned, { canvas })
+              clonedObjects.push(clonedObj)
+
+              // If this is the last object
+              if (clonedObjects.length === window.copiedObjects!.length) {
+                if (clonedObjects.length === 1) {
+                  canvas.setActiveObject(clonedObjects[0])
+                } else {
+                  import("fabric").then(({ ActiveSelection }) => {
+                    const selection = new ActiveSelection(clonedObjects, { canvas })
                     canvas.setActiveObject(selection)
                   })
                 }
-                canvas.renderAll()
+                canvas.requestRenderAll()
                 handleCanvasChange()
               }
-            })
+            }, ["id", "selectable", "evented"])
           })
         }
         return
