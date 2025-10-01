@@ -39,6 +39,12 @@ export function useInteractionHook({
     let activeShape: any = null
 
     const handleMouseDown = (e: any) => {
+      // Don't interfere if text is being edited
+      const activeObject = canvas.getActiveObject()
+      if (activeObject && activeObject.isEditing) {
+        return
+      }
+
       if (activeToolRef.current === "pen") {
         canvas.isDrawingMode = true
         if (canvas.freeDrawingBrush) {
@@ -171,13 +177,17 @@ export function useInteractionHook({
 
       
 
-      // Check if user is typing in regular HTML inputs
+      // Check if user is typing in regular HTML inputs OR editing text in canvas
       const activeElement = document.activeElement
+      const canvas = fabricCanvasRef.current
+      const isEditingText = canvas && canvas.getActiveObject() && canvas.getActiveObject().isEditing
+      
       if (
         activeElement &&
         (activeElement.tagName === "INPUT" || 
          activeElement.tagName === "TEXTAREA" || 
-         activeElement.isContentEditable)
+         activeElement.isContentEditable) ||
+        isEditingText
       ) {
         return
       }
