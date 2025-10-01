@@ -137,11 +137,26 @@ export function useInteractionHook({
       // Copy
       if ((e.ctrlKey || e.metaKey) && e.key === "c") {
         e.preventDefault()
+        console.log("🟢 COPY: Starting copy operation")
         const activeObject = canvas.getActiveObject()
+        console.log("🟢 COPY: Active object:", activeObject)
+        console.log("🟢 COPY: Object type:", activeObject?.type)
+        console.log("🟢 COPY: Object has clone method:", typeof activeObject?.clone === 'function')
+
         if (activeObject) {
-          activeObject.clone((cloned: any) => {
-            window.copiedObjects = [cloned]
-          })
+          try {
+            activeObject.clone((cloned: any) => {
+              console.log("🟢 COPY: Object cloned successfully:", cloned)
+              console.log("🟢 COPY: Cloned object type:", cloned?.type)
+              console.log("🟢 COPY: Cloned object has clone method:", typeof cloned?.clone === 'function')
+              window.copiedObjects = [cloned]
+              console.log("🟢 COPY: Stored in window.copiedObjects:", window.copiedObjects)
+            })
+          } catch (error) {
+            console.error("🔴 COPY ERROR: Failed to clone object:", error)
+          }
+        } else {
+          console.log("🔴 COPY: No active object to copy")
         }
         return
       }
