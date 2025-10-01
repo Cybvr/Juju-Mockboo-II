@@ -65,6 +65,37 @@ export default function CanvasEditor() {
     userId: user?.uid,
   })
 
+  // Import and setup interaction hook
+  const { useInteractionHook } = require("./hooks/use-interaction-hook")
+  const { setupInteractions, setupKeyboardHandlers, setupPanAndZoom, setupTouchHandlers } = useInteractionHook({
+    fabricCanvasRef: canvasCore.fabricCanvasRef,
+    handleCanvasChange: canvasCore.handleCanvasChange,
+    activeToolRef: canvasCore.activeToolRef,
+    isDrawingRef: canvasCore.isDrawingRef,
+    setIsDrawing: canvasCore.setIsDrawing,
+    setActiveTool: canvasCore.setActiveTool,
+    brushSize: canvasCore.brushSize,
+    brushColor: canvasCore.brushColor,
+    drawingMode: canvasCore.drawingMode,
+  })
+
+  // Setup interactions after canvas is loaded
+  useEffect(() => {
+    if (!canvasCore.fabricLoaded || !canvasCore.fabricCanvasRef.current) return
+
+    const cleanupInteractions = setupInteractions()
+    const cleanupKeyboard = setupKeyboardHandlers()
+    const cleanupPanZoom = setupPanAndZoom()
+    const cleanupTouch = setupTouchHandlers()
+
+    return () => {
+      if (cleanupInteractions) cleanupInteractions()
+      if (cleanupKeyboard) cleanupKeyboard()
+      if (cleanupPanZoom) cleanupPanZoom()
+      if (cleanupTouch) cleanupTouch()
+    }
+  }, [canvasCore.fabricLoaded, setupInteractions, setupKeyboardHandlers, setupPanAndZoom, setupTouchHandlers])
+
   // Initialize Fabric.js canvas
   useEffect(() => {
     if (!canvasCore.canvasRef.current || !document || canvasCore.fabricLoaded) return
