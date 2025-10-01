@@ -160,11 +160,13 @@ export function useInteractionHook({
 
       if ((e.ctrlKey || e.metaKey) && e.key === "c") {
         e.preventDefault()
-        const activeObjects = canvas.getActiveObjects()
-        if (activeObjects?.length > 0) {
+        const activeObjects = canvas.getActiveObjects() || []
+        const activeObjectsArray = Array.isArray(activeObjects) ? activeObjects : [activeObjects].filter(Boolean)
+        
+        if (activeObjectsArray.length > 0) {
           // Store cloned objects instead of references
           const clonedObjects: any[] = []
-          activeObjects.forEach((obj: any) => {
+          activeObjectsArray.forEach((obj: any) => {
             if (obj && typeof obj.clone === 'function') {
               obj.clone((cloned: any) => {
                 clonedObjects.push(cloned)
@@ -181,6 +183,7 @@ export function useInteractionHook({
         if (window.copiedObjects?.length > 0) {
           canvas.discardActiveObject()
           const newObjects: any[] = []
+          let completedClones = 0
           
           window.copiedObjects.forEach((obj: any) => {
             if (obj && typeof obj.clone === 'function') {
@@ -191,15 +194,19 @@ export function useInteractionHook({
                 })
                 canvas.add(cloned)
                 newObjects.push(cloned)
+                completedClones++
                 
-                if (newObjects.length === window.copiedObjects.length) {
+                if (completedClones === window.copiedObjects.length) {
                   if (newObjects.length === 1) {
                     canvas.setActiveObject(newObjects[0])
                   } else if (newObjects.length > 1) {
-                    const selection = new (canvas.constructor as any).ActiveSelection(newObjects, {
-                      canvas: canvas
+                    import("fabric").then((FabricModule) => {
+                      const fabric = FabricModule
+                      const selection = new fabric.ActiveSelection(newObjects, {
+                        canvas: canvas
+                      })
+                      canvas.setActiveObject(selection)
                     })
-                    canvas.setActiveObject(selection)
                   }
                   canvas.renderAll()
                   handleCanvasChange()
@@ -213,9 +220,11 @@ export function useInteractionHook({
 
       if (e.key === "Delete" || e.key === "Backspace") {
         e.preventDefault()
-        const activeObjects = canvas.getActiveObjects()
-        if (activeObjects?.length > 0) {
-          activeObjects.forEach((obj: any) => canvas.remove(obj))
+        const activeObjects = canvas.getActiveObjects() || []
+        const activeObjectsArray = Array.isArray(activeObjects) ? activeObjects : [activeObjects].filter(Boolean)
+        
+        if (activeObjectsArray.length > 0) {
+          activeObjectsArray.forEach((obj: any) => canvas.remove(obj))
           canvas.discardActiveObject()
           canvas.renderAll()
           handleCanvasChange()
