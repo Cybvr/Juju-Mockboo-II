@@ -1,9 +1,7 @@
 "use client"
 
 import type React from "react"
-
 import { useCallback } from "react"
-import { useStickyNotes } from "./use-sticky-notes"
 
 interface InteractionHookProps {
   fabricCanvasRef: React.MutableRefObject<any>
@@ -12,10 +10,10 @@ interface InteractionHookProps {
   isDrawingRef: React.MutableRefObject<boolean>
   setIsDrawing: (drawing: boolean) => void
   setActiveTool: (tool: string) => void
-  brushSize?: number // Added brush size prop
-  brushColor?: string // Added brush color prop
-  drawingMode?: "draw" | "erase" // Added drawing mode prop
-  stickyNotes?: any // Accept sticky notes functions
+  brushSize?: number
+  brushColor?: string
+  drawingMode?: "draw" | "erase"
+  stickyNotes?: any
 }
 
 export function useInteractionHook({
@@ -47,14 +45,12 @@ export function useInteractionHook({
           canvas.freeDrawingBrush.width = brushSize
           canvas.freeDrawingBrush.color = drawingMode === "erase" ? "rgba(0,0,0,0)" : brushColor
 
-          // Set up eraser mode
           if (drawingMode === "erase") {
             canvas.freeDrawingBrush.globalCompositeOperation = "destination-out"
           } else {
             canvas.freeDrawingBrush.globalCompositeOperation = "source-over"
           }
         }
-
         return
       }
 
@@ -73,15 +69,23 @@ export function useInteractionHook({
             left: pointer.x,
             top: pointer.y,
             width: 200,
-            fontSize: 16,
+            fontSize: 20,
             fill: "#000000",
             fontFamily: "Arial",
             editable: true,
+            selectable: true,
           })
+
           canvas.add(textbox)
           canvas.setActiveObject(textbox)
-          textbox.enterEditing()
-          textbox.selectAll()
+          canvas.renderAll()
+
+          // Wait a tick for the textbox to be fully added
+          setTimeout(() => {
+            textbox.enterEditing()
+            textbox.selectAll()
+          }, 50)
+
           handleCanvasChange()
           setActiveTool("select")
         })
@@ -180,7 +184,7 @@ export function useInteractionHook({
       canvas.off("mouse:down", handleMouseDown)
       canvas.off("mouse:move", handleMouseMove)
       canvas.off("mouse:up", handleMouseUp)
-      canvas.off("path:created") // Clean up path created listener
+      canvas.off("path:created")
     }
   }, [
     fabricCanvasRef,
@@ -192,42 +196,46 @@ export function useInteractionHook({
     brushSize,
     brushColor,
     drawingMode,
-  ]) // Added new dependencies
+  ])
 
   const setupKeyboardHandlers = useCallback(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const canvas = fabricCanvasRef.current
       if (!canvas) return
 
-      // Check if user is editing a Fabric textbox
+      // Check if user is typing in a Fabric.js textbox
       const activeObject = canvas.getActiveObject()
-      if (activeObject && activeObject.isEditing) {
-        return // Don't handle if user is editing text in Fabric
+      if (activeObject && activeObject.type === 'textbox' && activeObject.isEditing) {
+        // User is editing text - don't interfere!
+        return
       }
 
-      // Only handle keyboard events when canvas is focused or no input elements are focused
+      // Check if user is typing in regular HTML inputs
       const activeElement = document.activeElement
       if (
         activeElement &&
-        (activeElement.tagName === "INPUT" || activeElement.tagName === "TEXTAREA" || activeElement.isContentEditable)
+        (activeElement.tagName === "INPUT" || 
+         activeElement.tagName === "TEXTAREA" || 
+         activeElement.isContentEditable)
       ) {
-        return // Don't handle if user is typing in an input
+        return
       }
 
-      // Handle Ctrl+Z (undo) and Ctrl+Y (redo)
+      // Handle Ctrl+Z (undo)
       if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
         e.preventDefault()
-        canvas.undo()
+        if (canvas.undo) canvas.undo()
         return
       }
 
+      // Handle Ctrl+Y or Ctrl+Shift+Z (redo)
       if ((e.ctrlKey || e.metaKey) && (e.key === "y" || (e.key === "z" && e.shiftKey))) {
         e.preventDefault()
-        canvas.redo()
+        if (canvas.redo) canvas.redo()
         return
       }
 
-      // Handle delete keys - comprehensive detection for cross-platform support
+      // Handle delete keys
       const isDeleteKey =
         e.key === "Delete" ||
         e.key === "Backspace" ||
@@ -241,12 +249,10 @@ export function useInteractionHook({
 
         const activeObjects = canvas.getActiveObjects()
         if (activeObjects && activeObjects.length > 0) {
-          // Handle multiple selected objects
           activeObjects.forEach((obj: any) => {
             canvas.remove(obj)
           })
 
-          // Clear selection after deletion
           canvas.discardActiveObject()
           canvas.renderAll()
           handleCanvasChange()
@@ -266,7 +272,6 @@ export function useInteractionHook({
 
     const canvas = fabricCanvasRef.current
 
-    // Zoom handling
     const handleMouseWheel = (opt: any) => {
       const delta = opt.e.deltaY
       let zoom = canvas.getZoom()
@@ -275,7 +280,6 @@ export function useInteractionHook({
 
       import("fabric").then((FabricModule) => {
         const fabric = FabricModule
-        // Use canvas center point instead of mouse position for consistent zoom
         const centerX = canvas.width / 2
         const centerY = canvas.height / 2
         canvas.zoomToPoint(new fabric.Point(centerX, centerY), zoom)
@@ -285,7 +289,6 @@ export function useInteractionHook({
       opt.e.stopPropagation()
     }
 
-    // Pan handling
     let isPanning = false
     let lastPanX = 0
     let lastPanY = 0
@@ -356,12 +359,10 @@ export function useInteractionHook({
       startTime = Date.now()
 
       if (e.touches.length === 1) {
-        // Single touch - prepare for potential pan or selection
         const touch = e.touches[0]
         lastPanX = touch.clientX
         lastPanY = touch.clientY
       } else if (e.touches.length === 2) {
-        // Two finger gesture - disable selection and prepare for pan/zoom
         e.preventDefault()
         isPanning = true
         isZooming = true
@@ -378,12 +379,10 @@ export function useInteractionHook({
 
     const handleTouchMove = (e: TouchEvent) => {
       if (e.touches.length === 1 && !isPanning) {
-        // Single finger drag - check if we should start panning
         const touch = e.touches[0]
         const deltaX = Math.abs(touch.clientX - lastPanX)
         const deltaY = Math.abs(touch.clientY - lastPanY)
 
-        // If moved significantly, start panning
         if (deltaX > 10 || deltaY > 10) {
           e.preventDefault()
           isPanning = true
@@ -392,7 +391,6 @@ export function useInteractionHook({
       }
 
       if (e.touches.length === 1 && isPanning) {
-        // Single finger pan
         e.preventDefault()
         const touch = e.touches[0]
         const deltaX = touch.clientX - lastPanX
@@ -406,7 +404,6 @@ export function useInteractionHook({
         lastPanX = touch.clientX
         lastPanY = touch.clientY
       } else if (e.touches.length === 2 && (isPanning || isZooming)) {
-        // Two finger pan and zoom
         e.preventDefault()
 
         const touch1 = e.touches[0]
@@ -415,7 +412,6 @@ export function useInteractionHook({
         const centerY = (touch1.clientY + touch2.clientY) / 2
         const currentDistance = getDistance(touch1, touch2)
 
-        // Pan
         if (isPanning) {
           const deltaX = centerX - lastPanX
           const deltaY = centerY - lastPanY
@@ -426,7 +422,6 @@ export function useInteractionHook({
           canvas.requestRenderAll()
         }
 
-        // Zoom
         if (isZooming && Math.abs(currentDistance - lastDistance) > 5) {
           const zoom = canvas.getZoom()
           const zoomDelta = (currentDistance - lastDistance) / 200
@@ -450,12 +445,10 @@ export function useInteractionHook({
       const touchEndTime = Date.now()
 
       if (e.touches.length === 0) {
-        // All touches ended
         if (isPanning || isZooming) {
           canvas.setViewportTransform(canvas.viewportTransform)
         }
 
-        // Reset states
         setTimeout(() => {
           isPanning = false
           isZooming = false
@@ -463,7 +456,6 @@ export function useInteractionHook({
           canvas.defaultCursor = "default"
         }, 100)
 
-        // Handle double tap for reset zoom
         if (touchEndTime - lastTouchEnd < 300 && touchEndTime - startTime < 300) {
           canvas.setZoom(1)
           canvas.setViewportTransform([1, 0, 0, 1, 0, 0])
@@ -472,17 +464,13 @@ export function useInteractionHook({
 
         lastTouchEnd = touchEndTime
       } else if (e.touches.length === 1) {
-        // One finger left, disable two-finger gestures
         isZooming = false
-
-        // Continue single finger pan if already panning
         const touch = e.touches[0]
         lastPanX = touch.clientX
         lastPanY = touch.clientY
       }
     }
 
-    // Prevent context menu on long press
     const handleContextMenu = (e: Event) => {
       e.preventDefault()
     }
