@@ -25,12 +25,13 @@ export function useSnapGrid({
   }
 
   const snapToObjects = (movingObj: any, x: number, y: number) => {
-    if (!isObjectSnapEnabled || !fabricCanvasRef.current) return { x, y }
+    if (!isObjectSnapEnabled || !fabricCanvasRef.current) return { x, y, guides: [] }
 
     const canvas = fabricCanvasRef.current
     const objects = canvas.getObjects()
     let snappedX = x
     let snappedY = y
+    const guides: any[] = []
 
     for (const obj of objects) {
       if (obj === movingObj) continue
@@ -47,16 +48,35 @@ export function useSnapGrid({
       const movingRight = x + movingBounds.width
       const movingCenterX = x + movingBounds.width / 2
 
-      // Horizontal snapping
-      if (Math.abs(movingLeft - objLeft) < snapDistance) snappedX = objLeft
-      else if (Math.abs(movingLeft - objRight) < snapDistance) snappedX = objRight
-      else if (Math.abs(movingLeft - objCenterX) < snapDistance) snappedX = objCenterX
-      else if (Math.abs(movingRight - objLeft) < snapDistance) snappedX = objLeft - movingBounds.width
-      else if (Math.abs(movingRight - objRight) < snapDistance) snappedX = objRight - movingBounds.width
-      else if (Math.abs(movingRight - objCenterX) < snapDistance) snappedX = objCenterX - movingBounds.width
-      else if (Math.abs(movingCenterX - objLeft) < snapDistance) snappedX = objLeft - movingBounds.width / 2
-      else if (Math.abs(movingCenterX - objRight) < snapDistance) snappedX = objRight - movingBounds.width / 2
-      else if (Math.abs(movingCenterX - objCenterX) < snapDistance) snappedX = objCenterX - movingBounds.width / 2
+      // Horizontal snapping with guides
+      if (Math.abs(movingLeft - objLeft) < snapDistance) {
+        snappedX = objLeft
+        guides.push({ type: 'vertical', x: objLeft })
+      } else if (Math.abs(movingLeft - objRight) < snapDistance) {
+        snappedX = objRight
+        guides.push({ type: 'vertical', x: objRight })
+      } else if (Math.abs(movingLeft - objCenterX) < snapDistance) {
+        snappedX = objCenterX
+        guides.push({ type: 'vertical', x: objCenterX })
+      } else if (Math.abs(movingRight - objLeft) < snapDistance) {
+        snappedX = objLeft - movingBounds.width
+        guides.push({ type: 'vertical', x: objLeft })
+      } else if (Math.abs(movingRight - objRight) < snapDistance) {
+        snappedX = objRight - movingBounds.width
+        guides.push({ type: 'vertical', x: objRight })
+      } else if (Math.abs(movingRight - objCenterX) < snapDistance) {
+        snappedX = objCenterX - movingBounds.width
+        guides.push({ type: 'vertical', x: objCenterX })
+      } else if (Math.abs(movingCenterX - objLeft) < snapDistance) {
+        snappedX = objLeft - movingBounds.width / 2
+        guides.push({ type: 'vertical', x: objLeft })
+      } else if (Math.abs(movingCenterX - objRight) < snapDistance) {
+        snappedX = objRight - movingBounds.width / 2
+        guides.push({ type: 'vertical', x: objRight })
+      } else if (Math.abs(movingCenterX - objCenterX) < snapDistance) {
+        snappedX = objCenterX - movingBounds.width / 2
+        guides.push({ type: 'vertical', x: objCenterX })
+      }
 
       // Snap to object edges (top, bottom, center)
       const objTop = objBounds.top
@@ -67,28 +87,47 @@ export function useSnapGrid({
       const movingBottom = y + movingBounds.height
       const movingCenterY = y + movingBounds.height / 2
 
-      // Vertical snapping
-      if (Math.abs(movingTop - objTop) < snapDistance) snappedY = objTop
-      else if (Math.abs(movingTop - objBottom) < snapDistance) snappedY = objBottom
-      else if (Math.abs(movingTop - objCenterY) < snapDistance) snappedY = objCenterY
-      else if (Math.abs(movingBottom - objTop) < snapDistance) snappedY = objTop - movingBounds.height
-      else if (Math.abs(movingBottom - objBottom) < snapDistance) snappedY = objBottom - movingBounds.height
-      else if (Math.abs(movingBottom - objCenterY) < snapDistance) snappedY = objCenterY - movingBounds.height
-      else if (Math.abs(movingCenterY - objTop) < snapDistance) snappedY = objTop - movingBounds.height / 2
-      else if (Math.abs(movingCenterY - objBottom) < snapDistance) snappedY = objBottom - movingBounds.height / 2
-      else if (Math.abs(movingCenterY - objCenterY) < snapDistance) snappedY = objCenterY - movingBounds.height / 2
+      // Vertical snapping with guides
+      if (Math.abs(movingTop - objTop) < snapDistance) {
+        snappedY = objTop
+        guides.push({ type: 'horizontal', y: objTop })
+      } else if (Math.abs(movingTop - objBottom) < snapDistance) {
+        snappedY = objBottom
+        guides.push({ type: 'horizontal', y: objBottom })
+      } else if (Math.abs(movingTop - objCenterY) < snapDistance) {
+        snappedY = objCenterY
+        guides.push({ type: 'horizontal', y: objCenterY })
+      } else if (Math.abs(movingBottom - objTop) < snapDistance) {
+        snappedY = objTop - movingBounds.height
+        guides.push({ type: 'horizontal', y: objTop })
+      } else if (Math.abs(movingBottom - objBottom) < snapDistance) {
+        snappedY = objBottom - movingBounds.height
+        guides.push({ type: 'horizontal', y: objBottom })
+      } else if (Math.abs(movingBottom - objCenterY) < snapDistance) {
+        snappedY = objCenterY - movingBounds.height
+        guides.push({ type: 'horizontal', y: objCenterY })
+      } else if (Math.abs(movingCenterY - objTop) < snapDistance) {
+        snappedY = objTop - movingBounds.height / 2
+        guides.push({ type: 'horizontal', y: objTop })
+      } else if (Math.abs(movingCenterY - objBottom) < snapDistance) {
+        snappedY = objBottom - movingBounds.height / 2
+        guides.push({ type: 'horizontal', y: objBottom })
+      } else if (Math.abs(movingCenterY - objCenterY) < snapDistance) {
+        snappedY = objCenterY - movingBounds.height / 2
+        guides.push({ type: 'horizontal', y: objCenterY })
+      }
     }
 
-    return { x: snappedX, y: snappedY }
+    return { x: snappedX, y: snappedY, guides }
   }
 
   const drawGrid = () => {
-    if (!fabricCanvasRef.current || !isGridVisible) return
+    if (!fabricCanvasRef.current) return
 
     const canvas = fabricCanvasRef.current
     const canvasElement = canvas.getElement()
 
-    // Remove existing grid
+    // Remove existing grid and guides
     const existingGrid = canvasElement.parentElement?.querySelector('.canvas-grid')
     if (existingGrid) {
       existingGrid.remove()
@@ -135,24 +174,88 @@ export function useSnapGrid({
     gridPatternRef.current = pattern
   }
 
+  const drawGuides = (guides: any[]) => {
+    if (!fabricCanvasRef.current) return
+
+    const canvas = fabricCanvasRef.current
+    const canvasElement = canvas.getElement()
+
+    // Remove existing guides
+    const existingGuides = canvasElement.parentElement?.querySelector('.alignment-guides')
+    if (existingGuides) {
+      existingGuides.remove()
+    }
+
+    if (guides.length === 0) return
+
+    // Create SVG guides overlay
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg")
+    svg.classList.add('alignment-guides')
+    svg.style.position = 'absolute'
+    svg.style.top = '0'
+    svg.style.left = '0'
+    svg.style.width = `${canvas.width}px`
+    svg.style.height = `${canvas.height}px`
+    svg.style.pointerEvents = 'none'
+    svg.style.zIndex = '10'
+
+    guides.forEach(guide => {
+      const line = document.createElementNS("http://www.w3.org/2000/svg", "line")
+      
+      if (guide.type === 'vertical') {
+        line.setAttribute('x1', guide.x.toString())
+        line.setAttribute('y1', '0')
+        line.setAttribute('x2', guide.x.toString())
+        line.setAttribute('y2', canvas.height.toString())
+      } else {
+        line.setAttribute('x1', '0')
+        line.setAttribute('y1', guide.y.toString())
+        line.setAttribute('x2', canvas.width.toString())
+        line.setAttribute('y2', guide.y.toString())
+      }
+      
+      line.setAttribute('stroke', '#ff4081')
+      line.setAttribute('stroke-width', '1')
+      line.setAttribute('opacity', '0.8')
+      line.setAttribute('stroke-dasharray', '5,5')
+      
+      svg.appendChild(line)
+    })
+
+    canvasElement.parentElement?.appendChild(svg)
+  }
+
+  const clearGuides = () => {
+    if (!fabricCanvasRef.current) return
+    
+    const canvas = fabricCanvasRef.current
+    const canvasElement = canvas.getElement()
+    const existingGuides = canvasElement.parentElement?.querySelector('.alignment-guides')
+    if (existingGuides) {
+      existingGuides.remove()
+    }
+  }
+
   const setupSnapBehavior = () => {
     if (!fabricCanvasRef.current) return
 
     const canvas = fabricCanvasRef.current
 
-    // Use object:modified instead of object:moving for better performance
-    const handleObjectModified = (e: any) => {
+    // Handle object movement to show guides
+    const handleObjectMoving = (e: any) => {
       const obj = e.target
       if (!obj) return
 
       let snappedLeft = obj.left
       let snappedTop = obj.top
+      let guides: any[] = []
 
       // Apply object snapping first
       if (isObjectSnapEnabled) {
         const objSnap = snapToObjects(obj, obj.left, obj.top)
         snappedLeft = objSnap.x
         snappedTop = objSnap.y
+        guides = objSnap.guides || []
       }
 
       // Apply grid snapping if enabled
@@ -161,6 +264,7 @@ export function useSnapGrid({
         snappedTop = snapToGrid(snappedTop)
       }
 
+      // Update object position if snapped
       if (snappedLeft !== obj.left || snappedTop !== obj.top) {
         obj.set({
           left: snappedLeft,
@@ -168,6 +272,14 @@ export function useSnapGrid({
         })
         canvas.requestRenderAll()
       }
+
+      // Draw alignment guides
+      drawGuides(guides)
+    }
+
+    // Use object:modified for final cleanup
+    const handleObjectModified = (e: any) => {
+      clearGuides()
     }
 
     // Handle scaling separately with proper bounds calculation
@@ -229,16 +341,20 @@ export function useSnapGrid({
     }
 
     // Bind events
+    canvas.on('object:moving', handleObjectMoving)
     canvas.on('object:modified', handleObjectModified)
     canvas.on('object:scaling', handleObjectScaling)
     canvas.on('mouse:down', handleMouseDown)
     canvas.on('path:created', handlePathCreated)
+    canvas.on('selection:cleared', clearGuides)
 
     return () => {
+      canvas.off('object:moving', handleObjectMoving)
       canvas.off('object:modified', handleObjectModified)
       canvas.off('object:scaling', handleObjectScaling) 
       canvas.off('mouse:down', handleMouseDown)
       canvas.off('path:created', handlePathCreated)
+      canvas.off('selection:cleared', clearGuides)
     }
   }
 
