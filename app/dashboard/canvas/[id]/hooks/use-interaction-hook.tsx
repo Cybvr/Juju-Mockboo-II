@@ -65,26 +65,45 @@ export function useInteractionHook({
 
         import("fabric").then((FabricModule) => {
           const fabric = FabricModule
-          const textbox = new fabric.Textbox("Type here...", {
+          
+          // Create a new textbox with better defaults
+          const textbox = new fabric.Textbox("Click to edit", {
             left: pointer.x,
             top: pointer.y,
-            width: 200,
-            fontSize: 20,
+            width: 300,
+            fontSize: 24,
             fill: "#000000",
-            fontFamily: "Arial",
+            fontFamily: "Arial, sans-serif",
+            fontWeight: "normal",
+            textAlign: "left",
             editable: true,
             selectable: true,
+            splitByGrapheme: false,
+            padding: 8,
+            borderColor: "#2563eb",
+            cornerColor: "#2563eb",
+            cornerSize: 8,
+            transparentCorners: false,
+            backgroundColor: "transparent"
           })
 
+          // Add to canvas and setup editing
           canvas.add(textbox)
           canvas.setActiveObject(textbox)
+          
+          // Force render before entering edit mode
           canvas.renderAll()
-
-          // Wait a tick for the textbox to be fully added
-          setTimeout(() => {
-            textbox.enterEditing()
-            textbox.selectAll()
-          }, 50)
+          
+          // Enter editing mode with proper timing
+          requestAnimationFrame(() => {
+            try {
+              textbox.enterEditing()
+              textbox.selectAll()
+              canvas.renderAll()
+            } catch (error) {
+              console.warn("Could not enter text editing mode:", error)
+            }
+          })
 
           handleCanvasChange()
           setActiveTool("select")
@@ -203,11 +222,12 @@ export function useInteractionHook({
       const canvas = fabricCanvasRef.current
       if (!canvas) return
 
-      // Check if user is typing in a Fabric.js textbox
+      // Check if user is editing a Fabric textbox
       const activeObject = canvas.getActiveObject()
-      if (activeObject && activeObject.type === 'textbox' && activeObject.isEditing) {
-        // User is editing text - don't interfere!
-        return
+      if (activeObject && (activeObject.type === 'textbox' || activeObject.type === 'text')) {
+        if (activeObject.isEditing || activeObject.__isEditing) {
+          return // Don't handle keyboard shortcuts while editing text
+        }
       }
 
       // Check if user is typing in regular HTML inputs

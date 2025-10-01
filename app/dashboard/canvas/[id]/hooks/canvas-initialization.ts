@@ -72,27 +72,41 @@ export function setupCanvasEvents(
   canvas.on("object:added", () => {
     handleCanvasChange()
   })
-  
+
   canvas.on("object:modified", () => {
     handleCanvasChange()
   })
-  
+
   canvas.on("object:removed", () => {
     handleCanvasChange()
   })
 
-  // Selection events
-  canvas.on("selection:created", (e) => {
-    const activeObjects = canvas.getActiveObjects()
-    setSelectedObjects(activeObjects)
-    const imageUrls = activeObjects
-      .filter((obj: any) => obj.type === 'image' && obj.getSrc)
-      .map((obj: any) => obj.getSrc())
-    if (onSelectedImagesChange && imageUrls.length > 0) {
-      onSelectedImagesChange(imageUrls)
+  // Handle object selection
+  canvas.on("selection:created", (e: any) => {
+    setSelectedObjects(e.selected || [])
+    if (onSelectedImagesChange) {
+      const selectedImages = (e.selected || [])
+        .filter((obj: any) => obj.type === "image")
+        .map((obj: any) => obj.src)
+      onSelectedImagesChange(selectedImages)
+    }
+    saveState()
+  })
+
+  // Handle text editing events
+  canvas.on("text:editing:entered", (e: any) => {
+    if (e.target) {
+      e.target.__isEditing = true
     }
   })
-  
+
+  canvas.on("text:editing:exited", (e: any) => {
+    if (e.target) {
+      e.target.__isEditing = false
+      handleCanvasChange()
+    }
+  })
+
   canvas.on("selection:updated", (e) => {
     const activeObjects = canvas.getActiveObjects()
     setSelectedObjects(activeObjects)
@@ -103,7 +117,7 @@ export function setupCanvasEvents(
       onSelectedImagesChange(imageUrls)
     }
   })
-  
+
   canvas.on("selection:cleared", () => {
     setSelectedObjects([])
     if (onSelectedImagesChange) {
@@ -126,9 +140,9 @@ export function setupResizeHandler(canvas: Canvas) {
 
   // Set initial size to viewport
   handleResize()
-  
+
   window.addEventListener("resize", handleResize)
-  
+
   return () => {
     window.removeEventListener("resize", handleResize)
   }
