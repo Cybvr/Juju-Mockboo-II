@@ -53,7 +53,7 @@ export function useFabricCanvas(
     brushSize,
     brushColor,
     drawingMode,
-    stickyNotes: operations.stickyNotes,
+    
   })
 
   const snapGrid = useSnapGrid({

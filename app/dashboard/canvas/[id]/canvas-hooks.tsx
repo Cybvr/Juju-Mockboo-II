@@ -7,7 +7,6 @@ import type React from "react"
 import { useEffect, useRef, useState } from "react"
 import { documentService } from "@/services/documentService"
 import type { Document } from "@/types/firebase"
-import { useStickyNotes } from "./hooks/use-sticky-notes"
 
 type Tool = "select" | "sticky" | "square" | "circle" | "pan" | "pen"
 
@@ -29,12 +28,6 @@ export function useCanvasState() {
   const activeToolRef = useRef<Tool>("select")
   const isDrawingRef = useRef(false)
   const autoSaveIntervalRef = useRef<NodeJS.Timeout | null>(null)
-
-  // Initialize sticky notes hook once here
-  const stickyNotes = useStickyNotes({
-    fabricCanvasRef,
-    handleCanvasChange: () => {}, // Will be set by operations
-  })
 
   useEffect(() => {
     activeToolRef.current = activeTool
@@ -72,7 +65,6 @@ export function useCanvasState() {
     setBrushColor,
     drawingMode,
     setDrawingMode,
-    stickyNotes,
   }
 }
 
@@ -89,7 +81,6 @@ export function useCanvasOperations(
     setActiveTool: setActiveToolState,
     setCanUndo,
     setCanRedo,
-    stickyNotes,
   } = canvasState
 
   const saveCanvasState = async (immediate = false) => {
@@ -147,13 +138,6 @@ export function useCanvasOperations(
       }
     }, 2000)
   }
-
-  // Update sticky notes hook with handleCanvasChange
-  useEffect(() => {
-    if (stickyNotes && typeof stickyNotes === 'object' && 'updateHandleCanvasChange' in stickyNotes) {
-      stickyNotes.updateHandleCanvasChange(handleCanvasChange)
-    }
-  }, [stickyNotes])
 
   const handleZoomIn = () => {
     if (!fabricCanvasRef.current) return
@@ -294,6 +278,5 @@ export function useCanvasOperations(
     setActiveTool,
     handleUndo,
     handleRedo,
-    stickyNotes,
   }
 }

@@ -1,6 +1,6 @@
 "use client"
 import { Button } from "@/components/ui/button"
-import { Copy, Download, RefreshCcw, CircleFadingPlus, Flower2, Video, Scaling, Type, Trash2 } from "lucide-react"
+import { Copy, Download, RefreshCcw, CircleFadingPlus, Flower2, Video, Scaling } from "lucide-react"
 import { useState, useEffect } from "react"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -180,97 +180,6 @@ export function FloatingToolbar({
           transform: "translateX(-50%)",
         }}
       >
-        {hasStickyNotes && (
-          <>
-            {/* Color Picker for Sticky Notes */}
-            <Popover open={isColorOpen} onOpenChange={setIsColorOpen}>
-              <PopoverTrigger asChild>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <div
-                        className="w-4 h-4 rounded border"
-                        style={{
-                          backgroundColor:
-                            stickyColors.find((c) => c.name === (currentStickyNote?.stickyColor || "yellow"))?.bg ||
-                            "#ffeb3b",
-                        }}
-                      />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Change Color</p>
-                  </TooltipContent>
-                </Tooltip>
-              </PopoverTrigger>
-              <PopoverContent className="w-48 p-3">
-                <div className="grid grid-cols-3 gap-2">
-                  {stickyColors.map((color) => (
-                    <button
-                      key={color.name}
-                      onClick={() => handleStickyColorChange(color.name)}
-                      className={cn(
-                        "w-12 h-12 rounded-lg border-2 transition-all hover:scale-105",
-                        (currentStickyNote?.stickyColor || "yellow") === color.name
-                          ? "border-foreground"
-                          : "border-border",
-                      )}
-                      style={{ backgroundColor: color.bg }}
-                      title={color.label}
-                    />
-                  ))}
-                </div>
-              </PopoverContent>
-            </Popover>
-
-            {/* Font Size for Sticky Notes */}
-            <Popover open={isFontOpen} onOpenChange={setIsFontOpen}>
-              <PopoverTrigger asChild>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <Type className="w-4 h-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Font Size</p>
-                  </TooltipContent>
-                </Tooltip>
-              </PopoverTrigger>
-              <PopoverContent className="w-32 p-2">
-                <div className="space-y-1">
-                  {fontSizes.map((size) => (
-                    <button
-                      key={size}
-                      onClick={() => handleStickyFontSizeChange(size)}
-                      className="w-full text-left px-2 py-1 rounded hover:bg-accent text-sm"
-                    >
-                      {size}px
-                    </button>
-                  ))}
-                </div>
-              </PopoverContent>
-            </Popover>
-
-            {/* Delete Sticky Note */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleStickyDelete}
-                  className="h-8 w-8 text-destructive hover:text-destructive"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Delete</p>
-              </TooltipContent>
-            </Tooltip>
-          </>
-        )}
-
         {hasImages && (
           <>
             <Tooltip>

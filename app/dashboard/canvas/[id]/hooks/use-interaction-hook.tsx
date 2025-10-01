@@ -13,7 +13,7 @@ interface InteractionHookProps {
   brushSize?: number
   brushColor?: string
   drawingMode?: "draw" | "erase"
-  stickyNotes?: any
+  
 }
 
 export function useInteractionHook({
@@ -26,7 +26,7 @@ export function useInteractionHook({
   brushSize = 5,
   brushColor = "#000000",
   drawingMode = "draw",
-  stickyNotes,
+  
 }: InteractionHookProps) {
   const setupInteractions = useCallback(() => {
     if (!fabricCanvasRef.current) return null
