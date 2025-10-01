@@ -45,6 +45,9 @@ export function useFabricCanvas(
         canvasCore.fabricCanvasRef.current = canvas
         canvasCore.setFabricLoaded(true)
 
+        // Force immediate render
+        canvas.renderAll()
+
         // Setup drawing brush
         canvas.freeDrawingBrush = new fabric.PencilBrush(canvas)
         canvas.freeDrawingBrush.width = canvasCore.brushSize
@@ -64,7 +67,17 @@ export function useFabricCanvas(
           canvas.loadFromJSON(documentData.content.canvasData, () => {
             canvas.renderAll()
           })
+        } else {
+          // Force render even if no data to load
+          canvas.renderAll()
         }
+
+        // Force one more render after everything is set up
+        setTimeout(() => {
+          if (canvas) {
+            canvas.renderAll()
+          }
+        }, 10)
 
         return () => {
           cleanupResize()
