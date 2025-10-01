@@ -49,11 +49,11 @@ export function useFabricCanvas(
     activeToolRef,
     isDrawingRef,
     setIsDrawing,
-    setActiveTool: operations.setActiveTool,
-    brushSize, // Pass brush size
-    brushColor, // Pass brush color
-    drawingMode, // Pass drawing mode
-    stickyNotes: operations.stickyNotes, // Pass sticky notes functions
+    setActiveTool: canvasState.setActiveTool,
+    brushSize,
+    brushColor,
+    drawingMode,
+    stickyNotes: operations.stickyNotes,
   })
 
   const snapGrid = useSnapGrid({
