@@ -96,22 +96,22 @@ export function useCanvasCore(documentId: string, document: Document | null) {
     canvas.on("object:removed", () => handleCanvasChange())
 
     canvas.on("selection:created", (e: any) => {
-      const selected = e.selected || e.target ? [e.target] : []
+      const selected = (e.selected || (e.target ? [e.target] : [])).filter((obj: any) => obj != null)
       setSelectedObjects(selected)
       if (onSelectedImagesChange) {
         const selectedImages = selected
-          .filter((obj: any) => obj.type === "image")
+          .filter((obj: any) => obj && obj.type === "image")
           .map((obj: any) => obj.getSrc ? obj.getSrc() : obj.src)
         onSelectedImagesChange(selectedImages)
       }
     })
 
     canvas.on("selection:updated", (e: any) => {
-      const selected = e.selected || canvas.getActiveObjects()
+      const selected = (e.selected || canvas.getActiveObjects()).filter((obj: any) => obj != null)
       setSelectedObjects(selected)
       if (onSelectedImagesChange) {
         const selectedImages = selected
-          .filter((obj: any) => obj.type === "image")
+          .filter((obj: any) => obj && obj.type === "image")
           .map((obj: any) => obj.getSrc ? obj.getSrc() : obj.src)
         onSelectedImagesChange(selectedImages)
       }
