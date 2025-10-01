@@ -214,8 +214,16 @@ export function useInteractionHook({
     const canvas = fabricCanvasRef.current
     let isPanning = false, lastPanX = 0, lastPanY = 0
     const handleMouseWheel = (opt: any) => {
-      // Mouse wheel zoom disabled
-      opt.e.preventDefault()
+      const evt = opt.e
+      evt.preventDefault()
+      
+      // Two-finger trackpad pan (when shift is held or deltaX exists)
+      if (evt.shiftKey || Math.abs(evt.deltaX) > 0) {
+        const vpt = canvas.viewportTransform
+        vpt[4] -= evt.deltaX
+        vpt[5] -= evt.deltaY
+        canvas.requestRenderAll()
+      }
     }
     const handleMouseDown = (opt: any) => {
       const evt = opt.e as MouseEvent
