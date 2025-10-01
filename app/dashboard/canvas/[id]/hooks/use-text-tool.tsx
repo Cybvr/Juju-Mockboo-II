@@ -71,45 +71,12 @@ export function useTextTool({
       addTextAtPosition(pointer.x, pointer.y)
     }
 
-    const handleDoubleClick = (e: any) => {
-      const target = e.target
-      
-      // Check if double-clicked on a text object
-      if (target && (target.type === "textbox" || target.type === "i-text" || target.type === "text")) {
-        console.log("🖱️ Double-clicked on text object")
-        
-        // Make sure it's selectable and editable
-        target.set({
-          editable: true,
-          selectable: true
-        })
-
-        // Set as active object and enter editing mode
-        canvas.setActiveObject(target)
-        target.enterEditing()
-        target.selectAll()
-
-        console.log("✏️ Text object entered editing mode")
-
-        // Save changes when editing exits
-        const onEditExit = () => {
-          target.off("editing:exited", onEditExit)
-          handleCanvasChange()
-          console.log("💾 Text changes saved")
-        }
-
-        target.on("editing:exited", onEditExit)
-      }
-    }
-
     canvas.on("mouse:down", handleCanvasClick)
-    canvas.on("mouse:dblclick", handleDoubleClick)
 
     return () => {
       canvas.off("mouse:down", handleCanvasClick)
-      canvas.off("mouse:dblclick", handleDoubleClick)
     }
-  }, [fabricCanvasRef, activeTool, addTextAtPosition, handleCanvasChange])
+  }, [fabricCanvasRef, activeTool, addTextAtPosition])
 
   return {
     setupTextTool,
