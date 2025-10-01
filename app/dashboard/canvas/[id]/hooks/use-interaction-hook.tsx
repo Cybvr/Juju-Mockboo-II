@@ -171,13 +171,15 @@ export function useInteractionHook({
 
       
 
-      // Check if user is typing in regular HTML inputs
+      // Check if user is typing in regular HTML inputs OR editing text in canvas
       const activeElement = document.activeElement
+      const isEditingText = canvas && canvas.getActiveObject() && canvas.getActiveObject().isEditing
       if (
         activeElement &&
         (activeElement.tagName === "INPUT" || 
          activeElement.tagName === "TEXTAREA" || 
-         activeElement.isContentEditable)
+         activeElement.isContentEditable) ||
+        isEditingText
       ) {
         return
       }
