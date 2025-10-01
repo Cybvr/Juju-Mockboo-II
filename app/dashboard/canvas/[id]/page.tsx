@@ -126,7 +126,7 @@ export default function CanvasEditor() {
       if (cleanupDragDrop) cleanupDragDrop()
       if (cleanupStickyNote) cleanupStickyNote()
     }
-  }, [canvasCore.fabricLoaded, setupInteractions, setupKeyboardHandlers, setupPanAndZoom, setupTouchHandlers, imageOps.setupDragAndDrop, setupTextTool])
+  }, [canvasCore.fabricLoaded, setupInteractions, setupKeyboardHandlers, setupPanAndZoom, setupTouchHandlers, imageOps.setupDragAndDrop])
 
   // Canvas initialization is handled by useFabricCanvas hook
 
