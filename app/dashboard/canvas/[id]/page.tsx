@@ -63,7 +63,7 @@ export default function CanvasEditor() {
   // Add snap grid functionality
   const snapGrid = useSnapGrid({
     fabricCanvasRef: canvasCore.fabricCanvasRef,
-    gridSize: 20,
+    gridSize: 5,
     enabled: true
   })
   

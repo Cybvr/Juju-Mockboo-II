@@ -10,12 +10,12 @@ interface SnapGridProps {
 
 export function useSnapGrid({ 
   fabricCanvasRef, 
-  gridSize = 20, 
+  gridSize = 5, 
   enabled = true 
 }: SnapGridProps) {
   const [isGridVisible, setIsGridVisible] = useState(false)
   const [isSnapEnabled] = useState(true) // Always enabled
-  const [isObjectSnapEnabled, setIsObjectSnapEnabled] = useState(false)
+  const [isObjectSnapEnabled, setIsObjectSnapEnabled] = useState(true)
   const [currentGridSize, setCurrentGridSize] = useState(gridSize)
   const [snapDistance, setSnapDistance] = useState(10)
   const gridPatternRef = useRef<SVGPatternElement | null>(null)
