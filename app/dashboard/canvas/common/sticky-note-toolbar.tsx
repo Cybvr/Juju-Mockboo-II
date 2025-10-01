@@ -158,14 +158,9 @@ export function StickyNoteToolbar({
           transform: "translateX(-50%)",
         }}
       >
-        {/* Text Area */}
-        <div className="flex-1 mr-2">
-          <Textarea
-            value={noteText}
-            onChange={(e) => handleTextChange(e.target.value)}
-            placeholder="Type your note..."
-            className="min-h-16 text-sm resize-none"
-          />
+        {/* Instructions */}
+        <div className="flex-1 mr-2 text-xs text-muted-foreground p-2 bg-muted/50 rounded">
+          Double-click the sticky note to edit text directly on the canvas
         </div>
 
         {/* Controls */}

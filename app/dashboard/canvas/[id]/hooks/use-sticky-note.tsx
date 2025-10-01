@@ -93,12 +93,64 @@ export function useStickyNote({ fabricCanvasRef, handleCanvasChange }: StickyNot
     const handleDoubleClick = (e: any) => {
       const target = e.target
       if (target && target.stickyNoteGroup) {
-        // Find the text object in the group and enter edit mode
-        const textObj = target.getObjects().find((obj: any) => obj.type === "textbox")
+        // Ungroup, edit text, then regroup
+        const objects = target.getObjects()
+        const textObj = objects.find((obj: any) => obj.type === "textbox")
+        
         if (textObj) {
+          // Store group position
+          const groupLeft = target.left
+          const groupTop = target.top
+          
+          // Remove group and add objects individually
+          canvas.remove(target)
+          objects.forEach((obj: any) => {
+            obj.left += groupLeft
+            obj.top += groupTop
+            canvas.add(obj)
+          })
+          
+          // Enter text editing mode
           canvas.setActiveObject(textObj)
           textObj.enterEditing()
           textObj.selectAll()
+          
+          // Listen for text editing end to regroup
+          const regroupAfterEdit = () => {
+            textObj.off("editing:exited", regroupAfterEdit)
+            
+            // Remove individual objects
+            objects.forEach((obj: any) => canvas.remove(obj))
+            
+            // Reset relative positions
+            objects.forEach((obj: any) => {
+              obj.left -= groupLeft
+              obj.top -= groupTop
+            })
+            
+            // Recreate group
+            import("fabric").then((FabricModule) => {
+              const fabric = FabricModule
+              const newGroup = new fabric.Group(objects, {
+                left: groupLeft,
+                top: groupTop,
+                selectable: true,
+                hasControls: true,
+                hasBorders: true,
+                lockRotation: true,
+              })
+              
+              newGroup.stickyNoteGroup = true
+              newGroup.stickyColor = target.stickyColor
+              
+              canvas.add(newGroup)
+              canvas.setActiveObject(newGroup)
+              canvas.renderAll()
+              handleCanvasChange()
+            })
+          }
+          
+          textObj.on("editing:exited", regroupAfterEdit)
         }
       }
     }
@@ -108,7 +160,7 @@ export function useStickyNote({ fabricCanvasRef, handleCanvasChange }: StickyNot
     return () => {
       canvas.off("mouse:dblclick", handleDoubleClick)
     }
-  }, [fabricCanvasRef])
+  }, [fabricCanvasRef, handleCanvasChange])
 
   return {
     createStickyNote,
