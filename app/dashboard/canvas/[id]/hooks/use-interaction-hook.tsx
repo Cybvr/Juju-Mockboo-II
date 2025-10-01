@@ -3,6 +3,14 @@
 import type React from "react"
 import { useCallback } from "react"
 
+// Extend global window object for copied objects
+declare global {
+  interface Window {
+    copiedObjects?: any[]
+    stickyNoteHook?: any
+  }
+}
+
 interface InteractionHookProps {
   fabricCanvasRef: React.MutableRefObject<any>
   handleCanvasChange: () => void
@@ -261,6 +269,45 @@ export function useInteractionHook({
         e.preventDefault()
         if (canvas.redo) canvas.redo()
         console.log("Redo action performed."); // Log for debugging redo
+        return
+      }
+
+      // Handle copy (Ctrl+C)
+      if ((e.ctrlKey || e.metaKey) && e.key === "c") {
+        e.preventDefault()
+        const activeObjects = canvas.getActiveObjects()
+        if (activeObjects && activeObjects.length > 0) {
+          // Store copied objects globally for paste
+          window.copiedObjects = activeObjects.map((obj: any) => obj.toObject())
+          console.log("Copied objects:", window.copiedObjects)
+        }
+        return
+      }
+
+      // Handle paste (Ctrl+V)
+      if ((e.ctrlKey || e.metaKey) && e.key === "v") {
+        e.preventDefault()
+        if (window.copiedObjects && window.copiedObjects.length > 0) {
+          import("fabric").then((FabricModule) => {
+            const fabric = FabricModule
+            window.copiedObjects.forEach((objData: any, index: number) => {
+              fabric.util.enlivenObjects([objData], (objects: any[]) => {
+                objects.forEach((obj: any) => {
+                  obj.set({
+                    left: obj.left + 20,
+                    top: obj.top + 20,
+                  })
+                  canvas.add(obj)
+                  if (index === window.copiedObjects.length - 1) {
+                    canvas.setActiveObject(obj)
+                    canvas.renderAll()
+                    handleCanvasChange()
+                  }
+                })
+              })
+            })
+          })
+        }
         return
       }
 
