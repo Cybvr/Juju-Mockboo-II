@@ -128,6 +128,16 @@ export function useFabricCanvas(
       canvas.on('object:modified', canvasCore.handleCanvasChange)
       canvas.on('object:added', canvasCore.handleCanvasChange)
       canvas.on('object:removed', canvasCore.handleCanvasChange)
+      
+      // Text editing handlers
+      canvas.on('text:changed', canvasCore.handleCanvasChange)
+      canvas.on('text:editing:entered', () => {
+        console.log('Text editing started')
+      })
+      canvas.on('text:editing:exited', () => {
+        console.log('Text editing ended, saving changes')
+        canvasCore.handleCanvasChange()
+      })
 
       // Handle double-click to enter text editing
       canvas.on('mouse:dblclick', (e) => {
