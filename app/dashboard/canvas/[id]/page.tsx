@@ -35,7 +35,6 @@ import { ShareModal } from "@/components/ShareModal"
 import { useSnapGrid } from "./hooks/use-snap-grid"
 import { FloatingToolbar } from "./floating-toolbar"
 import { TextToolbar } from "./text-toolbar"
-import CanvasFabric from "./canvas-fabric"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -120,7 +119,74 @@ export default function CanvasEditor() {
     }
   }, [canvasCore.fabricLoaded, setupInteractions, setupKeyboardHandlers, setupPanAndZoom, setupTouchHandlers, imageOps.setupDragAndDrop, setupTextTool])
 
-  // Canvas initialization is handled by canvas-fabric.tsx
+  // Initialize Fabric.js canvas
+  useEffect(() => {
+    if (!canvasCore.canvasRef.current || !document) return
+
+    import("fabric").then((FabricModule) => {
+      const fabric = FabricModule.fabric || FabricModule
+      
+      // Dispose existing canvas
+      if (canvasCore.fabricCanvasRef.current) {
+        canvasCore.fabricCanvasRef.current.dispose()
+        canvasCore.fabricCanvasRef.current = null
+      }
+
+      const canvas = new fabric.Canvas(canvasCore.canvasRef.current, {
+        width: window.innerWidth,
+        height: window.innerHeight,
+        backgroundColor: "white",
+      })
+
+      canvasCore.fabricCanvasRef.current = canvas
+      canvasCore.setFabricLoaded(true)
+      
+      console.log("🎉 CANVAS LOADED ON PAGE LOAD HURRAY!! Canvas initialized successfully")
+      console.log("📐 Canvas dimensions:", { width: canvas.width, height: canvas.height })
+
+      // Setup drawing brush
+      canvas.freeDrawingBrush = new fabric.PencilBrush(canvas)
+      canvas.freeDrawingBrush.width = canvasCore.brushSize
+      canvas.freeDrawingBrush.color = canvasCore.brushColor
+
+      // Setup undo/redo
+      const { saveState } = canvasCore.setupUndoRedo(canvas)
+
+      // Setup canvas events
+      canvasCore.setupCanvasEvents(canvas, canvasCore.handleCanvasChange, (images) => {
+        setSelectedImages(images)
+      })
+      
+      // Additional text editing handlers
+      canvas.on('mouse:dblclick', (e) => {
+        if (e.target && (e.target.type === 'textbox' || e.target.type === 'text')) {
+          e.target.enterEditing()
+          e.target.selectAll()
+        }
+      })
+
+      // Setup resize handler
+      const cleanupResize = canvasCore.setupResizeHandler(canvas)
+
+      // Load canvas data if exists
+      if (document.content?.canvasData && Object.keys(document.content.canvasData).length > 0) {
+        console.log("📂 Loading existing canvas data from Firebase...")
+        canvas.loadFromJSON(document.content.canvasData, () => {
+          canvas.renderAll()
+          console.log("✅ CANVAS DATA LOADED SUCCESSFULLY! Objects count:", canvas.getObjects().length)
+          if (saveState) saveState()
+        })
+      } else {
+        console.log("🆕 Fresh canvas - no existing data to load")
+        if (saveState) saveState()
+      }
+
+      return () => {
+        cleanupResize()
+        canvas.dispose()
+      }
+    })
+  }, [document])
 
   // Load document from Firebase
   useEffect(() => {
@@ -395,10 +461,17 @@ export default function CanvasEditor() {
 
       {/* Canvas area */}
       <div className="fixed inset-0 w-screen h-screen overflow-hidden" style={{ zIndex: 0 }}>
-        <CanvasFabric
-          canvasCore={canvasCore}
-          documentData={document}
-          onSelectedImagesChange={setSelectedImages}
+        <canvas
+          ref={canvasCore.canvasRef}
+          className="block border-none outline-none"
+          style={{ 
+            width: "100vw", 
+            height: "100vh", 
+            touchAction: "none",
+            position: "absolute",
+            top: 0,
+            left: 0
+          }}
         />
 
         {isGenerating && <GeneratingMedia isVisible={true} message="Generating image..." />}
