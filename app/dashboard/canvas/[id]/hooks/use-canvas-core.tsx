@@ -174,7 +174,6 @@ export function useCanvasCore(documentId: string, document: Document | null) {
         content: {
           ...document.content,
           canvasData: cleanCanvasData,
-          ...(thumbnail && { thumbnail }),
         },
       })
 
