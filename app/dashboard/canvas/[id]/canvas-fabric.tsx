@@ -4,6 +4,7 @@ import type { Document } from "@/types/firebase"
 import { useInteractionHook } from "./hooks/use-interaction-hook"
 import { useCanvasCore } from "./hooks/use-canvas-core"
 import { useImageOperations } from "./hooks/use-image-operations"
+import { useSnapGrid } from "./hooks/use-snap-grid"
 import { FloatingToolbar } from "./floating-toolbar"
 import { DrawingToolbar } from "../common/drawing-toolbar" // Added drawing toolbar import
 
@@ -55,11 +56,12 @@ export function useFabricCanvas(
     drawingMode,
   })
 
-  // Grid functionality - temporarily disabled until useSnapGrid is implemented
-  const snapGrid = {
-    enabled: true,
-    gridSize: 20
-  }
+  // Wire up snap grid functionality
+  const snapGrid = useSnapGrid({
+    fabricCanvasRef,
+    gridSize: 20,
+    enabled: true
+  })
 
   const addImageToCanvas = useCallback(
     (imageUrl: string, replaceObjects?: any) => {
