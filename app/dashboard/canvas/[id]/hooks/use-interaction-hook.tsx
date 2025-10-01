@@ -145,9 +145,15 @@ export function useInteractionHook({
         }
         
         try {
+          const jsonData = JSON.stringify(canvas.toJSON())
+          const canvasData = JSON.parse(jsonData)
+          
           if (activeObject.type === "activeSelection") {
             const objects = (activeObject as any).getObjects()
-            window.copiedObjects = objects.map((obj: any) => obj.toObject())
+            window.copiedObjects = objects.map((obj: any) => {
+              const objData = canvasData.objects.find((o: any) => o === obj.toObject() || JSON.stringify(o) === JSON.stringify(obj.toObject()))
+              return obj.toObject()
+            })
             console.log("Copied multiple objects:", window.copiedObjects.length)
           } else {
             window.copiedObjects = [activeObject.toObject()]
@@ -165,32 +171,40 @@ export function useInteractionHook({
 
         if (window.copiedObjects?.length > 0) {
           canvas.discardActiveObject()
-
+          console.log("Creating temporary canvas for loading...")
+          
+          const tempData = {
+            version: '6.7.1',
+            objects: window.copiedObjects!.map((obj: any) => ({
+              ...obj,
+              left: (obj.left || 0) + 20,
+              top: (obj.top || 0) + 20,
+            }))
+          }
+          
           import("fabric").then((FabricModule) => {
             const fabric = FabricModule
-            console.log("Fabric loaded, enlivening objects...")
+            const tempCanvas = new fabric.Canvas(null)
             
-            fabric.util.enlivenObjects(window.copiedObjects!, (enlivenedObjects: any[]) => {
-              console.log("Enlivened objects:", enlivenedObjects.length)
-              enlivenedObjects.forEach((obj: any) => {
-                obj.set({
-                  left: (obj.left || 0) + 20,
-                  top: (obj.top || 0) + 20,
-                  evented: true,
-                  selectable: true,
-                })
+            tempCanvas.loadFromJSON(tempData, () => {
+              console.log("Loaded to temp canvas, objects:", tempCanvas.getObjects().length)
+              const clonedObjects = tempCanvas.getObjects()
+              
+              clonedObjects.forEach((obj: any) => {
+                tempCanvas.remove(obj)
                 canvas.add(obj)
               })
-
-              if (enlivenedObjects.length === 1) {
-                canvas.setActiveObject(enlivenedObjects[0])
-              } else if (enlivenedObjects.length > 1) {
-                const sel = new fabric.ActiveSelection(enlivenedObjects, { canvas })
+              
+              if (clonedObjects.length === 1) {
+                canvas.setActiveObject(clonedObjects[0])
+              } else if (clonedObjects.length > 1) {
+                const sel = new fabric.ActiveSelection(clonedObjects, { canvas })
                 canvas.setActiveObject(sel)
               }
               
               canvas.requestRenderAll()
               handleCanvasChange()
+              tempCanvas.dispose()
               console.log("Paste complete!")
             })
           })
