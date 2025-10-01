@@ -1,0 +1,72 @@
+Here’s a working copy/paste implementation that should integrate cleanly in your setupKeyboardHandlers:
+
+// Copy
+if ((e.ctrlKey || e.metaKey) && e.key === "c") {
+  e.preventDefault()
+  const activeObject = canvas.getActiveObject()
+
+  if (activeObject) {
+    if (activeObject.type === "activeSelection") {
+      const objects = activeObject.getObjects()
+      Promise.all(objects.map(obj => new Promise(resolve => obj.clone(resolve, ["id", "selectable", "evented"]))))
+        .then(cloned => {
+          window.copiedObjects = cloned
+        })
+    } else {
+      activeObject.clone((cloned: any) => {
+        window.copiedObjects = [cloned]
+      }, ["id", "selectable", "evented"])
+    }
+  }
+  return
+}
+
+// Paste
+if ((e.ctrlKey || e.metaKey) && e.key === "v") {
+  e.preventDefault()
+
+  if (window.copiedObjects?.length > 0) {
+    canvas.discardActiveObject()
+    const clonedObjects: any[] = []
+
+    window.copiedObjects.forEach((obj: any, index: number) => {
+      obj.clone((clonedObj: any) => {
+        clonedObj.set({
+          left: (obj.left || 0) + 20,
+          top: (obj.top || 0) + 20,
+          evented: true,
+          selectable: true
+        })
+        canvas.add(clonedObj)
+        clonedObjects.push(clonedObj)
+
+        // If this is the last object
+        if (clonedObjects.length === window.copiedObjects!.length) {
+          if (clonedObjects.length === 1) {
+            canvas.setActiveObject(clonedObjects[0])
+          } else {
+            import("fabric").then(({ ActiveSelection }) => {
+              const selection = new ActiveSelection(clonedObjects, { canvas })
+              canvas.setActiveObject(selection)
+            })
+          }
+          canvas.requestRenderAll()
+          handleCanvasChange()
+        }
+      }, ["id", "selectable", "evented"])
+    })
+  }
+  return
+}
+
+Key Changes
+
+Pass ["id", "selectable", "evented"] into .clone() to preserve properties.
+
+Use Promise.all for multiple objects on copy.
+
+On paste, ensure selectable: true and evented: true are restored.
+
+Use requestRenderAll() instead of renderAll() for better async consistency.
+
+👉 If you drop this replacement inside your setupKeyboardHandlers, copy/paste will start behaving properly.
