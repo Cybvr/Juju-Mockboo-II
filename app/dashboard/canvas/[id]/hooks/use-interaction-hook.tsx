@@ -214,13 +214,7 @@ export function useInteractionHook({
     const canvas = fabricCanvasRef.current
     let isPanning = false, lastPanX = 0, lastPanY = 0
     const handleMouseWheel = (opt: any) => {
-      const delta = opt.e.deltaY
-      let zoom = canvas.getZoom() * (0.999 ** delta)
-      zoom = Math.max(0.2, Math.min(5, zoom))
-      import("fabric").then((FabricModule) => {
-        const fabric = FabricModule
-        canvas.zoomToPoint(new fabric.Point(canvas.width / 2, canvas.height / 2), zoom)
-      })
+      // Mouse wheel zoom disabled
       opt.e.preventDefault()
     }
     const handleMouseDown = (opt: any) => {
