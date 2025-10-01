@@ -43,8 +43,6 @@ export function useInteractionHook({
     const handleMouseDown = (e: any) => {
       const tool = activeToolRef.current
 
-      
-
       if (tool === "sticky-note") {
         const pointer = canvas.getPointer(e.e)
         window.stickyNoteHook?.createStickyNote?.(pointer.x, pointer.y)
@@ -146,85 +144,79 @@ export function useInteractionHook({
         return
       }
 
+      // Undo
       if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
         e.preventDefault()
         canvas.undo?.()
         return
       }
 
+      // Redo
       if ((e.ctrlKey || e.metaKey) && (e.key === "y" || (e.key === "z" && e.shiftKey))) {
         e.preventDefault()
         canvas.redo?.()
         return
       }
 
+      // Copy
       if ((e.ctrlKey || e.metaKey) && e.key === "c") {
         e.preventDefault()
         const activeObjects = canvas.getActiveObjects() || []
-        const activeObjectsArray = Array.isArray(activeObjects) ? activeObjects : [activeObjects].filter(Boolean)
-        
-        if (activeObjectsArray.length > 0) {
-          // Store cloned objects instead of references
-          const clonedObjects: any[] = []
-          activeObjectsArray.forEach((obj: any) => {
-            if (obj && typeof obj.clone === 'function') {
-              obj.clone((cloned: any) => {
-                clonedObjects.push(cloned)
-              })
-            }
+        const objectsArray = Array.isArray(activeObjects) ? activeObjects : [activeObjects].filter(Boolean)
+
+        if (objectsArray.length > 0) {
+          Promise.all(
+            objectsArray.map((obj: any) => 
+              new Promise(resolve => obj.clone(resolve))
+            )
+          ).then(cloned => {
+            window.copiedObjects = cloned
           })
-          window.copiedObjects = clonedObjects
         }
         return
       }
 
+      // Paste
       if ((e.ctrlKey || e.metaKey) && e.key === "v") {
         e.preventDefault()
+
         if (window.copiedObjects?.length > 0) {
           canvas.discardActiveObject()
-          const newObjects: any[] = []
-          let completedClones = 0
-          
-          window.copiedObjects.forEach((obj: any) => {
-            if (obj && typeof obj.clone === 'function') {
-              obj.clone((cloned: any) => {
-                cloned.set({ 
-                  left: cloned.left + 20, 
-                  top: cloned.top + 20 
-                })
-                canvas.add(cloned)
-                newObjects.push(cloned)
-                completedClones++
-                
-                if (completedClones === window.copiedObjects.length) {
-                  if (newObjects.length === 1) {
-                    canvas.setActiveObject(newObjects[0])
-                  } else if (newObjects.length > 1) {
-                    import("fabric").then((FabricModule) => {
-                      const fabric = FabricModule
-                      const selection = new fabric.ActiveSelection(newObjects, {
-                        canvas: canvas
-                      })
-                      canvas.setActiveObject(selection)
-                    })
-                  }
-                  canvas.renderAll()
-                  handleCanvasChange()
-                }
+
+          Promise.all(
+            window.copiedObjects.map((obj: any) =>
+              new Promise(resolve => obj.clone(resolve))
+            )
+          ).then((cloned: any[]) => {
+            cloned.forEach((obj: any) => {
+              obj.set({ left: obj.left + 20, top: obj.top + 20 })
+              canvas.add(obj)
+            })
+
+            if (cloned.length === 1) {
+              canvas.setActiveObject(cloned[0])
+            } else if (cloned.length > 1) {
+              import("fabric").then((FabricModule) => {
+                const fabric = FabricModule
+                const selection = new fabric.ActiveSelection(cloned, { canvas })
+                canvas.setActiveObject(selection)
               })
             }
+
+            canvas.renderAll()
+            handleCanvasChange()
           })
         }
         return
       }
 
+      // Delete
       if (e.key === "Delete" || e.key === "Backspace") {
         e.preventDefault()
-        const activeObjects = canvas.getActiveObjects() || []
-        const activeObjectsArray = Array.isArray(activeObjects) ? activeObjects : [activeObjects].filter(Boolean)
-        
-        if (activeObjectsArray.length > 0) {
-          activeObjectsArray.forEach((obj: any) => canvas.remove(obj))
+        const activeObjects = canvas.getActiveObjects()
+
+        if (activeObjects.length > 0) {
+          activeObjects.forEach((obj: any) => canvas.remove(obj))
           canvas.discardActiveObject()
           canvas.renderAll()
           handleCanvasChange()
