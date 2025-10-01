@@ -93,6 +93,10 @@ export function useCanvasCore(documentId: string, document: Document | null) {
     canvas.on("object:added", () => handleCanvasChange())
     canvas.on("object:modified", () => handleCanvasChange())
     canvas.on("object:removed", () => handleCanvasChange())
+    
+    // Text editing events - CRITICAL for saving text changes
+    canvas.on("text:changed", () => handleCanvasChange())
+    canvas.on("text:editing:exited", () => handleCanvasChange())
 
     canvas.on("selection:created", (e: any) => {
       const selected = (e.selected || (e.target ? [e.target] : [])).filter((obj: any) => obj != null)

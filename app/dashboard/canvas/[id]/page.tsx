@@ -153,6 +153,14 @@ export default function CanvasEditor() {
       canvasCore.setupCanvasEvents(canvas, canvasCore.handleCanvasChange, (images) => {
         setSelectedImages(images)
       })
+      
+      // Additional text editing handlers
+      canvas.on('mouse:dblclick', (e) => {
+        if (e.target && (e.target.type === 'textbox' || e.target.type === 'text')) {
+          e.target.enterEditing()
+          e.target.selectAll()
+        }
+      })
 
       // Setup resize handler
       const cleanupResize = canvasCore.setupResizeHandler(canvas)
