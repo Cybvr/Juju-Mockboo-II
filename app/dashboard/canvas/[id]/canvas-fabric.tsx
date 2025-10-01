@@ -31,44 +31,52 @@ export function useFabricCanvas(
   useEffect(() => {
     if (!canvasCore.canvasRef.current || !documentData || canvasCore.fabricLoaded) return
 
-    import("fabric").then((FabricModule) => {
-      const fabric = FabricModule
+    // Wait for DOM to be fully ready and window to be properly sized
+    const initCanvas = () => {
+      import("fabric").then((FabricModule) => {
+        const fabric = FabricModule
 
-      const canvas = new fabric.Canvas(canvasCore.canvasRef.current, {
-        width: window.innerWidth,
-        height: window.innerHeight,
-        backgroundColor: "white",
-      })
-
-      canvasCore.fabricCanvasRef.current = canvas
-      canvasCore.setFabricLoaded(true)
-
-      // Setup drawing brush
-      canvas.freeDrawingBrush = new fabric.PencilBrush(canvas)
-      canvas.freeDrawingBrush.width = canvasCore.brushSize
-      canvas.freeDrawingBrush.color = canvasCore.brushColor
-
-      // Setup undo/redo ONCE
-      canvasCore.setupUndoRedo(canvas)
-
-      // Setup canvas events ONCE
-      canvasCore.setupCanvasEvents(canvas, canvasCore.handleCanvasChange, onSelectedImagesChange)
-
-      // Setup resize handler ONCE
-      const cleanupResize = canvasCore.setupResizeHandler(canvas)
-
-      // Load existing canvas data
-      if (documentData.content?.canvasData && Object.keys(documentData.content.canvasData).length > 0) {
-        canvas.loadFromJSON(documentData.content.canvasData, () => {
-          canvas.renderAll()
+        const canvas = new fabric.Canvas(canvasCore.canvasRef.current, {
+          width: window.innerWidth,
+          height: window.innerHeight,
+          backgroundColor: "white",
         })
-      }
 
-      return () => {
-        cleanupResize()
-        canvas.dispose()
-      }
-    })
+        canvasCore.fabricCanvasRef.current = canvas
+        canvasCore.setFabricLoaded(true)
+
+        // Setup drawing brush
+        canvas.freeDrawingBrush = new fabric.PencilBrush(canvas)
+        canvas.freeDrawingBrush.width = canvasCore.brushSize
+        canvas.freeDrawingBrush.color = canvasCore.brushColor
+
+        // Setup undo/redo ONCE
+        canvasCore.setupUndoRedo(canvas)
+
+        // Setup canvas events ONCE
+        canvasCore.setupCanvasEvents(canvas, canvasCore.handleCanvasChange, onSelectedImagesChange)
+
+        // Setup resize handler ONCE
+        const cleanupResize = canvasCore.setupResizeHandler(canvas)
+
+        // Load existing canvas data
+        if (documentData.content?.canvasData && Object.keys(documentData.content.canvasData).length > 0) {
+          canvas.loadFromJSON(documentData.content.canvasData, () => {
+            canvas.renderAll()
+          })
+        }
+
+        return () => {
+          cleanupResize()
+          canvas.dispose()
+        }
+      })
+    }
+
+    // Use a small timeout to ensure everything is loaded
+    const timer = setTimeout(initCanvas, 100)
+
+    return () => clearTimeout(timer)
   }, [documentData, canvasCore.fabricLoaded])
 
   // Auto-save interval
