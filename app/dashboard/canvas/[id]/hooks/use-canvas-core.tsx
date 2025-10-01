@@ -341,6 +341,74 @@ export function useCanvasCore(documentId: string, document: Document | null) {
     isDrawingRef.current = isDrawing
   }, [isDrawing])
 
+  // Initialize canvas when document is available
+  useEffect(() => {
+    if (!canvasRef.current || !document) return
+
+    import("fabric").then((FabricModule) => {
+      const fabric = FabricModule.fabric || FabricModule
+      
+      // Dispose existing canvas
+      if (fabricCanvasRef.current) {
+        fabricCanvasRef.current.dispose()
+        fabricCanvasRef.current = null
+      }
+
+      const canvas = new fabric.Canvas(canvasRef.current, {
+        width: window.innerWidth,
+        height: window.innerHeight,
+        backgroundColor: "white",
+      })
+
+      fabricCanvasRef.current = canvas
+      setFabricLoaded(true)
+      
+      console.log("🎉 Canvas initialized in core hook")
+
+      // Setup drawing brush
+      canvas.freeDrawingBrush = new fabric.PencilBrush(canvas)
+      canvas.freeDrawingBrush.width = brushSize
+      canvas.freeDrawingBrush.color = brushColor
+
+      // Setup undo/redo
+      const { saveState } = setupUndoRedo(canvas)
+
+      // Setup canvas events
+      setupCanvasEvents(canvas, handleCanvasChange, (images) => {
+        // This will be handled by parent component
+      })
+      
+      // Text editing handlers
+      canvas.on('mouse:dblclick', (e) => {
+        if (e.target && (e.target.type === 'textbox' || e.target.type === 'text')) {
+          e.target.enterEditing()
+          e.target.selectAll()
+        }
+      })
+
+      // Setup resize handler
+      const cleanupResize = setupResizeHandler(canvas)
+
+      // Load canvas data if exists
+      if (document.content?.canvasData && Object.keys(document.content.canvasData).length > 0) {
+        console.log("📂 Loading canvas data from Firebase...")
+        canvas.loadFromJSON(document.content.canvasData, () => {
+          canvas.renderAll()
+          console.log("✅ Canvas data loaded successfully")
+          if (saveState) saveState()
+        })
+      } else {
+        console.log("🆕 Fresh canvas")
+        if (saveState) saveState()
+      }
+
+      return () => {
+        cleanupResize()
+        canvas.dispose()
+      }
+    })
+  }, [document])
+
   return {
     // State
     canvasRef,
