@@ -60,55 +60,70 @@ export default function CanvasEditor() {
 
   const documentId = params.id as string
 
-  // Use canvas core hook
-  const canvasCore = useCanvasCore(documentId, document)
-  
-  // Add snap grid functionality
-  const snapGrid = useSnapGrid({
-    fabricCanvasRef: canvasCore.fabricCanvasRef,
-    gridSize: 5,
-    enabled: true
-  })
-  
-  // Image operations hook
-  const imageOps = useImageOperations({
-    fabricCanvasRef: canvasCore.fabricCanvasRef,
-    handleCanvasChange: canvasCore.handleCanvasChange,
-    userId: user?.uid,
-  })
-
-  // Use fabric canvas hook for canvas initialization
-  const { FloatingToolbarComponent, addImageToCanvas, canvasRef: fabricCanvasRef } = useFabricCanvas(
+  // Use fabric canvas hook for canvas initialization - this includes canvas core
+  const { 
+    FloatingToolbarComponent, 
+    addImageToCanvas, 
+    canvasRef: fabricCanvasRef,
+    snapGrid,
+    // Canvas core functionality
+    fabricCanvasRef: canvasCoreFabricRef,
+    activeTool,
+    setActiveTool,
+    handleCanvasChange,
+    handleZoomIn,
+    handleZoomOut,
+    handleResetZoom,
+    zoomLevel,
+    selectedObjects,
+    setIsDrawing,
+    isDrawingRef,
+    activeToolRef,
+    brushSize,
+    brushColor,
+    drawingMode,
+    fabricLoaded,
+    isSaving,
+    lastSaved,
+    saveCanvasState
+  } = useFabricCanvas(
     document,
     documentId,
     (images) => setSelectedImages(images)
   )
 
+  // Image operations hook
+  const imageOps = useImageOperations({
+    fabricCanvasRef: canvasCoreFabricRef,
+    handleCanvasChange: handleCanvasChange,
+    userId: user?.uid,
+  })
+
   // Import and setup interaction hook
   const { useInteractionHook } = require("./hooks/use-interaction-hook")
   const { setupInteractions, setupKeyboardHandlers, setupPanAndZoom, setupTouchHandlers } = useInteractionHook({
-    fabricCanvasRef: canvasCore.fabricCanvasRef,
-    handleCanvasChange: canvasCore.handleCanvasChange,
-    activeToolRef: canvasCore.activeToolRef,
-    isDrawingRef: canvasCore.isDrawingRef,
-    setIsDrawing: canvasCore.setIsDrawing,
-    setActiveTool: canvasCore.setActiveTool,
-    brushSize: canvasCore.brushSize,
-    brushColor: canvasCore.brushColor,
-    drawingMode: canvasCore.drawingMode,
+    fabricCanvasRef: canvasCoreFabricRef,
+    handleCanvasChange: handleCanvasChange,
+    activeToolRef: activeToolRef,
+    isDrawingRef: isDrawingRef,
+    setIsDrawing: setIsDrawing,
+    setActiveTool: setActiveTool,
+    brushSize: brushSize,
+    brushColor: brushColor,
+    drawingMode: drawingMode,
   })
 
   // Text tool hook
   const { useTextTool } = require("./hooks/use-text-tool")
   const { setupTextTool } = useTextTool({
-    fabricCanvasRef: canvasCore.fabricCanvasRef,
-    handleCanvasChange: canvasCore.handleCanvasChange,
-    activeTool: canvasCore.activeTool
+    fabricCanvasRef: canvasCoreFabricRef,
+    handleCanvasChange: handleCanvasChange,
+    activeTool: activeTool
   })
 
   // Setup interactions after canvas is loaded
   useEffect(() => {
-    if (!canvasCore.fabricLoaded || !canvasCore.fabricCanvasRef.current) return
+    if (!fabricLoaded || !canvasCoreFabricRef.current) return
 
     const cleanupInteractions = setupInteractions()
     const cleanupKeyboard = setupKeyboardHandlers()
@@ -125,7 +140,7 @@ export default function CanvasEditor() {
       if (cleanupDragDrop) cleanupDragDrop()
       if (cleanupTextTool) cleanupTextTool()
     }
-  }, [canvasCore.fabricLoaded, setupInteractions, setupKeyboardHandlers, setupPanAndZoom, setupTouchHandlers, imageOps.setupDragAndDrop, setupTextTool])
+  }, [fabricLoaded, setupInteractions, setupKeyboardHandlers, setupPanAndZoom, setupTouchHandlers, imageOps.setupDragAndDrop, setupTextTool])
 
   // Canvas initialization is handled by useFabricCanvas hook
 
@@ -232,11 +247,11 @@ export default function CanvasEditor() {
               <Trash2 className="h-3 w-3 mr-1.5" />
               Move to Trash
             </DropdownMenuItem>
-            {!isViewOnly && canvasCore.lastSaved && (
+            {!isViewOnly && lastSaved && (
               <>
                 <DropdownMenuSeparator />
                 <div className="px-2 py-1 text-xs text-muted-foreground">
-                  {canvasCore.isSaving ? "Saving..." : `Saved ${canvasCore.lastSaved.toLocaleTimeString()}`}
+                  {isSaving ? "Saving..." : `Saved ${lastSaved.toLocaleTimeString()}`}
                 </div>
               </>
             )}
@@ -281,19 +296,19 @@ export default function CanvasEditor() {
       {/* Controls Panel */}
       <div className="absolute right-4 top-1/2 z-10 -translate-y-1/2">
         <div className="flex flex-col gap-2 rounded-lg bg-card p-2 shadow-lg border w-12">
-          <Button variant="ghost" size="icon" onClick={canvasCore.handleZoomIn} className="h-8 w-8" title="Zoom In">
+          <Button variant="ghost" size="icon" onClick={handleZoomIn} className="h-8 w-8" title="Zoom In">
             <ZoomIn className="h-4 w-4" />
           </Button>
           <div className="text-xs text-center text-muted-foreground px-1">
-            {Math.round(canvasCore.zoomLevel * 100)}%
+            {Math.round(zoomLevel * 100)}%
           </div>
-          <Button variant="ghost" size="icon" onClick={canvasCore.handleZoomOut} className="h-8 w-8" title="Zoom Out">
+          <Button variant="ghost" size="icon" onClick={handleZoomOut} className="h-8 w-8" title="Zoom Out">
             <ZoomOut className="h-4 w-4" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
-            onClick={canvasCore.handleResetZoom}
+            onClick={handleResetZoom}
             className="h-8 w-8"
             title="Reset Zoom"
           >
@@ -313,10 +328,10 @@ export default function CanvasEditor() {
               return (
                 <Button
                   key={tool.id}
-                  variant={canvasCore.activeTool === tool.id ? "default" : "ghost"}
+                  variant={activeTool === tool.id ? "default" : "ghost"}
                   size="icon"
                   onClick={() => {
-                    canvasCore.setActiveTool(tool.id)
+                    setActiveTool(tool.id)
                   }}
                   className="h-10 w-10"
                   title={tool.label}
@@ -360,7 +375,7 @@ export default function CanvasEditor() {
                 if (imageOps.addImageToCanvas) {
                   await imageOps.addImageToCanvas(imageUrl)
                   setTimeout(() => {
-                    canvasCore.saveCanvasState()
+                    saveCanvasState()
                   }, 500)
                 }
               } catch (error) {
@@ -377,8 +392,8 @@ export default function CanvasEditor() {
       {/* Floating Toolbar for Selected Images */}
       {!isViewOnly && (
         <FloatingToolbar
-          selectedObjects={canvasCore.selectedObjects}
-          fabricCanvas={canvasCore.fabricCanvasRef.current}
+          selectedObjects={selectedObjects}
+          fabricCanvas={canvasCoreFabricRef.current}
           onCopy={() => imageOps.copyImageToClipboard()}
           onDuplicate={() => imageOps.duplicateSelectedImages()}
           onDownload={() => imageOps.downloadSelectedImages()}
@@ -393,10 +408,10 @@ export default function CanvasEditor() {
       {/* Text Toolbar */}
       {!isViewOnly && (
         <TextToolbar
-          isVisible={canvasCore.selectedObjects.length === 1 && canvasCore.selectedObjects[0]?.type === "textbox"}
-          selectedTextObject={canvasCore.selectedObjects.find(obj => obj.type === "textbox")}
-          fabricCanvas={canvasCore.fabricCanvasRef.current}
-          onTextChange={canvasCore.handleCanvasChange}
+          isVisible={selectedObjects.length === 1 && selectedObjects[0]?.type === "textbox"}
+          selectedTextObject={selectedObjects.find(obj => obj.type === "textbox")}
+          fabricCanvas={canvasCoreFabricRef.current}
+          onTextChange={handleCanvasChange}
         />
       )}
 

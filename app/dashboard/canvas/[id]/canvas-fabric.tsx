@@ -228,5 +228,7 @@ export function useFabricCanvas(
     addImageToCanvas,
     snapGrid,
     canvasRef,
+    // Return all canvas core functionality
+    ...canvasCore,
   }
 }
