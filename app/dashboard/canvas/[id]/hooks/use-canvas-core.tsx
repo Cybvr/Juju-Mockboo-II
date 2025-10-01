@@ -257,10 +257,9 @@ export function useCanvasCore(documentId: string, document: Document | null) {
       } else if (tool === "text") {
         canvas.defaultCursor = "text"
         canvas.hoverCursor = "text"
-        canvas.selection = true  // Allow selection for text editing
+        canvas.selection = false
         canvas.forEachObject((obj: any) => {
-          // Only make text objects selectable when text tool is active
-          obj.selectable = obj.type === 'textbox' || obj.type === 'text'
+          obj.selectable = false
         })
       } else if (tool === "pan") {
         canvas.defaultCursor = "grab"
