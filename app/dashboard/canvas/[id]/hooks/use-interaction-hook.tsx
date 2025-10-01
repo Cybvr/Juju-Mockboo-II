@@ -267,7 +267,13 @@ export function useInteractionHook({
     if (!fabricCanvasRef.current) return null
     const canvas = fabricCanvasRef.current
     const canvasElement = canvas.getElement()
-    let isPanning = false, lastPanX = 0, lastPanY = 0
+    let isPanning = false, lastPanX = 0, lastPanY = 0, lastDistance = 0
+    
+    const getDistance = (touch1: Touch, touch2: Touch) => {
+      const dx = touch1.clientX - touch2.clientX
+      const dy = touch1.clientY - touch2.clientY
+      return Math.sqrt(dx * dx + dy * dy)
+    }
     
     const handleTouchStart = (e: TouchEvent) => {
       if (e.touches.length === 1) {
@@ -283,6 +289,7 @@ export function useInteractionHook({
         const touch1 = e.touches[0], touch2 = e.touches[1]
         lastPanX = (touch1.clientX + touch2.clientX) / 2
         lastPanY = (touch1.clientY + touch2.clientY) / 2
+        lastDistance = getDistance(touch1, touch2)
       }
     }
     const handleTouchMove = (e: TouchEvent) => {
@@ -292,15 +299,30 @@ export function useInteractionHook({
         const touch1 = e.touches[0], touch2 = e.touches[1]
         const centerX = (touch1.clientX + touch2.clientX) / 2
         const centerY = (touch1.clientY + touch2.clientY) / 2
+        const distance = getDistance(touch1, touch2)
 
-        // Two fingers = pan only
+        // Pan
         const vpt = canvas.viewportTransform
         vpt[4] += centerX - lastPanX
         vpt[5] += centerY - lastPanY
-        canvas.requestRenderAll()
 
+        // Zoom
+        if (lastDistance > 0) {
+          const scale = distance / lastDistance
+          const zoom = canvas.getZoom() * scale
+          const clampedZoom = Math.min(Math.max(zoom, 0.2), 5)
+          
+          import("fabric").then((FabricModule) => {
+            const fabric = FabricModule
+            const point = new fabric.Point(centerX, centerY)
+            canvas.zoomToPoint(point, clampedZoom)
+          })
+        }
+
+        canvas.requestRenderAll()
         lastPanX = centerX
         lastPanY = centerY
+        lastDistance = distance
       }
     }
     const handleTouchEnd = () => {
