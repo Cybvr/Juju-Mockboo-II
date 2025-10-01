@@ -42,13 +42,7 @@ export function useInteractionHook({
     const handleMouseDown = (e: any) => {
       const tool = activeToolRef.current
 
-      if (tool === "text") {
-        const pointer = canvas.getPointer(e.e)
-        const { useTextTool } = require("./use-text-tool")
-        const { addTextAtPosition } = useTextTool({ fabricCanvasRef, handleCanvasChange, activeTool: tool })
-        addTextAtPosition(pointer.x, pointer.y)
-        return
-      }
+      
 
       if (tool === "sticky-note") {
         const pointer = canvas.getPointer(e.e)

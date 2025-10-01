@@ -6,7 +6,7 @@ import { documentService } from "@/services/documentService"
 import type { Document } from "@/types/firebase"
 import type { Canvas } from "fabric"
 
-type Tool = "select" | "square" | "circle" | "pan" | "text" | "pen" | "sticky-note"
+type Tool = "select" | "square" | "circle" | "pan" | "pen" | "sticky-note"
 
 export function useCanvasCore(documentId: string, document: Document | null) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -274,13 +274,7 @@ export function useCanvasCore(documentId: string, document: Document | null) {
         canvas.forEachObject((obj: any) => {
           obj.selectable = false
         })
-      } else if (tool === "text") {
-        canvas.defaultCursor = "text"
-        canvas.hoverCursor = "text"
-        canvas.selection = false
-        canvas.forEachObject((obj: any) => {
-          obj.selectable = false
-        })
+      
       } else if (tool === "pan") {
         canvas.defaultCursor = "grab"
         canvas.hoverCursor = "grab"
