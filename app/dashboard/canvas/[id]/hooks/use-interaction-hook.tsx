@@ -13,7 +13,7 @@ interface InteractionHookProps {
   brushSize?: number
   brushColor?: string
   drawingMode?: "draw" | "erase"
-  
+
 }
 
 export function useInteractionHook({
@@ -26,7 +26,7 @@ export function useInteractionHook({
   brushSize = 5,
   brushColor = "#000000",
   drawingMode = "draw",
-  
+
 }: InteractionHookProps) {
   const setupInteractions = useCallback(() => {
     if (!fabricCanvasRef.current) return null
@@ -54,9 +54,9 @@ export function useInteractionHook({
         return
       }
 
-      
 
-      
+
+
 
       if (activeToolRef.current === "select" || activeToolRef.current === "pan") return
 
@@ -169,7 +169,7 @@ export function useInteractionHook({
       const canvas = fabricCanvasRef.current
       if (!canvas) return
 
-      
+
 
       // Check if user is typing in regular HTML inputs OR editing text in canvas
       const activeElement = document.activeElement
