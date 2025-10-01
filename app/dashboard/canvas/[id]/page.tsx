@@ -59,13 +59,6 @@ export default function CanvasEditor() {
 
   // Use canvas core hook
   const canvasCore = useCanvasCore(documentId, document)
-  // Add snap grid functionality
-  const { useSnapGrid } = require("./hooks/use-snap-grid")
-  const snapGrid = useSnapGrid({
-    fabricCanvasRef: canvasCore.fabricCanvasRef,
-    gridSize: 20,
-    enabled: true
-  })
   
   // Image operations hook
   const imageOps = useImageOperations({
