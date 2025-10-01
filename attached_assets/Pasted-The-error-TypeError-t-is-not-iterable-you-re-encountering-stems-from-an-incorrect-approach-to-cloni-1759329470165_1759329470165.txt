@@ -1,0 +1,59 @@
+The error TypeError: t is not iterable you're encountering stems from an incorrect approach to cloning a Fabric.js group or activeSelection. Here’s a breakdown of the problem and how to fix it.
+
+The Problem: Incorrectly Cloning Group Children
+The error occurs because your code attempts to manually clone each individual object inside a group or active selection.
+
+JavaScript
+
+// The problematic code block
+if (activeObject.type === "activeSelection" || activeObject.type === "group") {
+  const objects = ...
+  // This loop is the source of the error
+  objects.forEach((obj: any, index: number) => {
+    obj.clone((cloned: any) => { 
+      // ...
+    })
+  })
+}
+When an object is part of a group in Fabric.js, its properties (like coordinates) are relative to the group container, not the canvas. Cloning an object in this state, isolated from its group context, can lead to an inconsistent internal state. This causes Fabric's internal toObject method, which is called by clone, to fail during serialization, resulting in the t is not iterable error.
+
+The Solution: Unified Cloning
+The correct approach is to let Fabric.js handle the complexity. The clone() method is polymorphic and works perfectly on groups and active selections. You should clone the entire group object itself, not its children individually.
+
+You can fix this by removing the special if/else logic for groups and using a single, unified call to activeObject.clone().
+
+Here is the corrected code for your handleKeyDown function's copy logic:
+
+JavaScript
+
+// Copy
+if ((e.ctrlKey || e.metaKey) && e.key === "c") {
+  e.preventDefault()
+  console.log("🟢 COPY: Starting copy operation")
+  const activeObject = canvas.getActiveObject()
+
+  if (!activeObject) {
+    console.log("🔴 COPY: No active object to copy")
+    return
+  }
+  
+  // ✅ UNIFIED AND CORRECTED LOGIC
+  try {
+    // Let Fabric's clone method handle all object types, including groups
+    activeObject.clone((cloned: any) => {
+      console.log("🟢 COPY: Object cloned successfully:", cloned)
+      // The paste logic expects an array, so we wrap the single cloned object (which could be a group) in an array.
+      window.copiedObjects = [cloned]
+      console.log("🟢 COPY: Stored in window.copiedObjects:", window.copiedObjects)
+    })
+  } catch (error) {
+    console.error("🔴 COPY ERROR: Failed to clone object:", error)
+  }
+  return
+}
+How This Fix Works
+Trust Fabric.js: This simplified code trusts Fabric's clone() method to correctly create a deep copy of whatever is selected, whether it's a single shape, a text object, or a complex group.
+
+Preserve Structure: When you clone a group, Fabric creates a new group with all its children correctly cloned and positioned inside it. The group structure is preserved.
+
+Works with Paste: Your existing paste logic is designed to iterate through window.copiedObjects and add each item to the canvas. By storing the entire cloned group as a single item in the array [cloned], the paste function will correctly add the entire group back to the canvas in one operation.
