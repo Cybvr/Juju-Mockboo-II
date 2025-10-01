@@ -76,6 +76,14 @@ export default function CanvasEditor() {
     userId: user?.uid,
   })
 
+  // Use fabric canvas hook for canvas initialization
+  const { useFabricCanvas } = require("./canvas-fabric")
+  const { FloatingToolbarComponent, addImageToCanvas } = useFabricCanvas(
+    document,
+    documentId,
+    (images) => setSelectedImages(images)
+  )
+
   // Import and setup interaction hook
   const { useInteractionHook } = require("./hooks/use-interaction-hook")
   const { setupInteractions, setupKeyboardHandlers, setupPanAndZoom, setupTouchHandlers } = useInteractionHook({
@@ -119,74 +127,7 @@ export default function CanvasEditor() {
     }
   }, [canvasCore.fabricLoaded, setupInteractions, setupKeyboardHandlers, setupPanAndZoom, setupTouchHandlers, imageOps.setupDragAndDrop, setupTextTool])
 
-  // Initialize Fabric.js canvas
-  useEffect(() => {
-    if (!canvasCore.canvasRef.current || !document) return
-
-    import("fabric").then((FabricModule) => {
-      const fabric = FabricModule.fabric || FabricModule
-      
-      // Dispose existing canvas
-      if (canvasCore.fabricCanvasRef.current) {
-        canvasCore.fabricCanvasRef.current.dispose()
-        canvasCore.fabricCanvasRef.current = null
-      }
-
-      const canvas = new fabric.Canvas(canvasCore.canvasRef.current, {
-        width: window.innerWidth,
-        height: window.innerHeight,
-        backgroundColor: "white",
-      })
-
-      canvasCore.fabricCanvasRef.current = canvas
-      canvasCore.setFabricLoaded(true)
-      
-      console.log("🎉 CANVAS LOADED ON PAGE LOAD HURRAY!! Canvas initialized successfully")
-      console.log("📐 Canvas dimensions:", { width: canvas.width, height: canvas.height })
-
-      // Setup drawing brush
-      canvas.freeDrawingBrush = new fabric.PencilBrush(canvas)
-      canvas.freeDrawingBrush.width = canvasCore.brushSize
-      canvas.freeDrawingBrush.color = canvasCore.brushColor
-
-      // Setup undo/redo
-      const { saveState } = canvasCore.setupUndoRedo(canvas)
-
-      // Setup canvas events
-      canvasCore.setupCanvasEvents(canvas, canvasCore.handleCanvasChange, (images) => {
-        setSelectedImages(images)
-      })
-      
-      // Additional text editing handlers
-      canvas.on('mouse:dblclick', (e) => {
-        if (e.target && (e.target.type === 'textbox' || e.target.type === 'text')) {
-          e.target.enterEditing()
-          e.target.selectAll()
-        }
-      })
-
-      // Setup resize handler
-      const cleanupResize = canvasCore.setupResizeHandler(canvas)
-
-      // Load canvas data if exists
-      if (document.content?.canvasData && Object.keys(document.content.canvasData).length > 0) {
-        console.log("📂 Loading existing canvas data from Firebase...")
-        canvas.loadFromJSON(document.content.canvasData, () => {
-          canvas.renderAll()
-          console.log("✅ CANVAS DATA LOADED SUCCESSFULLY! Objects count:", canvas.getObjects().length)
-          if (saveState) saveState()
-        })
-      } else {
-        console.log("🆕 Fresh canvas - no existing data to load")
-        if (saveState) saveState()
-      }
-
-      return () => {
-        cleanupResize()
-        canvas.dispose()
-      }
-    })
-  }, [document])
+  // Canvas initialization is handled by useFabricCanvas hook
 
   // Load document from Firebase
   useEffect(() => {
