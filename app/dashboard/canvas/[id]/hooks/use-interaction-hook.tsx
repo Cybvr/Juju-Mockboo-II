@@ -286,6 +286,7 @@ export function useInteractionHook({
         isPanning = true
         canvas.selection = false
         canvas.discardActiveObject()
+        canvas.isDrawingMode = false
         const touch1 = e.touches[0], touch2 = e.touches[1]
         lastPanX = (touch1.clientX + touch2.clientX) / 2
         lastPanY = (touch1.clientY + touch2.clientY) / 2
@@ -314,7 +315,10 @@ export function useInteractionHook({
           
           import("fabric").then((FabricModule) => {
             const fabric = FabricModule
-            const point = new fabric.Point(centerX, centerY)
+            const rect = canvasElement.getBoundingClientRect()
+            const localX = centerX - rect.left
+            const localY = centerY - rect.top
+            const point = new fabric.Point(localX, localY)
             canvas.zoomToPoint(point, clampedZoom)
           })
         }
