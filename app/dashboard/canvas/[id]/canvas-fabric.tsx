@@ -98,94 +98,59 @@ export function useFabricCanvas(
 
   useEffect(() => {
     if (!canvasRef.current || !documentData) return
+    
+    // Dispose existing canvas
     if (fabricCanvasRef.current) {
       fabricCanvasRef.current.dispose()
       fabricCanvasRef.current = null
     }
 
-    import("fabric")
-      .then((FabricModule) => {
-        const fabric = FabricModule
-        setFabricLoaded(true)
+    import("fabric").then((FabricModule) => {
+      const fabric = FabricModule
+      
+      const canvas = new fabric.Canvas(canvasRef.current, {
+        width: window.innerWidth,
+        height: window.innerHeight,
+        backgroundColor: "white",
+      })
 
-        if (canvasRef.current.__fabric) {
-          canvasRef.current.__fabric = null
-        }
-        if (!canvasRef.current) return
+      fabricCanvasRef.current = canvas
+      setFabricLoaded(true)
 
-        const canvas = new fabric.Canvas(canvasRef.current, {
-          width: window.innerWidth,
-          height: window.innerHeight,
-          backgroundColor: "white",
-          preserveObjectStacking: true,
-          enableRetinaScaling: false,
-          renderOnAddRemove: false,
+      // Setup drawing brush
+      canvas.freeDrawingBrush = new fabric.PencilBrush(canvas)
+      canvas.freeDrawingBrush.width = brushSize
+      canvas.freeDrawingBrush.color = brushColor
+
+      // Simple event handlers
+      canvas.on('object:modified', canvasCore.handleCanvasChange)
+      canvas.on('object:added', canvasCore.handleCanvasChange)
+      canvas.on('object:removed', canvasCore.handleCanvasChange)
+
+      // Load canvas data if exists
+      if (documentData.content?.canvasData && Object.keys(documentData.content.canvasData).length > 0) {
+        canvas.loadFromJSON(documentData.content.canvasData, () => {
+          canvas.renderAll()
         })
+      }
 
-        // Ensure canvas fills viewport immediately
+      // Resize handler
+      const handleResize = () => {
         canvas.setDimensions({
           width: window.innerWidth,
           height: window.innerHeight,
         })
-        fabricCanvasRef.current = canvas
+        canvas.renderAll()
+      }
 
-        canvas.freeDrawingBrush = new fabric.PencilBrush(canvas)
-        canvas.freeDrawingBrush.width = brushSize
-        canvas.freeDrawingBrush.color = brushColor
+      window.addEventListener('resize', handleResize)
 
-        // Setup undo/redo
-        const { saveState } = setupUndoRedo(canvas)
-
-        // Setup canvas events
-        setupCanvasEvents(canvas, canvasCore.handleCanvasChange, setSelectedObjects, onSelectedImagesChange, saveState)
-
-        // Setup interaction handlers
-        const cleanupInteractions = interactionHook.setupInteractions()
-        const cleanupKeyboard = interactionHook.setupKeyboardHandlers()
-        const cleanupPanZoom = interactionHook.setupPanAndZoom()
-        const cleanupTouch = interactionHook.setupTouchHandlers()
-
-        // Setup resize handler
-        const cleanupResize = setupResizeHandler(canvas)
-
-        // Setup drag and drop using centralized image operations
-        const cleanupDragDrop = imageOps.setupDragAndDrop()
-
-        // Setup canvas actions using centralized image operations
-        canvas._duplicateHandler = imageOps.duplicateSelectedImages
-        canvas._downloadHandler = imageOps.downloadSelectedImages
-        canvas._variationsHandler = imageOps.generateImageVariations
-
-        // Load existing canvas data
-        if (documentData.content?.canvasData) {
-          try {
-            canvas.loadFromJSON(documentData.content.canvasData, () => {
-              canvas.renderAll()
-            })
-          } catch (error) {
-            console.error("Error loading canvas data:", error)
-            canvas.renderAll()
-            setTimeout(() => canvas.renderAll(), 100)
-          }
-        } else {
-          canvas.renderAll()
-          setTimeout(() => canvas.renderAll(), 100)
-        }
-
-        return () => {
-          cleanupResize()
-          if (cleanupInteractions) cleanupInteractions()
-          if (cleanupKeyboard) cleanupKeyboard()
-          if (cleanupPanZoom) cleanupPanZoom()
-          if (cleanupTouch) cleanupTouch()
-          cleanupDragDrop()
-          canvas.dispose()
-        }
-      })
-      .catch((error) => {
-        console.error("Error initializing fabric canvas:", error)
-      })
-  }, [documentData])
+      return () => {
+        window.removeEventListener('resize', handleResize)
+        canvas.dispose()
+      }
+    })
+  }, [documentData, canvasRef])
 
   useEffect(() => {
     if (canvasCore.fabricLoaded && documentData) {

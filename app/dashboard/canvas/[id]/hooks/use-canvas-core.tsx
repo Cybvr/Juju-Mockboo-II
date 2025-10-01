@@ -147,31 +147,16 @@ export function useCanvasCore(documentId: string, document: Document | null) {
 
     try {
       setIsSaving(true)
-      const rawCanvasData = fabricCanvasRef.current.toJSON()
-      const cleanCanvasData = JSON.parse(JSON.stringify(rawCanvasData))
-
-      if (!cleanCanvasData.width) cleanCanvasData.width = 800
-      if (!cleanCanvasData.height) cleanCanvasData.height = 600
-
-      let thumbnail = document.content?.thumbnail
-      if (immediate) {
-        thumbnail = fabricCanvasRef.current.toDataURL({
-          format: "png",
-          quality: 0.6,
-          multiplier: 0.2,
-        })
-      }
+      const canvasData = fabricCanvasRef.current.toJSON()
 
       await documentService.updateDocument(documentId, {
         content: {
-          ...document.content,
-          canvasData: cleanCanvasData,
-          ...(thumbnail && { thumbnail }),
+          canvasData: canvasData,
+          canvasVersion: "1.0"
         },
       })
 
-      const now = new Date()
-      setLastSaved(now)
+      setLastSaved(new Date())
     } catch (error) {
       console.error("Error saving canvas:", error)
     } finally {
@@ -236,33 +221,23 @@ export function useCanvasCore(documentId: string, document: Document | null) {
 
     if (fabricCanvasRef.current) {
       const canvas = fabricCanvasRef.current
-      if (tool === "pan") {
-        canvas.defaultCursor = "grab"
-        canvas.hoverCursor = "grab"
+      
+      // Reset canvas state
+      canvas.isDrawingMode = false
+      canvas.selection = true
+      canvas.defaultCursor = "default"
+      canvas.hoverCursor = "move"
+      
+      // Make all objects selectable by default
+      canvas.forEachObject((obj: any) => {
+        obj.selectable = true
+      })
+
+      if (tool === "pen") {
+        canvas.isDrawingMode = true
         canvas.selection = false
-        canvas.isDrawingMode = false
-        canvas.forEachObject((obj: any) => {
-          obj.selectable = false
-        })
-      } else if (tool === "select") {
-        canvas.defaultCursor = "default"
-        canvas.hoverCursor = "move"
-        canvas.selection = true
-        canvas.isDrawingMode = false
-        canvas.forEachObject((obj: any) => {
-          obj.selectable = true
-        })
-      } else if (tool === "pen") {
         canvas.defaultCursor = "crosshair"
         canvas.hoverCursor = "crosshair"
-        canvas.selection = false
-        canvas.isDrawingMode = true
-        if (!canvas.freeDrawingBrush) {
-          import("fabric").then((FabricModule) => {
-            const fabric = FabricModule
-            canvas.freeDrawingBrush = new fabric.PencilBrush(canvas)
-          })
-        }
         if (canvas.freeDrawingBrush) {
           canvas.freeDrawingBrush.width = brushSize
           canvas.freeDrawingBrush.color = brushColor
@@ -270,15 +245,22 @@ export function useCanvasCore(documentId: string, document: Document | null) {
         canvas.forEachObject((obj: any) => {
           obj.selectable = false
         })
-      } else {
+      } else if (tool === "pan") {
+        canvas.defaultCursor = "grab"
+        canvas.hoverCursor = "grab"
+        canvas.selection = false
+        canvas.forEachObject((obj: any) => {
+          obj.selectable = false
+        })
+      } else if (tool !== "select") {
         canvas.defaultCursor = "crosshair"
         canvas.hoverCursor = "crosshair"
         canvas.selection = false
-        canvas.isDrawingMode = false
         canvas.forEachObject((obj: any) => {
           obj.selectable = false
         })
       }
+      
       canvas.renderAll()
     }
   }, [brushSize, brushColor])

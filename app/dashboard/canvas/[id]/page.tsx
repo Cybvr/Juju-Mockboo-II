@@ -256,11 +256,10 @@ export default function CanvasEditor() {
               return (
                 <Button
                   key={tool.id}
-                  variant="ghost"
+                  variant={canvasState.activeTool === tool.id ? "default" : "ghost"}
                   size="icon"
                   onClick={() => {
-                    // Tool selection will be handled by the canvas core
-                    console.log(`Selected tool: ${tool.id}`)
+                    operations.setActiveTool(tool.id)
                   }}
                   className="h-10 w-10"
                   title={tool.label}
