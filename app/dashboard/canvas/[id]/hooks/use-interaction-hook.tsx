@@ -181,7 +181,7 @@ export function useInteractionHook({
         e.preventDefault()
         const activeObjects = canvas.getActiveObjects()
         if (activeObjects?.length > 0) {
-          window.copiedObjects = activeObjects
+          window.copiedObjects = activeObjects.map(obj => obj.toObject())
         }
         return
       }
@@ -189,16 +189,22 @@ export function useInteractionHook({
       if ((e.ctrlKey || e.metaKey) && e.key === "v") {
         e.preventDefault()
         if (window.copiedObjects?.length > 0) {
-          window.copiedObjects.forEach((obj: any) => {
-            if (obj && typeof obj.clone === 'function') {
-              obj.clone((cloned: any) => {
-                cloned.set({ left: cloned.left + 20, top: cloned.top + 20 })
-                canvas.add(cloned)
-                canvas.setActiveObject(cloned)
+          import("fabric").then((FabricModule) => {
+            const fabric = FabricModule.fabric || FabricModule
+            
+            window.copiedObjects.forEach((objData: any) => {
+              fabric.util.enlivenObjects([objData], (objects: any) => {
+                const obj = objects[0]
+                obj.set({
+                  left: obj.left + 20,
+                  top: obj.top + 20
+                })
+                canvas.add(obj)
+                canvas.setActiveObject(obj)
                 canvas.renderAll()
                 handleCanvasChange()
               })
-            }
+            })
           })
         }
         return
