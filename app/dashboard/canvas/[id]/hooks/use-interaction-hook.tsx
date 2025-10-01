@@ -137,44 +137,18 @@ export function useInteractionHook({
       // Copy
       if ((e.ctrlKey || e.metaKey) && e.key === "c") {
         e.preventDefault()
-        console.log("🟢 COPY: Starting copy operation")
         const activeObject = canvas.getActiveObject()
-        console.log("🟢 COPY: Active object:", activeObject)
-        console.log("🟢 COPY: Object type:", activeObject?.type)
 
-        if (activeObject) {
-          try {
-            // Handle groups differently - copy individual objects
-            if (activeObject.type === "activeSelection" || activeObject.type === "group") {
-              console.log("🟢 COPY: Handling group/selection")
-              const objects = activeObject.type === "activeSelection" ? activeObject.getObjects() : activeObject._objects
-              const clonedObjects: any[] = []
-              let completed = 0
-
-              objects.forEach((obj: any, index: number) => {
-                obj.clone((cloned: any) => {
-                  clonedObjects[index] = cloned
-                  completed++
-                  if (completed === objects.length) {
-                    window.copiedObjects = clonedObjects
-                    console.log("🟢 COPY: Group objects stored:", window.copiedObjects)
-                  }
-                })
-              })
-            } else {
-              // Handle single objects
-              console.log("🟢 COPY: Handling single object")
-              activeObject.clone((cloned: any) => {
-                console.log("🟢 COPY: Object cloned successfully:", cloned)
-                window.copiedObjects = [cloned]
-                console.log("🟢 COPY: Stored in window.copiedObjects:", window.copiedObjects)
-              })
-            }
-          } catch (error) {
-            console.error("🔴 COPY ERROR: Failed to clone object:", error)
-          }
-        } else {
-          console.log("🔴 COPY: No active object to copy")
+        if (!activeObject) {
+          return
+        }
+        
+        try {
+          activeObject.clone((cloned: any) => {
+            window.copiedObjects = [cloned]
+          })
+        } catch (error) {
+          console.error("Copy failed:", error)
         }
         return
       }
