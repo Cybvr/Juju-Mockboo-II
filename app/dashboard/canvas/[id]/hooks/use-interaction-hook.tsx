@@ -167,18 +167,18 @@ export function useInteractionHook({
 
             // Preserve all custom properties from original object
             if (window.copiedObjects.stickyNoteGroup) {
-              clonedObj.stickyNoteGroup = true
+              clonedObj.stickyNoteGroup = window.copiedObjects.stickyNoteGroup
               clonedObj.stickyColor = window.copiedObjects.stickyColor || "yellow"
             }
 
             if (window.copiedObjects.isTextObject) {
-              clonedObj.isTextObject = true
+              clonedObj.isTextObject = window.copiedObjects.isTextObject
             }
 
             // Handle group objects (like sticky notes)
             if (clonedObj.type === "group" && window.copiedObjects.type === "group") {
               if (window.copiedObjects.stickyNoteGroup) {
-                clonedObj.stickyNoteGroup = true
+                clonedObj.stickyNoteGroup = window.copiedObjects.stickyNoteGroup
                 clonedObj.stickyColor = window.copiedObjects.stickyColor || "yellow"
               }
             }
