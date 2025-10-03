@@ -6,6 +6,7 @@ import { useImageOperations } from "./hooks/use-image-operations"
 import { useSnapGrid } from "./hooks/use-snap-grid"
 import { FloatingToolbar } from "./toolbars/image-toolbar"
 import { DrawingToolbar } from "./toolbars/drawing-toolbar"
+import { StickyNoteToolbar } from "./toolbars/sticky-note-toolbar"
 
 export function useFabricCanvas(
   documentData: Document | null,
@@ -165,6 +166,12 @@ export function useFabricCanvas(
         brushSize={canvasCore.brushSize}
         currentColor={canvasCore.brushColor}
         currentMode={canvasCore.drawingMode}
+      />
+      <StickyNoteToolbar
+        isVisible={canvasCore.selectedObjects.length > 0 && canvasCore.selectedObjects.some(obj => obj.type === "group" && obj.stickyNoteGroup)}
+        selectedStickyNote={canvasCore.selectedObjects.find(obj => obj.type === "group" && obj.stickyNoteGroup)}
+        fabricCanvas={canvasCore.fabricCanvasRef.current}
+        onNoteChange={canvasCore.handleCanvasChange}
       />
     </>
   )
