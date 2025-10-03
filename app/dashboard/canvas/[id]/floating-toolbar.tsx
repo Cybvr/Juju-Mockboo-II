@@ -48,7 +48,9 @@ export function FloatingToolbar({
   
 
   const hasImages = selectedObjects.some((obj: any) => obj.type === "image")
-  const hasStickyNotes = false // Sticky notes feature disabled
+  const hasStickyNotes = selectedObjects.some((obj: any) => 
+    obj.type === "group" && (obj.stickyNoteGroup === true || obj.stickyColor)
+  )
 
   useEffect(() => {
     if (!fabricCanvas || selectedObjects.length === 0) {
