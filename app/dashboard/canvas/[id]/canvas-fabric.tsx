@@ -167,7 +167,12 @@ export function useFabricCanvas(
         currentColor={canvasCore.brushColor}
         currentMode={canvasCore.drawingMode}
       />
-      
+      <StickyNoteToolbar
+        isVisible={!!canvasCore.selectedStickyNote}
+        selectedStickyNote={canvasCore.selectedStickyNote}
+        fabricCanvas={canvasCore.fabricCanvasRef.current}
+        onNoteChange={canvasCore.handleCanvasChange}
+      />
     </>
   )
 
