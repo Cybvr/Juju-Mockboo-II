@@ -115,7 +115,7 @@ export function useCanvasCore(documentId: string, document: Document | null) {
           })
         }
       })
-      
+
       setSelectedObjects(selected)
 
       // Track specific object types
@@ -124,7 +124,7 @@ export function useCanvasCore(documentId: string, document: Document | null) {
 
       setSelectedStickyNote(stickyNote || null)
       setSelectedTextObject(textObject || null)
-      
+
       if (onSelectedImagesChange) {
         const selectedImages = selected
           .filter((obj: any) => obj && obj.type === "image")
@@ -440,31 +440,31 @@ export function useCanvasCore(documentId: string, document: Document | null) {
     fabricCanvasRef,
     fabricLoaded,
     setFabricLoaded,
+    selectedObjects,
+    selectedStickyNote,
     activeTool,
     setActiveTool,
+    activeToolRef,
     brushSize,
     setBrushSize,
     brushColor,
     setBrushColor,
     drawingMode,
     setDrawingMode,
-    selectedObjects,
-    selectedStickyNote,
-    selectedTextObject,
-    zoomLevel,
-    lastSaved,
-    isSaving,
-    isDrawingRef,
+    isDrawing,
     setIsDrawing,
-    activeToolRef,
-    handleCanvasChange,
+    isDrawingRef,
+    zoomLevel,
     handleZoomIn,
     handleZoomOut,
     handleResetZoom,
+    handleCanvasChange,
+    saveCanvasState,
+    isSaving,
+    lastSaved,
     setupUndoRedo,
     setupCanvasEvents,
     setupResizeHandler,
-    saveCanvasState,
     handleDuplicate,
     handleDelete,
     handleCopy,
@@ -472,5 +472,6 @@ export function useCanvasCore(documentId: string, document: Document | null) {
     handleRedo: handleRedo,
     canUndo,
     canRedo,
+    selectedTextObject,
   }
 }
