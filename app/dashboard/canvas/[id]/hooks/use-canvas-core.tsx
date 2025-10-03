@@ -482,6 +482,108 @@ export function useCanvasCore(documentId: string, document: Document | null) {
     fabricCanvasRef.current.redo()
   }, [])
 
+  // Initialize Fabric.js and load document data
+  useEffect(() => {
+    const initCanvas = async () => {
+      if (!canvasRef.current) return
+
+      const FabricModule = await import("fabric")
+      const fabric = FabricModule
+
+      const canvas = new fabric.Canvas(canvasRef.current, {
+        width: window.innerWidth,
+        height: window.innerHeight,
+        backgroundColor: "#f0f0f0",
+        preserveObjectStacking: true,
+      })
+      fabricCanvasRef.current = canvas
+
+      const { saveState } = setupUndoRedo(canvas)
+      setupCanvasEvents(canvas, handleCanvasChange)
+      const removeResizeHandler = setupResizeHandler(canvas)
+
+      // Load existing canvas data
+      if (document && document.content?.canvasData && Object.keys(document.content.canvasData).length > 0) {
+        // Load existing canvas data
+        if (document.content?.canvasData && Object.keys(document.content.canvasData).length > 0) {
+          canvas.loadFromJSON(document.content.canvasData, () => {
+            // Restore sticky note and other custom properties after loading
+            canvas.getObjects().forEach((obj: any) => {
+              if (obj.type === "group") {
+                // If it was saved with stickyNoteGroup property, restore it properly
+                if (obj.stickyNoteGroup === true) {
+                  Object.defineProperty(obj, 'stickyNoteGroup', {
+                    value: true,
+                    writable: true,
+                    enumerable: true,
+                    configurable: false
+                  })
+                  Object.defineProperty(obj, 'stickyColor', {
+                    value: obj.stickyColor || "yellow",
+                    writable: true,
+                    enumerable: true,
+                    configurable: true
+                  })
+                  console.log("🗒️ Restored sticky note:", obj.stickyColor)
+                } else {
+                  // Fallback: Check if this is a sticky note by examining its structure
+                  const objects = obj.getObjects()
+                  if (objects && objects.length >= 2) {
+                    const hasRect = objects.some((child: any) => child.type === "rect")
+                    const hasText = objects.some((child: any) => child.type === "textbox")
+
+                    if (hasRect && hasText) {
+                      // This is a sticky note - restore its properties
+                      Object.defineProperty(obj, 'stickyNoteGroup', {
+                        value: true,
+                        writable: true,
+                        enumerable: true,
+                        configurable: false
+                      })
+                      Object.defineProperty(obj, 'stickyColor', {
+                        value: obj.stickyColor || "yellow",
+                        writable: true,
+                        enumerable: true,
+                        configurable: true
+                      })
+                      console.log("🗒️ Restored sticky note (fallback):", obj.stickyColor)
+                    }
+                  }
+                }
+              }
+
+              // Restore text object properties
+              if (obj.isTextObject === true) {
+                obj.isTextObject = true
+              }
+            })
+            canvas.renderAll()
+          })
+        } else {
+          // Force render even if no data to load
+          canvas.renderAll()
+        }
+      } else {
+        // Force render even if no data to load
+        canvas.renderAll()
+      }
+
+      // Initial save state
+      saveState()
+      setFabricLoaded(true)
+
+      return () => {
+        canvas.dispose()
+        removeResizeHandler()
+        if (autoSaveIntervalRef.current) {
+          clearTimeout(autoSaveIntervalRef.current)
+        }
+      }
+    }
+    initCanvas()
+  }, [documentId, document, setupUndoRedo, setupCanvasEvents, setupResizeHandler, handleCanvasChange, saveCanvasState])
+
+
   // Update refs
   useEffect(() => {
     activeToolRef.current = activeTool
