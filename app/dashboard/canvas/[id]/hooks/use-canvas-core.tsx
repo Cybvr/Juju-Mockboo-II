@@ -219,7 +219,7 @@ export function useCanvasCore(documentId: string, document: Document | null) {
   const handleZoomIn = useCallback(() => {
     if (!fabricCanvasRef.current) return
     const canvas = fabricCanvasRef.current
-    const newZoom = Math.min(zoomLevel * 1.2, 5)
+    const newZoom = Math.min(zoomLevel * 1.5, 10)
     setZoomLevel(newZoom)
 
     import("fabric").then((FabricModule) => {
@@ -233,7 +233,7 @@ export function useCanvasCore(documentId: string, document: Document | null) {
   const handleZoomOut = useCallback(() => {
     if (!fabricCanvasRef.current) return
     const canvas = fabricCanvasRef.current
-    const newZoom = Math.max(zoomLevel / 1.2, 0.2)
+    const newZoom = Math.max(zoomLevel / 1.5, 0.1)
     setZoomLevel(newZoom)
 
     import("fabric").then((FabricModule) => {
