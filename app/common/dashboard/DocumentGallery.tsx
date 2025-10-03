@@ -260,6 +260,36 @@ export function DocumentGallery({
     }
   }
 
+  const handleDuplicate = async (documentId: string) => {
+    if (!user) {
+      toast.error("Please sign in to duplicate documents")
+      return
+    }
+    
+    const flatDoc = flattenedDocuments.find(item => item.id === documentId)
+    if (!flatDoc) return
+    
+    try {
+      const originalDoc = flatDoc.originalDoc
+      const duplicatedDoc = await documentService.createDocument(user.uid, {
+        ...originalDoc,
+        title: `${originalDoc.title} (Copy)`,
+        id: undefined,
+        createdAt: undefined,
+        updatedAt: undefined
+      })
+      
+      // Refresh the documents list
+      const userDocs = await documentService.getUserRecentDocuments(user.uid, 100)
+      setDocuments(userDocs)
+      
+      toast.success("Document duplicated successfully")
+    } catch (error) {
+      console.error("Error duplicating document:", error)
+      toast.error("Failed to duplicate document")
+    }
+  }
+
   const handleDocumentClick = async (documentId: string) => {
     const flatDoc = flattenedDocuments.find(item => item.id === documentId)
     if (!flatDoc) return
@@ -354,6 +384,7 @@ export function DocumentGallery({
                     onRename={handleRenameClick}
                     onLike={handleLike}
                     onDownload={handleDownload}
+                    onDuplicate={handleDuplicate}
                     isLiked={isDocumentLiked(flatDoc)}
                     onClick={() => handleDocumentClick(flatDoc.id)}
                     onAddToBoard={(docId: string, imageUrl: string) => {

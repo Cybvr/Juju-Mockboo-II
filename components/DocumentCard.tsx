@@ -25,6 +25,7 @@ interface DocumentCardProps {
   onRename?: (id: string) => void
   onLike?: (id: string, isLiked: boolean) => void
   onDownload?: (id: string, thumbnail: string, name: string) => void
+  onDuplicate?: (id: string) => void
   isLiked?: boolean
   onClick?: () => void
   onAddToBoard?: (documentId: string, imageUrl: string) => void
@@ -38,6 +39,7 @@ export function DocumentCard({
   onRename,
   onLike,
   onDownload,
+  onDuplicate,
   isLiked = false,
   onClick,
   onAddToBoard,
@@ -106,6 +108,13 @@ export function DocumentCard({
     }
   }
 
+  const handleDuplicate = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (onDuplicate) {
+      onDuplicate(document.id)
+    }
+  }
+
   const handleVideoError = (e: React.SyntheticEvent<HTMLVideoElement>) => {
     const video = e.target as HTMLVideoElement
     const fallback = video.nextElementSibling as HTMLElement
@@ -157,6 +166,12 @@ export function DocumentCard({
                 <Edit className="mr-2 h-4 w-4" />
                 Rename
               </DropdownMenuItem>
+              {onDuplicate && (
+                <DropdownMenuItem onClick={handleDuplicate} className="px-3 py-2">
+                  <Edit className="h-4 w-4 mr-2" />
+                  Duplicate
+                </DropdownMenuItem>
+              )}
               {document.type === 'image' && (
                 <DropdownMenuItem
                   onClick={() => window.open(`/dashboard/images/${document.id.split('-')[0]}`, '_blank')}
@@ -164,15 +179,6 @@ export function DocumentCard({
                 >
                   <Edit className="mr-2 h-4 w-4" />
                   Edit Image
-                </DropdownMenuItem>
-              )}
-              {document.type === 'image' && (
-                <DropdownMenuItem
-                  onClick={() => window.open(`/dashboard/canvas/${document.id.split('-')[0]}`, '_blank')}
-                  className="text-foreground hover:bg-muted"
-                >
-                  <Edit className="mr-2 h-4 w-4" />
-                  Edit in Canvas
                 </DropdownMenuItem>
               )}
               {document.thumbnail && (
