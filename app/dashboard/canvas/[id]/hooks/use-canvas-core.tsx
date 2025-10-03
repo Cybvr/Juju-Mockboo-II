@@ -438,18 +438,16 @@ export function useCanvasCore(documentId: string, document: Document | null) {
 
       // Handle group objects (like sticky notes) - FORCE sticky note properties
       if (clonedObj.type === "group" && window.copiedObjects.stickyNoteGroup === true) {
-        Object.defineProperty(clonedObj, 'stickyNoteGroup', {
-          value: true,
-          writable: true,
-          enumerable: true,
-          configurable: false
-        })
-        Object.defineProperty(clonedObj, 'stickyColor', {
-          value: window.copiedObjects.stickyColor || "yellow",
-          writable: true,
-          enumerable: true,
-          configurable: true
-        })
+        clonedObj.stickyNoteGroup = true
+        clonedObj.stickyColor = window.copiedObjects.stickyColor || "yellow"
+        
+        // Override toObject to ensure custom properties are serialized
+        clonedObj.toObject = function() {
+          return fabric.util.object.extend(fabric.Group.prototype.toObject.call(this), {
+            stickyNoteGroup: this.stickyNoteGroup,
+            stickyColor: this.stickyColor
+          })
+        }
       }
 
       import("fabric").then(({ ActiveSelection }) => {

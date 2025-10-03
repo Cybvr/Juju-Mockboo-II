@@ -77,25 +77,21 @@ export function useFabricCanvas(
             // Restore sticky note properties after loading
             canvas.getObjects().forEach((obj: any) => {
               if (obj.type === "group") {
-                // Check if this is a sticky note by examining its structure
+                // Check if this is a sticky note by examining its structure OR if it has the sticky properties
                 const objects = obj.getObjects()
-                if (objects && objects.length >= 2) {
-                  const hasRect = objects.some((child: any) => child.type === "rect")
-                  const hasText = objects.some((child: any) => child.type === "textbox")
+                const hasRect = objects && objects.some((child: any) => child.type === "rect")
+                const hasText = objects && objects.some((child: any) => child.type === "textbox")
+                
+                if ((hasRect && hasText) || obj.stickyNoteGroup) {
+                  // This is a sticky note - restore its properties
+                  obj.stickyNoteGroup = true
+                  obj.stickyColor = obj.stickyColor || "yellow"
                   
-                  if (hasRect && hasText) {
-                    // This is a sticky note - restore its properties
-                    Object.defineProperty(obj, 'stickyNoteGroup', {
-                      value: true,
-                      writable: true,
-                      enumerable: true,
-                      configurable: false
-                    })
-                    Object.defineProperty(obj, 'stickyColor', {
-                      value: obj.stickyColor || "yellow",
-                      writable: true,
-                      enumerable: true,
-                      configurable: true
+                  // Override toObject to ensure custom properties are serialized
+                  obj.toObject = function() {
+                    return fabric.util.object.extend(fabric.Group.prototype.toObject.call(this), {
+                      stickyNoteGroup: this.stickyNoteGroup,
+                      stickyColor: this.stickyColor
                     })
                   }
                 }

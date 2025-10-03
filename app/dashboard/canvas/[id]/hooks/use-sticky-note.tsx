@@ -70,6 +70,14 @@ export function useStickyNote({ fabricCanvasRef, handleCanvasChange }: StickyNot
       stickyGroup.stickyNoteGroup = true
       stickyGroup.stickyColor = options?.color || "yellow"
 
+      // Override toObject to ensure custom properties are serialized
+      stickyGroup.toObject = function() {
+        return fabric.util.object.extend(fabric.Group.prototype.toObject.call(this), {
+          stickyNoteGroup: this.stickyNoteGroup,
+          stickyColor: this.stickyColor
+        })
+      }
+
       canvas.add(stickyGroup)
       canvas.setActiveObject(stickyGroup)
       canvas.renderAll()
