@@ -4,7 +4,7 @@ import { Download, RefreshCcw, CircleFadingPlus, Flower2, Video, Scaling } from 
 import { useState, useEffect } from "react"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { VisualRestylePanel } from "../common/visual-restyle-panel"
+import { VisualRestylePanel } from "../../common/visual-restyle-panel"
 
 interface FloatingToolbarProps {
   selectedObjects: any[]

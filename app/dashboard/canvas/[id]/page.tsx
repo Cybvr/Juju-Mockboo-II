@@ -33,10 +33,10 @@ import { GeneratingMedia } from "./GeneratingMedia"
 import { ProfileDropdown } from "@/app/common/dashboard/ProfileDropdown"
 import { ShareModal } from "@/components/ShareModal"
 import { useSnapGrid } from "./hooks/use-snap-grid"
-import { FloatingToolbar } from "./floating-toolbar"
+import { FloatingToolbar } from "./toolbars/image-toolbar"
 
-import { StickyNoteToolbar } from "../common/sticky-note-toolbar"
-import { TextToolbar } from "./text-toolbar"
+import { StickyNoteToolbar } from "./toolbars/sticky-note-toolbar"
+import { TextToolbar } from "./toolbars/text-toolbar"
 import { useFabricCanvas } from "./canvas-fabric"
 import {
   DropdownMenu,

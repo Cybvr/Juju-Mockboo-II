@@ -4,8 +4,8 @@ import type { Document } from "@/types/firebase"
 import { useCanvasCore } from "./hooks/use-canvas-core"
 import { useImageOperations } from "./hooks/use-image-operations"
 import { useSnapGrid } from "./hooks/use-snap-grid"
-import { FloatingToolbar } from "./floating-toolbar"
-import { DrawingToolbar } from "../common/drawing-toolbar"
+import { FloatingToolbar } from "./toolbars/image-toolbar"
+import { DrawingToolbar } from "./toolbars/drawing-toolbar"
 
 export function useFabricCanvas(
   documentData: Document | null,
