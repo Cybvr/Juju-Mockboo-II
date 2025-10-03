@@ -217,8 +217,8 @@ export function useInteractionHook({
       const evt = opt.e
       evt.preventDefault()
       
-      // Trackpad pinch zoom (when ctrlKey is true or it's a zoom gesture)
-      if (evt.ctrlKey || (!evt.shiftKey && Math.abs(evt.deltaY) > Math.abs(evt.deltaX))) {
+      // Trackpad pinch zoom (when ctrlKey is true - this is the pinch gesture)
+      if (evt.ctrlKey) {
         const delta = evt.deltaY
         const zoom = canvas.getZoom()
         let newZoom = zoom * (1 - delta / 1000)
@@ -232,8 +232,8 @@ export function useInteractionHook({
           canvas.zoomToPoint(pointer, newZoom)
         })
       }
-      // Two-finger trackpad pan (when shift is held or deltaX exists)
-      else if (evt.shiftKey || Math.abs(evt.deltaX) > 0) {
+      // Two-finger trackpad pan (when shift is held or significant horizontal movement)
+      else if (evt.shiftKey || Math.abs(evt.deltaX) > Math.abs(evt.deltaY)) {
         const vpt = canvas.viewportTransform
         vpt[4] -= evt.deltaX
         vpt[5] -= evt.deltaY
