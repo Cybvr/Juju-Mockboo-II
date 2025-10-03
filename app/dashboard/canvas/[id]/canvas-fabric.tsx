@@ -74,17 +74,6 @@ export function useFabricCanvas(
         // Load existing canvas data
         if (documentData.content?.canvasData && Object.keys(documentData.content.canvasData).length > 0) {
           canvas.loadFromJSON(documentData.content.canvasData, () => {
-            // Restore sticky note properties after loading
-            canvas.getObjects().forEach((obj: any) => {
-              if (obj.type === "group" && obj.stickyColor) {
-                Object.defineProperty(obj, 'stickyNoteGroup', {
-                  value: true,
-                  writable: true,
-                  enumerable: true,
-                  configurable: false
-                })
-              }
-            })
             canvas.renderAll()
           })
         } else {
