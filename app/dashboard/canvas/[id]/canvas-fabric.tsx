@@ -56,13 +56,7 @@ export function useFabricCanvas(
         canvas.freeDrawingBrush.color = canvasCore.brushColor
 
         // Setup undo/redo ONCE
-        const undoRedoManager = canvasCore.setupUndoRedo(canvas)
-        
-        // Make sure undo/redo methods are accessible
-        if (undoRedoManager && undoRedoManager.saveState) {
-          // Save initial state
-          undoRedoManager.saveState()
-        }
+        canvasCore.setupUndoRedo(canvas)
 
         // Setup canvas events ONCE
         canvasCore.setupCanvasEvents(canvas, canvasCore.handleCanvasChange, onSelectedImagesChange)
