@@ -103,8 +103,17 @@ export function useCanvasCore(documentId: string, document: Document | null) {
     canvas.on("text:editing:exited", () => handleCanvasChange())
 
     const updateSelection = (selected: any[]) => {
+      console.log("🎯 SELECTION UPDATE - Objects selected:", selected.length)
+      
       // Ensure sticky note properties are preserved during selection
-      selected.forEach((obj: any) => {
+      selected.forEach((obj: any, index) => {
+        console.log(`🎯 Selected object ${index + 1}:`, {
+          type: obj.type,
+          stickyNoteGroup: obj.stickyNoteGroup,
+          stickyColor: obj.stickyColor,
+          isTextObject: obj.isTextObject
+        })
+        
         if (obj.type === "group" && obj.stickyNoteGroup) {
           // Preserve sticky note properties
           Object.defineProperty(obj, 'stickyNoteGroup', {
@@ -113,6 +122,7 @@ export function useCanvasCore(documentId: string, document: Document | null) {
             enumerable: true,
             configurable: false
           })
+          console.log("🟡 STICKY NOTE SELECTED - Properties preserved")
         }
       })
 
@@ -121,6 +131,16 @@ export function useCanvasCore(documentId: string, document: Document | null) {
       // Track specific object types
       const stickyNote = selected.find((obj: any) => obj.type === "group" && obj.stickyNoteGroup)
       const textObject = selected.find((obj: any) => obj.isTextObject || obj.type === 'textbox' || obj.type === 'i-text')
+
+      console.log("🟡 STICKY NOTE TOOLBAR TRIGGER:", !!stickyNote)
+      if (stickyNote) {
+        console.log("🟡 Selected sticky note details:", {
+          stickyNoteGroup: stickyNote.stickyNoteGroup,
+          stickyColor: stickyNote.stickyColor,
+          objectCount: stickyNote.getObjects?.()?.length,
+          textContent: stickyNote.getObjects?.()?.find((obj: any) => obj.type === 'textbox')?.text
+        })
+      }
 
       setSelectedStickyNote(stickyNote || null)
       setSelectedTextObject(textObject || null)
@@ -177,6 +197,18 @@ export function useCanvasCore(documentId: string, document: Document | null) {
     try {
       setIsSaving(true)
       const rawCanvasData = fabricCanvasRef.current.toJSON()
+
+      // Debug logs for sticky notes
+      const stickyNotes = rawCanvasData.objects?.filter(obj => obj.type === 'group' && obj.stickyNoteGroup)
+      console.log("🟡 STICKY NOTES BEING SAVED:", stickyNotes?.length || 0)
+      stickyNotes?.forEach((stickyNote, index) => {
+        console.log(`🟡 Sticky Note ${index + 1}:`, {
+          stickyNoteGroup: stickyNote.stickyNoteGroup,
+          stickyColor: stickyNote.stickyColor,
+          hasObjects: stickyNote.objects?.length,
+          textContent: stickyNote.objects?.find(obj => obj.type === 'textbox')?.text
+        })
+      })
 
       // Debug logs for text objects
       console.log("🔍 Saving canvas state - Raw data:", rawCanvasData)

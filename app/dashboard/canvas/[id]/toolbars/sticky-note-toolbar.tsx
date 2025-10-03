@@ -50,9 +50,21 @@ export function StickyNoteToolbar({
   const [currentAlignment, setCurrentAlignment] = useState("left")
 
   useEffect(() => {
+    console.log("🛠️ STICKY NOTE TOOLBAR UPDATE:", {
+      isVisible,
+      hasSelectedStickyNote: !!selectedStickyNote,
+      hasFabricCanvas: !!fabricCanvas,
+      stickyNoteType: selectedStickyNote?.type,
+      stickyNoteGroup: selectedStickyNote?.stickyNoteGroup,
+      stickyColor: selectedStickyNote?.stickyColor
+    })
+    
     if (!isVisible || !selectedStickyNote || !fabricCanvas) {
+      console.log("🛠️ TOOLBAR NOT SHOWING - Missing requirements")
       return
     }
+    
+    console.log("🛠️ TOOLBAR SHOULD BE VISIBLE NOW")
 
     // Position toolbar above the selected sticky note
     const objBounds = selectedStickyNote.getBoundingRect()

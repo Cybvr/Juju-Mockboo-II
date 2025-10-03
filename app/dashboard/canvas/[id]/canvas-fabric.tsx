@@ -75,17 +75,39 @@ export function useFabricCanvas(
         if (documentData.content?.canvasData && Object.keys(documentData.content.canvasData).length > 0) {
           canvas.loadFromJSON(documentData.content.canvasData, () => {
             // Restore sticky note properties after loading
-            canvas.getObjects().forEach((obj: any) => {
+            const allObjects = canvas.getObjects()
+            console.log("🔄 LOADING FROM FIREBASE - Total objects:", allObjects.length)
+            
+            allObjects.forEach((obj: any, index) => {
+              console.log(`🔄 Object ${index + 1}:`, {
+                type: obj.type,
+                stickyNoteGroup: obj.stickyNoteGroup,
+                stickyColor: obj.stickyColor
+              })
+              
               if (obj.type === "group") {
                 // Check if this is a sticky note by examining its structure OR if it has the sticky properties
                 const objects = obj.getObjects()
                 const hasRect = objects && objects.some((child: any) => child.type === "rect")
                 const hasText = objects && objects.some((child: any) => child.type === "textbox")
                 
+                console.log(`🔄 Group ${index + 1} analysis:`, {
+                  hasRect,
+                  hasText,
+                  existingStickyProp: obj.stickyNoteGroup,
+                  childrenCount: objects?.length
+                })
+                
                 if ((hasRect && hasText) || obj.stickyNoteGroup) {
                   // This is a sticky note - restore its properties
                   obj.stickyNoteGroup = true
                   obj.stickyColor = obj.stickyColor || "yellow"
+                  
+                  console.log("🟡 STICKY NOTE RESTORED:", {
+                    stickyNoteGroup: obj.stickyNoteGroup,
+                    stickyColor: obj.stickyColor,
+                    textContent: objects?.find((child: any) => child.type === 'textbox')?.text
+                  })
                   
                   // Override toObject to ensure custom properties are serialized
                   obj.toObject = function() {
