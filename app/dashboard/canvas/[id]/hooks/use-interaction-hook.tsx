@@ -165,20 +165,19 @@ export function useInteractionHook({
               evented: true,
             })
 
-            // Preserve all custom properties from original object
+            // Preserve custom properties
             if (window.copiedObjects.stickyNoteGroup) {
-              clonedObj.stickyNoteGroup = window.copiedObjects.stickyNoteGroup
+              clonedObj.stickyNoteGroup = true
               clonedObj.stickyColor = window.copiedObjects.stickyColor || "yellow"
             }
-
             if (window.copiedObjects.isTextObject) {
-              clonedObj.isTextObject = window.copiedObjects.isTextObject
+              clonedObj.isTextObject = true
             }
 
             // Handle group objects (like sticky notes)
             if (clonedObj.type === "group" && window.copiedObjects.type === "group") {
               if (window.copiedObjects.stickyNoteGroup) {
-                clonedObj.stickyNoteGroup = window.copiedObjects.stickyNoteGroup
+                clonedObj.stickyNoteGroup = true
                 clonedObj.stickyColor = window.copiedObjects.stickyColor || "yellow"
               }
             }
@@ -229,14 +228,14 @@ export function useInteractionHook({
     const handleMouseWheel = (opt: any) => {
       const evt = opt.e
       evt.preventDefault()
-
+      
       // Trackpad pinch zoom (when ctrlKey is true - this is the pinch gesture)
       if (evt.ctrlKey) {
         const delta = evt.deltaY
         const zoom = canvas.getZoom()
-        let newZoom = zoom * (1 - delta / 100)
+        let newZoom = zoom * (1 - delta / 1000)
         newZoom = Math.max(0.001, Math.min(1000, newZoom))
-
+        
         import("fabric").then((FabricModule) => {
           const fabric = FabricModule
           const canvasElement = canvas.getElement()
@@ -296,13 +295,13 @@ export function useInteractionHook({
     const canvas = fabricCanvasRef.current
     const canvasElement = canvas.getElement()
     let isPanning = false, lastPanX = 0, lastPanY = 0, lastDistance = 0
-
+    
     const getDistance = (touch1: Touch, touch2: Touch) => {
       const dx = touch1.clientX - touch2.clientX
       const dy = touch1.clientY - touch2.clientY
       return Math.sqrt(dx * dx + dy * dy)
     }
-
+    
     const handleTouchStart = (e: TouchEvent) => {
       if (e.touches.length === 1) {
         const touch = e.touches[0]
@@ -340,7 +339,7 @@ export function useInteractionHook({
           const scale = distance / lastDistance
           const zoom = canvas.getZoom() * scale
           const clampedZoom = Math.min(Math.max(zoom, 0.1), 10)
-
+          
           import("fabric").then((FabricModule) => {
             const fabric = FabricModule
             const rect = canvasElement.getBoundingClientRect()
