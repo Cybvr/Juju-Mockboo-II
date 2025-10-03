@@ -73,16 +73,20 @@ export function useFabricCanvas(
 
         // Load existing canvas data
         if (documentData.content?.canvasData && Object.keys(documentData.content.canvasData).length > 0) {
+          console.log("🔄 STARTING FIREBASE LOAD - Canvas data exists")
+          console.log("🔄 Raw Firebase data:", documentData.content.canvasData)
+          
           canvas.loadFromJSON(documentData.content.canvasData, () => {
             // Restore sticky note properties after loading
             const allObjects = canvas.getObjects()
             console.log("🔄 LOADING FROM FIREBASE - Total objects:", allObjects.length)
             
             allObjects.forEach((obj: any, index) => {
-              console.log(`🔄 Object ${index + 1}:`, {
+              console.log(`🔄 Object ${index + 1} RAW:`, {
                 type: obj.type,
                 stickyNoteGroup: obj.stickyNoteGroup,
-                stickyColor: obj.stickyColor
+                stickyColor: obj.stickyColor,
+                hasToObject: typeof obj.toObject === 'function'
               })
               
               if (obj.type === "group") {
@@ -90,39 +94,58 @@ export function useFabricCanvas(
                 const objects = obj.getObjects()
                 const hasRect = objects && objects.some((child: any) => child.type === "rect")
                 const hasText = objects && objects.some((child: any) => child.type === "textbox")
+                const textContent = objects?.find((child: any) => child.type === 'textbox')?.text
                 
-                console.log(`🔄 Group ${index + 1} analysis:`, {
+                console.log(`🔄 Group ${index + 1} DETAILED analysis:`, {
                   hasRect,
                   hasText,
                   existingStickyProp: obj.stickyNoteGroup,
-                  childrenCount: objects?.length
+                  childrenCount: objects?.length,
+                  textContent: textContent,
+                  childTypes: objects?.map(child => child.type)
                 })
                 
                 if ((hasRect && hasText) || obj.stickyNoteGroup) {
-                  // This is a sticky note - restore its properties
+                  console.log(`🟡 RESTORING STICKY NOTE ${index + 1}...`)
+                  
+                  // Force set sticky note properties
                   obj.stickyNoteGroup = true
                   obj.stickyColor = obj.stickyColor || "yellow"
                   
                   console.log("🟡 STICKY NOTE RESTORED:", {
                     stickyNoteGroup: obj.stickyNoteGroup,
                     stickyColor: obj.stickyColor,
-                    textContent: objects?.find((child: any) => child.type === 'textbox')?.text
+                    textContent: textContent,
+                    objectId: obj.id || 'no-id'
                   })
                   
                   // Override toObject to ensure custom properties are serialized
                   obj.toObject = function() {
-                    return fabric.util.object.extend(fabric.Group.prototype.toObject.call(this), {
+                    const result = fabric.util.object.extend(fabric.Group.prototype.toObject.call(this), {
                       stickyNoteGroup: this.stickyNoteGroup,
                       stickyColor: this.stickyColor
                     })
+                    console.log("🟡 toObject called for sticky note:", result)
+                    return result
                   }
+                } else {
+                  console.log(`❌ Group ${index + 1} NOT recognized as sticky note`)
                 }
               }
             })
+            
+            console.log("🔄 CANVAS LOADED - Final object count:", canvas.getObjects().length)
+            console.log("🔄 All objects after loading:", canvas.getObjects().map((obj: any, i) => ({
+              index: i + 1,
+              type: obj.type,
+              stickyNoteGroup: obj.stickyNoteGroup,
+              stickyColor: obj.stickyColor
+            })))
+            
             canvas.renderAll()
           })
         } else {
-          // Force render even if no data to load
+          console.log("🔄 NO FIREBASE DATA TO LOAD")
           canvas.renderAll()
         }
 

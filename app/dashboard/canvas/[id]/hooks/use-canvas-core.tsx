@@ -154,16 +154,29 @@ export function useCanvasCore(documentId: string, document: Document | null) {
     }
 
     canvas.on("selection:created", (e: any) => {
+      console.log("🎯 SELECTION CREATED event:", e)
       const selected = (e.selected || (e.target ? [e.target] : [])).filter((obj: any) => obj != null)
+      console.log("🎯 Selected objects from event:", selected.map((obj: any) => ({
+        type: obj.type,
+        stickyNoteGroup: obj.stickyNoteGroup,
+        stickyColor: obj.stickyColor
+      })))
       updateSelection(selected)
     })
 
     canvas.on("selection:updated", (e: any) => {
+      console.log("🎯 SELECTION UPDATED event:", e)
       const selected = (e.selected || canvas.getActiveObjects()).filter((obj: any) => obj != null)
+      console.log("🎯 Updated selection:", selected.map((obj: any) => ({
+        type: obj.type,
+        stickyNoteGroup: obj.stickyNoteGroup,
+        stickyColor: obj.stickyColor
+      })))
       updateSelection(selected)
     })
 
     canvas.on("selection:cleared", () => {
+      console.log("🎯 SELECTION CLEARED")
       setSelectedObjects([])
       setSelectedStickyNote(null)
       setSelectedTextObject(null)
@@ -199,14 +212,24 @@ export function useCanvasCore(documentId: string, document: Document | null) {
       const rawCanvasData = fabricCanvasRef.current.toJSON()
 
       // Debug logs for sticky notes
-      const stickyNotes = rawCanvasData.objects?.filter(obj => obj.type === 'group' && obj.stickyNoteGroup)
+      console.log("🟡 ALL OBJECTS BEING SAVED:", rawCanvasData.objects?.map((obj: any, i: number) => ({
+        index: i + 1,
+        type: obj.type,
+        stickyNoteGroup: obj.stickyNoteGroup,
+        stickyColor: obj.stickyColor,
+        hasObjects: obj.objects?.length,
+        textContent: obj.objects?.find((child: any) => child.type === 'textbox')?.text || 'no-text'
+      })))
+      
+      const stickyNotes = rawCanvasData.objects?.filter((obj: any) => obj.type === 'group' && obj.stickyNoteGroup)
       console.log("🟡 STICKY NOTES BEING SAVED:", stickyNotes?.length || 0)
-      stickyNotes?.forEach((stickyNote, index) => {
-        console.log(`🟡 Sticky Note ${index + 1}:`, {
+      stickyNotes?.forEach((stickyNote: any, index: number) => {
+        console.log(`🟡 Sticky Note ${index + 1} SAVE DATA:`, {
           stickyNoteGroup: stickyNote.stickyNoteGroup,
           stickyColor: stickyNote.stickyColor,
           hasObjects: stickyNote.objects?.length,
-          textContent: stickyNote.objects?.find(obj => obj.type === 'textbox')?.text
+          textContent: stickyNote.objects?.find((obj: any) => obj.type === 'textbox')?.text,
+          fullObjectStructure: stickyNote.objects?.map((obj: any) => obj.type)
         })
       })
 
