@@ -67,15 +67,17 @@ export function StickyNoteToolbar({
     setPosition({ x: viewportX, y: viewportY })
 
     // Get current sticky note properties
-    if (selectedStickyNote.type === "group" && selectedStickyNote.stickyNoteGroup) {
-      const textObj = selectedStickyNote.getObjects().find((obj: any) => obj.type === "textbox")
+    if (selectedStickyNote.type === "group") {
+      const objects = selectedStickyNote.getObjects()
+      const textObj = objects.find((obj: any) => obj.type === "textbox")
+
       if (textObj) {
         setNoteText(textObj.text || "")
         setCurrentFontSize(textObj.fontSize || 16)
         setCurrentFontFamily(textObj.fontFamily || "Arial")
         setCurrentAlignment(textObj.textAlign || "left")
+        setCurrentColor(selectedStickyNote.stickyColor || "yellow")
       }
-      setCurrentColor(selectedStickyNote.stickyColor || "yellow")
     }
   }, [isVisible, selectedStickyNote, fabricCanvas])
 
@@ -83,7 +85,7 @@ export function StickyNoteToolbar({
     setNoteText(newText)
     if (!selectedStickyNote || !fabricCanvas) return
 
-    if (selectedStickyNote.type === "group" && selectedStickyNote.stickyNoteGroup) {
+    if (selectedStickyNote.type === "group") {
       const textObj = selectedStickyNote.getObjects().find((obj: any) => obj.type === "textbox")
       if (textObj) {
         textObj.set({ text: newText })
@@ -100,7 +102,7 @@ export function StickyNoteToolbar({
     const color = stickyColors.find(c => c.name === colorName)
     if (!color) return
 
-    if (selectedStickyNote.type === "group" && selectedStickyNote.stickyNoteGroup) {
+    if (selectedStickyNote.type === "group") {
       const objects = selectedStickyNote.getObjects()
       // Update background
       if (objects[0]) {
@@ -120,7 +122,7 @@ export function StickyNoteToolbar({
     setCurrentFontSize(size)
     if (!selectedStickyNote || !fabricCanvas) return
 
-    if (selectedStickyNote.type === "group" && selectedStickyNote.stickyNoteGroup) {
+    if (selectedStickyNote.type === "group") {
       const textObj = selectedStickyNote.getObjects().find((obj: any) => obj.type === "textbox")
       if (textObj) {
         textObj.set({ fontSize: size })
@@ -134,7 +136,7 @@ export function StickyNoteToolbar({
     setCurrentFontFamily(fontFamily)
     if (!selectedStickyNote || !fabricCanvas) return
 
-    if (selectedStickyNote.type === "group" && selectedStickyNote.stickyNoteGroup) {
+    if (selectedStickyNote.type === "group") {
       const textObj = selectedStickyNote.getObjects().find((obj: any) => obj.type === "textbox")
       if (textObj) {
         textObj.set({ fontFamily: fontFamily })
@@ -148,7 +150,7 @@ export function StickyNoteToolbar({
     setCurrentAlignment(alignment)
     if (!selectedStickyNote || !fabricCanvas) return
 
-    if (selectedStickyNote.type === "group" && selectedStickyNote.stickyNoteGroup) {
+    if (selectedStickyNote.type === "group") {
       const textObj = selectedStickyNote.getObjects().find((obj: any) => obj.type === "textbox")
       if (textObj) {
         textObj.set({ textAlign: alignment })
