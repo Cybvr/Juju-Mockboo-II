@@ -217,8 +217,23 @@ export function useInteractionHook({
       const evt = opt.e
       evt.preventDefault()
       
+      // Trackpad pinch zoom (when ctrlKey is true or it's a zoom gesture)
+      if (evt.ctrlKey || (!evt.shiftKey && Math.abs(evt.deltaY) > Math.abs(evt.deltaX))) {
+        const delta = evt.deltaY
+        const zoom = canvas.getZoom()
+        let newZoom = zoom * (1 - delta / 1000)
+        newZoom = Math.max(0.2, Math.min(5, newZoom))
+        
+        import("fabric").then((FabricModule) => {
+          const fabric = FabricModule
+          const canvasElement = canvas.getElement()
+          const rect = canvasElement.getBoundingClientRect()
+          const pointer = new fabric.Point(evt.clientX - rect.left, evt.clientY - rect.top)
+          canvas.zoomToPoint(pointer, newZoom)
+        })
+      }
       // Two-finger trackpad pan (when shift is held or deltaX exists)
-      if (evt.shiftKey || Math.abs(evt.deltaX) > 0) {
+      else if (evt.shiftKey || Math.abs(evt.deltaX) > 0) {
         const vpt = canvas.viewportTransform
         vpt[4] -= evt.deltaX
         vpt[5] -= evt.deltaY
