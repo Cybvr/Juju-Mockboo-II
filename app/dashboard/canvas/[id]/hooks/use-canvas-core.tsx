@@ -377,42 +377,98 @@ export function useCanvasCore(documentId: string, document: Document | null) {
     })
   }, [handleCanvasChange])
 
-  // Placeholder for delete action
   const handleDelete = useCallback(() => {
     if (!fabricCanvasRef.current) return
     const canvas = fabricCanvasRef.current
-    const activeObjects = canvas.getActiveObjects()
-    if (activeObjects.length > 0) {
-      activeObjects.forEach((obj: any) => {
-        canvas.remove(obj)
-      })
+    const active = canvas.getActiveObject()
+    if (active) {
+      if (active.type === "activeSelection") {
+        active.getObjects().forEach((o: any) => canvas.remove(o))
+      } else {
+        canvas.remove(active)
+      }
       canvas.discardActiveObject()
-      canvas.renderAll()
+      canvas.requestRenderAll()
       handleCanvasChange()
     }
   }, [handleCanvasChange])
 
-  // Placeholder for copy action
   const handleCopy = useCallback(() => {
     if (!fabricCanvasRef.current) return
     const canvas = fabricCanvasRef.current
-    const activeObjects = canvas.getActiveObjects()
-    if (activeObjects.length > 0) {
-      // Fabric.js has a built-in copy/paste mechanism if you can manage clipboard access
-      // For simplicity here, we'll just clone and slightly offset
-      activeObjects.forEach((obj: any) => {
-        obj.clone((cloned: any) => {
-          cloned.set({
-            left: cloned.left + 10,
-            top: cloned.top + 10,
-          })
-          canvas.add(cloned)
-          canvas.setActiveObject(cloned)
-        })
+    const activeObject = canvas.getActiveObject()
+    if (!activeObject) return
+
+    activeObject.clone().then((cloned: any) => {
+      window.copiedObjects = cloned
+    })
+  }, [])
+
+  const handlePaste = useCallback(() => {
+    if (!fabricCanvasRef.current || !window.copiedObjects) return
+    const canvas = fabricCanvasRef.current
+
+    window.copiedObjects.clone().then((clonedObj: any) => {
+      canvas.discardActiveObject()
+      clonedObj.set({
+        left: clonedObj.left + 10,
+        top: clonedObj.top + 10,
+        evented: true,
       })
-      canvas.renderAll()
-      handleCanvasChange()
-    }
+
+      // Preserve all custom properties from original object
+      if (window.copiedObjects.stickyNoteGroup === true) {
+        Object.defineProperty(clonedObj, 'stickyNoteGroup', {
+          value: true,
+          writable: true,
+          enumerable: true,
+          configurable: false
+        })
+        Object.defineProperty(clonedObj, 'stickyColor', {
+          value: window.copiedObjects.stickyColor || "yellow",
+          writable: true,
+          enumerable: true,
+          configurable: true
+        })
+      }
+
+      if (window.copiedObjects.isTextObject) {
+        clonedObj.isTextObject = true
+      }
+
+      // Handle group objects (like sticky notes) - FORCE sticky note properties
+      if (clonedObj.type === "group" && window.copiedObjects.stickyNoteGroup === true) {
+        Object.defineProperty(clonedObj, 'stickyNoteGroup', {
+          value: true,
+          writable: true,
+          enumerable: true,
+          configurable: false
+        })
+        Object.defineProperty(clonedObj, 'stickyColor', {
+          value: window.copiedObjects.stickyColor || "yellow",
+          writable: true,
+          enumerable: true,
+          configurable: true
+        })
+      }
+
+      import("fabric").then(({ ActiveSelection }) => {
+        if (clonedObj instanceof ActiveSelection) {
+          clonedObj.canvas = canvas
+          clonedObj.forEachObject((obj: any) => {
+            canvas.add(obj)
+          })
+          clonedObj.setCoords()
+        } else {
+          canvas.add(clonedObj)
+        }
+        window.copiedObjects.top += 10
+        window.copiedObjects.left += 10
+        canvas.setActiveObject(clonedObj)
+        canvas.requestRenderAll()
+        handleCanvasChange()
+      })
+    })
   }, [handleCanvasChange])
 
 
@@ -468,6 +524,7 @@ export function useCanvasCore(documentId: string, document: Document | null) {
     handleDuplicate,
     handleDelete,
     handleCopy,
+    handlePaste,
     handleUndo: handleUndo,
     handleRedo: handleRedo,
     canUndo,

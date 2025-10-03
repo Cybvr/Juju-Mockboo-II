@@ -94,11 +94,19 @@ export default function CanvasEditor() {
   useEffect(() => {
     window.stickyNoteHook = { createStickyNote }
     window.textToolHook = { createTextObject }
+    window.canvasCore = {
+      handleUndo: canvasCore.handleUndo,
+      handleRedo: canvasCore.handleRedo,
+      handleCopy: canvasCore.handleCopy,
+      handlePaste: canvasCore.handlePaste,
+      handleDelete: canvasCore.handleDelete,
+    }
     return () => {
       delete window.stickyNoteHook
       delete window.textToolHook
+      delete window.canvasCore
     }
-  }, [createStickyNote, createTextObject])
+  }, [createStickyNote, createTextObject, canvasCore.handleUndo, canvasCore.handleRedo, canvasCore.handleCopy, canvasCore.handlePaste, canvasCore.handleDelete])
 
   // Import and setup interaction hook
   const { useInteractionHook } = require("./hooks/use-interaction-hook")

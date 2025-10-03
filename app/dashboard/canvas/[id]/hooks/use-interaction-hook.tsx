@@ -6,6 +6,13 @@ declare global {
     copiedObjects?: any
     stickyNoteHook?: any
     textToolHook?: any
+    canvasCore?: {
+      handleUndo?: () => void
+      handleRedo?: () => void
+      handleCopy?: () => void
+      handlePaste?: () => void
+      handleDelete?: () => void
+    }
   }
 }
 interface InteractionHookProps {
@@ -160,121 +167,36 @@ export function useInteractionHook({
       // Undo
       if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
         e.preventDefault()
-        if (canvas.undo) {
-          canvas.undo()
-        }
+        window.canvasCore?.handleUndo?.()
         return
       }
       // Redo
       if ((e.ctrlKey || e.metaKey) && (e.key === "y" || (e.key === "z" && e.shiftKey))) {
         e.preventDefault()
-        if (canvas.redo) {
-          canvas.redo()
-        }
+        window.canvasCore?.handleRedo?.()
         return
       }
       // Copy
       if ((e.ctrlKey || e.metaKey) && e.key === "c") {
         e.preventDefault()
-        const activeObject = canvas.getActiveObject()
-
-        if (!activeObject) {
-          return
-        }
-
-        activeObject.clone().then((cloned: any) => {
-          window.copiedObjects = cloned
-        })
+        window.canvasCore?.handleCopy?.()
         return
       }
       // Paste
       if ((e.ctrlKey || e.metaKey) && e.key === "v") {
         e.preventDefault()
-
-        if (window.copiedObjects) {
-          window.copiedObjects.clone().then((clonedObj: any) => {
-            canvas.discardActiveObject()
-            clonedObj.set({
-              left: clonedObj.left + 10,
-              top: clonedObj.top + 10,
-              evented: true,
-            })
-
-            // Preserve all custom properties from original object
-            if (window.copiedObjects.stickyNoteGroup === true) {
-              Object.defineProperty(clonedObj, 'stickyNoteGroup', {
-                value: true,
-                writable: true,
-                enumerable: true,
-                configurable: false
-              })
-              Object.defineProperty(clonedObj, 'stickyColor', {
-                value: window.copiedObjects.stickyColor || "yellow",
-                writable: true,
-                enumerable: true,
-                configurable: true
-              })
-            }
-
-            if (window.copiedObjects.isTextObject) {
-              clonedObj.isTextObject = true
-            }
-
-            // Handle group objects (like sticky notes) - FORCE sticky note properties
-            if (clonedObj.type === "group" && window.copiedObjects.stickyNoteGroup === true) {
-              Object.defineProperty(clonedObj, 'stickyNoteGroup', {
-                value: true,
-                writable: true,
-                enumerable: true,
-                configurable: false
-              })
-              Object.defineProperty(clonedObj, 'stickyColor', {
-                value: window.copiedObjects.stickyColor || "yellow",
-                writable: true,
-                enumerable: true,
-                configurable: true
-              })
-            }
-
-            import("fabric").then(({ ActiveSelection }) => {
-              if (clonedObj instanceof ActiveSelection) {
-                clonedObj.canvas = canvas
-                clonedObj.forEachObject((obj: any) => {
-                  canvas.add(obj)
-                })
-                clonedObj.setCoords()
-              } else {
-                canvas.add(clonedObj)
-              }
-              window.copiedObjects.top += 10
-              window.copiedObjects.left += 10
-              canvas.setActiveObject(clonedObj)
-              canvas.requestRenderAll()
-              handleCanvasChange()
-            })
-          })
-        }
+        window.canvasCore?.handlePaste?.()
         return
       }
       // Delete
       if (e.key === "Delete" || e.key === "Backspace") {
         e.preventDefault()
-        const active = canvas.getActiveObject()
-        if (active) {
-          if (active.type === "activeSelection") {
-            active.getObjects().forEach((o: any) => canvas.remove(o))
-          } else {
-            canvas.remove(active)
-          }
-          canvas.discardActiveObject()
-          canvas.requestRenderAll()
-          handleCanvasChange()
-        }
+        window.canvasCore?.handleDelete?.()
       }
     }
     document.addEventListener("keydown", handleKeyDown)
     return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [fabricCanvasRef, handleCanvasChange])
+  }, [])
   const setupPanAndZoom = useCallback(() => {
     if (!fabricCanvasRef.current) return null
     const canvas = fabricCanvasRef.current
