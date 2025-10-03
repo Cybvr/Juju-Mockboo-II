@@ -3,8 +3,8 @@ import { useCallback } from "react"
 import type { Canvas } from "fabric"
 
 interface StickyNoteHookProps {
-  fabricCanvasRef: React.MutableRefObject<any>
-  handleCanvasChange: () => void
+ fabricCanvasRef: React.MutableRefObject<any>
+ handleCanvasChange: () => void
 }
 
 export function useStickyNote({ fabricCanvasRef, handleCanvasChange }: StickyNoteHookProps) {
@@ -66,9 +66,19 @@ export function useStickyNote({ fabricCanvasRef, handleCanvasChange }: StickyNot
         },
       })
 
-      // Mark as sticky note for toolbar detection
-      stickyGroup.stickyNoteGroup = true
-      stickyGroup.stickyColor = options?.color || "yellow"
+      // Mark as sticky note for toolbar detection - MUST be preserved
+      Object.defineProperty(stickyGroup, 'stickyNoteGroup', {
+        value: true,
+        writable: true,
+        enumerable: true,
+        configurable: false
+      })
+      Object.defineProperty(stickyGroup, 'stickyColor', {
+        value: options?.color || "yellow",
+        writable: true,
+        enumerable: true,
+        configurable: true
+      })
 
       canvas.add(stickyGroup)
       canvas.setActiveObject(stickyGroup)

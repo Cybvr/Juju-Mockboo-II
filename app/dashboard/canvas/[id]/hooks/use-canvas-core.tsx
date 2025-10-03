@@ -312,6 +312,25 @@ export function useCanvasCore(documentId: string, document: Document | null) {
   }, [brushSize, brushColor])
 
 
+  const updateSelectedObjects = useCallback((canvas: any, onSelectedImagesChange?: (images: string[]) => void) => {
+    const activeObjects = canvas.getActiveObjects()
+
+    // Ensure sticky note properties are properly preserved
+    activeObjects.forEach((obj: any) => {
+      if (obj.type === "group" && obj.stickyNoteGroup) {
+        obj.stickyNoteGroup = true
+      }
+    })
+
+    setSelectedObjects(activeObjects)
+
+    if (onSelectedImagesChange) {
+      const imageUrls = activeObjects
+        .filter((obj: any) => obj.type === "image" && obj.src)
+        .map((obj: any) => obj.src)
+      onSelectedImagesChange(imageUrls)
+    }
+  }, [])
 
 
   // Canvas actions
@@ -375,12 +394,12 @@ export function useCanvasCore(documentId: string, document: Document | null) {
 
 
   const handleUndo = useCallback(() => {
-    if (!fabricCanvasRef.current) return
+    if (!fabricCanvasRef.current || !fabricCanvasRef.current.undo) return
     fabricCanvasRef.current.undo()
   }, [])
 
   const handleRedo = useCallback(() => {
-    if (!fabricCanvasRef.current) return
+    if (!fabricCanvasRef.current || !fabricCanvasRef.current.redo) return
     fabricCanvasRef.current.redo()
   }, [])
 
