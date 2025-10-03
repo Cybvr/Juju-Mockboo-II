@@ -400,6 +400,16 @@ export default function CanvasEditor() {
 
       
 
+      {/* Sticky Note Toolbar */}
+      {!isViewOnly && (
+        <StickyNoteToolbar
+          isVisible={!!canvasCore.selectedStickyNote}
+          selectedStickyNote={canvasCore.selectedStickyNote}
+          fabricCanvas={canvasCore.fabricCanvasRef.current}
+          onNoteChange={canvasCore.handleCanvasChange}
+        />
+      )}
+
       {/* Text Toolbar */}
       {!isViewOnly && (
         <TextToolbar
