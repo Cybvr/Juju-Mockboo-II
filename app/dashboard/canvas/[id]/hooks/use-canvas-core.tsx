@@ -23,6 +23,8 @@ export function useCanvasCore(documentId: string, document: Document | null) {
   const [brushColor, setBrushColor] = useState("#000000")
   const [drawingMode, setDrawingMode] = useState<"draw" | "erase">("draw")
   const [selectedObjects, setSelectedObjects] = useState<any[]>([])
+  const [selectedStickyNote, setSelectedStickyNote] = useState<any>(null)
+  const [selectedTextObject, setSelectedTextObject] = useState<any>(null)
 
   const activeToolRef = useRef<Tool>("select")
   const isDrawingRef = useRef(false)
@@ -115,6 +117,13 @@ export function useCanvasCore(documentId: string, document: Document | null) {
       })
       
       setSelectedObjects(selected)
+
+      // Track specific object types
+      const stickyNote = selected.find((obj: any) => obj.type === "group" && obj.stickyNoteGroup)
+      const textObject = selected.find((obj: any) => obj.isTextObject || obj.type === 'textbox' || obj.type === 'i-text')
+
+      setSelectedStickyNote(stickyNote || null)
+      setSelectedTextObject(textObject || null)
       
       if (onSelectedImagesChange) {
         const selectedImages = selected
@@ -136,6 +145,8 @@ export function useCanvasCore(documentId: string, document: Document | null) {
 
     canvas.on("selection:cleared", () => {
       setSelectedObjects([])
+      setSelectedStickyNote(null)
+      setSelectedTextObject(null)
       if (onSelectedImagesChange) {
         onSelectedImagesChange([])
       }
@@ -438,6 +449,8 @@ export function useCanvasCore(documentId: string, document: Document | null) {
     drawingMode,
     setDrawingMode,
     selectedObjects,
+    selectedStickyNote,
+    selectedTextObject,
     zoomLevel,
     lastSaved,
     isSaving,
