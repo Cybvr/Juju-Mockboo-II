@@ -76,13 +76,29 @@ export function useFabricCanvas(
           canvas.loadFromJSON(documentData.content.canvasData, () => {
             // Restore sticky note properties after loading
             canvas.getObjects().forEach((obj: any) => {
-              if (obj.type === "group" && obj.stickyColor) {
-                Object.defineProperty(obj, 'stickyNoteGroup', {
-                  value: true,
-                  writable: true,
-                  enumerable: true,
-                  configurable: false
-                })
+              if (obj.type === "group") {
+                // Check if this is a sticky note by examining its structure
+                const objects = obj.getObjects()
+                if (objects && objects.length >= 2) {
+                  const hasRect = objects.some((child: any) => child.type === "rect")
+                  const hasText = objects.some((child: any) => child.type === "textbox")
+                  
+                  if (hasRect && hasText) {
+                    // This is a sticky note - restore its properties
+                    Object.defineProperty(obj, 'stickyNoteGroup', {
+                      value: true,
+                      writable: true,
+                      enumerable: true,
+                      configurable: false
+                    })
+                    Object.defineProperty(obj, 'stickyColor', {
+                      value: obj.stickyColor || "yellow",
+                      writable: true,
+                      enumerable: true,
+                      configurable: true
+                    })
+                  }
+                }
               }
             })
             canvas.renderAll()

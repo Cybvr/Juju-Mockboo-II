@@ -66,19 +66,9 @@ export function useStickyNote({ fabricCanvasRef, handleCanvasChange }: StickyNot
         },
       })
 
-      // Mark as sticky note for toolbar detection - MUST be preserved
-      Object.defineProperty(stickyGroup, 'stickyNoteGroup', {
-        value: true,
-        writable: true,
-        enumerable: true,
-        configurable: false
-      })
-      Object.defineProperty(stickyGroup, 'stickyColor', {
-        value: options?.color || "yellow",
-        writable: true,
-        enumerable: true,
-        configurable: true
-      })
+      // Mark as sticky note for toolbar detection - MUST be preserved and serializable
+      stickyGroup.stickyNoteGroup = true
+      stickyGroup.stickyColor = options?.color || "yellow"
 
       canvas.add(stickyGroup)
       canvas.setActiveObject(stickyGroup)
