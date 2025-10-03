@@ -78,45 +78,9 @@ export function useStickyNote({ fabricCanvasRef, handleCanvasChange }: StickyNot
   }, [fabricCanvasRef, handleCanvasChange])
 
   const setupStickyNoteInteractions = useCallback(() => {
-    const canvas = fabricCanvasRef.current
-    if (!canvas) return null
-
-    const handleDoubleClick = (e: any) => {
-      const target = e.target
-      if (target && target.stickyNoteGroup) {
-        const objects = target.getObjects()
-        const textObj = objects.find((obj: any) => obj.type === "textbox")
-
-        if (textObj) {
-          // Make text editable directly in the group
-          textObj.set({
-            editable: true,
-            selectable: true
-          })
-
-          // Set text as active and enter editing
-          canvas.setActiveObject(textObj)
-          textObj.enterEditing()
-          textObj.hiddenTextarea?.focus()
-          textObj.selectAll()
-
-          // Save changes when editing exits
-          const onEditExit = () => {
-            textObj.off("editing:exited", onEditExit)
-            handleCanvasChange()
-          }
-
-          textObj.on("editing:exited", onEditExit)
-        }
-      }
-    }
-
-    canvas.on("mouse:dblclick", handleDoubleClick)
-
-    return () => {
-      canvas.off("mouse:dblclick", handleDoubleClick)
-    }
-  }, [fabricCanvasRef, handleCanvasChange])
+    // This is now handled centrally in useInteractionHook
+    return () => {}
+  }, [])
 
   return {
     createStickyNote,

@@ -35,13 +35,14 @@ export function useInteractionHook({
     let startX = 0, startY = 0, activeShape: any = null
     const handleMouseDown = (e: any) => {
       const tool = activeToolRef.current
+      const pointer = canvas.getPointer(e.e)
+      
+      // Handle tool-specific creation
       if (tool === "sticky-note") {
-        const pointer = canvas.getPointer(e.e)
         window.stickyNoteHook?.createStickyNote?.(pointer.x, pointer.y)
         return
       }
       if (tool === "text") {
-        const pointer = canvas.getPointer(e.e)
         window.textToolHook?.createTextObject?.(pointer.x, pointer.y)
         return
       }
@@ -55,7 +56,8 @@ export function useInteractionHook({
         return
       }
       if (tool === "select" || tool === "pan") return
-      const pointer = canvas.getPointer(e.e)
+      
+      // Handle shape drawing
       startX = pointer.x
       startY = pointer.y
       setIsDrawing(true)
@@ -74,6 +76,37 @@ export function useInteractionHook({
         }
         if (activeShape) canvas.add(activeShape)
       })
+    }
+
+    // Handle double-click for sticky note and text editing
+    const handleDoubleClick = (e: any) => {
+      const target = e.target
+      if (!target) return
+
+      // Handle sticky note double-click editing
+      if (target.stickyNoteGroup && target.type === "group") {
+        const objects = target.getObjects()
+        const textObj = objects.find((obj: any) => obj.type === "textbox")
+        if (textObj) {
+          textObj.set({ editable: true, selectable: true })
+          canvas.setActiveObject(textObj)
+          textObj.enterEditing()
+          textObj.hiddenTextarea?.focus()
+          textObj.selectAll()
+          
+          const onEditExit = () => {
+            textObj.off("editing:exited", onEditExit)
+            handleCanvasChange()
+          }
+          textObj.on("editing:exited", onEditExit)
+        }
+      }
+      // Handle text object double-click editing
+      else if (target.type === "textbox" || target.type === "i-text" || target.isTextObject) {
+        target.enterEditing()
+        target.hiddenTextarea?.focus()
+        target.selectAll()
+      }
     }
     const handleMouseMove = (e: any) => {
       if (!isDrawingRef.current || !activeShape) return
@@ -103,6 +136,7 @@ export function useInteractionHook({
     canvas.on("mouse:down", handleMouseDown)
     canvas.on("mouse:move", handleMouseMove)
     canvas.on("mouse:up", handleMouseUp)
+    canvas.on("mouse:dblclick", handleDoubleClick)
     canvas.on("path:created", () => {
       if (activeToolRef.current === "pen") handleCanvasChange()
     })
@@ -110,6 +144,7 @@ export function useInteractionHook({
       canvas.off("mouse:down", handleMouseDown)
       canvas.off("mouse:move", handleMouseMove)
       canvas.off("mouse:up", handleMouseUp)
+      canvas.off("mouse:dblclick", handleDoubleClick)
       canvas.off("path:created")
     }
   }, [fabricCanvasRef, handleCanvasChange, activeToolRef, isDrawingRef, setIsDrawing, brushSize, brushColor, drawingMode])

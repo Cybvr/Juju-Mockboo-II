@@ -128,13 +128,7 @@ export function useFabricCanvas(
     return () => clearTimeout(timer)
   }, [documentData, canvasCore.fabricLoaded])
 
-  // Auto-save interval
-  useEffect(() => {
-    if (canvasCore.fabricLoaded && documentData) {
-      const interval = setInterval(canvasCore.saveCanvasState, 60000)
-      return () => clearInterval(interval)
-    }
-  }, [canvasCore.fabricLoaded, documentData])
+  // Auto-save is already handled in useCanvasCore
 
   const addImageToCanvas = useCallback(
     (imageUrl: string, replaceObjects?: any) => {
