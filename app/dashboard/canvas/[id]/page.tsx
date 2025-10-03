@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useEffect, useState } from "react"
@@ -113,8 +114,8 @@ export default function CanvasEditor() {
     brushColor: canvasCore.brushColor,
     drawingMode: canvasCore.drawingMode,
   })
-  
 
+  
 
   // Setup interactions after canvas is loaded
   useEffect(() => {
@@ -140,7 +141,7 @@ export default function CanvasEditor() {
   }, [canvasCore.fabricLoaded, setupInteractions, setupKeyboardHandlers, setupPanAndZoom, setupTouchHandlers, imageOps.setupDragAndDrop])
 
   // Canvas initialization is handled by useFabricCanvas hook
-  
+
   // Load document from Firebase
   useEffect(() => {
     const loadDocument = async () => {
@@ -396,13 +397,14 @@ export default function CanvasEditor() {
           onUpscale={() => {}}
         />
       )}
+
       
 
       {/* Sticky Note Toolbar */}
       {!isViewOnly && (
         <StickyNoteToolbar
-          isVisible={canvasCore.selectedObjects.length > 0 && canvasCore.selectedObjects.some(obj => obj.stickyNoteGroup === true)}
-          selectedStickyNote={canvasCore.selectedObjects.find(obj => obj.stickyNoteGroup === true)}
+          isVisible={canvasCore.selectedObjects.some(obj => obj.stickyNoteGroup)}
+          selectedStickyNote={canvasCore.selectedObjects.find(obj => obj.stickyNoteGroup)}
           fabricCanvas={canvasCore.fabricCanvasRef.current}
           onNoteChange={canvasCore.handleCanvasChange}
         />

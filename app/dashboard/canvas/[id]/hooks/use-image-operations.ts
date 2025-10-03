@@ -357,20 +357,10 @@ export function useImageOperations({
           evented: true,
         })
 
-        // Preserve sticky note properties - FORCE preservation
-        if (obj.stickyNoteGroup === true || obj.type === "group") {
-          Object.defineProperty(cloned, 'stickyNoteGroup', {
-            value: true,
-            writable: true,
-            enumerable: true,
-            configurable: false
-          })
-          Object.defineProperty(cloned, 'stickyColor', {
-            value: obj.stickyColor || "yellow",
-            writable: true,
-            enumerable: true,
-            configurable: true
-          })
+        // Preserve sticky note properties
+        if (obj.stickyNoteGroup) {
+          cloned.stickyNoteGroup = true
+          cloned.stickyColor = obj.stickyColor || "yellow"
         }
 
         // Preserve text object properties
