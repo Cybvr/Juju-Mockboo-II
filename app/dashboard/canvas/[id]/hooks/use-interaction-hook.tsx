@@ -166,21 +166,39 @@ export function useInteractionHook({
             })
 
             // Preserve all custom properties from original object
-            if (window.copiedObjects.stickyNoteGroup) {
-              clonedObj.stickyNoteGroup = true
-              clonedObj.stickyColor = window.copiedObjects.stickyColor || "yellow"
+            if (window.copiedObjects.stickyNoteGroup === true) {
+              Object.defineProperty(clonedObj, 'stickyNoteGroup', {
+                value: true,
+                writable: true,
+                enumerable: true,
+                configurable: false
+              })
+              Object.defineProperty(clonedObj, 'stickyColor', {
+                value: window.copiedObjects.stickyColor || "yellow",
+                writable: true,
+                enumerable: true,
+                configurable: true
+              })
             }
 
             if (window.copiedObjects.isTextObject) {
               clonedObj.isTextObject = true
             }
 
-            // Handle group objects (like sticky notes) - this ensures duplicated sticky notes work
-            if (clonedObj.type === "group") {
-              if (window.copiedObjects.stickyNoteGroup) {
-                clonedObj.stickyNoteGroup = true
-                clonedObj.stickyColor = window.copiedObjects.stickyColor || "yellow"
-              }
+            // Handle group objects (like sticky notes) - FORCE sticky note properties
+            if (clonedObj.type === "group" && window.copiedObjects.stickyNoteGroup === true) {
+              Object.defineProperty(clonedObj, 'stickyNoteGroup', {
+                value: true,
+                writable: true,
+                enumerable: true,
+                configurable: false
+              })
+              Object.defineProperty(clonedObj, 'stickyColor', {
+                value: window.copiedObjects.stickyColor || "yellow",
+                writable: true,
+                enumerable: true,
+                configurable: true
+              })
             }
 
             import("fabric").then(({ ActiveSelection }) => {
