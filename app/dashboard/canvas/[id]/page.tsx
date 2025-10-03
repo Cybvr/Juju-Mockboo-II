@@ -265,20 +265,19 @@ export default function CanvasEditor() {
               <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">View Only</span>
             </div>
           ) : (
-            <Input
-              value={titleValue}
-              onChange={(e) => setTitleValue(e.target.value)}
-              onBlur={handleTitleSave}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") e.currentTarget.blur()
-                if (e.key === "Escape") {
-                  handleTitleCancel()
-                  e.currentTarget.blur()
-                }
-              }}
-              className="h-6 text-sm font-semibold bg-transparent border-none px-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-              style={{ width: `${Math.max(titleValue.length * 12, 90)}px` }}
-            />
+      <Input
+        value={titleValue}
+        onChange={(e) => setTitleValue(e.target.value)}
+        onBlur={handleTitleSave}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") e.currentTarget.blur()
+          if (e.key === "Escape") {
+            handleTitleCancel()
+            e.currentTarget.blur()
+          }
+        }}
+        className="h-6 text-sm font-semibold bg-transparent border-none px-0 focus-visible:ring-0 focus-visible:ring-offset-0 w-auto max-w-[100px]"
+      />
           )}
         </div>
       </div>
