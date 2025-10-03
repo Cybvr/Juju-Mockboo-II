@@ -100,26 +100,38 @@ export function useCanvasCore(documentId: string, document: Document | null) {
     canvas.on("text:changed", () => handleCanvasChange())
     canvas.on("text:editing:exited", () => handleCanvasChange())
 
-    canvas.on("selection:created", (e: any) => {
-      const selected = (e.selected || (e.target ? [e.target] : [])).filter((obj: any) => obj != null)
+    const updateSelection = (selected: any[]) => {
+      // Ensure sticky note properties are preserved during selection
+      selected.forEach((obj: any) => {
+        if (obj.type === "group" && obj.stickyNoteGroup) {
+          // Preserve sticky note properties
+          Object.defineProperty(obj, 'stickyNoteGroup', {
+            value: true,
+            writable: true,
+            enumerable: true,
+            configurable: false
+          })
+        }
+      })
+      
       setSelectedObjects(selected)
+      
       if (onSelectedImagesChange) {
         const selectedImages = selected
           .filter((obj: any) => obj && obj.type === "image")
           .map((obj: any) => obj.getSrc ? obj.getSrc() : obj.src)
         onSelectedImagesChange(selectedImages)
       }
+    }
+
+    canvas.on("selection:created", (e: any) => {
+      const selected = (e.selected || (e.target ? [e.target] : [])).filter((obj: any) => obj != null)
+      updateSelection(selected)
     })
 
     canvas.on("selection:updated", (e: any) => {
       const selected = (e.selected || canvas.getActiveObjects()).filter((obj: any) => obj != null)
-      setSelectedObjects(selected)
-      if (onSelectedImagesChange) {
-        const selectedImages = selected
-          .filter((obj: any) => obj && obj.type === "image")
-          .map((obj: any) => obj.getSrc ? obj.getSrc() : obj.src)
-        onSelectedImagesChange(selectedImages)
-      }
+      updateSelection(selected)
     })
 
     canvas.on("selection:cleared", () => {
