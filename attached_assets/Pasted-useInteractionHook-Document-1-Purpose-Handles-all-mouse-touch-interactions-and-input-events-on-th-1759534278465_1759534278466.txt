@@ -1,0 +1,57 @@
+useInteractionHook (Document 1)
+Purpose: Handles all mouse/touch interactions and input events on the canvas
+Key Functions:
+
+setupInteractions - Mouse-based drawing and object creation:
+
+Creates sticky notes and text objects on click
+Handles pen/drawing mode with brush settings
+Draws shapes (squares, circles) with click-and-drag
+Double-click editing for sticky notes and text objects
+
+
+setupKeyboardHandlers - Keyboard shortcuts:
+
+Undo: Ctrl/Cmd + Z
+Redo: Ctrl/Cmd + Y (or Ctrl/Cmd + Shift + Z)
+Copy: Ctrl/Cmd + C (clones object to memory)
+Paste: Ctrl/Cmd + V (pastes with offset, preserves sticky note properties)
+Delete: Delete/Backspace key
+
+
+setupPanAndZoom - Canvas navigation:
+
+Mouse wheel zoom (with Ctrl for trackpad pinch)
+Alt/Ctrl + drag to pan
+Shift + mouse
+
+
+RetryJPstopn fucking dfrmating! list singe line bulletsEdit
+useInteractionHook: Mouse/touch/keyboard input handling
+setupInteractions: Mouse down/move/up for drawing shapes, creating sticky notes/text, double-click editing
+setupKeyboardHandlers: Ctrl+Z undo, Ctrl+Y redo, Ctrl+C copy, Ctrl+V paste, Delete key
+setupPanAndZoom: Mouse wheel zoom, Alt+drag pan, trackpad gestures
+setupTouchHandlers: Two-finger pinch zoom and pan for mobile
+useCanvasCore: Canvas state management and operations
+setupUndoRedo: Manages undo/redo stacks with 50-state limit
+setupCanvasEvents: Listens for object added/modified/removed/text changes, updates selection state
+setupResizeHandler: Adjusts canvas dimensions on window resize
+saveCanvasState: Saves canvas JSON + thumbnail to Firebase with 2-second debounce
+handleCanvasChange: Triggers autosave after changes
+handleZoomIn/Out/Reset: Programmatic zoom controls
+setActiveToolState: Switches between tools (select/pen/pan/text/shapes), updates cursor and object selectability
+handleDuplicate/Delete/Copy: Object manipulation actions
+handleUndo/Redo: Wrapper functions for undo/redo
+RetryJPseems like there are repeatitionsEditYes, there are redundancies:
+Duplicate functionality:
+
+Copy/paste exists in both hooks (keyboard shortcuts AND canvas actions)
+Undo/redo in both (keyboard handlers AND canvas operations)
+Delete in both (keyboard shortcut AND handleDelete function)
+Selection tracking duplicated (setupCanvasEvents AND updateSelectedObjects)
+
+Overlapping responsibilities:
+
+Both hooks handle canvas state changes
+Both manage tool switching logic
+Both deal with object selection
