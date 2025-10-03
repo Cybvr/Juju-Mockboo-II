@@ -171,8 +171,16 @@ export function useCanvasCore(documentId: string, document: Document | null) {
       // Clean the canvas data for Firestore
       const cleanCanvasData = JSON.parse(JSON.stringify(rawCanvasData))
 
+      // Generate thumbnail
+      const thumbnail = fabricCanvasRef.current.toDataURL({
+        format: "png",
+        quality: 0.6,
+        multiplier: 0.2,
+      })
+
       console.log("💾 Saving to Firebase with data:", {
         canvasData: cleanCanvasData,
+        thumbnail: thumbnail ? "Generated" : "None",
         textObjectsCount: cleanCanvasData.objects?.filter(obj => obj.type === 'i-text' || obj.type === 'textbox' || obj.type === 'text').length
       })
 
@@ -180,6 +188,7 @@ export function useCanvasCore(documentId: string, document: Document | null) {
         content: {
           ...document.content,
           canvasData: cleanCanvasData,
+          thumbnail: thumbnail,
         },
       })
 

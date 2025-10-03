@@ -115,8 +115,13 @@ export function DocumentGallery({
     let mediaUrl = '/placeholder.svg'
     
     // Handle different document types for thumbnails
-    if (doc.type === 'canvas' && doc.content?.thumbnail) {
-      mediaUrl = doc.content.thumbnail
+    if (doc.type === 'canvas') {
+      // For canvas, check content.thumbnail first, then content.canvasData thumbnail
+      if (doc.content?.thumbnail) {
+        mediaUrl = doc.content.thumbnail
+      } else if (doc.content?.canvasData?.thumbnail) {
+        mediaUrl = doc.content.canvasData.thumbnail
+      }
     } else if (doc.content?.thumbnail) {
       mediaUrl = doc.content.thumbnail
     } else if (doc.content?.imageUrls && doc.content.imageUrls.length > 0) {
