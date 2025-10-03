@@ -125,13 +125,17 @@ export function useInteractionHook({
       // Undo
       if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
         e.preventDefault()
-        canvas.undo?.()
+        if (canvas.undo) {
+          canvas.undo()
+        }
         return
       }
       // Redo
       if ((e.ctrlKey || e.metaKey) && (e.key === "y" || (e.key === "z" && e.shiftKey))) {
         e.preventDefault()
-        canvas.redo?.()
+        if (canvas.redo) {
+          canvas.redo()
+        }
         return
       }
       // Copy

@@ -375,12 +375,12 @@ export function useCanvasCore(documentId: string, document: Document | null) {
 
 
   const handleUndo = useCallback(() => {
-    if (!fabricCanvasRef.current) return
+    if (!fabricCanvasRef.current || !fabricCanvasRef.current.undo) return
     fabricCanvasRef.current.undo()
   }, [])
 
   const handleRedo = useCallback(() => {
-    if (!fabricCanvasRef.current) return
+    if (!fabricCanvasRef.current || !fabricCanvasRef.current.redo) return
     fabricCanvasRef.current.redo()
   }, [])
 
