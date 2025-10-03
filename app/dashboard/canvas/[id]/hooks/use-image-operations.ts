@@ -342,28 +342,37 @@ export function useImageOperations({
     })
   }, [fabricCanvasRef])
 
-  const duplicateSelectedImages = useCallback(async () => {
-    if (!fabricCanvasRef.current) return
-
+  const duplicateSelectedImages = useCallback(() => {
     const canvas = fabricCanvasRef.current
-    const activeObjects = canvas.getActiveObjects()
+    if (!canvas) return
 
-    for (const obj of activeObjects) {
-      try {
-        const cloned = await new Promise((resolve) => {
-          obj.clone(resolve)
-        })
+    const activeObjects = canvas.getActiveObjects()
+    if (activeObjects.length === 0) return
+
+    activeObjects.forEach((obj: any) => {
+      obj.clone().then((cloned: any) => {
         cloned.set({
           left: cloned.left + 20,
           top: cloned.top + 20,
+          evented: true,
         })
-        canvas.add(cloned)
-        canvas.setActiveObject(cloned)
-      } catch (error) {
-        console.warn('Failed to clone object:', error)
-      }
-    }
 
+        // Preserve sticky note properties
+        if (obj.stickyNoteGroup) {
+          cloned.stickyNoteGroup = true
+          cloned.stickyColor = obj.stickyColor || "yellow"
+        }
+
+        // Preserve text object properties
+        if (obj.isTextObject) {
+          cloned.isTextObject = true
+        }
+
+        canvas.add(cloned)
+      })
+    })
+
+    canvas.discardActiveObject()
     canvas.renderAll()
     handleCanvasChange()
   }, [fabricCanvasRef, handleCanvasChange])

@@ -175,8 +175,8 @@ export function useInteractionHook({
               clonedObj.isTextObject = true
             }
 
-            // Handle group objects (like sticky notes)
-            if (clonedObj.type === "group" && window.copiedObjects.type === "group") {
+            // Handle group objects (like sticky notes) - this ensures duplicated sticky notes work
+            if (clonedObj.type === "group") {
               if (window.copiedObjects.stickyNoteGroup) {
                 clonedObj.stickyNoteGroup = true
                 clonedObj.stickyColor = window.copiedObjects.stickyColor || "yellow"
