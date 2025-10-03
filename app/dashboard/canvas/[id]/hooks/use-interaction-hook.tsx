@@ -164,10 +164,18 @@ export function useInteractionHook({
             // Preserve custom properties
             if (window.copiedObjects.stickyNoteGroup) {
               clonedObj.stickyNoteGroup = true
-              clonedObj.stickyColor = window.copiedObjects.stickyColor
+              clonedObj.stickyColor = window.copiedObjects.stickyColor || "yellow"
             }
             if (window.copiedObjects.isTextObject) {
               clonedObj.isTextObject = true
+            }
+
+            // Handle group objects (like sticky notes)
+            if (clonedObj.type === "group" && window.copiedObjects.type === "group") {
+              if (window.copiedObjects.stickyNoteGroup) {
+                clonedObj.stickyNoteGroup = true
+                clonedObj.stickyColor = window.copiedObjects.stickyColor || "yellow"
+              }
             }
 
             import("fabric").then(({ ActiveSelection }) => {
