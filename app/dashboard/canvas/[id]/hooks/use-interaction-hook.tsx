@@ -222,7 +222,7 @@ export function useInteractionHook({
         const delta = evt.deltaY
         const zoom = canvas.getZoom()
         let newZoom = zoom * (1 - delta / 1000)
-        newZoom = Math.max(0.1, Math.min(10, newZoom))
+        newZoom = Math.max(0.001, Math.min(1000, newZoom))
         
         import("fabric").then((FabricModule) => {
           const fabric = FabricModule
