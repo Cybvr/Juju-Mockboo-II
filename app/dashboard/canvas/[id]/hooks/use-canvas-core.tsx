@@ -497,11 +497,13 @@ export function useCanvasCore(documentId: string, document: Document | null) {
         clonedObj.stickyColor = window.copiedObjects.stickyColor || "yellow"
         
         // Override toObject to ensure custom properties are serialized
-        clonedObj.toObject = function() {
-          return fabric.util.object.extend(fabric.Group.prototype.toObject.call(this), {
+        clonedObj.toObject = function(propertiesToInclude?: string[]) {
+          const defaultProps = fabric.Group.prototype.toObject.call(this, propertiesToInclude)
+          return {
+            ...defaultProps,
             stickyNoteGroup: this.stickyNoteGroup,
             stickyColor: this.stickyColor
-          })
+          }
         }
       }
 

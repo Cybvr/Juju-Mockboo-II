@@ -120,11 +120,13 @@ export function useFabricCanvas(
                   })
                   
                   // Override toObject to ensure custom properties are serialized
-                  obj.toObject = function() {
-                    const result = fabric.util.object.extend(fabric.Group.prototype.toObject.call(this), {
+                  obj.toObject = function(propertiesToInclude?: string[]) {
+                    const defaultProps = fabric.Group.prototype.toObject.call(this, propertiesToInclude)
+                    const result = {
+                      ...defaultProps,
                       stickyNoteGroup: this.stickyNoteGroup,
                       stickyColor: this.stickyColor
-                    })
+                    }
                     console.log("🟡 toObject called for sticky note:", result)
                     return result
                   }
