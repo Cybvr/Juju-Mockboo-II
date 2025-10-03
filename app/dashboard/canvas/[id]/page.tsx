@@ -206,7 +206,7 @@ export default function CanvasEditor() {
   return (
     <div className="relative h-full w-full overflow-hidden" data-user-id={user?.uid}>
       {/* Floating Toolbar */}
-      <div className="flex items-center gap-2 absolute left-4 top-4 z-10 bg-card rounded-xl px-4 py-2">
+      <div className="flex items-center gap-2 absolute left-4 top-4 z-10 bg-background rounded-xl px-4 py-2">
         {/* Logo Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -292,7 +292,7 @@ export default function CanvasEditor() {
 
       {/* Controls Panel */}
       <div className="absolute right-4 top-1/2 z-10 -translate-y-1/2">
-        <div className="flex flex-col gap-2 rounded-lg bg-card p-2 shadow-lg border w-12">
+        <div className="flex flex-col gap-2 rounded-lg bg-background p-2 shadow-lg border w-12">
           <Button variant="ghost" size="icon" onClick={canvasCore.handleZoomIn} className="h-8 w-8" title="Zoom In">
             <ZoomIn className="h-4 w-4" />
           </Button>
@@ -319,7 +319,7 @@ export default function CanvasEditor() {
       {/* Floating Toolbar - Hide in view-only mode */}
       {!isViewOnly && (
         <div className="absolute left-4 top-1/2 z-10 -translate-y-1/2">
-          <div className="flex flex-col gap-2 rounded-lg bg-card p-2 shadow-lg border">
+          <div className="flex flex-col gap-2 rounded-lg bg-background p-2 shadow-lg border">
             {tools.map((tool) => {
               const Icon = tool.icon
               return (
