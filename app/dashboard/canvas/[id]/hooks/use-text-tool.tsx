@@ -41,13 +41,6 @@ export function useTextTool({ fabricCanvasRef, handleCanvasChange }: TextToolHoo
       canvas.setActiveObject(textObj)
       canvas.renderAll()
       handleCanvasChange()
-
-      // Auto-enter editing mode
-      setTimeout(() => {
-        textObj.enterEditing()
-        textObj.hiddenTextarea?.focus()
-        textObj.selectAll()
-      }, 100)
     })
   }, [fabricCanvasRef, handleCanvasChange])
 

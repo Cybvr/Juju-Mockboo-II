@@ -54,13 +54,6 @@ export function useStickyNote({ fabricCanvasRef, handleCanvasChange }: StickyNot
       canvas.setActiveObject(textObj)
       canvas.renderAll()
       handleCanvasChange()
-
-      // Auto-enter editing mode
-      setTimeout(() => {
-        textObj.enterEditing()
-        textObj.hiddenTextarea?.focus()
-        textObj.selectAll()
-      }, 100)
     })
   }, [fabricCanvasRef, handleCanvasChange])
 
