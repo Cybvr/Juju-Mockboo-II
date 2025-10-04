@@ -111,6 +111,7 @@ export function useFabricCanvas(
                   // Force set sticky note properties
                   obj.stickyNoteGroup = true
                   obj.stickyColor = obj.stickyColor || "yellow"
+                  obj.name = `sticky-note-${obj.stickyColor || "yellow"}`
                   
                   console.log("🟡 STICKY NOTE RESTORED:", {
                     stickyNoteGroup: obj.stickyNoteGroup,
