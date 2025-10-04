@@ -133,6 +133,7 @@ export default function CanvasEditor() {
     const cleanupPanZoom = setupPanAndZoom()
     const cleanupTouch = setupTouchHandlers()
     const cleanupDragDrop = imageOps.setupDragAndDrop()
+    const cleanupStickyNote = setupStickyNoteInteractions()
     const cleanupTextTool = setupTextInteractions()
 
     return () => {
@@ -141,6 +142,7 @@ export default function CanvasEditor() {
       if (cleanupPanZoom) cleanupPanZoom()
       if (cleanupTouch) cleanupTouch()
       if (cleanupDragDrop) cleanupDragDrop()
+      if (cleanupStickyNote) cleanupStickyNote()
       if (cleanupTextTool) cleanupTextTool()
     }
   }, [canvasCore.fabricLoaded, setupInteractions, setupKeyboardHandlers, setupPanAndZoom, setupTouchHandlers, imageOps.setupDragAndDrop])
