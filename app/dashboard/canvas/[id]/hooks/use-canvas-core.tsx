@@ -1,13 +1,10 @@
 "use client"
-
 import type React from "react"
 import { useEffect, useRef, useState, useCallback } from "react"
 import { documentService } from "@/services/documentService"
 import type { Document } from "@/types/firebase"
 import type { Canvas } from "fabric"
-
 type Tool = "select" | "square" | "circle" | "pan" | "pen" | "text" | "sticky-note"
-
 export function useCanvasCore(documentId: string, document: Document | null) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const fabricCanvasRef = useRef<any>(null)
@@ -25,17 +22,14 @@ export function useCanvasCore(documentId: string, document: Document | null) {
   const [selectedObjects, setSelectedObjects] = useState<any[]>([])
   const [selectedStickyNote, setSelectedStickyNote] = useState<any>(null)
   const [selectedTextObject, setSelectedTextObject] = useState<any>(null)
-
   const activeToolRef = useRef<Tool>("select")
   const isDrawingRef = useRef(false)
   const autoSaveIntervalRef = useRef<NodeJS.Timeout | null>(null)
-
   // Undo/Redo setup
   const setupUndoRedo = useCallback((canvas: Canvas) => {
     let undoStack: string[] = []
     let redoStack: string[] = []
     let isUndoRedoing = false
-
     const saveState = () => {
       if (isUndoRedoing) return
       const state = JSON.stringify(canvas.toJSON())
@@ -47,7 +41,6 @@ export function useCanvasCore(documentId: string, document: Document | null) {
         undoStack.shift()
       }
     }
-
     canvas.undo = () => {
       if (undoStack.length <= 1) return
       isUndoRedoing = true
@@ -64,7 +57,6 @@ export function useCanvasCore(documentId: string, document: Document | null) {
         }, 0)
       })
     }
-
     canvas.redo = () => {
       if (redoStack.length === 0) return
       isUndoRedoing = true
@@ -82,56 +74,26 @@ export function useCanvasCore(documentId: string, document: Document | null) {
         })
       }
     }
-
     canvas.canUndo = () => undoStack.length > 1
     canvas.canRedo = () => redoStack.length > 0
-
     saveState()
     return { saveState }
   }, [])
-
   // Canvas events setup
   const setupCanvasEvents = useCallback((canvas: Canvas, handleCanvasChange: () => void, onSelectedImagesChange?: (images: string[]) => void) => {
-    console.log("🔧 Setting up canvas events and interactions...")
-
     canvas.on("object:added", () => handleCanvasChange())
     canvas.on("object:modified", () => handleCanvasChange())
     canvas.on("object:removed", () => handleCanvasChange())
-
     // Text editing events - CRITICAL for saving text changes
     canvas.on("text:changed", () => handleCanvasChange())
     canvas.on("text:editing:exited", () => handleCanvasChange())
-
     const updateSelection = (selected: any[]) => {
-      console.log("🎯 SELECTION UPDATE - Objects selected:", selected.length)
-
-      // Check for sticky notes using name property
-      selected.forEach((obj: any, index) => {
-        console.log(`🎯 Selected object ${index + 1}:`, {
-          type: obj.type,
-          name: obj.name,
-          isSticky: obj.name?.startsWith('sticky-note-')
-        })
-      })
-
       setSelectedObjects(selected)
-
       // Track specific object types
       const stickyNote = selected.find((obj: any) => obj.name?.startsWith('sticky-note-'))
       const textObject = selected.find((obj: any) => obj.isTextObject || obj.type === 'textbox' || obj.type === 'i-text')
-
-      console.log("🟡 STICKY NOTE TOOLBAR TRIGGER:", !!stickyNote)
-      if (stickyNote) {
-        console.log("🟡 Selected sticky note details:", {
-          name: stickyNote.name,
-          objectCount: stickyNote.getObjects?.()?.length,
-          textContent: stickyNote.getObjects?.()?.find((obj: any) => obj.type === 'textbox')?.text
-        })
-      }
-
       setSelectedStickyNote(stickyNote || null)
       setSelectedTextObject(textObject || null)
-
       if (onSelectedImagesChange) {
         const selectedImages = selected
           .filter((obj: any) => obj && obj.type === "image")
@@ -139,31 +101,15 @@ export function useCanvasCore(documentId: string, document: Document | null) {
         onSelectedImagesChange(selectedImages)
       }
     }
-
     canvas.on("selection:created", (e: any) => {
-      console.log("🎯 SELECTION CREATED event:", e)
       const selected = (e.selected || (e.target ? [e.target] : [])).filter((obj: any) => obj != null)
-      console.log("🎯 Selected objects from event:", selected.map((obj: any) => ({
-        type: obj.type,
-        stickyNoteGroup: obj.stickyNoteGroup,
-        stickyColor: obj.stickyColor
-      })))
       updateSelection(selected)
     })
-
     canvas.on("selection:updated", (e: any) => {
-      console.log("🎯 SELECTION UPDATED event:", e)
       const selected = (e.selected || canvas.getActiveObjects()).filter((obj: any) => obj != null)
-      console.log("🎯 Updated selection:", selected.map((obj: any) => ({
-        type: obj.type,
-        stickyNoteGroup: obj.stickyNoteGroup,
-        stickyColor: obj.stickyColor
-      })))
       updateSelection(selected)
     })
-
     canvas.on("selection:cleared", () => {
-      console.log("🎯 SELECTION CLEARED")
       setSelectedObjects([])
       setSelectedStickyNote(null)
       setSelectedTextObject(null)
@@ -172,7 +118,6 @@ export function useCanvasCore(documentId: string, document: Document | null) {
       }
     })
   }, [])
-
   // Resize handler
   const setupResizeHandler = useCallback((canvas: Canvas) => {
     const handleResize = () => {
@@ -184,20 +129,16 @@ export function useCanvasCore(documentId: string, document: Document | null) {
         canvas.renderAll()
       }
     }
-
     handleResize()
     window.addEventListener("resize", handleResize)
     return () => window.removeEventListener("resize", handleResize)
   }, [])
-
   // Canvas operations
   const saveCanvasState = useCallback(async (immediate = false) => {
     if (!fabricCanvasRef.current || !document || isSaving) return
-
     try {
       setIsSaving(true)
       const rawCanvasData = fabricCanvasRef.current.toJSON(['name', 'isTextObject'])
-
       // Debug logs for sticky notes
       console.log("🟡 ALL OBJECTS BEING SAVED:", rawCanvasData.objects?.map((obj: any, i: number) => ({
         index: i + 1,
@@ -207,10 +148,8 @@ export function useCanvasCore(documentId: string, document: Document | null) {
         hasObjects: obj.objects?.length,
         textContent: obj.objects?.find((child: any) => child.type === 'textbox')?.text || 'no-text'
       })))
-
       const stickyNotes = rawCanvasData.objects?.filter((obj: any) => obj.name?.startsWith('sticky-note-'))
       console.log("🟡 STICKY NOTES BEING SAVED:", stickyNotes?.length || 0)
-
       // Debug logs for text objects
       console.log("🔍 Saving canvas state - Raw data:", rawCanvasData)
       const textObjects = rawCanvasData.objects?.filter(obj => obj.type === 'i-text' || obj.type === 'textbox' || obj.type === 'text')
@@ -223,23 +162,19 @@ export function useCanvasCore(documentId: string, document: Document | null) {
           fontFamily: textObj.fontFamily
         })
       })
-
       // Clean the canvas data for Firestore
       const cleanCanvasData = JSON.parse(JSON.stringify(rawCanvasData))
-
       // Generate thumbnail
       const thumbnail = fabricCanvasRef.current.toDataURL({
         format: "png",
         quality: 0.6,
         multiplier: 0.2,
       })
-
       console.log("💾 Saving to Firebase with data:", {
         canvasData: cleanCanvasData,
         thumbnail: thumbnail ? "Generated" : "None",
         textObjectsCount: cleanCanvasData.objects?.filter(obj => obj.type === 'i-text' || obj.type === 'textbox' || obj.type === 'text').length
       })
-
       await documentService.updateDocument(documentId, {
         content: {
           ...document.content,
@@ -247,7 +182,6 @@ export function useCanvasCore(documentId: string, document: Document | null) {
           thumbnail: thumbnail,
         },
       })
-
       console.log("✅ Canvas saved to Firebase successfully")
       const now = new Date()
       setLastSaved(now)
@@ -257,10 +191,8 @@ export function useCanvasCore(documentId: string, document: Document | null) {
       setIsSaving(false)
     }
   }, [documentId, document, isSaving])
-
   const handleCanvasChange = useCallback(() => {
     if (!fabricCanvasRef.current || !document || isSaving) return
-
     if (autoSaveIntervalRef.current) {
       clearTimeout(autoSaveIntervalRef.current)
     }
@@ -270,14 +202,12 @@ export function useCanvasCore(documentId: string, document: Document | null) {
       }
     }, 2000)
   }, [saveCanvasState, document, isSaving])
-
   // Zoom operations
   const handleZoomIn = useCallback(() => {
     if (!fabricCanvasRef.current) return
     const canvas = fabricCanvasRef.current
     const newZoom = Math.min(zoomLevel * 1.5, 10)
     setZoomLevel(newZoom)
-
     import("fabric").then((FabricModule) => {
       const fabric = FabricModule
       const centerX = canvas.width / 2
@@ -285,13 +215,11 @@ export function useCanvasCore(documentId: string, document: Document | null) {
       canvas.zoomToPoint(new fabric.Point(centerX, centerY), newZoom)
     })
   }, [zoomLevel])
-
   const handleZoomOut = useCallback(() => {
     if (!fabricCanvasRef.current) return
     const canvas = fabricCanvasRef.current
     const newZoom = Math.max(zoomLevel / 1.5, 0.1)
     setZoomLevel(newZoom)
-
     import("fabric").then((FabricModule) => {
       const fabric = FabricModule
       const centerX = canvas.width / 2
@@ -299,7 +227,6 @@ export function useCanvasCore(documentId: string, document: Document | null) {
       canvas.zoomToPoint(new fabric.Point(centerX, centerY), newZoom)
     })
   }, [zoomLevel])
-
   const handleResetZoom = useCallback(() => {
     if (!fabricCanvasRef.current) return
     setZoomLevel(1)
@@ -307,26 +234,21 @@ export function useCanvasCore(documentId: string, document: Document | null) {
     fabricCanvasRef.current.setViewportTransform([1, 0, 0, 1, 0, 0])
     fabricCanvasRef.current.renderAll()
   }, [])
-
   // Tool operations
   const setActiveToolState = useCallback((tool: Tool) => {
     activeToolRef.current = tool
     setActiveTool(tool)
-
     if (fabricCanvasRef.current) {
       const canvas = fabricCanvasRef.current
-
       // Reset canvas state
       canvas.isDrawingMode = false
       canvas.selection = true
       canvas.defaultCursor = "default"
       canvas.hoverCursor = "move"
-
       // Make all objects selectable by default
       canvas.forEachObject((obj: any) => {
         obj.selectable = true
       })
-
       if (tool === "pen") {
         canvas.isDrawingMode = true
         canvas.selection = false
@@ -339,7 +261,6 @@ export function useCanvasCore(documentId: string, document: Document | null) {
         canvas.forEachObject((obj: any) => {
           obj.selectable = false
         })
-
       } else if (tool === "pan") {
         canvas.defaultCursor = "grab"
         canvas.hoverCursor = "grab"
@@ -362,24 +283,18 @@ export function useCanvasCore(documentId: string, document: Document | null) {
           obj.selectable = false
         })
       }
-
       canvas.renderAll()
     }
   }, [brushSize, brushColor])
-
-
   const updateSelectedObjects = useCallback((canvas: any, onSelectedImagesChange?: (images: string[]) => void) => {
     const activeObjects = canvas.getActiveObjects()
-
     // Ensure sticky note properties are properly preserved
     activeObjects.forEach((obj: any) => {
       if (obj.type === "group" && obj.stickyNoteGroup) {
         obj.stickyNoteGroup = true
       }
     })
-
     setSelectedObjects(activeObjects)
-
     if (onSelectedImagesChange) {
       const imageUrls = activeObjects
         .filter((obj: any) => obj.type === "image" && obj.src)
@@ -387,15 +302,12 @@ export function useCanvasCore(documentId: string, document: Document | null) {
       onSelectedImagesChange(imageUrls)
     }
   }, [])
-
-
   // Canvas actions
   const handleDuplicate = useCallback(() => {
     if (!fabricCanvasRef.current) return
     const canvas = fabricCanvasRef.current
     const activeObjects = canvas.getActiveObjects()
     if (activeObjects.length === 0) return
-
     activeObjects.forEach((obj: any) => {
       obj.clone((cloned: any) => {
         cloned.set({
@@ -409,7 +321,6 @@ export function useCanvasCore(documentId: string, document: Document | null) {
       })
     })
   }, [handleCanvasChange])
-
   const handleDelete = useCallback(() => {
     if (!fabricCanvasRef.current) return
     const canvas = fabricCanvasRef.current
@@ -425,22 +336,18 @@ export function useCanvasCore(documentId: string, document: Document | null) {
       handleCanvasChange()
     }
   }, [handleCanvasChange])
-
   const handleCopy = useCallback(() => {
     if (!fabricCanvasRef.current) return
     const canvas = fabricCanvasRef.current
     const activeObject = canvas.getActiveObject()
     if (!activeObject) return
-
     activeObject.clone().then((cloned: any) => {
       window.copiedObjects = cloned
     })
   }, [])
-
   const handlePaste = useCallback(() => {
     if (!fabricCanvasRef.current || !window.copiedObjects) return
     const canvas = fabricCanvasRef.current
-
     window.copiedObjects.clone().then((clonedObj: any) => {
       canvas.discardActiveObject()
       clonedObj.set({
@@ -448,7 +355,6 @@ export function useCanvasCore(documentId: string, document: Document | null) {
         top: clonedObj.top + 10,
         evented: true,
       })
-
       // Preserve all custom properties from original object
       if (window.copiedObjects.stickyNoteGroup === true) {
         Object.defineProperty(clonedObj, 'stickyNoteGroup', {
@@ -463,7 +369,6 @@ export function useCanvasCore(documentId: string, document: Document | null) {
           enumerable: true,
           configurable: true
         })
-
         // Override toObject
         const originalToObject = clonedObj.toObject.bind(clonedObj)
         clonedObj.toObject = function(propertiesToInclude?: string[]) {
@@ -475,11 +380,9 @@ export function useCanvasCore(documentId: string, document: Document | null) {
           }
         }
       }
-
       if (window.copiedObjects.isTextObject) {
         clonedObj.isTextObject = true
       }
-
       import("fabric").then(({ ActiveSelection }) => {
         if (clonedObj instanceof ActiveSelection) {
           clonedObj.canvas = canvas
@@ -498,27 +401,21 @@ export function useCanvasCore(documentId: string, document: Document | null) {
       })
     })
   }, [handleCanvasChange])
-
-
   const handleUndo = useCallback(() => {
     if (!fabricCanvasRef.current || !fabricCanvasRef.current.undo) return
     fabricCanvasRef.current.undo()
   }, [])
-
   const handleRedo = useCallback(() => {
     if (!fabricCanvasRef.current || !fabricCanvasRef.current.redo) return
     fabricCanvasRef.current.redo()
   }, [])
-
   // Update refs
   useEffect(() => {
     activeToolRef.current = activeTool
   }, [activeTool])
-
   useEffect(() => {
     isDrawingRef.current = isDrawing
   }, [isDrawing])
-
   return {
     canvasRef,
     fabricCanvasRef,

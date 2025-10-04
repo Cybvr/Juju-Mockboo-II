@@ -13,14 +13,12 @@ import {
   Minus
 } from "lucide-react"
 import { useState, useEffect } from "react"
-
 interface StickyNoteToolbarProps {
   isVisible: boolean
   selectedStickyNote: any
   fabricCanvas: any
   onNoteChange: () => void
 }
-
 const stickyColors = [
   { name: "yellow", bg: "#FEF3C7", border: "#F59E0B" },
   { name: "pink", bg: "#FCE7F3", border: "#EC4899" },
@@ -29,13 +27,10 @@ const stickyColors = [
   { name: "orange", bg: "#FED7AA", border: "#F97316" },
   { name: "purple", bg: "#E9D5FF", border: "#8B5CF6" },
 ]
-
 const fontSizes = [12, 14, 16, 18, 20, 24, 28]
-
 const fontFamilies = [
   "Arial", "Helvetica", "Times New Roman", "Georgia", "Verdana", "Comic Sans MS", "Impact", "Courier New"
 ]
-
 export function StickyNoteToolbar({ 
   isVisible, 
   selectedStickyNote, 
@@ -48,39 +43,21 @@ export function StickyNoteToolbar({
   const [currentFontSize, setCurrentFontSize] = useState(16)
   const [currentFontFamily, setCurrentFontFamily] = useState("Arial")
   const [currentAlignment, setCurrentAlignment] = useState("left")
-
   useEffect(() => {
-    console.log("🛠️ STICKY NOTE TOOLBAR UPDATE:", {
-      isVisible,
-      hasSelectedStickyNote: !!selectedStickyNote,
-      hasFabricCanvas: !!fabricCanvas,
-      stickyNoteType: selectedStickyNote?.type,
-      stickyNoteGroup: selectedStickyNote?.stickyNoteGroup,
-      stickyColor: selectedStickyNote?.stickyColor
-    })
-    
     if (!isVisible || !selectedStickyNote || !fabricCanvas) {
-      console.log("🛠️ TOOLBAR NOT SHOWING - Missing requirements")
       return
     }
-    
-    console.log("🛠️ TOOLBAR SHOULD BE VISIBLE NOW")
-
     // Position toolbar above the selected sticky note
     const objBounds = selectedStickyNote.getBoundingRect()
     const zoom = fabricCanvas.getZoom()
     const vpt = fabricCanvas.viewportTransform || [1, 0, 0, 1, 0, 0]
-
     const viewportX = (objBounds.left + objBounds.width / 2) * zoom + vpt[4]
     const viewportY = Math.max(40, (objBounds.top - 80) * zoom + vpt[5])
-
     setPosition({ x: viewportX, y: viewportY })
-
     // Get current sticky note properties
     if (selectedStickyNote.type === "group") {
       const objects = selectedStickyNote.getObjects()
       const textObj = objects.find((obj: any) => obj.type === "textbox")
-
       if (textObj) {
         setNoteText(textObj.text || "")
         setCurrentFontSize(textObj.fontSize || 16)
@@ -92,11 +69,9 @@ export function StickyNoteToolbar({
       }
     }
   }, [isVisible, selectedStickyNote, fabricCanvas])
-
   const handleTextChange = (newText: string) => {
     setNoteText(newText)
     if (!selectedStickyNote || !fabricCanvas) return
-
     if (selectedStickyNote.type === "group") {
       const textObj = selectedStickyNote.getObjects().find((obj: any) => obj.type === "textbox")
       if (textObj) {
@@ -106,14 +81,11 @@ export function StickyNoteToolbar({
       }
     }
   }
-
   const handleColorChange = (colorName: string) => {
     setCurrentColor(colorName)
     if (!selectedStickyNote || !fabricCanvas) return
-
     const color = stickyColors.find(c => c.name === colorName)
     if (!color) return
-
     if (selectedStickyNote.type === "group") {
       const objects = selectedStickyNote.getObjects()
       // Update background
@@ -129,11 +101,9 @@ export function StickyNoteToolbar({
       onNoteChange()
     }
   }
-
   const handleFontSizeChange = (size: number) => {
     setCurrentFontSize(size)
     if (!selectedStickyNote || !fabricCanvas) return
-
     if (selectedStickyNote.type === "group") {
       const textObj = selectedStickyNote.getObjects().find((obj: any) => obj.type === "textbox")
       if (textObj) {
@@ -143,11 +113,9 @@ export function StickyNoteToolbar({
       }
     }
   }
-
   const handleFontFamilyChange = (fontFamily: string) => {
     setCurrentFontFamily(fontFamily)
     if (!selectedStickyNote || !fabricCanvas) return
-
     if (selectedStickyNote.type === "group") {
       const textObj = selectedStickyNote.getObjects().find((obj: any) => obj.type === "textbox")
       if (textObj) {
@@ -157,11 +125,9 @@ export function StickyNoteToolbar({
       }
     }
   }
-
   const handleAlignmentChange = (alignment: string) => {
     setCurrentAlignment(alignment)
     if (!selectedStickyNote || !fabricCanvas) return
-
     if (selectedStickyNote.type === "group") {
       const textObj = selectedStickyNote.getObjects().find((obj: any) => obj.type === "textbox")
       if (textObj) {
@@ -171,16 +137,13 @@ export function StickyNoteToolbar({
       }
     }
   }
-
   const handleDelete = () => {
     if (!selectedStickyNote || !fabricCanvas) return
     fabricCanvas.remove(selectedStickyNote)
     fabricCanvas.renderAll()
     onNoteChange()
   }
-
   if (!isVisible) return null
-
   return (
     <TooltipProvider>
       <div
@@ -213,7 +176,6 @@ export function StickyNoteToolbar({
             </div>
           </PopoverContent>
         </Popover>
-
         {/* Font Size */}
         <Popover>
           <PopoverTrigger asChild>
@@ -236,7 +198,6 @@ export function StickyNoteToolbar({
             </div>
           </PopoverContent>
         </Popover>
-
         {/* Font Family */}
         <Popover>
           <PopoverTrigger asChild>
@@ -261,7 +222,6 @@ export function StickyNoteToolbar({
             </div>
           </PopoverContent>
         </Popover>
-
         {/* Alignment */}
         <Tooltip>
           <TooltipTrigger asChild>
@@ -276,7 +236,6 @@ export function StickyNoteToolbar({
           </TooltipTrigger>
           <TooltipContent><p>Align Left</p></TooltipContent>
         </Tooltip>
-
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
@@ -290,7 +249,6 @@ export function StickyNoteToolbar({
           </TooltipTrigger>
           <TooltipContent><p>Align Center</p></TooltipContent>
         </Tooltip>
-
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
@@ -304,7 +262,6 @@ export function StickyNoteToolbar({
           </TooltipTrigger>
           <TooltipContent><p>Align Right</p></TooltipContent>
         </Tooltip>
-
         {/* Delete */}
         <Tooltip>
           <TooltipTrigger asChild>
