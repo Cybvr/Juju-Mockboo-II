@@ -105,31 +105,19 @@ export function useCanvasCore(documentId: string, document: Document | null) {
     const updateSelection = (selected: any[]) => {
       console.log("🎯 SELECTION UPDATE - Objects selected:", selected.length)
       
-      // Ensure sticky note properties are preserved during selection
+      // Check for sticky notes using name property
       selected.forEach((obj: any, index) => {
         console.log(`🎯 Selected object ${index + 1}:`, {
           type: obj.type,
-          stickyNoteGroup: obj.stickyNoteGroup,
-          stickyColor: obj.stickyColor,
-          isTextObject: obj.isTextObject
+          name: obj.name,
+          isSticky: obj.name?.startsWith('sticky-note-')
         })
-        
-        if (obj.type === "group" && obj.stickyNoteGroup) {
-          // Preserve sticky note properties
-          Object.defineProperty(obj, 'stickyNoteGroup', {
-            value: true,
-            writable: true,
-            enumerable: true,
-            configurable: false
-          })
-          console.log("🟡 STICKY NOTE SELECTED - Properties preserved")
-        }
       })
 
       setSelectedObjects(selected)
 
       // Track specific object types
-      const stickyNote = selected.find((obj: any) => obj.type === "group" && obj.stickyNoteGroup)
+      const stickyNote = selected.find((obj: any) => obj.name?.startsWith('sticky-note-'))
       const textObject = selected.find((obj: any) => obj.isTextObject || obj.type === 'textbox' || obj.type === 'i-text')
 
       console.log("🟡 STICKY NOTE TOOLBAR TRIGGER:", !!stickyNote)
@@ -209,7 +197,7 @@ export function useCanvasCore(documentId: string, document: Document | null) {
 
     try {
       setIsSaving(true)
-      const rawCanvasData = fabricCanvasRef.current.toJSON(['stickyNoteGroup', 'stickyColor', 'isTextObject'])
+      const rawCanvasData = fabricCanvasRef.current.toJSON(['name', 'isTextObject'])
 
       // Debug logs for sticky notes
       console.log("🟡 ALL OBJECTS BEING SAVED:", rawCanvasData.objects?.map((obj: any, i: number) => ({

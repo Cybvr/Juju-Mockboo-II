@@ -86,7 +86,9 @@ export function StickyNoteToolbar({
         setCurrentFontSize(textObj.fontSize || 16)
         setCurrentFontFamily(textObj.fontFamily || "Arial")
         setCurrentAlignment(textObj.textAlign || "left")
-        setCurrentColor(selectedStickyNote.stickyColor || "yellow")
+        // Get color from name (format: "sticky-note-yellow")
+        const colorFromName = selectedStickyNote.name?.split('-')[2] || "yellow"
+        setCurrentColor(colorFromName)
       }
     }
   }, [isVisible, selectedStickyNote, fabricCanvas])
@@ -122,7 +124,7 @@ export function StickyNoteToolbar({
       if (objects[1]) {
         objects[1].set({ fill: color.border })
       }
-      selectedStickyNote.stickyColor = colorName
+      selectedStickyNote.name = `sticky-note-${colorName}`
       fabricCanvas.renderAll()
       onNoteChange()
     }

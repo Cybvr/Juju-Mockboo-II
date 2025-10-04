@@ -66,30 +66,8 @@ export function useStickyNote({ fabricCanvasRef, handleCanvasChange }: StickyNot
         },
       })
 
-      // Mark as sticky note for toolbar detection - MUST be preserved and serializable
-      Object.defineProperty(stickyGroup, 'stickyNoteGroup', {
-        value: true,
-        writable: true,
-        enumerable: true,
-        configurable: true
-      })
-      Object.defineProperty(stickyGroup, 'stickyColor', {
-        value: options?.color || "yellow",
-        writable: true,
-        enumerable: true,
-        configurable: true
-      })
-
-      // Override toObject to ensure custom properties are serialized
-      const originalToObject = stickyGroup.toObject.bind(stickyGroup)
-      stickyGroup.toObject = function(propertiesToInclude?: string[]) {
-        const obj = originalToObject(propertiesToInclude)
-        return {
-          ...obj,
-          stickyNoteGroup: this.stickyNoteGroup,
-          stickyColor: this.stickyColor
-        }
-      }
+      // Mark as sticky note using name property (Fabric saves this automatically)
+      stickyGroup.name = `sticky-note-${options?.color || "yellow"}`
 
       canvas.add(stickyGroup)
       canvas.setActiveObject(stickyGroup)
