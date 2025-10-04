@@ -47,14 +47,10 @@ export function useInteractionHook({
       // Handle tool-specific creation
       if (tool === "sticky-note") {
         window.stickyNoteHook?.createStickyNote?.(pointer.x, pointer.y)
-        // Reset to select tool after creation
-        setActiveTool("select")
         return
       }
       if (tool === "text") {
         window.textToolHook?.createTextObject?.(pointer.x, pointer.y)
-        // Reset to select tool after creation
-        setActiveTool("select")
         return
       }
       if (tool === "pen") {
@@ -89,22 +85,34 @@ export function useInteractionHook({
       })
     }
 
-    // Handle double-click for text editing (only when in select mode)
+    // Handle double-click for sticky note and text editing
     const handleDoubleClick = (e: any) => {
       const target = e.target
-      if (!target || activeToolRef.current !== "select") return
+      if (!target) return
 
+      // Handle sticky note double-click editing
+      if (target.name?.startsWith('sticky-note-') && target.type === "group") {
+        const objects = target.getObjects()
+        const textObj = objects.find((obj: any) => obj.type === "textbox")
+        if (textObj) {
+          textObj.set({ editable: true, selectable: true })
+          canvas.setActiveObject(textObj)
+          textObj.enterEditing()
+          textObj.hiddenTextarea?.focus()
+          textObj.selectAll()
+          
+          const onEditExit = () => {
+            textObj.off("editing:exited", onEditExit)
+            handleCanvasChange()
+          }
+          textObj.on("editing:exited", onEditExit)
+        }
+      }
       // Handle text object double-click editing
-      if (target.type === "textbox" || target.type === "i-text" || target.isTextObject) {
-        // Prevent conflicts by ensuring we're in the right state
-        canvas.discardActiveObject()
-        canvas.setActiveObject(target)
-        
-        setTimeout(() => {
-          target.enterEditing()
-          target.hiddenTextarea?.focus()
-          target.selectAll()
-        }, 50)
+      else if (target.type === "textbox" || target.type === "i-text" || target.isTextObject) {
+        target.enterEditing()
+        target.hiddenTextarea?.focus()
+        target.selectAll()
       }
     }
     const handleMouseMove = (e: any) => {
