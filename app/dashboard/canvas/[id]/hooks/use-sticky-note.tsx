@@ -1,7 +1,6 @@
 
 "use client"
 import { useCallback } from "react"
-import type { Canvas } from "fabric"
 
 interface StickyNoteHookProps {
  fabricCanvasRef: React.MutableRefObject<any>
@@ -47,9 +46,9 @@ export function useStickyNote({ fabricCanvasRef, handleCanvasChange }: StickyNot
         transparentCorners: false,
       })
 
-      // Mark as sticky note
-      textObj.name = `sticky-note-${options?.color || "yellow"}`
+      // Mark as text object (same as regular text)
       textObj.isTextObject = true
+      textObj.stickyColor = options?.color || "yellow"
 
       canvas.add(textObj)
       canvas.setActiveObject(textObj)

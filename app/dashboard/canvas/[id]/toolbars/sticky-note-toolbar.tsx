@@ -1,3 +1,4 @@
+
 "use client"
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -14,7 +15,7 @@ import { useState, useEffect } from "react"
 
 interface StickyNoteToolbarProps {
   isVisible: boolean
-  selectedStickyNote: any
+  selectedTextObject: any
   fabricCanvas: any
   onNoteChange: () => void
 }
@@ -32,7 +33,7 @@ const fontSizes = [12, 14, 16, 18, 20, 24, 28]
 
 export function StickyNoteToolbar({ 
   isVisible, 
-  selectedStickyNote, 
+  selectedTextObject, 
   fabricCanvas, 
   onNoteChange 
 }: StickyNoteToolbarProps) {
@@ -41,38 +42,38 @@ export function StickyNoteToolbar({
   const [currentFontSize, setCurrentFontSize] = useState(16)
   const [currentAlignment, setCurrentAlignment] = useState("left")
 
+  // Only show for sticky notes (text objects with backgroundColor)
+  const isSticky = selectedTextObject?.backgroundColor && selectedTextObject?.stickyColor
+
   useEffect(() => {
-    if (!isVisible || !selectedStickyNote || !fabricCanvas) {
+    if (!isVisible || !selectedTextObject || !fabricCanvas || !isSticky) {
       return
     }
 
-    // Position toolbar above the selected sticky note
-    const objBounds = selectedStickyNote.getBoundingRect()
+    // Position toolbar above the selected object
+    const objBounds = selectedTextObject.getBoundingRect()
     const zoom = fabricCanvas.getZoom()
     const vpt = fabricCanvas.viewportTransform || [1, 0, 0, 1, 0, 0]
     const viewportX = (objBounds.left + objBounds.width / 2) * zoom + vpt[4]
     const viewportY = Math.max(40, (objBounds.top - 80) * zoom + vpt[5])
     setPosition({ x: viewportX, y: viewportY })
 
-    // Get current properties from the text object
-    setCurrentFontSize(selectedStickyNote.fontSize || 16)
-    setCurrentAlignment(selectedStickyNote.textAlign || "left")
-
-    // Get color from name (format: "sticky-note-yellow")
-    const colorFromName = selectedStickyNote.name?.split('-')[2] || "yellow"
-    setCurrentColor(colorFromName)
-  }, [isVisible, selectedStickyNote, fabricCanvas])
+    // Get current properties
+    setCurrentFontSize(selectedTextObject.fontSize || 16)
+    setCurrentAlignment(selectedTextObject.textAlign || "left")
+    setCurrentColor(selectedTextObject.stickyColor || "yellow")
+  }, [isVisible, selectedTextObject, fabricCanvas, isSticky])
 
   const handleColorChange = (colorName: string) => {
     setCurrentColor(colorName)
-    if (!selectedStickyNote || !fabricCanvas) return
+    if (!selectedTextObject || !fabricCanvas) return
 
     const color = stickyColors.find(c => c.name === colorName)
     if (!color) return
 
-    selectedStickyNote.set({ 
+    selectedTextObject.set({ 
       backgroundColor: color.bg,
-      name: `sticky-note-${colorName}`
+      stickyColor: colorName
     })
     fabricCanvas.renderAll()
     onNoteChange()
@@ -80,30 +81,30 @@ export function StickyNoteToolbar({
 
   const handleFontSizeChange = (size: number) => {
     setCurrentFontSize(size)
-    if (!selectedStickyNote || !fabricCanvas) return
+    if (!selectedTextObject || !fabricCanvas) return
 
-    selectedStickyNote.set({ fontSize: size })
+    selectedTextObject.set({ fontSize: size })
     fabricCanvas.renderAll()
     onNoteChange()
   }
 
   const handleAlignmentChange = (alignment: string) => {
     setCurrentAlignment(alignment)
-    if (!selectedStickyNote || !fabricCanvas) return
+    if (!selectedTextObject || !fabricCanvas) return
 
-    selectedStickyNote.set({ textAlign: alignment })
+    selectedTextObject.set({ textAlign: alignment })
     fabricCanvas.renderAll()
     onNoteChange()
   }
 
   const handleDelete = () => {
-    if (!selectedStickyNote || !fabricCanvas) return
-    fabricCanvas.remove(selectedStickyNote)
+    if (!selectedTextObject || !fabricCanvas) return
+    fabricCanvas.remove(selectedTextObject)
     fabricCanvas.renderAll()
     onNoteChange()
   }
 
-  if (!isVisible) return null
+  if (!isVisible || !isSticky) return null
 
   return (
     <TooltipProvider>
