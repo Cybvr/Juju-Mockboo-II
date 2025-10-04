@@ -123,8 +123,7 @@ export function useCanvasCore(documentId: string, document: Document | null) {
       console.log("🟡 STICKY NOTE TOOLBAR TRIGGER:", !!stickyNote)
       if (stickyNote) {
         console.log("🟡 Selected sticky note details:", {
-          stickyNoteGroup: stickyNote.stickyNoteGroup,
-          stickyColor: stickyNote.stickyColor,
+          name: stickyNote.name,
           objectCount: stickyNote.getObjects?.()?.length,
           textContent: stickyNote.getObjects?.()?.find((obj: any) => obj.type === 'textbox')?.text
         })
@@ -203,23 +202,14 @@ export function useCanvasCore(documentId: string, document: Document | null) {
       console.log("🟡 ALL OBJECTS BEING SAVED:", rawCanvasData.objects?.map((obj: any, i: number) => ({
         index: i + 1,
         type: obj.type,
-        stickyNoteGroup: obj.stickyNoteGroup,
-        stickyColor: obj.stickyColor,
+        name: obj.name,
+        isSticky: obj.name?.startsWith('sticky-note-'),
         hasObjects: obj.objects?.length,
         textContent: obj.objects?.find((child: any) => child.type === 'textbox')?.text || 'no-text'
       })))
       
-      const stickyNotes = rawCanvasData.objects?.filter((obj: any) => obj.type === 'group' && obj.stickyNoteGroup)
+      const stickyNotes = rawCanvasData.objects?.filter((obj: any) => obj.name?.startsWith('sticky-note-'))
       console.log("🟡 STICKY NOTES BEING SAVED:", stickyNotes?.length || 0)
-      stickyNotes?.forEach((stickyNote: any, index: number) => {
-        console.log(`🟡 Sticky Note ${index + 1} SAVE DATA:`, {
-          stickyNoteGroup: stickyNote.stickyNoteGroup,
-          stickyColor: stickyNote.stickyColor,
-          hasObjects: stickyNote.objects?.length,
-          textContent: stickyNote.objects?.find((obj: any) => obj.type === 'textbox')?.text,
-          fullObjectStructure: stickyNote.objects?.map((obj: any) => obj.type)
-        })
-      })
 
       // Debug logs for text objects
       console.log("🔍 Saving canvas state - Raw data:", rawCanvasData)

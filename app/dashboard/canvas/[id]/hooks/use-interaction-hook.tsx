@@ -91,7 +91,7 @@ export function useInteractionHook({
       if (!target) return
 
       // Handle sticky note double-click editing
-      if (target.stickyNoteGroup && target.type === "group") {
+      if (target.name?.startsWith('sticky-note-') && target.type === "group") {
         const objects = target.getObjects()
         const textObj = objects.find((obj: any) => obj.type === "textbox")
         if (textObj) {
