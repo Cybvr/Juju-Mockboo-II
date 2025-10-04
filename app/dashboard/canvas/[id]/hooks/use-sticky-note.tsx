@@ -1,10 +1,10 @@
+
 "use client"
 import { useCallback } from "react"
-import type { Canvas } from "fabric"
 
 interface StickyNoteHookProps {
-  fabricCanvasRef: React.MutableRefObject<any>
-  handleCanvasChange: () => void
+ fabricCanvasRef: React.MutableRefObject<any>
+ handleCanvasChange: () => void
 }
 
 export function useStickyNote({ fabricCanvasRef, handleCanvasChange }: StickyNoteHookProps) {
@@ -16,110 +16,55 @@ export function useStickyNote({ fabricCanvasRef, handleCanvasChange }: StickyNot
       if (!canvas) return
 
       const stickyColors = [
-        { name: "yellow", bg: "#FEF3C7", border: "#F59E0B" },
-        { name: "pink", bg: "#FCE7F3", border: "#EC4899" },
-        { name: "blue", bg: "#DBEAFE", border: "#3B82F6" },
-        { name: "green", bg: "#D1FAE5", border: "#10B981" },
-        { name: "orange", bg: "#FED7AA", border: "#F97316" },
-        { name: "purple", bg: "#E9D5FF", border: "#8B5CF6" },
+        { name: "yellow", bg: "#FEF3C7" },
+        { name: "pink", bg: "#FCE7F3" },
+        { name: "blue", bg: "#DBEAFE" },
+        { name: "green", bg: "#D1FAE5" },
+        { name: "orange", bg: "#FED7AA" },
+        { name: "purple", bg: "#E9D5FF" },
       ]
 
       const selectedColor = stickyColors.find(c => c.name === (options?.color || "yellow")) || stickyColors[0]
 
-      // Create main note background
-      const noteBackground = new fabric.Rect({
-        width: 200,
-        height: 160,
-        fill: selectedColor.bg,
-        rx: 4,
-        ry: 4,
-        left: 0,
-        top: 0,
-      })
-
-      // Create text area
       const textObj = new fabric.Textbox(options?.text || "Type your note here...", {
-        left: 15,
-        top: 15,
-        width: 170,
+        left: x,
+        top: y,
+        width: 200,
         fontSize: 16,
-        fontFamily: "Arial, sans-serif",
+        fontFamily: "Arial",
         fill: "#374151",
         textAlign: "left",
         splitByGrapheme: true,
         editable: true,
-      })
-
-      // Group all elements
-      const stickyGroup = new fabric.Group([noteBackground, textObj], {
-        left: x,
-        top: y,
         selectable: true,
         hasControls: true,
-        hasBorders: false,
-        lockRotation: true,
-        shadow: {
-          color: "rgba(0, 0, 0, 0.15)",
-          blur: 8,
-          offsetX: 0,
-          offsetY: 2,
-        },
+        hasBorders: true,
+        backgroundColor: selectedColor.bg,
+        padding: 15,
+        cornerColor: "#2563eb",
+        cornerSize: 8,
+        transparentCorners: false,
       })
 
-      // Mark as sticky note for toolbar detection
-      stickyGroup.stickyNoteGroup = true
-      stickyGroup.stickyColor = options?.color || "yellow"
+      // Mark as text object (same as regular text)
+      textObj.isTextObject = true
+      textObj.stickyColor = options?.color || "yellow"
 
-      canvas.add(stickyGroup)
-      canvas.setActiveObject(stickyGroup)
+      canvas.add(textObj)
+      canvas.setActiveObject(textObj)
       canvas.renderAll()
       handleCanvasChange()
+
+      // Auto-enter editing mode
+      setTimeout(() => {
+        textObj.enterEditing()
+        textObj.hiddenTextarea?.focus()
+        textObj.selectAll()
+      }, 100)
     })
-  }, [fabricCanvasRef, handleCanvasChange])
-
-  const setupStickyNoteInteractions = useCallback(() => {
-    const canvas = fabricCanvasRef.current
-    if (!canvas) return null
-
-    const handleDoubleClick = (e: any) => {
-      const target = e.target
-      if (target && target.stickyNoteGroup) {
-        const objects = target.getObjects()
-        const textObj = objects.find((obj: any) => obj.type === "textbox")
-
-        if (textObj) {
-          // Make text editable directly in the group
-          textObj.set({
-            editable: true,
-            selectable: true
-          })
-
-          // Set text as active and enter editing
-          canvas.setActiveObject(textObj)
-          textObj.enterEditing()
-          textObj.hiddenTextarea?.focus()
-          textObj.selectAll()
-
-          // Save changes when editing exits
-          const onEditExit = () => {
-            textObj.off("editing:exited", onEditExit)
-            handleCanvasChange()
-          }
-
-          textObj.on("editing:exited", onEditExit)
-        }
-      }
-    }
-
-    canvas.on("mouse:dblclick", handleDoubleClick)
-
-    return () => {
-      canvas.off("mouse:dblclick", handleDoubleClick)
-    }
   }, [fabricCanvasRef, handleCanvasChange])
 
   return {
     createStickyNote,
-    setupStickyNoteInteractions,
   }
 }

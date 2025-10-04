@@ -1,0 +1,25 @@
+which part of this still applies . The Problem: You create a sticky note. It shows up. It has special properties that say "I'm a sticky note, I'm yellow." When you save to the database, those properties disappear. When you reload the page, the note looks like a regular shape group instead of a sticky note.
+Why This Happens: Fabric.js (the canvas library) has a built-in way to save canvas objects. By default, it only saves standard stuff like position, size, color. Your custom "stickyNoteGroup" and "stickyColor" properties are NOT standard, so Fabric ignores them when saving.
+What We've Been Doing Wrong: Trying to trick Fabric into including those properties by overriding functions, using special JavaScript property definitions, etc. It's like trying to convince your printer to print in a color it doesn't have ink for.
+The Simple Fix: Stop fighting with Fabric. Just mark sticky notes in a way Fabric DOES understand. Change this line in your sticky note creation:
+Instead of custom properties, give the sticky note a name or id that starts with "sticky-note-":
+
+Most of that explanation no longer applies because you're already using the name property correctly.
+
+What you're doing right:
+
+Creating sticky notes with name: 'sticky-note-yellow' (or similar)
+Using name in your save: toJSON(['name', 'isTextObject'])
+Detecting sticky notes on load via obj.name?.startsWith('sticky-note-')
+What's still broken: You're setting additional properties (stickyNoteGroup, stickyColor) during load restoration, but NOT saving them. This creates inconsistency in your toolbar logic that checks for these properties.
+
+Two options:
+
+Save all properties (my previous suggestion):
+javascript
+   toJSON(['name', 'isTextObject', 'stickyNoteGroup', 'stickyColor'])
+Or simplify - just use name everywhere:
+Stop setting stickyNoteGroup and stickyColor after load
+Change your toolbar logic to only check obj.name?.startsWith('sticky-note-')
+Extract color from the name: const color = obj.name.split('-').pop()
+Option 2 is cleaner since you're already using name successfully. The problem isn't the approach - it's that you're mixing two identification systems (name-based and property-based) inconsistently.
