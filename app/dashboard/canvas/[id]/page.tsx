@@ -408,21 +408,21 @@ export default function CanvasEditor() {
 
       
 
-      {/* Sticky Note Toolbar */}
+      {/* Sticky Note Toolbar - only for sticky notes with backgroundColor */}
       {!isViewOnly && (
         <StickyNoteToolbar
-          isVisible={!!canvasCore.selectedStickyNote}
-          selectedStickyNote={canvasCore.selectedStickyNote}
+          isVisible={canvasCore.selectedObjects.length === 1 && canvasCore.selectedObjects[0]?.backgroundColor && canvasCore.selectedObjects[0]?.stickyColor}
+          selectedTextObject={canvasCore.selectedObjects.find(obj => obj.backgroundColor && obj.stickyColor)}
           fabricCanvas={canvasCore.fabricCanvasRef.current}
           onNoteChange={canvasCore.handleCanvasChange}
         />
       )}
 
-      {/* Text Toolbar */}
+      {/* Text Toolbar - only for regular text objects without backgroundColor */}
       {!isViewOnly && (
         <TextToolbar
-          isVisible={canvasCore.selectedObjects.length === 1 && (canvasCore.selectedObjects[0]?.type === "textbox" || canvasCore.selectedObjects[0]?.type === "i-text" || canvasCore.selectedObjects[0]?.isTextObject)}
-          selectedTextObject={canvasCore.selectedObjects.find(obj => obj.type === "textbox" || obj.type === "i-text" || obj.isTextObject)}
+          isVisible={canvasCore.selectedObjects.length === 1 && (canvasCore.selectedObjects[0]?.type === "textbox" || canvasCore.selectedObjects[0]?.type === "i-text" || canvasCore.selectedObjects[0]?.isTextObject) && !canvasCore.selectedObjects[0]?.backgroundColor}
+          selectedTextObject={canvasCore.selectedObjects.find(obj => (obj.type === "textbox" || obj.type === "i-text" || obj.isTextObject) && !obj.backgroundColor)}
           fabricCanvas={canvasCore.fabricCanvasRef.current}
           onTextChange={canvasCore.handleCanvasChange}
         />

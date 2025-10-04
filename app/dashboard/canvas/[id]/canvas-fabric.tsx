@@ -188,8 +188,8 @@ export function useFabricCanvas(
         currentMode={canvasCore.drawingMode}
       />
       <StickyNoteToolbar
-        isVisible={!!canvasCore.selectedStickyNote}
-        selectedStickyNote={canvasCore.selectedStickyNote}
+        isVisible={canvasCore.selectedObjects.length === 1 && canvasCore.selectedObjects[0]?.backgroundColor && canvasCore.selectedObjects[0]?.stickyColor}
+        selectedTextObject={canvasCore.selectedObjects.find(obj => obj.backgroundColor && obj.stickyColor)}
         fabricCanvas={canvasCore.fabricCanvasRef.current}
         onNoteChange={canvasCore.handleCanvasChange}
       />
