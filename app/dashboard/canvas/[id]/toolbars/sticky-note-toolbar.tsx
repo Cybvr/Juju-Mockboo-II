@@ -8,17 +8,17 @@ import {
   AlignLeft, 
   AlignCenter, 
   AlignRight,
-  Trash2,
-  Plus,
-  Minus
+  Trash2
 } from "lucide-react"
 import { useState, useEffect } from "react"
+
 interface StickyNoteToolbarProps {
   isVisible: boolean
   selectedStickyNote: any
   fabricCanvas: any
   onNoteChange: () => void
 }
+
 const stickyColors = [
   { name: "yellow", bg: "#FEF3C7", border: "#F59E0B" },
   { name: "pink", bg: "#FCE7F3", border: "#EC4899" },
@@ -27,10 +27,9 @@ const stickyColors = [
   { name: "orange", bg: "#FED7AA", border: "#F97316" },
   { name: "purple", bg: "#E9D5FF", border: "#8B5CF6" },
 ]
+
 const fontSizes = [12, 14, 16, 18, 20, 24, 28]
-const fontFamilies = [
-  "Arial", "Helvetica", "Times New Roman", "Georgia", "Verdana", "Comic Sans MS", "Impact", "Courier New"
-]
+
 export function StickyNoteToolbar({ 
   isVisible, 
   selectedStickyNote, 
@@ -38,15 +37,15 @@ export function StickyNoteToolbar({
   onNoteChange 
 }: StickyNoteToolbarProps) {
   const [position, setPosition] = useState({ x: 0, y: 0 })
-  const [noteText, setNoteText] = useState("")
   const [currentColor, setCurrentColor] = useState("yellow")
   const [currentFontSize, setCurrentFontSize] = useState(16)
-  const [currentFontFamily, setCurrentFontFamily] = useState("Arial")
   const [currentAlignment, setCurrentAlignment] = useState("left")
+
   useEffect(() => {
     if (!isVisible || !selectedStickyNote || !fabricCanvas) {
       return
     }
+
     // Position toolbar above the selected sticky note
     const objBounds = selectedStickyNote.getBoundingRect()
     const zoom = fabricCanvas.getZoom()
@@ -54,96 +53,58 @@ export function StickyNoteToolbar({
     const viewportX = (objBounds.left + objBounds.width / 2) * zoom + vpt[4]
     const viewportY = Math.max(40, (objBounds.top - 80) * zoom + vpt[5])
     setPosition({ x: viewportX, y: viewportY })
-    // Get current sticky note properties
-    if (selectedStickyNote.type === "group") {
-      const objects = selectedStickyNote.getObjects()
-      const textObj = objects.find((obj: any) => obj.type === "textbox")
-      if (textObj) {
-        setNoteText(textObj.text || "")
-        setCurrentFontSize(textObj.fontSize || 16)
-        setCurrentFontFamily(textObj.fontFamily || "Arial")
-        setCurrentAlignment(textObj.textAlign || "left")
-        // Get color from name (format: "sticky-note-yellow")
-        const colorFromName = selectedStickyNote.name?.split('-')[2] || "yellow"
-        setCurrentColor(colorFromName)
-      }
-    }
+
+    // Get current properties from the text object
+    setCurrentFontSize(selectedStickyNote.fontSize || 16)
+    setCurrentAlignment(selectedStickyNote.textAlign || "left")
+
+    // Get color from name (format: "sticky-note-yellow")
+    const colorFromName = selectedStickyNote.name?.split('-')[2] || "yellow"
+    setCurrentColor(colorFromName)
   }, [isVisible, selectedStickyNote, fabricCanvas])
-  const handleTextChange = (newText: string) => {
-    setNoteText(newText)
-    if (!selectedStickyNote || !fabricCanvas) return
-    if (selectedStickyNote.type === "group") {
-      const textObj = selectedStickyNote.getObjects().find((obj: any) => obj.type === "textbox")
-      if (textObj) {
-        textObj.set({ text: newText })
-        fabricCanvas.renderAll()
-        onNoteChange()
-      }
-    }
-  }
+
   const handleColorChange = (colorName: string) => {
     setCurrentColor(colorName)
     if (!selectedStickyNote || !fabricCanvas) return
+
     const color = stickyColors.find(c => c.name === colorName)
     if (!color) return
-    if (selectedStickyNote.type === "group") {
-      const objects = selectedStickyNote.getObjects()
-      // Update background
-      if (objects[0]) {
-        objects[0].set({ fill: color.bg, stroke: color.border })
-      }
-      // Update fold
-      if (objects[1]) {
-        objects[1].set({ fill: color.border })
-      }
-      selectedStickyNote.name = `sticky-note-${colorName}`
-      fabricCanvas.renderAll()
-      onNoteChange()
-    }
+
+    selectedStickyNote.set({ 
+      backgroundColor: color.bg,
+      name: `sticky-note-${colorName}`
+    })
+    fabricCanvas.renderAll()
+    onNoteChange()
   }
+
   const handleFontSizeChange = (size: number) => {
     setCurrentFontSize(size)
     if (!selectedStickyNote || !fabricCanvas) return
-    if (selectedStickyNote.type === "group") {
-      const textObj = selectedStickyNote.getObjects().find((obj: any) => obj.type === "textbox")
-      if (textObj) {
-        textObj.set({ fontSize: size })
-        fabricCanvas.renderAll()
-        onNoteChange()
-      }
-    }
+
+    selectedStickyNote.set({ fontSize: size })
+    fabricCanvas.renderAll()
+    onNoteChange()
   }
-  const handleFontFamilyChange = (fontFamily: string) => {
-    setCurrentFontFamily(fontFamily)
-    if (!selectedStickyNote || !fabricCanvas) return
-    if (selectedStickyNote.type === "group") {
-      const textObj = selectedStickyNote.getObjects().find((obj: any) => obj.type === "textbox")
-      if (textObj) {
-        textObj.set({ fontFamily: fontFamily })
-        fabricCanvas.renderAll()
-        onNoteChange()
-      }
-    }
-  }
+
   const handleAlignmentChange = (alignment: string) => {
     setCurrentAlignment(alignment)
     if (!selectedStickyNote || !fabricCanvas) return
-    if (selectedStickyNote.type === "group") {
-      const textObj = selectedStickyNote.getObjects().find((obj: any) => obj.type === "textbox")
-      if (textObj) {
-        textObj.set({ textAlign: alignment })
-        fabricCanvas.renderAll()
-        onNoteChange()
-      }
-    }
+
+    selectedStickyNote.set({ textAlign: alignment })
+    fabricCanvas.renderAll()
+    onNoteChange()
   }
+
   const handleDelete = () => {
     if (!selectedStickyNote || !fabricCanvas) return
     fabricCanvas.remove(selectedStickyNote)
     fabricCanvas.renderAll()
     onNoteChange()
   }
+
   if (!isVisible) return null
+
   return (
     <TooltipProvider>
       <div
@@ -176,6 +137,7 @@ export function StickyNoteToolbar({
             </div>
           </PopoverContent>
         </Popover>
+
         {/* Font Size */}
         <Popover>
           <PopoverTrigger asChild>
@@ -198,30 +160,7 @@ export function StickyNoteToolbar({
             </div>
           </PopoverContent>
         </Popover>
-        {/* Font Family */}
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <Type className="h-4 w-4" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-2">
-            <div className="flex flex-col gap-1 max-h-48 overflow-y-auto">
-              {fontFamilies.map((font) => (
-                <Button
-                  key={font}
-                  variant={currentFontFamily === font ? "default" : "ghost"}
-                  size="sm"
-                  className="justify-start text-left"
-                  style={{ fontFamily: font }}
-                  onClick={() => handleFontFamilyChange(font)}
-                >
-                  {font}
-                </Button>
-              ))}
-            </div>
-          </PopoverContent>
-        </Popover>
+
         {/* Alignment */}
         <Tooltip>
           <TooltipTrigger asChild>
@@ -236,6 +175,7 @@ export function StickyNoteToolbar({
           </TooltipTrigger>
           <TooltipContent><p>Align Left</p></TooltipContent>
         </Tooltip>
+
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
@@ -249,6 +189,7 @@ export function StickyNoteToolbar({
           </TooltipTrigger>
           <TooltipContent><p>Align Center</p></TooltipContent>
         </Tooltip>
+
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
@@ -262,6 +203,7 @@ export function StickyNoteToolbar({
           </TooltipTrigger>
           <TooltipContent><p>Align Right</p></TooltipContent>
         </Tooltip>
+
         {/* Delete */}
         <Tooltip>
           <TooltipTrigger asChild>
