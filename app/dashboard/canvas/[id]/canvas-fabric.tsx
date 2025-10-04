@@ -105,32 +105,19 @@ export function useFabricCanvas(
                   childTypes: objects?.map(child => child.type)
                 })
                 
-                if ((hasRect && hasText) || obj.stickyNoteGroup) {
+                if ((hasRect && hasText) || obj.name?.startsWith('sticky-note-')) {
                   console.log(`🟡 RESTORING STICKY NOTE ${index + 1}...`)
                   
-                  // Force set sticky note properties
-                  obj.stickyNoteGroup = true
-                  obj.stickyColor = obj.stickyColor || "yellow"
-                  obj.name = `sticky-note-${obj.stickyColor || "yellow"}`
+                  // Ensure name is set if missing
+                  if (!obj.name?.startsWith('sticky-note-')) {
+                    obj.name = `sticky-note-yellow`
+                  }
                   
                   console.log("🟡 STICKY NOTE RESTORED:", {
-                    stickyNoteGroup: obj.stickyNoteGroup,
-                    stickyColor: obj.stickyColor,
+                    name: obj.name,
                     textContent: textContent,
                     objectId: obj.id || 'no-id'
                   })
-                  
-                  // Override toObject to ensure custom properties are serialized
-                  obj.toObject = function(propertiesToInclude?: string[]) {
-                    const defaultProps = fabric.Group.prototype.toObject.call(this, propertiesToInclude)
-                    const result = {
-                      ...defaultProps,
-                      stickyNoteGroup: this.stickyNoteGroup,
-                      stickyColor: this.stickyColor
-                    }
-                    console.log("🟡 toObject called for sticky note:", result)
-                    return result
-                  }
                 } else {
                   console.log(`❌ Group ${index + 1} NOT recognized as sticky note`)
                 }

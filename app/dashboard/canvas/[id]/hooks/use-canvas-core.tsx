@@ -104,7 +104,7 @@ export function useCanvasCore(documentId: string, document: Document | null) {
 
     const updateSelection = (selected: any[]) => {
       console.log("🎯 SELECTION UPDATE - Objects selected:", selected.length)
-      
+
       // Check for sticky notes using name property
       selected.forEach((obj: any, index) => {
         console.log(`🎯 Selected object ${index + 1}:`, {
@@ -207,7 +207,7 @@ export function useCanvasCore(documentId: string, document: Document | null) {
         hasObjects: obj.objects?.length,
         textContent: obj.objects?.find((child: any) => child.type === 'textbox')?.text || 'no-text'
       })))
-      
+
       const stickyNotes = rawCanvasData.objects?.filter((obj: any) => obj.name?.startsWith('sticky-note-'))
       console.log("🟡 STICKY NOTES BEING SAVED:", stickyNotes?.length || 0)
 
@@ -463,7 +463,7 @@ export function useCanvasCore(documentId: string, document: Document | null) {
           enumerable: true,
           configurable: true
         })
-        
+
         // Override toObject
         const originalToObject = clonedObj.toObject.bind(clonedObj)
         clonedObj.toObject = function(propertiesToInclude?: string[]) {
