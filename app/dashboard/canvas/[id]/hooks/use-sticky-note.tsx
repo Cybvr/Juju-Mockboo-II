@@ -17,12 +17,12 @@ export function useStickyNote({ fabricCanvasRef, handleCanvasChange }: StickyNot
       if (!canvas) return
 
       const stickyColors = [
-        { name: "yellow", bg: "#FEF3C7", border: "#F59E0B" },
-        { name: "pink", bg: "#FCE7F3", border: "#EC4899" },
-        { name: "blue", bg: "#DBEAFE", border: "#3B82F6" },
-        { name: "green", bg: "#D1FAE5", border: "#10B981" },
-        { name: "orange", bg: "#FED7AA", border: "#F97316" },
-        { name: "purple", bg: "#E9D5FF", border: "#8B5CF6" },
+        { name: "yellow", bg: "#FEF3C7" },
+        { name: "pink", bg: "#FCE7F3" },
+        { name: "blue", bg: "#DBEAFE" },
+        { name: "green", bg: "#D1FAE5" },
+        { name: "orange", bg: "#FED7AA" },
+        { name: "purple", bg: "#E9D5FF" },
       ]
 
       const selectedColor = stickyColors.find(c => c.name === (options?.color || "yellow")) || stickyColors[0]
@@ -31,9 +31,8 @@ export function useStickyNote({ fabricCanvasRef, handleCanvasChange }: StickyNot
         left: x,
         top: y,
         width: 200,
-        height: 160,
         fontSize: 16,
-        fontFamily: "Arial, sans-serif",
+        fontFamily: "Arial",
         fill: "#374151",
         textAlign: "left",
         splitByGrapheme: true,
@@ -43,17 +42,12 @@ export function useStickyNote({ fabricCanvasRef, handleCanvasChange }: StickyNot
         hasBorders: true,
         backgroundColor: selectedColor.bg,
         padding: 15,
-        rx: 4,
-        ry: 4,
-        shadow: {
-          color: "rgba(0, 0, 0, 0.15)",
-          blur: 8,
-          offsetX: 0,
-          offsetY: 2,
-        },
+        cornerColor: "#2563eb",
+        cornerSize: 8,
+        transparentCorners: false,
       })
 
-      // Mark as both sticky note and text object
+      // Mark as sticky note
       textObj.name = `sticky-note-${options?.color || "yellow"}`
       textObj.isTextObject = true
 
@@ -71,13 +65,7 @@ export function useStickyNote({ fabricCanvasRef, handleCanvasChange }: StickyNot
     })
   }, [fabricCanvasRef, handleCanvasChange])
 
-  const setupStickyNoteInteractions = useCallback(() => {
-    // This is now handled centrally in useInteractionHook
-    return () => {}
-  }, [])
-
   return {
     createStickyNote,
-    setupStickyNoteInteractions,
   }
 }

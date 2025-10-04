@@ -140,14 +140,6 @@ export function useCanvasCore(documentId: string, document: Document | null) {
       setIsSaving(true)
       const rawCanvasData = fabricCanvasRef.current.toJSON(['name', 'isTextObject', 'text'])
       // Debug logs for sticky notes
-      console.log("🟡 ALL OBJECTS BEING SAVED:", rawCanvasData.objects?.map((obj: any, i: number) => ({
-        index: i + 1,
-        type: obj.type,
-        name: obj.name,
-        isSticky: obj.name?.startsWith('sticky-note-'),
-        hasObjects: obj.objects?.length,
-        textContent: obj.objects?.find((child: any) => child.type === 'textbox')?.text || 'no-text'
-      })))
       const stickyNotes = rawCanvasData.objects?.filter((obj: any) => obj.name?.startsWith('sticky-note-'))
       console.log("🟡 STICKY NOTES BEING SAVED:", stickyNotes?.length || 0)
       // Debug logs for text objects
@@ -288,12 +280,7 @@ export function useCanvasCore(documentId: string, document: Document | null) {
   }, [brushSize, brushColor])
   const updateSelectedObjects = useCallback((canvas: any, onSelectedImagesChange?: (images: string[]) => void) => {
     const activeObjects = canvas.getActiveObjects()
-    // Ensure sticky note properties are properly preserved
-    activeObjects.forEach((obj: any) => {
-      if (obj.type === "group" && obj.stickyNoteGroup) {
-        obj.stickyNoteGroup = true
-      }
-    })
+    
     setSelectedObjects(activeObjects)
     if (onSelectedImagesChange) {
       const imageUrls = activeObjects
@@ -355,30 +342,9 @@ export function useCanvasCore(documentId: string, document: Document | null) {
         top: clonedObj.top + 10,
         evented: true,
       })
-      // Preserve all custom properties from original object
-      if (window.copiedObjects.stickyNoteGroup === true) {
-        Object.defineProperty(clonedObj, 'stickyNoteGroup', {
-          value: true,
-          writable: true,
-          enumerable: true,
-          configurable: true
-        })
-        Object.defineProperty(clonedObj, 'stickyColor', {
-          value: window.copiedObjects.stickyColor || "yellow",
-          writable: true,
-          enumerable: true,
-          configurable: true
-        })
-        // Override toObject
-        const originalToObject = clonedObj.toObject.bind(clonedObj)
-        clonedObj.toObject = function(propertiesToInclude?: string[]) {
-          const obj = originalToObject(propertiesToInclude)
-          return {
-            ...obj,
-            stickyNoteGroup: this.stickyNoteGroup,
-            stickyColor: this.stickyColor
-          }
-        }
+      // Preserve custom properties
+      if (window.copiedObjects.name?.startsWith('sticky-note-')) {
+        clonedObj.name = window.copiedObjects.name
       }
       if (window.copiedObjects.isTextObject) {
         clonedObj.isTextObject = true
