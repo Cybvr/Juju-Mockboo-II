@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useEffect, useState } from "react"
@@ -33,10 +34,10 @@ import { GeneratingMedia } from "./GeneratingMedia"
 import { ProfileDropdown } from "@/app/common/dashboard/ProfileDropdown"
 import { ShareModal } from "@/components/ShareModal"
 import { useSnapGrid } from "./hooks/use-snap-grid"
-import { FloatingToolbar } from "./toolbars/image-toolbar"
+import { FloatingToolbar } from "./floating-toolbar"
 
-import { StickyNoteToolbar } from "./toolbars/sticky-note-toolbar"
-import { TextToolbar } from "./toolbars/text-toolbar"
+import { StickyNoteToolbar } from "../common/sticky-note-toolbar"
+import { TextToolbar } from "./text-toolbar"
 import { useFabricCanvas } from "./canvas-fabric"
 import {
   DropdownMenu,
@@ -94,19 +95,11 @@ export default function CanvasEditor() {
   useEffect(() => {
     window.stickyNoteHook = { createStickyNote }
     window.textToolHook = { createTextObject }
-    window.canvasCore = {
-      handleUndo: canvasCore.handleUndo,
-      handleRedo: canvasCore.handleRedo,
-      handleCopy: canvasCore.handleCopy,
-      handlePaste: canvasCore.handlePaste,
-      handleDelete: canvasCore.handleDelete,
-    }
     return () => {
       delete window.stickyNoteHook
       delete window.textToolHook
-      delete window.canvasCore
     }
-  }, [createStickyNote, createTextObject, canvasCore.handleUndo, canvasCore.handleRedo, canvasCore.handleCopy, canvasCore.handlePaste, canvasCore.handleDelete])
+  }, [createStickyNote, createTextObject])
 
   // Import and setup interaction hook
   const { useInteractionHook } = require("./hooks/use-interaction-hook")
@@ -121,8 +114,8 @@ export default function CanvasEditor() {
     brushColor: canvasCore.brushColor,
     drawingMode: canvasCore.drawingMode,
   })
-  
 
+  
 
   // Setup interactions after canvas is loaded
   useEffect(() => {
@@ -148,7 +141,7 @@ export default function CanvasEditor() {
   }, [canvasCore.fabricLoaded, setupInteractions, setupKeyboardHandlers, setupPanAndZoom, setupTouchHandlers, imageOps.setupDragAndDrop])
 
   // Canvas initialization is handled by useFabricCanvas hook
-  
+
   // Load document from Firebase
   useEffect(() => {
     const loadDocument = async () => {
@@ -214,7 +207,7 @@ export default function CanvasEditor() {
   return (
     <div className="relative h-full w-full overflow-hidden" data-user-id={user?.uid}>
       {/* Floating Toolbar */}
-      <div className="flex items-center gap-2 absolute left-4 top-4 z-10 bg-background rounded-xl px-4 py-2">
+      <div className="flex items-center gap-2 absolute left-4 top-4 z-10 bg-card rounded-xl px-4 py-2">
         {/* Logo Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -300,7 +293,7 @@ export default function CanvasEditor() {
 
       {/* Controls Panel */}
       <div className="absolute right-4 top-1/2 z-10 -translate-y-1/2">
-        <div className="flex flex-col gap-2 rounded-lg bg-background p-2 shadow-lg border w-12">
+        <div className="flex flex-col gap-2 rounded-lg bg-card p-2 shadow-lg border w-12">
           <Button variant="ghost" size="icon" onClick={canvasCore.handleZoomIn} className="h-8 w-8" title="Zoom In">
             <ZoomIn className="h-4 w-4" />
           </Button>
@@ -327,7 +320,7 @@ export default function CanvasEditor() {
       {/* Floating Toolbar - Hide in view-only mode */}
       {!isViewOnly && (
         <div className="absolute left-4 top-1/2 z-10 -translate-y-1/2">
-          <div className="flex flex-col gap-2 rounded-lg bg-background p-2 shadow-lg border">
+          <div className="flex flex-col gap-2 rounded-lg bg-card p-2 shadow-lg border">
             {tools.map((tool) => {
               const Icon = tool.icon
               return (
@@ -404,15 +397,14 @@ export default function CanvasEditor() {
           onUpscale={() => {}}
         />
       )}
-      
 
       
 
       {/* Sticky Note Toolbar */}
       {!isViewOnly && (
         <StickyNoteToolbar
-          isVisible={!!canvasCore.selectedStickyNote}
-          selectedStickyNote={canvasCore.selectedStickyNote}
+          isVisible={canvasCore.selectedObjects.length === 1 && canvasCore.selectedObjects[0]?.stickyNoteGroup}
+          selectedStickyNote={canvasCore.selectedObjects.find(obj => obj.stickyNoteGroup)}
           fabricCanvas={canvasCore.fabricCanvasRef.current}
           onNoteChange={canvasCore.handleCanvasChange}
         />

@@ -342,47 +342,28 @@ export function useImageOperations({
     })
   }, [fabricCanvasRef])
 
-  const duplicateSelectedImages = useCallback(() => {
+  const duplicateSelectedImages = useCallback(async () => {
+    if (!fabricCanvasRef.current) return
+
     const canvas = fabricCanvasRef.current
-    if (!canvas) return
-
     const activeObjects = canvas.getActiveObjects()
-    if (activeObjects.length === 0) return
 
-    activeObjects.forEach((obj: any) => {
-      obj.clone().then((cloned: any) => {
+    for (const obj of activeObjects) {
+      try {
+        const cloned = await new Promise((resolve) => {
+          obj.clone(resolve)
+        })
         cloned.set({
           left: cloned.left + 20,
           top: cloned.top + 20,
-          evented: true,
         })
-
-        // Preserve sticky note properties - FORCE preservation
-        if (obj.stickyNoteGroup === true || obj.type === "group") {
-          Object.defineProperty(cloned, 'stickyNoteGroup', {
-            value: true,
-            writable: true,
-            enumerable: true,
-            configurable: false
-          })
-          Object.defineProperty(cloned, 'stickyColor', {
-            value: obj.stickyColor || "yellow",
-            writable: true,
-            enumerable: true,
-            configurable: true
-          })
-        }
-
-        // Preserve text object properties
-        if (obj.isTextObject) {
-          cloned.isTextObject = true
-        }
-
         canvas.add(cloned)
-      })
-    })
+        canvas.setActiveObject(cloned)
+      } catch (error) {
+        console.warn('Failed to clone object:', error)
+      }
+    }
 
-    canvas.discardActiveObject()
     canvas.renderAll()
     handleCanvasChange()
   }, [fabricCanvasRef, handleCanvasChange])

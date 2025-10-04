@@ -52,9 +52,24 @@ export function useTextTool({ fabricCanvasRef, handleCanvasChange }: TextToolHoo
   }, [fabricCanvasRef, handleCanvasChange])
 
   const setupTextInteractions = useCallback(() => {
-    // This is now handled centrally in useInteractionHook  
-    return () => {}
-  }, [])
+    const canvas = fabricCanvasRef.current
+    if (!canvas) return null
+
+    const handleDoubleClick = (e: any) => {
+      const target = e.target
+      if (target && (target.type === "textbox" || target.type === "i-text" || target.isTextObject)) {
+        target.enterEditing()
+        target.hiddenTextarea?.focus()
+        target.selectAll()
+      }
+    }
+
+    canvas.on("mouse:dblclick", handleDoubleClick)
+
+    return () => {
+      canvas.off("mouse:dblclick", handleDoubleClick)
+    }
+  }, [fabricCanvasRef])
 
   return {
     createTextObject,

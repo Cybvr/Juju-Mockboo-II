@@ -3,8 +3,10 @@ import type { Metadata } from 'next';
 import { DM_Sans } from 'next/font/google';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
+
 // Load DM Sans font with the desired subsets
 const dmSans = DM_Sans({ subsets: ['latin'] });
+
 export const metadata: Metadata = {
   title: 'Juju - Workspace Suite',
   description: 'What would you like to create today?',
@@ -22,6 +24,7 @@ export const metadata: Metadata = {
     'apple-mobile-web-app-title': 'Juju',
   },
 };
+
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
@@ -29,6 +32,7 @@ export const viewport = {
   userScalable: false,
   themeColor: '#000000',
 };
+
 export default function RootLayout({
   children,
 }: {
@@ -72,7 +76,13 @@ export default function RootLayout({
             __html: `
               if ('serviceWorker' in navigator) {
                 window.addEventListener('load', function() {
-                  navigator.serviceWorker.register('/sw.js');
+                  navigator.serviceWorker.register('/sw.js')
+                    .then(function(registration) {
+                      console.log('SW registered: ', registration);
+                    })
+                    .catch(function(registrationError) {
+                      console.log('SW registration failed: ', registrationError);
+                    });
                 });
               }
             `,

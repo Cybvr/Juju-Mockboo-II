@@ -4,9 +4,8 @@ import type { Document } from "@/types/firebase"
 import { useCanvasCore } from "./hooks/use-canvas-core"
 import { useImageOperations } from "./hooks/use-image-operations"
 import { useSnapGrid } from "./hooks/use-snap-grid"
-import { FloatingToolbar } from "./toolbars/image-toolbar"
-import { DrawingToolbar } from "./toolbars/drawing-toolbar"
-import { StickyNoteToolbar } from "./toolbars/sticky-note-toolbar"
+import { FloatingToolbar } from "./floating-toolbar"
+import { DrawingToolbar } from "../common/drawing-toolbar"
 
 export function useFabricCanvas(
   documentData: Document | null,
@@ -58,7 +57,7 @@ export function useFabricCanvas(
 
         // Setup undo/redo ONCE
         const undoRedoManager = canvasCore.setupUndoRedo(canvas)
-
+        
         // Make sure undo/redo methods are accessible
         if (undoRedoManager && undoRedoManager.saveState) {
           // Save initial state
@@ -73,37 +72,11 @@ export function useFabricCanvas(
 
         // Load existing canvas data
         if (documentData.content?.canvasData && Object.keys(documentData.content.canvasData).length > 0) {
-          console.log("🔄 STARTING FIREBASE LOAD - Canvas data exists")
-          console.log("🔄 Raw Firebase data:", documentData.content.canvasData)
-
           canvas.loadFromJSON(documentData.content.canvasData, () => {
-            // Restore sticky note properties after loading
-            const allObjects = canvas.getObjects()
-            console.log("🔄 LOADING FROM FIREBASE - Total objects:", allObjects.length)
-
-            allObjects.forEach((obj: any, index) => {
-              console.log(`🔄 Object ${index + 1} RAW:`, {
-                type: obj.type,
-                stickyNoteGroup: obj.stickyNoteGroup,
-                stickyColor: obj.stickyColor,
-                hasToObject: typeof obj.toObject === 'function'
-              })
-
-              // Sticky notes are now simple text objects with background colors
-            })
-
-            console.log("🔄 CANVAS LOADED - Final object count:", canvas.getObjects().length)
-            console.log("🔄 All objects after loading:", canvas.getObjects().map((obj: any, i) => ({
-              index: i + 1,
-              type: obj.type,
-              stickyNoteGroup: obj.stickyNoteGroup,
-              stickyColor: obj.stickyColor
-            })))
-
             canvas.renderAll()
           })
         } else {
-          console.log("🔄 NO FIREBASE DATA TO LOAD")
+          // Force render even if no data to load
           canvas.renderAll()
         }
 
@@ -127,7 +100,13 @@ export function useFabricCanvas(
     return () => clearTimeout(timer)
   }, [documentData, canvasCore.fabricLoaded])
 
-  // Auto-save is already handled in useCanvasCore
+  // Auto-save interval
+  useEffect(() => {
+    if (canvasCore.fabricLoaded && documentData) {
+      const interval = setInterval(canvasCore.saveCanvasState, 60000)
+      return () => clearInterval(interval)
+    }
+  }, [canvasCore.fabricLoaded, documentData])
 
   const addImageToCanvas = useCallback(
     (imageUrl: string, replaceObjects?: any) => {
@@ -186,12 +165,6 @@ export function useFabricCanvas(
         brushSize={canvasCore.brushSize}
         currentColor={canvasCore.brushColor}
         currentMode={canvasCore.drawingMode}
-      />
-      <StickyNoteToolbar
-        isVisible={!!canvasCore.selectedStickyNote}
-        selectedStickyNote={canvasCore.selectedStickyNote}
-        fabricCanvas={canvasCore.fabricCanvasRef.current}
-        onNoteChange={canvasCore.handleCanvasChange}
       />
     </>
   )

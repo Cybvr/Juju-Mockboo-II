@@ -6,13 +6,6 @@ declare global {
     copiedObjects?: any
     stickyNoteHook?: any
     textToolHook?: any
-    canvasCore?: {
-      handleUndo?: () => void
-      handleRedo?: () => void
-      handleCopy?: () => void
-      handlePaste?: () => void
-      handleDelete?: () => void
-    }
   }
 }
 interface InteractionHookProps {
@@ -42,14 +35,13 @@ export function useInteractionHook({
     let startX = 0, startY = 0, activeShape: any = null
     const handleMouseDown = (e: any) => {
       const tool = activeToolRef.current
-      const pointer = canvas.getPointer(e.e)
-      
-      // Handle tool-specific creation
       if (tool === "sticky-note") {
+        const pointer = canvas.getPointer(e.e)
         window.stickyNoteHook?.createStickyNote?.(pointer.x, pointer.y)
         return
       }
       if (tool === "text") {
+        const pointer = canvas.getPointer(e.e)
         window.textToolHook?.createTextObject?.(pointer.x, pointer.y)
         return
       }
@@ -63,8 +55,7 @@ export function useInteractionHook({
         return
       }
       if (tool === "select" || tool === "pan") return
-      
-      // Handle shape drawing
+      const pointer = canvas.getPointer(e.e)
       startX = pointer.x
       startY = pointer.y
       setIsDrawing(true)
@@ -83,37 +74,6 @@ export function useInteractionHook({
         }
         if (activeShape) canvas.add(activeShape)
       })
-    }
-
-    // Handle double-click for sticky note and text editing
-    const handleDoubleClick = (e: any) => {
-      const target = e.target
-      if (!target) return
-
-      // Handle sticky note double-click editing
-      if (target.name?.startsWith('sticky-note-') && target.type === "group") {
-        const objects = target.getObjects()
-        const textObj = objects.find((obj: any) => obj.type === "textbox")
-        if (textObj) {
-          textObj.set({ editable: true, selectable: true })
-          canvas.setActiveObject(textObj)
-          textObj.enterEditing()
-          textObj.hiddenTextarea?.focus()
-          textObj.selectAll()
-          
-          const onEditExit = () => {
-            textObj.off("editing:exited", onEditExit)
-            handleCanvasChange()
-          }
-          textObj.on("editing:exited", onEditExit)
-        }
-      }
-      // Handle text object double-click editing
-      else if (target.type === "textbox" || target.type === "i-text" || target.isTextObject) {
-        target.enterEditing()
-        target.hiddenTextarea?.focus()
-        target.selectAll()
-      }
     }
     const handleMouseMove = (e: any) => {
       if (!isDrawingRef.current || !activeShape) return
@@ -143,7 +103,6 @@ export function useInteractionHook({
     canvas.on("mouse:down", handleMouseDown)
     canvas.on("mouse:move", handleMouseMove)
     canvas.on("mouse:up", handleMouseUp)
-    canvas.on("mouse:dblclick", handleDoubleClick)
     canvas.on("path:created", () => {
       if (activeToolRef.current === "pen") handleCanvasChange()
     })
@@ -151,7 +110,6 @@ export function useInteractionHook({
       canvas.off("mouse:down", handleMouseDown)
       canvas.off("mouse:move", handleMouseMove)
       canvas.off("mouse:up", handleMouseUp)
-      canvas.off("mouse:dblclick", handleDoubleClick)
       canvas.off("path:created")
     }
   }, [fabricCanvasRef, handleCanvasChange, activeToolRef, isDrawingRef, setIsDrawing, brushSize, brushColor, drawingMode])
@@ -167,36 +125,103 @@ export function useInteractionHook({
       // Undo
       if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
         e.preventDefault()
-        window.canvasCore?.handleUndo?.()
+        if (canvas.undo) {
+          canvas.undo()
+        }
         return
       }
       // Redo
       if ((e.ctrlKey || e.metaKey) && (e.key === "y" || (e.key === "z" && e.shiftKey))) {
         e.preventDefault()
-        window.canvasCore?.handleRedo?.()
+        if (canvas.redo) {
+          canvas.redo()
+        }
         return
       }
       // Copy
       if ((e.ctrlKey || e.metaKey) && e.key === "c") {
         e.preventDefault()
-        window.canvasCore?.handleCopy?.()
+        const activeObject = canvas.getActiveObject()
+
+        if (!activeObject) {
+          return
+        }
+
+        activeObject.clone().then((cloned: any) => {
+          window.copiedObjects = cloned
+        })
         return
       }
       // Paste
       if ((e.ctrlKey || e.metaKey) && e.key === "v") {
         e.preventDefault()
-        window.canvasCore?.handlePaste?.()
+
+        if (window.copiedObjects) {
+          window.copiedObjects.clone().then((clonedObj: any) => {
+            canvas.discardActiveObject()
+            clonedObj.set({
+              left: clonedObj.left + 10,
+              top: clonedObj.top + 10,
+              evented: true,
+            })
+
+            // Preserve all custom properties from original object
+            if (window.copiedObjects.stickyNoteGroup) {
+              clonedObj.stickyNoteGroup = true
+              clonedObj.stickyColor = window.copiedObjects.stickyColor || "yellow"
+            }
+
+            if (window.copiedObjects.isTextObject) {
+              clonedObj.isTextObject = true
+            }
+
+            // Handle group objects (like sticky notes)
+            if (clonedObj.type === "group" && window.copiedObjects.type === "group") {
+              if (window.copiedObjects.stickyNoteGroup) {
+                clonedObj.stickyNoteGroup = true
+                clonedObj.stickyColor = window.copiedObjects.stickyColor || "yellow"
+              }
+            }
+
+            import("fabric").then(({ ActiveSelection }) => {
+              if (clonedObj instanceof ActiveSelection) {
+                clonedObj.canvas = canvas
+                clonedObj.forEachObject((obj: any) => {
+                  canvas.add(obj)
+                })
+                clonedObj.setCoords()
+              } else {
+                canvas.add(clonedObj)
+              }
+              window.copiedObjects.top += 10
+              window.copiedObjects.left += 10
+              canvas.setActiveObject(clonedObj)
+              canvas.requestRenderAll()
+              handleCanvasChange()
+            })
+          })
+        }
         return
       }
       // Delete
       if (e.key === "Delete" || e.key === "Backspace") {
         e.preventDefault()
-        window.canvasCore?.handleDelete?.()
+        const active = canvas.getActiveObject()
+        if (active) {
+          if (active.type === "activeSelection") {
+            active.getObjects().forEach((o: any) => canvas.remove(o))
+          } else {
+            canvas.remove(active)
+          }
+          canvas.discardActiveObject()
+          canvas.requestRenderAll()
+          handleCanvasChange()
+        }
       }
     }
     document.addEventListener("keydown", handleKeyDown)
     return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [])
+  }, [fabricCanvasRef, handleCanvasChange])
   const setupPanAndZoom = useCallback(() => {
     if (!fabricCanvasRef.current) return null
     const canvas = fabricCanvasRef.current
