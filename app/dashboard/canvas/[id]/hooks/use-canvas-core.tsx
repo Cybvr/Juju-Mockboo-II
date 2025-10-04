@@ -138,7 +138,7 @@ export function useCanvasCore(documentId: string, document: Document | null) {
     if (!fabricCanvasRef.current || !document || isSaving) return
     try {
       setIsSaving(true)
-      const rawCanvasData = fabricCanvasRef.current.toJSON(['name', 'isTextObject'])
+      const rawCanvasData = fabricCanvasRef.current.toJSON(['name', 'isTextObject', 'text'])
       // Debug logs for sticky notes
       console.log("🟡 ALL OBJECTS BEING SAVED:", rawCanvasData.objects?.map((obj: any, i: number) => ({
         index: i + 1,
