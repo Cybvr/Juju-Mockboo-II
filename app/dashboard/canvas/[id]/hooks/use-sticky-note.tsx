@@ -1,3 +1,4 @@
+
 "use client"
 import { useCallback } from "react"
 import type { Canvas } from "fabric"
@@ -26,38 +27,24 @@ export function useStickyNote({ fabricCanvasRef, handleCanvasChange }: StickyNot
 
       const selectedColor = stickyColors.find(c => c.name === (options?.color || "yellow")) || stickyColors[0]
 
-      // Create main note background
-      const noteBackground = new fabric.Rect({
+      const textObj = new fabric.Textbox(options?.text || "Type your note here...", {
+        left: x,
+        top: y,
         width: 200,
         height: 160,
-        fill: selectedColor.bg,
-        rx: 4,
-        ry: 4,
-        left: 0,
-        top: 0,
-      })
-
-      // Create text area
-      const textObj = new fabric.Textbox(options?.text || "Type your note here...", {
-        left: 15,
-        top: 15,
-        width: 170,
         fontSize: 16,
         fontFamily: "Arial, sans-serif",
         fill: "#374151",
         textAlign: "left",
         splitByGrapheme: true,
         editable: true,
-      })
-
-      // Group all elements
-      const stickyGroup = new fabric.Group([noteBackground, textObj], {
-        left: x,
-        top: y,
         selectable: true,
         hasControls: true,
-        hasBorders: false,
-        lockRotation: true,
+        hasBorders: true,
+        backgroundColor: selectedColor.bg,
+        padding: 15,
+        rx: 4,
+        ry: 4,
         shadow: {
           color: "rgba(0, 0, 0, 0.15)",
           blur: 8,
@@ -66,13 +53,21 @@ export function useStickyNote({ fabricCanvasRef, handleCanvasChange }: StickyNot
         },
       })
 
-      // Mark as sticky note using name property (Fabric saves this automatically)
-      stickyGroup.name = `sticky-note-${options?.color || "yellow"}`
+      // Mark as both sticky note and text object
+      textObj.name = `sticky-note-${options?.color || "yellow"}`
+      textObj.isTextObject = true
 
-      canvas.add(stickyGroup)
-      canvas.setActiveObject(stickyGroup)
+      canvas.add(textObj)
+      canvas.setActiveObject(textObj)
       canvas.renderAll()
       handleCanvasChange()
+
+      // Auto-enter editing mode
+      setTimeout(() => {
+        textObj.enterEditing()
+        textObj.hiddenTextarea?.focus()
+        textObj.selectAll()
+      }, 100)
     })
   }, [fabricCanvasRef, handleCanvasChange])
 
