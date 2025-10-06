@@ -64,21 +64,31 @@ export function useInteractionHook({
       }
       if (tool === "select" || tool === "pan") return
       
+      // Only create shapes if clicking on empty canvas (no target)
+      if (e.target) return
+      
       // Handle shape drawing
       startX = pointer.x
       startY = pointer.y
       setIsDrawing(true)
+      
+      // Disable selection while drawing
+      canvas.selection = false
+      canvas.forEachObject((obj: any) => {
+        obj.selectable = false
+      })
+      
       import("fabric").then((FabricModule) => {
         const fabric = FabricModule
         if (tool === "square") {
           activeShape = new fabric.Rect({
             left: startX, top: startY, width: 0, height: 0,
-            fill: "transparent", stroke: "#000000", strokeWidth: 2,
+            fill: "rgba(59, 130, 246, 0.2)", stroke: "#3b82f6", strokeWidth: 2,
           })
         } else if (tool === "circle") {
           activeShape = new fabric.Circle({
             left: startX, top: startY, radius: 0,
-            fill: "transparent", stroke: "#000000", strokeWidth: 2,
+            fill: "rgba(59, 130, 246, 0.2)", stroke: "#3b82f6", strokeWidth: 2,
           })
         }
         if (activeShape) canvas.add(activeShape)
@@ -134,6 +144,11 @@ export function useInteractionHook({
     }
     const handleMouseUp = () => {
       if (isDrawingRef.current && activeShape) {
+        // Re-enable selection and make objects selectable
+        canvas.selection = true
+        canvas.forEachObject((obj: any) => {
+          obj.selectable = true
+        })
         canvas.setActiveObject(activeShape)
         handleCanvasChange()
       }
