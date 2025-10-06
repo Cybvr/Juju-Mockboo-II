@@ -20,65 +20,70 @@ export function useCanvasCore(documentId: string, document: Document | null) {
   const [brushColor, setBrushColor] = useState("#000000")
   const [drawingMode, setDrawingMode] = useState<"draw" | "erase">("draw")
   const [selectedObjects, setSelectedObjects] = useState<any[]>([])
-  
+
   const [selectedTextObject, setSelectedTextObject] = useState<any>(null)
   const activeToolRef = useRef<Tool>("select")
   const isDrawingRef = useRef(false)
   const autoSaveIntervalRef = useRef<NodeJS.Timeout | null>(null)
   // Undo/Redo setup
-  const setupUndoRedo = useCallback((canvas: Canvas) => {
-    let undoStack: string[] = []
-    let redoStack: string[] = []
-    let isUndoRedoing = false
-    const saveState = () => {
-      if (isUndoRedoing) return
-      const state = JSON.stringify(canvas.toJSON())
-      undoStack.push(state)
-      redoStack = []
-      setCanUndo(undoStack.length > 1)
-      setCanRedo(false)
-      if (undoStack.length > 50) {
-        undoStack.shift()
-      }
+  const undoStackRef = useRef<string[]>([])
+  const redoStackRef = useRef<string[]>([])
+  const isUndoRedoingRef = useRef(false)
+
+  const saveState = useCallback((canvas: Canvas) => {
+    if (isUndoRedoingRef.current) return
+
+    const state = JSON.stringify(canvas.toJSON(['name', 'isTextObject', 'text', 'stickyColor', 'backgroundColor']))
+    undoStackRef.current.push(state)
+    redoStackRef.current = []
+
+    setCanUndo(undoStackRef.current.length > 1)
+    setCanRedo(false)
+
+    if (undoStackRef.current.length > 50) {
+      undoStackRef.current.shift()
     }
+  }, [])
+
+  const setupUndoRedo = useCallback((canvas: Canvas) => {
     canvas.undo = () => {
-      if (undoStack.length <= 1) return
-      isUndoRedoing = true
-      const currentState = undoStack.pop()
-      if (currentState) redoStack.push(currentState)
-      const previousState = undoStack[undoStack.length - 1]
-      canvas.clear()
+      if (undoStackRef.current.length <= 1) return
+
+      isUndoRedoingRef.current = true
+      const currentState = undoStackRef.current.pop()
+      if (currentState) redoStackRef.current.push(currentState)
+
+      const previousState = undoStackRef.current[undoStackRef.current.length - 1]
+
       canvas.loadFromJSON(previousState, () => {
         canvas.requestRenderAll()
-        setCanUndo(undoStack.length > 1)
-        setCanRedo(redoStack.length > 0)
-        setTimeout(() => {
-          isUndoRedoing = false
-        }, 0)
+        setCanUndo(undoStackRef.current.length > 1)
+        setCanRedo(redoStackRef.current.length > 0)
+        isUndoRedoingRef.current = false
       })
     }
+
     canvas.redo = () => {
-      if (redoStack.length === 0) return
-      isUndoRedoing = true
-      const nextState = redoStack.pop()
+      if (redoStackRef.current.length === 0) return
+
+      isUndoRedoingRef.current = true
+      const nextState = redoStackRef.current.pop()
       if (nextState) {
-        undoStack.push(nextState)
-        canvas.clear()
+        undoStackRef.current.push(nextState)
         canvas.loadFromJSON(nextState, () => {
           canvas.requestRenderAll()
-          setCanUndo(undoStack.length > 1)
-          setCanRedo(redoStack.length > 0)
-          setTimeout(() => {
-            isUndoRedoing = false
-          }, 0)
+          setCanUndo(undoStackRef.current.length > 1)
+          setCanRedo(redoStackRef.current.length > 0)
+          isUndoRedoingRef.current = false
         })
       }
     }
-    canvas.canUndo = () => undoStack.length > 1
-    canvas.canRedo = () => redoStack.length > 0
-    saveState()
-    return { saveState }
-  }, [])
+
+    // Save initial state
+    saveState(canvas)
+
+    return { saveState: () => saveState(canvas) }
+  }, [saveState])
   // Canvas events setup
   const setupCanvasEvents = useCallback((canvas: Canvas, handleCanvasChange: () => void, onSelectedImagesChange?: (images: string[]) => void) => {
     canvas.on("object:added", () => handleCanvasChange())
@@ -182,15 +187,22 @@ export function useCanvasCore(documentId: string, document: Document | null) {
   }, [documentId, document, isSaving])
   const handleCanvasChange = useCallback(() => {
     if (!fabricCanvasRef.current || !document || isSaving) return
+
+    // Save to undo/redo stack
+    if (!isUndoRedoingRef.current) {
+      saveState(fabricCanvasRef.current)
+    }
+
     if (autoSaveIntervalRef.current) {
       clearTimeout(autoSaveIntervalRef.current)
     }
+
     autoSaveIntervalRef.current = setTimeout(() => {
       if (!isSaving) {
         saveCanvasState()
       }
     }, 2000)
-  }, [saveCanvasState, document, isSaving])
+  }, [saveCanvasState, document, isSaving, saveState])
   // Zoom operations
   const handleZoomIn = useCallback(() => {
     if (!fabricCanvasRef.current) return
@@ -277,7 +289,7 @@ export function useCanvasCore(documentId: string, document: Document | null) {
   }, [brushSize, brushColor])
   const updateSelectedObjects = useCallback((canvas: any, onSelectedImagesChange?: (images: string[]) => void) => {
     const activeObjects = canvas.getActiveObjects()
-    
+
     setSelectedObjects(activeObjects)
     if (onSelectedImagesChange) {
       const imageUrls = activeObjects
@@ -365,13 +377,14 @@ export function useCanvasCore(documentId: string, document: Document | null) {
     })
   }, [handleCanvasChange])
   const handleUndo = useCallback(() => {
-    if (!fabricCanvasRef.current || !fabricCanvasRef.current.undo) return
+    if (!fabricCanvasRef.current || !fabricCanvasRef.current.undo || !canUndo) return
     fabricCanvasRef.current.undo()
-  }, [])
+  }, [canUndo])
+
   const handleRedo = useCallback(() => {
-    if (!fabricCanvasRef.current || !fabricCanvasRef.current.redo) return
+    if (!fabricCanvasRef.current || !fabricCanvasRef.current.redo || !canRedo) return
     fabricCanvasRef.current.redo()
-  }, [])
+  }, [canRedo])
   // Update refs
   useEffect(() => {
     activeToolRef.current = activeTool
@@ -385,7 +398,7 @@ export function useCanvasCore(documentId: string, document: Document | null) {
     fabricLoaded,
     setFabricLoaded,
     selectedObjects,
-    
+
     activeTool,
     setActiveTool,
     activeToolRef,
