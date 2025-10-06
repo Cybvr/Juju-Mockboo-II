@@ -282,31 +282,10 @@ export function useSnapGrid({
       clearGuides()
     }
 
-    // Handle scaling separately with proper bounds calculation
+    // Handle scaling - removed snap behavior to prevent buggy scaling
     const handleObjectScaling = (e: any) => {
-      if (!isSnapEnabled) return
-
-      const obj = e.target
-      if (!obj) return
-
-      // Get the scaled dimensions
-      const scaledWidth = obj.width * obj.scaleX
-      const scaledHeight = obj.height * obj.scaleY
-
-      // Snap the scaled dimensions to grid
-      const snappedWidth = snapToGrid(scaledWidth)
-      const snappedHeight = snapToGrid(scaledHeight)
-
-      // Calculate new scale factors
-      const newScaleX = snappedWidth / obj.width
-      const newScaleY = snappedHeight / obj.height
-
-      obj.set({
-        scaleX: newScaleX,
-        scaleY: newScaleY
-      })
-
-      canvas.requestRenderAll()
+      // Let scaling happen naturally without grid interference
+      return
     }
 
     // Fix mouse coordinate snapping for drawing
@@ -343,7 +322,6 @@ export function useSnapGrid({
     // Bind events
     canvas.on('object:moving', handleObjectMoving)
     canvas.on('object:modified', handleObjectModified)
-    canvas.on('object:scaling', handleObjectScaling)
     canvas.on('mouse:down', handleMouseDown)
     canvas.on('path:created', handlePathCreated)
     canvas.on('selection:cleared', clearGuides)
@@ -351,7 +329,6 @@ export function useSnapGrid({
     return () => {
       canvas.off('object:moving', handleObjectMoving)
       canvas.off('object:modified', handleObjectModified)
-      canvas.off('object:scaling', handleObjectScaling) 
       canvas.off('mouse:down', handleMouseDown)
       canvas.off('path:created', handlePathCreated)
       canvas.off('selection:cleared', clearGuides)
