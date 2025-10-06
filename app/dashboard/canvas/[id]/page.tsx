@@ -326,9 +326,10 @@ export default function CanvasEditor() {
       {!isViewOnly && (
         <ShapeToolbar
           isVisible={
-            canvasCore.selectedObjects.some(obj => obj.type === "rect" || obj.type === "circle")
+            canvasCore.selectedObjects.length === 1 && 
+            (canvasCore.selectedObjects[0]?.type === "rect" || canvasCore.selectedObjects[0]?.type === "circle")
           }
-          selectedShapes={canvasCore.selectedObjects.filter(obj => obj.type === "rect" || obj.type === "circle")}
+          selectedShapeObject={canvasCore.selectedObjects.find(obj => obj.type === "rect" || obj.type === "circle")}
           fabricCanvas={canvasCore.fabricCanvasRef.current}
           onShapeChange={canvasCore.handleCanvasChange}
         />
@@ -429,11 +430,26 @@ export default function CanvasEditor() {
         />
       )}
 
-      {/* Text Toolbar - only for regular text objects without backgroundColor */}
+      {/* Text Toolbar - only for regular text objects */}
       {!isViewOnly && (
         <TextToolbar
-          isVisible={canvasCore.selectedObjects.length === 1 && (canvasCore.selectedObjects[0]?.type === "textbox" || canvasCore.selectedObjects[0]?.type === "i-text" || canvasCore.selectedObjects[0]?.isTextObject) && !canvasCore.selectedObjects[0]?.backgroundColor}
-          selectedTextObject={canvasCore.selectedObjects.find(obj => (obj.type === "textbox" || obj.type === "i-text" || obj.isTextObject) && !obj.backgroundColor)}
+          isVisible={
+            canvasCore.selectedObjects.length === 1 && 
+            (canvasCore.selectedObjects[0]?.type === "textbox" || 
+             canvasCore.selectedObjects[0]?.type === "i-text" || 
+             canvasCore.selectedObjects[0]?.isTextObject) && 
+            !canvasCore.selectedObjects[0]?.backgroundColor &&
+            !canvasCore.selectedObjects[0]?.stickyColor &&
+            canvasCore.selectedObjects[0]?.type !== "rect" &&
+            canvasCore.selectedObjects[0]?.type !== "circle"
+          }
+          selectedTextObject={canvasCore.selectedObjects.find(obj => 
+            (obj.type === "textbox" || obj.type === "i-text" || obj.isTextObject) && 
+            !obj.backgroundColor && 
+            !obj.stickyColor &&
+            obj.type !== "rect" &&
+            obj.type !== "circle"
+          )}
           fabricCanvas={canvasCore.fabricCanvasRef.current}
           onTextChange={canvasCore.handleCanvasChange}
         />
