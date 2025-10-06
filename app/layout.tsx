@@ -3,8 +3,10 @@ import type { Metadata } from 'next';
 import { DM_Sans } from 'next/font/google';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
+
 // Load DM Sans font with the desired subsets
 const dmSans = DM_Sans({ subsets: ['latin'] });
+
 export const metadata: Metadata = {
   title: 'Juju - Workspace Suite',
   description: 'What would you like to create today?',
@@ -22,13 +24,15 @@ export const metadata: Metadata = {
     'apple-mobile-web-app-title': 'Juju',
   },
 };
+
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: '#000000',
+  themeColor: '#ffffff',
 };
+
 export default function RootLayout({
   children,
 }: {
@@ -38,7 +42,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#000000" />
+        <meta name="theme-color" content="#ffffff" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -58,7 +62,7 @@ export default function RootLayout({
           <div className="relative z-10">
             <ThemeProvider
               attribute="class"
-              defaultTheme="dark"
+              defaultTheme="light"
               enableSystem
               disableTransitionOnChange
             >

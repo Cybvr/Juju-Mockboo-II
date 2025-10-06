@@ -12,6 +12,13 @@ import { PricingTable } from '@/components/PricingTable';
 import FAQSection from '@/app/common/marketing/FAQSection';
 import { cn } from '@/lib/utils';
 import { visualNeedsData } from '@/data/industryData';
+import { Playfair_Display } from 'next/font/google';
+
+const playfair = Playfair_Display({ 
+  subsets: ['latin'],
+  weight: ['400', '600', '700'],
+  display: 'swap',
+});
 
 export default function LandingPage() {
   const router = useRouter();
@@ -95,7 +102,7 @@ export default function LandingPage() {
             <div className="flex flex-col items-center">
               <div className="mb-12 items-center text-center">
                 {/* Updated Hero */}
-                <h1 className="text-5xl lg:text-7xl font-bold text-foreground mb-6 leading-tight">
+                <h1 className={cn("text-5xl lg:text-7xl font-semibold text-foreground mb-6 leading-tight", playfair.className)}>
                   Dream It.<br />Design It.<br />Done.
                 </h1>
                 <p className="text-xl lg:text-2xl text-muted-foreground mb-8 max-w-2xl leading-relaxed">
@@ -146,11 +153,11 @@ export default function LandingPage() {
         <div className="mb-16">
           <div className="text-foreground">
             <div className="max-w-7xl mx-auto p-6">
-              <div className="max-w-7xl mx-auto p-6 mb-12 text-center">
-                <h2 className="text-4xl lg:text-5xl font-extralight mb-6 text-balance">
+              <div className="max-w-7xl mx-auto p-6 mb-12 text-left">
+                <h2 className={cn("text-4xl lg:text-5xl font-semibold mb-6 text-balance", playfair.className)}>
                   Your ideas deserve to be seen
                 </h2>
-                <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+                <p className="text-xl text-muted-foreground max-w-3xl mx-auto text-left">
                   Whether you're launching a product, building a brand, or creating content that converts—turn concepts into visuals instantly.
                 </p>
               </div>
@@ -218,7 +225,8 @@ export default function LandingPage() {
                     <div className="max-w-2xl">
                       <h3 
                         className={cn(
-                          "text-xl lg:text-2xl font-normal text-balance text-white transition-all duration-500 ease-out transform",
+                          "text-xl lg:text-2xl font-semibold text-balance text-white transition-all duration-500 ease-out transform",
+                          playfair.className,
                           isTransitioning 
                             ? "translate-y-4 opacity-0" 
                             : "translate-y-0 opacity-100"
@@ -263,9 +271,9 @@ export default function LandingPage() {
 
         <div className="px-6 pb-12">
           {/* How It Works */}
-          <div className="mb-16 bg-black rounded-2xl p-4 lg:p-8">
+          <div className="mb-16 rounded-2xl p-4 lg:p-8">
             <div className="mb-12 text-left">
-              <h2 className="text-4xl lg:text-5xl font-extralight mb-4">Three steps to visual perfection</h2>
+              <h2 className={cn("text-4xl lg:text-5xl font-semibold mb-4", playfair.className)}>Three steps to visual perfection</h2>
               <p className="text-xl text-muted-foreground">It's so simple, you'll wonder why you ever did it any other way</p>
             </div>
             <div className="grid lg:grid-cols-3 gap-12 items-start">
@@ -273,7 +281,7 @@ export default function LandingPage() {
                 <div key={index} className="flex items-start">
                   <div>
                     <div className="text-sm text-accent font-mono mb-2">0{index + 1}</div>
-                    <h3 className="text-2xl font-semibold mb-3">{feature.title}</h3>
+                    <h3 className={cn("text-2xl font-semibold mb-3", playfair.className)}>{feature.title}</h3>
                     <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
                   </div>
                 </div>
@@ -289,7 +297,7 @@ export default function LandingPage() {
               { metric: '∞', label: 'Iterations without extra cost' }
             ].map((stat, index) => (
               <div key={index} className="bg-card border rounded-xl p-8 text-center hover:shadow-lg transition-shadow">
-                <div className="text-5xl font-bold text-foreground mb-3">{stat.metric}</div>
+                <div className={cn("text-5xl font-semibold text-foreground mb-3", playfair.className)}>{stat.metric}</div>
                 <p className="text-muted-foreground">{stat.label}</p>
               </div>
             ))}
@@ -307,7 +315,7 @@ export default function LandingPage() {
                   />
                 </div>
                 <div className="text-left">
-                  <h3 className="text-xl font-semibold text-foreground">{prop.title}</h3>
+                  <h3 className={cn("text-xl font-semibold text-foreground", playfair.className)}>{prop.title}</h3>
                   <p className="text-muted-foreground text-sm leading-relaxed">{prop.description}</p>
                 </div>
               </div>
@@ -317,7 +325,7 @@ export default function LandingPage() {
           {/* Pricing */}
           <div className="mb-8">
             <div className="text-center mb-8">
-              <h2 className="text-4xl lg:text-5xl font-extralight mb-4">Simple, transparent pricing</h2>
+              <h2 className={cn("text-4xl lg:text-5xl font-semibold mb-4", playfair.className)}>Simple, transparent pricing</h2>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
                 Start free. Scale as you grow. No hidden fees, no surprises.
               </p>
@@ -333,7 +341,7 @@ export default function LandingPage() {
 
         {/* Final CTA */}
         <div className="mx-auto max-w-4xl px-6 py-16 text-center">
-          <h2 className="text-4xl lg:text-5xl font-bold mb-6">
+          <h2 className={cn("text-4xl lg:text-5xl font-semibold mb-6", playfair.className)}>
             Stop dreaming. Start creating.
           </h2>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">

@@ -3,9 +3,7 @@ import { useState, useEffect } from 'react';
 import { DashboardHeader } from '@/app/common/dashboard/Header';
 import { DocumentGallery } from '@/app/common/dashboard/DocumentGallery';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
-import { documentService } from '@/services/documentService';
 import { useToast } from '@/hooks/use-toast';
 
 export default function Dashboard() {

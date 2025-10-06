@@ -11,9 +11,7 @@ import {
   Home,
   Clapperboard,
   Image as ImageIcon,
-  Video,
-  FolderOpen,
-  Globe,
+  Video,Settings,
   PanelLeft,
   Folder,
 } from 'lucide-react';
@@ -128,22 +126,17 @@ export function Sidebar({ className, onNavigate, isExpanded = true, onToggle }: 
 
   const navItems = [     
     {
-      label: 'Images',
-      icon: ImageIcon,
-      href: '/dashboard/images',
-      active: pathname.startsWith('/dashboard/images/edit'),
-    },
-    {
       label: 'Scenes',
       icon: Clapperboard,
       href: '/dashboard/scenes',
       active: pathname.startsWith('/dashboard/scenes'),
     },
+
     {
-      label: 'Apps',
-      icon: LayoutDashboard,
-      href: '/dashboard/tools',
-      active: pathname.startsWith('/dashboard/tools'),
+      label: 'Settings',
+      icon: Settings,
+      href: '/dashboard/account',
+      active: pathname.startsWith('/dashboard/account'),
     },
   ];
 
