@@ -5,12 +5,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Slider } from "@/components/ui/slider"
 import { 
-  Palette, 
   Square, 
   Circle,
-  Trash2,
-  Copy,
-  RotateCw,
   FlipHorizontal,
   FlipVertical
 } from "lucide-react"
@@ -90,46 +86,18 @@ export function ShapeToolbar({
     updateShapeProperty('opacity', opacity / 100)
   }
 
-  const handleDuplicate = () => {
-    if (!selectedShapeObject || !fabricCanvas) return
-    
-    selectedShapeObject.clone((cloned: any) => {
-      cloned.set({
-        left: cloned.left + 20,
-        top: cloned.top + 20,
-      })
-      fabricCanvas.add(cloned)
-      fabricCanvas.setActiveObject(cloned)
-      fabricCanvas.renderAll()
-      onShapeChange()
-    })
-  }
-
-  const handleDelete = () => {
-    if (!selectedShapeObject || !fabricCanvas) return
-    fabricCanvas.remove(selectedShapeObject)
-    fabricCanvas.renderAll()
-    onShapeChange()
-  }
-
   const handleFlipHorizontal = () => {
     if (!selectedShapeObject || !fabricCanvas) return
-    selectedShapeObject.set('flipX', !selectedShapeObject.flipX)
+    const currentFlipX = selectedShapeObject.flipX || false
+    selectedShapeObject.set('flipX', !currentFlipX)
     fabricCanvas.renderAll()
     onShapeChange()
   }
 
   const handleFlipVertical = () => {
     if (!selectedShapeObject || !fabricCanvas) return
-    selectedShapeObject.set('flipY', !selectedShapeObject.flipY)
-    fabricCanvas.renderAll()
-    onShapeChange()
-  }
-
-  const handleRotate = () => {
-    if (!selectedShapeObject || !fabricCanvas) return
-    const currentAngle = selectedShapeObject.angle || 0
-    selectedShapeObject.set('angle', currentAngle + 90)
+    const currentFlipY = selectedShapeObject.flipY || false
+    selectedShapeObject.set('flipY', !currentFlipY)
     fabricCanvas.renderAll()
     onShapeChange()
   }
@@ -284,48 +252,6 @@ export function ShapeToolbar({
               </Button>
             </TooltipTrigger>
             <TooltipContent><p>Flip Vertical</p></TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                onClick={handleRotate}
-              >
-                <RotateCw className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent><p>Rotate 90°</p></TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                onClick={handleDuplicate}
-              >
-                <Copy className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent><p>Duplicate</p></TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-red-500 hover:text-red-600"
-                onClick={handleDelete}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent><p>Delete</p></TooltipContent>
           </Tooltip>
         </div>
       </div>
