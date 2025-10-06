@@ -430,7 +430,7 @@ export default function CanvasEditor() {
         />
       )}
 
-      {/* Text Toolbar - only for regular text objects */}
+      {/* Text Toolbar - only for regular text objects, NOT sticky notes */}
       {!isViewOnly && (
         <TextToolbar
           isVisible={
@@ -438,17 +438,11 @@ export default function CanvasEditor() {
             (canvasCore.selectedObjects[0]?.type === "textbox" || 
              canvasCore.selectedObjects[0]?.type === "i-text" || 
              canvasCore.selectedObjects[0]?.isTextObject) && 
-            !canvasCore.selectedObjects[0]?.backgroundColor &&
-            !canvasCore.selectedObjects[0]?.stickyColor &&
-            canvasCore.selectedObjects[0]?.type !== "rect" &&
-            canvasCore.selectedObjects[0]?.type !== "circle"
+            !canvasCore.selectedObjects[0]?.stickyColor
           }
           selectedTextObject={canvasCore.selectedObjects.find(obj => 
             (obj.type === "textbox" || obj.type === "i-text" || obj.isTextObject) && 
-            !obj.backgroundColor && 
-            !obj.stickyColor &&
-            obj.type !== "rect" &&
-            obj.type !== "circle"
+            !obj.stickyColor
           )}
           fabricCanvas={canvasCore.fabricCanvasRef.current}
           onTextChange={canvasCore.handleCanvasChange}
