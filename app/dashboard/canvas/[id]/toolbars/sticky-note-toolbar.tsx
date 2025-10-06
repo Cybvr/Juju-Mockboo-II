@@ -116,11 +116,17 @@ export function StickyNoteToolbar({
           transform: "translateX(-50%)",
         }}
       >
-        {/* Color Picker */}
+        {/* Background Color Picker */}
         <Popover>
           <PopoverTrigger asChild>
             <Button variant="ghost" size="icon" className="h-8 w-8">
-              <Palette className="h-4 w-4" />
+              <div className="flex flex-col items-center">
+                <Palette className="h-3 w-3" />
+                <div 
+                  className="w-4 h-1 rounded-full mt-0.5" 
+                  style={{ backgroundColor: stickyColors.find(c => c.name === currentColor)?.bg || "#FEF3C7" }} 
+                />
+              </div>
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-2">
@@ -130,8 +136,11 @@ export function StickyNoteToolbar({
                   key={color.name}
                   variant={currentColor === color.name ? "default" : "ghost"}
                   size="sm"
-                  className="h-8 w-8 p-0"
-                  style={{ backgroundColor: color.bg }}
+                  className="h-8 w-8 p-0 border-2"
+                  style={{ 
+                    backgroundColor: color.bg,
+                    borderColor: currentColor === color.name ? "#2563eb" : "transparent"
+                  }}
                   onClick={() => handleColorChange(color.name)}
                 />
               ))}
