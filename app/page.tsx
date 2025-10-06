@@ -5,38 +5,45 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '@/lib/firebase';
 import { MarketingHeader } from '@/app/common/marketing/Header';
 import { MarketingFooter } from '@/app/common/marketing/Footer';
-import Hero from '@/app/common/marketing/Hero';
-import { CommunityGallery } from '@/app/common/CommunityGallery';
 import AuthModal from '@/components/AuthModal';
 import InstallPWA from '@/components/InstallPWA';
-import { documentService } from '@/services/documentService';
-import { Document } from '@/types/firebase';
 import { Button } from '@/components/ui/button';
 import { PricingTable } from '@/components/PricingTable';
 import FAQSection from '@/app/common/marketing/FAQSection';
-import { toolsData } from '@/data/toolsData';
 import { cn } from '@/lib/utils';
-import { VisualNeedsSection } from '@/app/common/marketing/VisualNeedsSection';
+import { visualNeedsData } from '@/data/industryData';
+
 export default function LandingPage() {
   const router = useRouter();
   const [user, loading] = useAuthState(auth);
   const [authModalOpen, setAuthModalOpen] = useState(false);
-  const [documents, setDocuments] = useState<Document[]>([]);
-  const [docsLoading, setDocsLoading] = useState(true);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
+  const handleIndexChange = (newIndex: number) => {
+    if (newIndex === activeIndex) return;
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setIsTransitioning(false);
+    }, 400);
+    setActiveIndex(newIndex);
+  };
+
   const features = [
     {
-      title: 'Mind-to-Visual Pipeline',
-      description: 'Describe your vision in plain English.'
+      title: 'Dream It',
+      description: 'Describe your vision in plain English. No design skills needed.'
     },
     {
-      title: 'Conversion Optimization AI',
-      description: 'Our AI learns what converts in your industry.'
+      title: 'Design It',
+      description: 'Watch AI bring your ideas to life in seconds. Iterate instantly.'
     },
     {
-      title: 'Brand DNA Recognition',
-      description: 'Maintains perfect brand consistency automatically.'
+      title: 'Done',
+      description: 'Export, share, or keep refining. Ship faster than ever before.'
     }
   ];
+
   const valueProps = [
     {
       image: 'assets/images/marketing/consistent.jpg',
@@ -51,35 +58,17 @@ export default function LandingPage() {
     {
       image: 'assets/images/marketing/cans.jpg',
       title: 'Endless possibilities',
-        description: 'Test unlimited variations and styles without additional costs'
+      description: 'Test unlimited variations and styles without additional costs'
     }
   ];
+
   // Redirect logged-in users to dashboard
   useEffect(() => {
     if (!loading && user) {
       router.push('/dashboard');
     }
   }, [user, loading, router]);
-  useEffect(() => {
-    const loadDocuments = async () => {
-      try {
-        setDocsLoading(true);
-        // Only load documents if we're in the browser (not during SSR)
-        if (typeof window !== 'undefined') {
-          const docs = await documentService.getPopularDocuments(20);
-          const publicDocs = docs.filter(doc => doc.isPublic === true);
-          setDocuments(publicDocs);
-        }
-      } catch (error) {
-        console.error('Failed to load documents:', error);
-        // Set empty array on error to prevent UI issues
-        setDocuments([]);
-      } finally {
-        setDocsLoading(false);
-      }
-    };
-    loadDocuments();
-  }, []);
+
   // Show loading while checking auth state
   if (loading) {
     return (
@@ -91,95 +80,276 @@ export default function LandingPage() {
       </div>
     );
   }
+
   // Don't render the landing page if user is logged in (will redirect)
   if (user) {
     return null;
   }
+
   return (
     <div className="min-h-screen">
       <MarketingHeader onAuthClick={() => setAuthModalOpen(true)} />
-       <div className="min-h-screen mx-auto max-w-6xl ">
-      <div className="m-8"><Hero onAuthClick={() => setAuthModalOpen(true)} /></div>
-      {/* Tools Gallery Section */}
-      <div className="px-6 py-16">
-        <img src="/assets/images/workspace.jpg" alt="Workspace" className="w-full h-auto" />
-      </div>
-      {/* Perfect Section */}
-      <div className="mb-16">
-        <VisualNeedsSection />
-      </div>
-      <div className=" px-6 pb-12">
-        {/* Future-Forward Features */}
-        <div className="mb-16 bg-black rounded-2xl p-4  lg:p-8 ">
-          <div className="mb-12 text-left">
-            <h2 className="text-5xl font-extralight">Beyond imagination</h2>
-            <p className="text-xl text-muted-foreground">Features that feel like magic, results that drive growth</p>
+      <div className="min-h-screen mx-auto max-w-6xl">
+        <div className="m-8">
+          <div className="lg:pt-12 pt-6">
+            <div className="flex flex-col items-center">
+              <div className="mb-12 items-center text-center">
+                {/* Updated Hero */}
+                <h1 className="text-5xl lg:text-7xl font-bold text-foreground mb-6 leading-tight">
+                  Dream It.<br />Design It.<br />Done.
+                </h1>
+                <p className="text-xl lg:text-2xl text-muted-foreground mb-8 max-w-2xl leading-relaxed">
+                  Turn your ideas into stunning visuals in seconds. No design skills required. Just imagination and AI.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Button
+                    size="lg"
+                    className="px-8 py-6 text-lg rounded-full bg-white hover:bg-white/90 text-black hover:text-black border-0 shadow-lg"
+                    onClick={() => setAuthModalOpen(true)}
+                  >
+                    Start Creating Free
+                  </Button>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="px-8 py-6 text-lg rounded-full"
+                  >
+                    See Examples
+                  </Button>
+                </div>
+                {/* Social Proof */}
+                <div className="mt-8 flex flex-wrap justify-center gap-6 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-2">
+                    <div className="flex -space-x-2">
+                      {[1, 2, 3, 4].map((i) => (
+                        <div key={i} className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-blue-400 border-2 border-background" />
+                      ))}
+                    </div>
+                    <span>10,000+ creators</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>⭐⭐⭐⭐⭐</span>
+                    <span>4.9/5 rating</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-     en     <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <div className="space-y-8">
-                {features.map((feature, index) => (
-                  <div key={index} className="flex items-start">
-                    <div>
-                      <h3 className="text-xl font-normal mb-2">{feature.title}</h3>
-                      <p className="text-muted-foreground">{feature.description}</p>
+        </div>
+
+        {/* Tools Gallery Section */}
+        <div className="px-6 py-16">
+          <img src="/assets/images/workspace.jpg" alt="Workspace" className="w-full h-auto rounded-2xl shadow-2xl" />
+        </div>
+
+        {/* Use Cases Section */}
+        <div className="mb-16">
+          <div className="text-foreground">
+            <div className="max-w-7xl mx-auto p-6">
+              <div className="max-w-7xl mx-auto p-6 mb-12 text-center">
+                <h2 className="text-4xl lg:text-5xl font-extralight mb-6 text-balance">
+                  Your ideas deserve to be seen
+                </h2>
+                <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+                  Whether you're launching a product, building a brand, or creating content that converts—turn concepts into visuals instantly.
+                </p>
+              </div>
+              <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
+                {/* Side Navigation */}
+                <div className="w-full lg:w-64 flex flex-row lg:flex-col gap-2 overflow-x-auto lg:overflow-visible pb-4 lg:pb-0">
+                  {visualNeedsData.map((item, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleIndexChange(index)}
+                      className={cn(
+                        "group relative overflow-hidden transition-all duration-500 ease-out rounded-lg shrink-0",
+                        "transform hover:scale-[1.02] hover:shadow-lg",
+                        "h-12 lg:h-14 min-w-[180px] lg:min-w-0",
+                        activeIndex === index 
+                          ? "bg-accent shadow-md scale-[1.02]" 
+                          : "hover:bg-accent/50 hover:shadow-sm",
+                      )}
+                    >
+                      <div className="relative z-10 flex items-center h-full px-3">
+                        <div className="text-left">
+                          <h3
+                            className={cn(
+                              "font-normal text-base lg:text-lg transition-all duration-400 ease-out transform",
+                              activeIndex === index 
+                                ? "text-accent-foreground translate-x-1 font-medium" 
+                                : "text-foreground translate-x-0 hover:translate-x-1",
+                            )}
+                          >
+                            {item.title}
+                          </h3>
+                        </div>
+                      </div>
+                      <div 
+                        className={cn(
+                          "absolute left-0 top-0 bottom-0 w-1 bg-accent transition-all duration-500 ease-out transform",
+                          activeIndex === index ? "translate-x-0 opacity-100" : "-translate-x-full opacity-0"
+                        )}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-r from-accent/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-out" />
+                    </button>
+                  ))}
+                </div>
+                {/* Main Display */}
+                <div className="flex-1 relative overflow-hidden rounded-xl shadow-2xl h-[500px] lg:h-[700px]">
+                  {visualNeedsData.map((item, index) => (
+                    <div
+                      key={index}
+                      className={cn(
+                        "absolute inset-0 transition-all duration-700 ease-out transform",
+                        activeIndex === index 
+                          ? "opacity-100 scale-100" 
+                          : "opacity-0 scale-105"
+                      )}
+                    >
+                      <img
+                        src={item.image || "/placeholder.svg"}
+                        alt={item.title}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                    </div>
+                  ))}
+                  <div className="relative z-10 h-full flex flex-col justify-end p-6 lg:p-12">
+                    <div className="max-w-2xl">
+                      <h3 
+                        className={cn(
+                          "text-xl lg:text-2xl font-normal text-balance text-white transition-all duration-500 ease-out transform",
+                          isTransitioning 
+                            ? "translate-y-4 opacity-0" 
+                            : "translate-y-0 opacity-100"
+                        )}
+                        style={{ transitionDelay: '100ms' }}
+                      >
+                        {visualNeedsData[activeIndex].title}
+                      </h3>
+                      <p 
+                        className={cn(
+                          "text-sm lg:text-md text-gray-200/80 mb-6 leading-relaxed text-pretty transition-all duration-500 ease-out transform",
+                          isTransitioning 
+                            ? "translate-y-4 opacity-0" 
+                            : "translate-y-0 opacity-100"
+                        )}
+                        style={{ transitionDelay: '200ms' }}
+                      >
+                        {visualNeedsData[activeIndex].description}
+                      </p>
                     </div>
                   </div>
+                </div>
+              </div>
+              {/* Bottom indicators */}
+              <div className="hidden lg:flex justify-center mt-8 gap-3">
+                {visualNeedsData.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleIndexChange(index)}
+                    className={cn(
+                      "h-1 rounded-full transition-all duration-400 ease-out transform hover:scale-y-150",
+                      activeIndex === index 
+                        ? "bg-accent w-12 scale-y-125" 
+                        : "bg-muted w-6 hover:bg-muted-foreground/70"
+                    )}
+                  />
                 ))}
               </div>
             </div>
-            <div className="bg-card rounded-3xl p-8 border relative overflow-hidden">
-              <div className="mb-6 text-left relative z-10">
-                <h3 className="text-2xl font-normal mb-3">Early Adopter Advantage</h3>
-              </div>
-              <div className="bg-accent rounded-xl p-4 mb-6 relative z-10">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm text-muted-foreground">Market Advantage</span>
-                  <span className="text-lg font-bold text-foreground">+347%</span>
+          </div>
+        </div>
+
+        <div className="px-6 pb-12">
+          {/* How It Works */}
+          <div className="mb-16 bg-black rounded-2xl p-4 lg:p-8">
+            <div className="mb-12 text-left">
+              <h2 className="text-4xl lg:text-5xl font-extralight mb-4">Three steps to visual perfection</h2>
+              <p className="text-xl text-muted-foreground">It's so simple, you'll wonder why you ever did it any other way</p>
+            </div>
+            <div className="grid lg:grid-cols-3 gap-12 items-start">
+              {features.map((feature, index) => (
+                <div key={index} className="flex items-start">
+                  <div>
+                    <div className="text-sm text-accent font-mono mb-2">0{index + 1}</div>
+                    <h3 className="text-2xl font-semibold mb-3">{feature.title}</h3>
+                    <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
+                  </div>
                 </div>
-                <div className="w-full bg-muted rounded-full h-2">
-                  <div className="bg-foreground h-2 rounded-full" style={{width: '87%'}}></div>
+              ))}
+            </div>
+          </div>
+
+          {/* Results Section */}
+          <div className="mb-16 grid md:grid-cols-3 gap-8">
+            {[
+              { metric: '10x', label: 'Faster than traditional design' },
+              { metric: '$0', label: 'Design agency fees saved' },
+              { metric: '∞', label: 'Iterations without extra cost' }
+            ].map((stat, index) => (
+              <div key={index} className="bg-card border rounded-xl p-8 text-center hover:shadow-lg transition-shadow">
+                <div className="text-5xl font-bold text-foreground mb-3">{stat.metric}</div>
+                <p className="text-muted-foreground">{stat.label}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Value Props */}
+          <div className="grid md:grid-cols-3 gap-8 mb-16">
+            {valueProps.map((prop, index) => (
+              <div key={index} className="shadow-lg">
+                <div className="mb-6 rounded-xl overflow-hidden">
+                  <img
+                    src={prop.image}
+                    alt={prop.title}
+                    className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-700"
+                  />
+                </div>
+                <div className="text-left">
+                  <h3 className="text-xl font-semibold text-foreground">{prop.title}</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">{prop.description}</p>
                 </div>
               </div>
-              <p className="text-muted-foreground text-sm text-left relative z-10">
-                Early adopters report 3.5x faster campaign launches
+            ))}
+          </div>
+
+          {/* Pricing */}
+          <div className="mb-8">
+            <div className="text-center mb-8">
+              <h2 className="text-4xl lg:text-5xl font-extralight mb-4">Simple, transparent pricing</h2>
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                Start free. Scale as you grow. No hidden fees, no surprises.
               </p>
             </div>
+            <PricingTable showCurrentPlan={false} />
           </div>
         </div>
-        {/* Value Props - Updated with image inside */}
-        <div className="grid md:grid-cols-3 gap-8 mb-16">
-          {valueProps.map((prop, index) => (
-            <div key={index} className="shadow-lg">
-              <div className="mb-6 rounded-xl overflow-hidden">
-                <img 
-                  src={prop.image} 
-                  alt={prop.title} 
-                  className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-700"
-                />
-              </div>
-              <div className="text-left">
-                <h3 className="text-xl font-semibold text-foreground">{prop.title}</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">{prop.description}</p>
-              </div>
-            </div>
-          ))}
+
+        {/* FAQ Section */}
+        <div className="mx-auto max-w-5xl px-6 mb-16">
+          <FAQSection />
         </div>
-        {/* Pricing */}
-        <div className="mb-8">
-          <div className="text-center mb-8">
-            <h2 className="text-5xl font-extralight">Simple, transparent pricing</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              From hobbyists to professionals, find the perfect plan that scales with your creative ambitions.
-            </p>
-          </div>
-          <PricingTable showCurrentPlan={false} />
+
+        {/* Final CTA */}
+        <div className="mx-auto max-w-4xl px-6 py-16 text-center">
+          <h2 className="text-4xl lg:text-5xl font-bold mb-6">
+            Stop dreaming. Start creating.
+          </h2>
+          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+            Join thousands of creators who've ditched design bottlenecks and unlocked their creative potential.
+          </p>
+          <Button
+            size="lg"
+            className="px-10 py-6 text-xl rounded-full bg-white hover:bg-white/90 text-black hover:text-black border-0 shadow-lg"
+            onClick={() => setAuthModalOpen(true)}
+          >
+            Get Started Free →
+          </Button>
+          <p className="text-sm text-muted-foreground mt-6">No credit card required. Cancel anytime.</p>
         </div>
       </div>
-      {/* FAQ Section */}
-      <div className="mx-auto max-w-5xl px-6 mb-16">
-        <FAQSection />
-      </div></div>
+
       <MarketingFooter />
       <InstallPWA />
       <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} />

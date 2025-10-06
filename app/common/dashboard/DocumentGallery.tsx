@@ -35,8 +35,6 @@ interface DocumentGalleryProps {
   emptyStateMessage?: string
 }
 
-type FilterType = "all" | "scene" | "canvas"
-
 interface FlattenedDocument {
   id: string
   originalDocId: string
@@ -62,7 +60,6 @@ export function DocumentGallery({
   const [deleteDocumentId, setDeleteDocumentId] = useState<string>("")
   const [renameDocumentId, setRenameDocumentId] = useState<string>("")
   const [newName, setNewName] = useState("")
-  const [filterType, setFilterType] = useState<FilterType>("all")
   const [showAddToBoardDialog, setShowAddToBoardDialog] = useState(false)
   const [selectedDocumentUrl, setSelectedDocumentUrl] = useState<string | null>(null)
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null)
@@ -110,13 +107,9 @@ export function DocumentGallery({
     }
   };
 
-  // Map documents directly
   const flattenedDocuments: FlattenedDocument[] = documents.map(doc => {
     let mediaUrl = '/placeholder.svg'
-    
-    // Handle different document types for thumbnails
     if (doc.type === 'canvas') {
-      // For canvas, check content.thumbnail first, then content.canvasData thumbnail
       if (doc.content?.thumbnail) {
         mediaUrl = doc.content.thumbnail
       } else if (doc.content?.canvasData?.thumbnail) {
@@ -127,7 +120,6 @@ export function DocumentGallery({
     } else if (doc.content?.imageUrls && doc.content.imageUrls.length > 0) {
       mediaUrl = doc.content.imageUrls[0]
     }
-
     return {
       id: doc.id,
       originalDocId: doc.id,
@@ -142,19 +134,10 @@ export function DocumentGallery({
     }
   })
 
-  const filteredFlattenedDocs = flattenedDocuments.filter(item => {
-    if (filterType === "all") return item.type === "canvas" || item.type === "scenes"
-    if (filterType === "scene") {
-      return item.type === "scenes" || (item.type === "video" && item.originalDoc.content?.scenes)
-    }
-    if (filterType === "canvas") {
-      return item.type === "canvas"
-    }
-    return false;
-  });
+  // Filter to show only canvas documents
+  const canvasDocuments = flattenedDocuments.filter(item => item.type === "canvas");
 
   const handleDeleteClick = (documentId: string) => {
-    // Extract the original document ID from the flattened ID
     const flatDoc = flattenedDocuments.find(item => item.id === documentId)
     if (flatDoc) {
       setDeleteDocumentId(flatDoc.originalDocId)
@@ -166,16 +149,7 @@ export function DocumentGallery({
     try {
       await documentService.deleteDocument(deleteDocumentId)
       setDocuments((prev) => {
-        const updatedDocs = prev.filter((doc) => doc.id !== deleteDocumentId)
-        // Reset filter to "all" if current filter type has no documents left
-        const filteredAfterDelete = updatedDocs.filter(doc => {
-          if (filterType === "all") return true
-          return doc.type === filterType
-        })
-        if (filteredAfterDelete.length === 0 && updatedDocs.length > 0) {
-          setFilterType("all")
-        }
-        return updatedDocs
+        return prev.filter((doc) => doc.id !== deleteDocumentId)
       })
       toast.success("Document deleted successfully")
     } catch (error) {
@@ -265,10 +239,8 @@ export function DocumentGallery({
       toast.error("Please sign in to duplicate documents")
       return
     }
-    
     const flatDoc = flattenedDocuments.find(item => item.id === documentId)
     if (!flatDoc) return
-    
     try {
       const originalDoc = flatDoc.originalDoc
       const duplicatedDoc = await documentService.createDocument(user.uid, {
@@ -278,11 +250,8 @@ export function DocumentGallery({
         createdAt: undefined,
         updatedAt: undefined
       })
-      
-      // Refresh the documents list
       const userDocs = await documentService.getUserRecentDocuments(user.uid, 100)
       setDocuments(userDocs)
-      
       toast.success("Document duplicated successfully")
     } catch (error) {
       console.error("Error duplicating document:", error)
@@ -296,14 +265,11 @@ export function DocumentGallery({
     const document = flatDoc.originalDoc
     if (document?.type === "canvas") {
       router.push(`/dashboard/canvas/${flatDoc.originalDocId}`)
-    } else if (document?.type === "scenes" || (document?.type === "video" && document?.content?.scenes)) {
-      router.push(`/dashboard/scenes/${flatDoc.originalDocId}`)
     } else {
       router.push(`/m/${flatDoc.originalDocId}`)
     }
   }
 
-  // Helper function to check if a document is liked by the current user
   const isDocumentLiked = (flatDoc: FlattenedDocument) => {
     return flatDoc.likedBy && flatDoc.likedBy.includes(user?.uid)
   }
@@ -314,27 +280,7 @@ export function DocumentGallery({
         <div>
           <div className="flex items-center justify-between">
             <div className="flex gap-2">
-              <Button
-                variant={filterType === "all" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setFilterType("all")}
-              >
-                All
-              </Button>
-              <Button
-                variant={filterType === "scene" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setFilterType("scene")}
-              >
-                Scenes
-              </Button>
-              <Button
-                variant={filterType === "canvas" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setFilterType("canvas")}
-              >
-                Canvas
-              </Button>
+              {/* Filter buttons removed */}
             </div>
             <div className="flex items-center">
               <Button
@@ -346,9 +292,7 @@ export function DocumentGallery({
                 New
               </Button>
             </div>
-            
           </div>
-          
         </div>
         {loading ? (
           <div className="flex items-center justify-center py-12">
@@ -356,9 +300,9 @@ export function DocumentGallery({
           </div>
         ) : (
           <div className="space-y-6">
-            {filteredFlattenedDocs.length > 0 ? (
+            {canvasDocuments.length > 0 ? (
               <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                {filteredFlattenedDocs.map((flatDoc) => (
+                {canvasDocuments.map((flatDoc) => (
                   <DocumentCard
                     key={flatDoc.id}
                     document={{
@@ -404,7 +348,6 @@ export function DocumentGallery({
           </div>
         )}
       </div>
-      {/* Add to Board Modal */}
       <AddToBoardModal
         isOpen={showAddToBoardDialog}
         onClose={() => {
