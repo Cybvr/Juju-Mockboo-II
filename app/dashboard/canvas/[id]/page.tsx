@@ -34,7 +34,7 @@ import { ProfileDropdown } from "@/app/common/dashboard/ProfileDropdown"
 import { ShareModal } from "@/components/ShareModal"
 import { useSnapGrid } from "./hooks/use-snap-grid"
 import { FloatingToolbar } from "./toolbars/image-toolbar"
-
+import { ShapeToolbar } from "./toolbars/shape-toolbar"
 import { StickyNoteToolbar } from "./toolbars/sticky-note-toolbar"
 import { TextToolbar } from "./toolbars/text-toolbar"
 import { useFabricCanvas } from "./canvas-fabric"
@@ -68,7 +68,7 @@ export default function CanvasEditor() {
     documentId,
     (images) => setSelectedImages(images)
   )
-  
+
   // Image operations hook
   const imageOps = useImageOperations({
     fabricCanvasRef: canvasCore.fabricCanvasRef,
@@ -121,7 +121,7 @@ export default function CanvasEditor() {
     brushColor: canvasCore.brushColor,
     drawingMode: canvasCore.drawingMode,
   })
-  
+
 
 
   // Setup interactions after canvas is loaded
@@ -146,7 +146,7 @@ export default function CanvasEditor() {
   }, [canvasCore.fabricLoaded, setupInteractions, setupKeyboardHandlers, setupPanAndZoom, setupTouchHandlers, imageOps.setupDragAndDrop])
 
   // Canvas initialization is handled by useFabricCanvas hook
-  
+
   // Load document from Firebase
   useEffect(() => {
     const loadDocument = async () => {
@@ -322,6 +322,19 @@ export default function CanvasEditor() {
         </div>
       </div>
 
+      {/* Floating Toolbar for Selected Shapes */}
+      {!isViewOnly && (
+        <ShapeToolbar
+          isVisible={
+            canvasCore.selectedObjects.some(obj => obj.type === "rect" || obj.type === "circle")
+          }
+          selectedShapes={canvasCore.selectedObjects.filter(obj => obj.type === "rect" || obj.type === "circle")}
+          fabricCanvas={canvasCore.fabricCanvasRef.current}
+          onShapeChange={canvasCore.handleCanvasChange}
+        />
+      )}
+
+
       {/* Floating Toolbar - Hide in view-only mode */}
       {!isViewOnly && (
         <div className="absolute left-4 top-1/2 z-10 -translate-y-1/2">
@@ -402,9 +415,9 @@ export default function CanvasEditor() {
           onUpscale={() => {}}
         />
       )}
-      
 
-      
+
+
 
       {/* Sticky Note Toolbar - only for sticky notes with backgroundColor */}
       {!isViewOnly && (
