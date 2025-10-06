@@ -140,7 +140,7 @@ export function useCanvasCore(documentId: string, document: Document | null) {
     if (!fabricCanvasRef.current || !document || isSaving) return
     try {
       setIsSaving(true)
-      const rawCanvasData = fabricCanvasRef.current.toJSON(['name', 'isTextObject', 'text'])
+      const rawCanvasData = fabricCanvasRef.current.toJSON(['name', 'isTextObject', 'text', 'stickyColor', 'backgroundColor'])
       // Debug logs for sticky notes
       const stickyNotes = rawCanvasData.objects?.filter((obj: any) => obj.name?.startsWith('sticky-note-'))
       console.log("🟡 STICKY NOTES BEING SAVED:", stickyNotes?.length || 0)

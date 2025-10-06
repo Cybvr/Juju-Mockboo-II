@@ -46,7 +46,7 @@ export function useStickyNote({ fabricCanvasRef, handleCanvasChange }: StickyNot
         transparentCorners: false,
       })
 
-      // Mark as text object (same as regular text)
+      // Mark as sticky note specifically
       textObj.isTextObject = true
       textObj.stickyColor = options?.color || "yellow"
 
