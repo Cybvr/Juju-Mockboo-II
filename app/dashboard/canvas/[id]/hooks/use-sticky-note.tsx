@@ -47,6 +47,8 @@ export function useStickyNote({ fabricCanvasRef, handleCanvasChange }: StickyNot
         backgroundColor: selectedColor.bg,
         padding: 15,
         borderRadius: 5,
+        lockUniScaling: true,
+        uniformScaling: true,
       })
 
       // Set custom properties for identification
