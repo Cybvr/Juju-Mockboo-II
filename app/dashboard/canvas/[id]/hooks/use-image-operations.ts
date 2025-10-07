@@ -116,14 +116,15 @@ export function useImageOperations({
               const scale = Math.min(maxWidth / fabricImage.width, maxHeight / fabricImage.height, 1)
 
               fabricImage.set({
+                left: options?.position?.x || Math.random() * (canvas.width - fabricImage.width!),
+                top: options?.position?.y || Math.random() * (canvas.height - fabricImage.height!),
                 scaleX: scale,
                 scaleY: scale,
-                lockUniScaling: true, // Force uniform scaling
-                centeredScaling: false,
-                centeredRotation: true,
-                lockScalingFlip: true, // Prevent flipping
-                lockSkewingX: true, // Prevent skewing
-                lockSkewingY: true  // Prevent skewing
+                selectable: true,
+                evented: true,
+                // Force serialization properties
+                src: imageUrl,
+                crossOrigin: 'anonymous'
               })
 
               if (replaceObjects) {
@@ -135,12 +136,12 @@ export function useImageOperations({
               canvas.setActiveObject(fabricImage)
               canvas.renderAll()
 
-              if (handleCanvasChange) {
-                handleCanvasChange();
-                canvas.fire('path:created', { path: fabricImage });
-                canvas.fire('object:added', { target: fabricImage });
-              }
-
+              // Force immediate save after adding image
+              setTimeout(() => {
+                if (handleCanvasChange) {
+                  handleCanvasChange()
+                }
+              }, 100)
               resolve()
             }
 
