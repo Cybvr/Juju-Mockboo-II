@@ -60,34 +60,38 @@ export function useStickyNote({ fabricCanvasRef, handleCanvasChange }: StickyNot
         padding: 0,
       })
 
-      // Mark both objects with sticky properties but don't group them
-      stickyBackground.stickyColor = options?.color || "yellow"
-      stickyBackground.backgroundColor = selectedColor.bg
-      stickyBackground.stickyNoteGroup = true
-      
-      textObj.stickyColor = options?.color || "yellow"
-      textObj.backgroundColor = selectedColor.bg
-      textObj.stickyNoteGroup = true
-      textObj.isTextObject = true
-      textObj.selectable = true
-      textObj.hasControls = true
-      textObj.hasBorders = true
+      // Group them together to make one sticky note
+      const stickyGroup = new fabric.Group([stickyBackground, textObj], {
+        left: x,
+        top: y,
+        selectable: true,
+        hasControls: true,
+        hasBorders: true,
+        cornerColor: "#2563eb",
+        cornerSize: 8,
+        transparentCorners: false,
+        // Set properties directly in constructor for better serialization
+        isTextObject: true,
+        stickyColor: options?.color || "yellow",
+        backgroundColor: selectedColor.bg,
+        stickyNoteGroup: true,
+      })
       
       console.log("🟡 CREATING STICKY NOTE:", {
         backgroundColor: selectedColor.bg,
-        stickyColor: textObj.stickyColor,
-        isTextObject: textObj.isTextObject,
+        stickyColor: stickyGroup.stickyColor,
+        isTextObject: stickyGroup.isTextObject,
         text: textObj.text
       })
 
-      canvas.add(stickyBackground)
-      canvas.add(textObj)
-      canvas.setActiveObject(textObj)
+      canvas.add(stickyGroup)
+      canvas.setActiveObject(stickyGroup)
       canvas.renderAll()
       handleCanvasChange()
 
       // Auto-enter editing mode for the text
       setTimeout(() => {
+        canvas.setActiveObject(textObj)
         textObj.enterEditing()
         textObj.hiddenTextarea?.focus()
         textObj.selectAll()
