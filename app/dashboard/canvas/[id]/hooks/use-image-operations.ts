@@ -84,7 +84,7 @@ export function useImageOperations({
     const { replaceObjects, position, immediate } = options
 
     // ALWAYS upload base64 to storage before adding to canvas
-    let persistentImageUrl = imageUrl
+    let persistentImageUrl = await uploadImageToStorage(imageUrl)
     
 
     return new Promise<void>((resolve, reject) => {
