@@ -94,38 +94,41 @@ export function useImageOperations({
       return new Promise<void>((resolve, reject) => {
         import("fabric").then((FabricModule) => {
           const fabric = FabricModule
-          const imgElement = new Image()
-          imgElement.crossOrigin = "anonymous"
-
+          
           const loadImage = (src: string) => {
-            imgElement.onload = () => {
-              let left = (canvas.width - imgElement.width) / 2
-              let top = (canvas.height - imgElement.height) / 2
-
-              if (replaceObjects?.placeholder) {
-                left = replaceObjects.placeholder.left
-                top = replaceObjects.placeholder.top
-              } else if (position) {
-                left = position.x
-                top = position.y
-              }
-
-              const fabricImage = new fabric.Image(imgElement, { left, top })
+            fabric.Image.fromURL(src, (fabricImage: any) => {
+              const imgWidth = fabricImage.width || fabricImage.getScaledWidth()
+              const imgHeight = fabricImage.height || fabricImage.getScaledHeight()
               const maxWidth = 400
               const maxHeight = 400
-              const scale = Math.min(maxWidth / fabricImage.width, maxHeight / fabricImage.height, 1)
+              const scale = Math.min(maxWidth / imgWidth, maxHeight / imgHeight, 1)
+
+              const left = (position?.x ?? Math.random() * Math.max(0, canvas.width - imgWidth * scale))
+              const top = (position?.y ?? Math.random() * Math.max(0, canvas.height - imgHeight * scale))
 
               fabricImage.set({
-                left: options?.position?.x || Math.random() * (canvas.width - fabricImage.width!),
-                top: options?.position?.y || Math.random() * (canvas.height - fabricImage.height!),
+                left,
+                top,
                 scaleX: scale,
                 scaleY: scale,
                 selectable: true,
                 evented: true,
-                // Force serialization properties
-                src: imageUrl,
+                src: persistentImageUrl,
                 crossOrigin: 'anonymous'
               })
+
+              // Strip non-serializable fields for Firestore
+              const originalToObject = fabricImage.toObject.bind(fabricImage)
+              fabricImage.toObject = function(props: any) {
+                const obj = originalToObject(props)
+                delete obj._element
+                delete obj._originalElement
+                delete obj.canvas
+                delete obj.el
+                delete obj.cacheCanvas
+                delete obj.cacheKey
+                return obj
+              }
 
               if (replaceObjects) {
                 if (replaceObjects.placeholder) canvas.remove(replaceObjects.placeholder)
@@ -136,25 +139,14 @@ export function useImageOperations({
               canvas.setActiveObject(fabricImage)
               canvas.renderAll()
 
-              // Force immediate save after adding image
               setTimeout(() => {
-                if (handleCanvasChange) {
-                  handleCanvasChange()
-                }
+                if (handleCanvasChange) handleCanvasChange()
               }, 100)
+
               resolve()
-            }
-
-            imgElement.onerror = () => {
-              if (src === persistentImageUrl && src !== imageUrl) {
-                loadImage(imageUrl)
-              } else {
-                console.error('Failed to load image')
-                reject(new Error('Failed to load image'))
-              }
-            }
-
-            imgElement.src = src
+            }, {
+              crossOrigin: 'anonymous'
+            })
           }
 
           loadImage(persistentImageUrl)
