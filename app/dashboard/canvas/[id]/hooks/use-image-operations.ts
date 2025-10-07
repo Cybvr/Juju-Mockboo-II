@@ -97,8 +97,14 @@ export function useImageOperations({
           
           const loadImage = (src: string) => {
             fabric.Image.fromURL(src, (fabricImage: any) => {
-              const imgWidth = fabricImage.width || fabricImage.getScaledWidth()
-              const imgHeight = fabricImage.height || fabricImage.getScaledHeight()
+              if (!fabricImage) {
+                console.error('Image failed to load:', src)
+                return reject('Image load error')
+              }
+
+              // Safe width/height fallback
+              const imgWidth = fabricImage.width || fabricImage.getScaledWidth() || 200
+              const imgHeight = fabricImage.height || fabricImage.getScaledHeight() || 200
               const maxWidth = 400
               const maxHeight = 400
               const scale = Math.min(maxWidth / imgWidth, maxHeight / imgHeight, 1)
@@ -113,21 +119,20 @@ export function useImageOperations({
                 scaleY: scale,
                 selectable: true,
                 evented: true,
-                src: persistentImageUrl,
                 crossOrigin: 'anonymous'
               })
 
-              // Strip non-serializable fields for Firestore
-              const originalToObject = fabricImage.toObject.bind(fabricImage)
-              fabricImage.toObject = function(props: any) {
-                const obj = originalToObject(props)
-                delete obj._element
-                delete obj._originalElement
-                delete obj.canvas
-                delete obj.el
-                delete obj.cacheCanvas
-                delete obj.cacheKey
-                return obj
+              // strip DOM refs before save
+              const origToObject = fabricImage.toObject.bind(fabricImage)
+              fabricImage.toObject = function (props: any) {
+                const o = origToObject(props)
+                delete o._element
+                delete o._originalElement
+                delete o.canvas
+                delete o.el
+                delete o.cacheCanvas
+                delete o.cacheKey
+                return o
               }
 
               if (replaceObjects) {
@@ -137,7 +142,7 @@ export function useImageOperations({
 
               canvas.add(fabricImage)
               canvas.setActiveObject(fabricImage)
-              canvas.renderAll()
+              canvas.requestRenderAll() // <-- force redraw AFTER async load
 
               setTimeout(() => {
                 if (handleCanvasChange) handleCanvasChange()
