@@ -1,3 +1,4 @@
+
 "use client"
 import { useCallback } from "react"
 
@@ -29,9 +30,9 @@ export function useStickyNote({ fabricCanvasRef, handleCanvasChange }: StickyNot
       const stickyNote = new fabric.Textbox(options?.text || "Type your note here...", {
         left: x,
         top: y,
-        width: 150,
-        height: 150,
-        fontSize: 14,
+        width: 200,
+        height: 200,
+        fontSize: 16,
         fontFamily: "Arial",
         fill: "#374151",
         textAlign: "left",
@@ -41,16 +42,11 @@ export function useStickyNote({ fabricCanvasRef, handleCanvasChange }: StickyNot
         hasControls: true,
         hasBorders: true,
         cornerColor: "#2563eb",
-        cornerSize: 6,
+        cornerSize: 8,
         transparentCorners: false,
         backgroundColor: selectedColor.bg,
-        padding: 10,
-        borderRadius: 3,
-        lockUniScaling: true,
-        uniformScaling: true,
-        lockScalingX: true,
-        lockScalingY: true,
-        noScaleCache: false,
+        padding: 15,
+        borderRadius: 5,
       })
 
       // Set custom properties for identification
@@ -60,7 +56,7 @@ export function useStickyNote({ fabricCanvasRef, handleCanvasChange }: StickyNot
         enumerable: true,
         configurable: true
       })
-
+      
       Object.defineProperty(stickyNote, 'stickyColor', {
         value: options?.color || "yellow",
         writable: true,
