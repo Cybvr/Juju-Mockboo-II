@@ -19,11 +19,14 @@ import {
   User, 
   CreditCard,
   HelpCircle,
-  Settings
+  Settings,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { userService } from '@/services/userService';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { useTheme } from 'next-themes';
 
 interface UserData {
   name: string;
@@ -36,6 +39,7 @@ export function ProfileDropdown() {
   const [user, loading] = useAuthState(auth);
   const [userData, setUserData] = useState<UserData | null>(null);
   const router = useRouter();
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -138,6 +142,15 @@ export function ProfileDropdown() {
         <DropdownMenuItem onClick={() => router.push('/dashboard/account')}>
           <CreditCard className="mr-2 h-4 w-4" />
           Billing
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
+          {theme === 'dark' ? (
+            <Sun className="mr-2 h-4 w-4" />
+          ) : (
+            <Moon className="mr-2 h-4 w-4" />
+          )}
+          {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut}>
