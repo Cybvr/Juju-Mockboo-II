@@ -13,7 +13,7 @@ import {
   Image as ImageIcon,
   Video,
   Settings,
-  Folder,
+  Plus,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -84,7 +84,7 @@ export function Sidebar({ className, onNavigate }: SidebarProps) {
   const navItems = [
     {
       label: 'New',
-      icon: Folder,
+      icon: Plus,
       href: '#', // Placeholder
       active: false,
       onClick: createNewCanvas,
@@ -114,9 +114,9 @@ export function Sidebar({ className, onNavigate }: SidebarProps) {
         <div className="p-4 h-full flex flex-col justify-between">
           <div className="text-muted-foreground">
             {/* Logo */}
-            <div className="mb-4 flex items-center justify-center">
+            <div className="mb-4 flex items-left justify-start">
               <Link href="/dashboard" className="flex">
-                <div className="flex items-center justify-center">
+                <div className="flex items-left justify-left">
                   <Image
                     src="/assets/images/juju/JUJUBLACK.png"
                     alt="Logo"
