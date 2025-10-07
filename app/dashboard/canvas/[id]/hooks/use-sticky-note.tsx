@@ -31,8 +31,8 @@ export function useStickyNote({ fabricCanvasRef, handleCanvasChange }: StickyNot
         left: x,
         top: y,
         width: 200,
-        height: 200,
-        fontSize: 16,
+        height: 150,
+        fontSize: 14,
         fontFamily: "Arial",
         fill: "#374151",
         textAlign: "left",
@@ -46,7 +46,10 @@ export function useStickyNote({ fabricCanvasRef, handleCanvasChange }: StickyNot
         transparentCorners: false,
         backgroundColor: selectedColor.bg,
         padding: 15,
-        borderRadius: 5,
+        borderRadius: 8,
+        lineHeight: 1.4,
+        charSpacing: 0,
+        styles: {},
       })
 
       // Set custom properties for identification
