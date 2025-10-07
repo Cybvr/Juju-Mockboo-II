@@ -20,7 +20,6 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '@/lib/firebase';
-import { useTheme } from 'next-themes';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import { ProfileDropdown } from '@/app/common/dashboard/ProfileDropdown';
@@ -59,7 +58,6 @@ interface SidebarProps {
 export function Sidebar({ className, onNavigate }: SidebarProps) {
   const pathname = usePathname();
   const [user] = useAuthState(auth);
-  const { theme } = useTheme();
   const createNewCanvas = async () => {
     if (!user) return;
     try {

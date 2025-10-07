@@ -2,7 +2,6 @@
 import { useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '@/lib/firebase';
-import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
 import { Menu, ChevronDown } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -27,7 +26,6 @@ interface MarketingHeaderProps {
 export function MarketingHeader({ onAuthClick }: MarketingHeaderProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [user, loading] = useAuthState(auth);
-  const { theme } = useTheme();
   const navItems = [
     { label: 'Pricing', href: '#pricing' },
   ];
