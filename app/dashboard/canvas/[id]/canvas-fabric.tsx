@@ -37,8 +37,9 @@ export function useFabricCanvas(
       import("fabric").then(async (FabricModule) => {
         const fabric = FabricModule
         
-        // Import custom StickyNote class
-        await import("./fabric/stickyNote")
+        // Import and initialize custom StickyNote class
+        const { initializeStickyNote } = await import("./fabric/stickyNote")
+        await initializeStickyNote()
 
         const canvas = new fabric.Canvas(canvasCore.canvasRef.current, {
           width: window.innerWidth,

@@ -9,7 +9,8 @@ interface StickyNoteHookProps {
 export function useStickyNote({ fabricCanvasRef, handleCanvasChange }: StickyNoteHookProps) {
 
   const createStickyNote = useCallback(async (x: number, y: number, options?: { text?: string; color?: string }) => {
-    const { StickyNote } = await import("../fabric/stickyNote")
+    const { initializeStickyNote } = await import("../fabric/stickyNote")
+    const StickyNote = await initializeStickyNote()
     const canvas = fabricCanvasRef.current
     if (!canvas) return
 
