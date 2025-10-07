@@ -85,9 +85,7 @@ export function useImageOperations({
 
     // ALWAYS upload base64 to storage before adding to canvas
     let persistentImageUrl = imageUrl
-    if (imageUrl.startsWith('data:')) {
-      persistentImageUrl = await uploadImageToStorage(imageUrl)
-    }
+    
 
     return new Promise<void>((resolve, reject) => {
       import("fabric").then((FabricModule) => {
