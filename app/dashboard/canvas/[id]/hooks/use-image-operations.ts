@@ -83,87 +83,69 @@ export function useImageOperations({
     const canvas = fabricCanvasRef.current
     const { replaceObjects, position, immediate } = options
 
-    try {
-      let persistentImageUrl = imageUrl
-      if (imageUrl.startsWith('data:') && imageUrl.length > 100000) {
-        persistentImageUrl = await uploadImageToStorage(imageUrl)
-      } else if (imageUrl.startsWith('data:') && imageUrl.length > 50000) {
-        persistentImageUrl = await compressImage(new File([imageUrl], 'image.jpg'), 800, 600, 0.7);
-      }
+    // ALWAYS upload base64 to storage before adding to canvas
+    let persistentImageUrl = imageUrl
+    if (imageUrl.startsWith('data:')) {
+      persistentImageUrl = await uploadImageToStorage(imageUrl)
+    }
 
-      return new Promise<void>((resolve, reject) => {
-        import("fabric").then((FabricModule) => {
-          const fabric = FabricModule
-          const imgElement = new Image()
-          imgElement.crossOrigin = "anonymous"
+    return new Promise<void>((resolve, reject) => {
+      import("fabric").then((FabricModule) => {
+        const fabric = FabricModule
+        const imgElement = new Image()
+        imgElement.crossOrigin = "anonymous"
 
-          const loadImage = (src: string) => {
-            imgElement.onload = () => {
-              let left = (canvas.width - imgElement.width) / 2
-              let top = (canvas.height - imgElement.height) / 2
+        imgElement.onload = () => {
+          let left = (canvas.width - imgElement.width) / 2
+          let top = (canvas.height - imgElement.height) / 2
 
-              if (replaceObjects?.placeholder) {
-                left = replaceObjects.placeholder.left
-                top = replaceObjects.placeholder.top
-              } else if (position) {
-                left = position.x
-                top = position.y
-              }
-
-              const fabricImage = new fabric.Image(imgElement, { left, top })
-              const maxWidth = 400
-              const maxHeight = 400
-              const scale = Math.min(maxWidth / fabricImage.width, maxHeight / fabricImage.height, 1)
-
-              fabricImage.set({
-                scaleX: scale,
-                scaleY: scale,
-                lockUniScaling: true, // Force uniform scaling
-                centeredScaling: false,
-                centeredRotation: true,
-                lockScalingFlip: true, // Prevent flipping
-                lockSkewingX: true, // Prevent skewing
-                lockSkewingY: true  // Prevent skewing
-              })
-
-              if (replaceObjects) {
-                if (replaceObjects.placeholder) canvas.remove(replaceObjects.placeholder)
-                if (replaceObjects.text) canvas.remove(replaceObjects.text)
-              }
-
-              canvas.add(fabricImage)
-              canvas.setActiveObject(fabricImage)
-              canvas.renderAll()
-
-              if (handleCanvasChange) {
-                handleCanvasChange();
-                canvas.fire('path:created', { path: fabricImage });
-                canvas.fire('object:added', { target: fabricImage });
-              }
-
-              resolve()
-            }
-
-            imgElement.onerror = () => {
-              if (src === persistentImageUrl && src !== imageUrl) {
-                loadImage(imageUrl)
-              } else {
-                console.error('Failed to load image')
-                reject(new Error('Failed to load image'))
-              }
-            }
-
-            imgElement.src = src
+          if (replaceObjects?.placeholder) {
+            left = replaceObjects.placeholder.left
+            top = replaceObjects.placeholder.top
+          } else if (position) {
+            left = position.x
+            top = position.y
           }
 
-          loadImage(persistentImageUrl)
-        }).catch(reject)
-      })
-    } catch (error) {
-      console.error('Error adding image to canvas:', error)
-      throw error
-    }
-  }, [fabricCanvasRef, handleCanvasChange, uploadImageToStorage, compressImage])
+          const fabricImage = new fabric.Image(imgElement, { left, top })
+          const maxWidth = 400
+          const maxHeight = 400
+          const scale = Math.min(maxWidth / fabricImage.width, maxHeight / fabricImage.height, 1)
+
+          fabricImage.set({
+            scaleX: scale,
+            scaleY: scale,
+            lockUniScaling: true,
+            centeredScaling: false,
+            centeredRotation: true,
+            lockScalingFlip: true,
+            lockSkewingX: true,
+            lockSkewingY: true
+          })
+
+          if (replaceObjects) {
+            if (replaceObjects.placeholder) canvas.remove(replaceObjects.placeholder)
+            if (replaceObjects.text) canvas.remove(replaceObjects.text)
+          }
+
+          canvas.add(fabricImage)
+          canvas.setActiveObject(fabricImage)
+          canvas.renderAll()
+
+          if (handleCanvasChange) {
+            handleCanvasChange()
+            canvas.fire('path:created', { path: fabricImage })
+            canvas.fire('object:added', { target: fabricImage })
+          }
+
+          resolve()
+        }
+
+        imgElement.onerror = () => reject(new Error('Failed to load image'))
+        imgElement.src = persistentImageUrl
+      }).catch(reject)
+    })
+  }, [fabricCanvasRef, handleCanvasChange, uploadImageToStorage])
 
   const handleFileUpload = useCallback(async (file: File, position?: { x: number; y: number }) => {
     if (!fabricCanvasRef.current) return
