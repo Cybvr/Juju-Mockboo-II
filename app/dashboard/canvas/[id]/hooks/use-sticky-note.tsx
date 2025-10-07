@@ -26,29 +26,42 @@ export function useStickyNote({ fabricCanvasRef, handleCanvasChange }: StickyNot
 
       const selectedColor = stickyColors.find(c => c.name === (options?.color || "yellow")) || stickyColors[0]
 
-      // Create sticky note as a single Textbox with background
+      // Create sticky note as a single Textbox with realistic sticky note styling
       const stickyNote = new fabric.Textbox(options?.text || "Type your note here...", {
         left: x,
         top: y,
-        width: 200,
-        height: 150,
-        fontSize: 14,
-        fontFamily: "Arial",
-        fill: "#374151",
+        width: 180,
+        height: 140,
+        fontSize: 12,
+        fontFamily: "Caveat, cursive", // More handwritten look
+        fill: "#2D3748",
         textAlign: "left",
         splitByGrapheme: true,
         editable: true,
         selectable: true,
         hasControls: true,
         hasBorders: true,
-        cornerColor: "#2563eb",
-        cornerSize: 8,
+        cornerColor: "#F59E0B",
+        cornerSize: 6,
         transparentCorners: false,
         backgroundColor: selectedColor.bg,
-        padding: 15,
-        borderRadius: 8,
-        lineHeight: 1.4,
+        padding: 12,
+        borderRadius: 2,
+        lineHeight: 1.3,
         charSpacing: 0,
+        shadow: {
+          color: 'rgba(0,0,0,0.15)',
+          blur: 4,
+          offsetX: 2,
+          offsetY: 2,
+        },
+        stroke: selectedColor.name === 'yellow' ? '#F59E0B' : 
+               selectedColor.name === 'pink' ? '#EC4899' :
+               selectedColor.name === 'blue' ? '#3B82F6' :
+               selectedColor.name === 'green' ? '#10B981' :
+               selectedColor.name === 'orange' ? '#F97316' : '#8B5CF6',
+        strokeWidth: 0.5,
+        strokeDashArray: [2, 2],
         styles: {},
       })
 

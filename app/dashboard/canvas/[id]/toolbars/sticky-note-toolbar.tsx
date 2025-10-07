@@ -21,12 +21,12 @@ interface StickyNoteToolbarProps {
 }
 
 const stickyColors = [
-  { name: "yellow", bg: "#FEF3C7" },
-  { name: "pink", bg: "#FCE7F3" },
-  { name: "blue", bg: "#DBEAFE" },
-  { name: "green", bg: "#D1FAE5" },
-  { name: "orange", bg: "#FED7AA" },
-  { name: "purple", bg: "#E9D5FF" },
+  { name: "yellow", bg: "#FBBF24" },
+  { name: "pink", bg: "#F472B6" },
+  { name: "blue", bg: "#60A5FA" },
+  { name: "green", bg: "#34D399" },
+  { name: "orange", bg: "#FB923C" },
+  { name: "purple", bg: "#A78BFA" },
 ]
 
 const fontSizes = [12, 14, 16, 18, 20, 24, 28]
