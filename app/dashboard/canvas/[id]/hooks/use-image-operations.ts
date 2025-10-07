@@ -96,7 +96,9 @@ export function useImageOperations({
           const fabric = FabricModule
           
           const loadImage = (src: string) => {
-            fabric.Image.fromURL(src, (fabricImage: any) => {
+            fabric.Image.fromURL(src, {
+              crossOrigin: 'anonymous'
+            }).then((fabricImage: any) => {
               if (!fabricImage) {
                 console.error('Image failed to load:', src)
                 return reject('Image load error')
@@ -149,8 +151,6 @@ export function useImageOperations({
               }, 100)
 
               resolve()
-            }, {
-              crossOrigin: 'anonymous'
             })
           }
 
@@ -317,7 +317,7 @@ export function useImageOperations({
     const imageObjects = activeObjects.filter((obj: any) => obj.type === 'image')
 
     if (imageObjects.length === 0) {
-      const dataURL = canvas.toDataURL({ format: "png" })
+      const dataURL = canvas.toDataURL({ format: "png", multiplier: 1 })
       const link = document.createElement('a')
       link.href = dataURL
       link.download = `canvas-export-${Date.now()}.png`
@@ -332,7 +332,6 @@ export function useImageOperations({
         const link = document.createElement('a')
         link.href = obj.getSrc()
         link.download = `canvas-image-${index + 1}.png`
-        link.crossOrigin = 'anonymous'
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
@@ -493,7 +492,7 @@ export function useImageOperations({
     if (!firstImage.getSrc) return
 
     try {
-      const dataURL = firstImage.toDataURL({ format: 'png' })
+      const dataURL = firstImage.toDataURL({ format: 'png', multiplier: 1 })
       const response = await fetch(dataURL)
       const blob = await response.blob()
       const pngBlob = new Blob([blob], { type: 'image/png' })
