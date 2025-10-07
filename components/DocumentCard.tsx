@@ -126,7 +126,7 @@ export function DocumentCard({
 
   return (
     <div
-      className="group relative  transition-all duration-200 overflow-hidden cursor-pointer"
+      className="group relative hover:shadow-md transition-all duration-200 overflow-hidden cursor-pointer"
       onClick={handleCardClick}
     >
       <div className="py-4">
@@ -216,7 +216,7 @@ export function DocumentCard({
             <img
               src={document.thumbnail || "/placeholder.svg"}
               alt={document.name}
-              className="w-full h-full object-cover rounded-lg hover:shadow-md"
+              className="w-full h-full object-cover rounded-lg"
             />
           ) : (
             getFileIcon(document.type)

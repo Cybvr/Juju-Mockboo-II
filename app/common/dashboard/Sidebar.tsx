@@ -13,7 +13,7 @@ import {
   Image as ImageIcon,
   Video,
   Settings,
-  Plus,
+  Folder,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -84,7 +84,7 @@ export function Sidebar({ className, onNavigate }: SidebarProps) {
   const navItems = [
     {
       label: 'New',
-      icon: Plus,
+      icon: Folder,
       href: '#', // Placeholder
       active: false,
       onClick: createNewCanvas,
@@ -107,16 +107,16 @@ export function Sidebar({ className, onNavigate }: SidebarProps) {
     <TooltipProvider delayDuration={300}>
       <div
         className={cn(
-          'h-full rounded-none transition-all duration-300 relative w-56 bg-card m-3 rounded-2xl ',
+          'h-full rounded-none transition-all duration-300 relative w-56 bg-card',
           className
         )}
       >
         <div className="p-4 h-full flex flex-col justify-between">
           <div className="text-muted-foreground">
             {/* Logo */}
-            <div className="mb-4 flex items-left justify-start">
+            <div className="mb-4 flex items-center justify-center">
               <Link href="/dashboard" className="flex">
-                <div className="flex items-left justify-left">
+                <div className="flex items-center justify-center">
                   <Image
                     src="/assets/images/juju/JUJUBLACK.png"
                     alt="Logo"

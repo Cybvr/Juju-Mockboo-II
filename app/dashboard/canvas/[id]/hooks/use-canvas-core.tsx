@@ -140,14 +140,7 @@ export function useCanvasCore(documentId: string, document: Document | null) {
     if (!fabricCanvasRef.current || !document || isSaving) return
     try {
       setIsSaving(true)
-      // Use dataless JSON to remove embedded DOM references
-      const rawCanvasData = fabricCanvasRef.current.toDatalessJSON([
-        'name',
-        'isTextObject', 
-        'text',
-        'stickyColor',
-        'backgroundColor'
-      ])
+      const rawCanvasData = fabricCanvasRef.current.toJSON(['name', 'isTextObject', 'text', 'stickyColor', 'backgroundColor'])
       
       // Debug logs for ALL text objects
       const textObjects = rawCanvasData.objects?.filter((obj: any) => 
@@ -181,23 +174,8 @@ export function useCanvasCore(documentId: string, document: Document | null) {
           fontFamily: textObj.fontFamily
         })
       })
-      // Deep-clean the JSON before saving (even toDatalessJSON can leave Fabric internals)
-      const cleanCanvasData = JSON.parse(
-        JSON.stringify(rawCanvasData, (key, value) => {
-          if (
-            key.startsWith('_') ||
-            key === 'canvas' ||
-            key === 'el' ||
-            key === 'cacheKey' ||
-            key === 'cacheCanvas' ||
-            key === 'fillRule' ||
-            key === 'dirty'
-          ) {
-            return undefined
-          }
-          return value
-        })
-      )
+      // Clean the canvas data for Firestore
+      const cleanCanvasData = JSON.parse(JSON.stringify(rawCanvasData))
       // Generate thumbnail
       const thumbnail = fabricCanvasRef.current.toDataURL({
         format: "png",

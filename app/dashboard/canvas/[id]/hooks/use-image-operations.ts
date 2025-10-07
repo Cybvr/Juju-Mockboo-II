@@ -94,48 +94,37 @@ export function useImageOperations({
       return new Promise<void>((resolve, reject) => {
         import("fabric").then((FabricModule) => {
           const fabric = FabricModule
-          
+          const imgElement = new Image()
+          imgElement.crossOrigin = "anonymous"
+
           const loadImage = (src: string) => {
-            fabric.Image.fromURL(src, {
-              crossOrigin: 'anonymous'
-            }).then((fabricImage: any) => {
-              if (!fabricImage) {
-                console.error('Image failed to load:', src)
-                return reject('Image load error')
+            imgElement.onload = () => {
+              let left = (canvas.width - imgElement.width) / 2
+              let top = (canvas.height - imgElement.height) / 2
+
+              if (replaceObjects?.placeholder) {
+                left = replaceObjects.placeholder.left
+                top = replaceObjects.placeholder.top
+              } else if (position) {
+                left = position.x
+                top = position.y
               }
 
-              // Safe width/height fallback
-              const imgWidth = fabricImage.width || fabricImage.getScaledWidth() || 200
-              const imgHeight = fabricImage.height || fabricImage.getScaledHeight() || 200
+              const fabricImage = new fabric.Image(imgElement, { left, top })
               const maxWidth = 400
               const maxHeight = 400
-              const scale = Math.min(maxWidth / imgWidth, maxHeight / imgHeight, 1)
-
-              const left = (position?.x ?? Math.random() * Math.max(0, canvas.width - imgWidth * scale))
-              const top = (position?.y ?? Math.random() * Math.max(0, canvas.height - imgHeight * scale))
+              const scale = Math.min(maxWidth / fabricImage.width, maxHeight / fabricImage.height, 1)
 
               fabricImage.set({
-                left,
-                top,
                 scaleX: scale,
                 scaleY: scale,
-                selectable: true,
-                evented: true,
-                crossOrigin: 'anonymous'
+                lockUniScaling: true, // Force uniform scaling
+                centeredScaling: false,
+                centeredRotation: true,
+                lockScalingFlip: true, // Prevent flipping
+                lockSkewingX: true, // Prevent skewing
+                lockSkewingY: true  // Prevent skewing
               })
-
-              // strip DOM refs before save
-              const origToObject = fabricImage.toObject.bind(fabricImage)
-              fabricImage.toObject = function (props: any) {
-                const o = origToObject(props)
-                delete o._element
-                delete o._originalElement
-                delete o.canvas
-                delete o.el
-                delete o.cacheCanvas
-                delete o.cacheKey
-                return o
-              }
 
               if (replaceObjects) {
                 if (replaceObjects.placeholder) canvas.remove(replaceObjects.placeholder)
@@ -144,14 +133,27 @@ export function useImageOperations({
 
               canvas.add(fabricImage)
               canvas.setActiveObject(fabricImage)
-              canvas.requestRenderAll() // <-- force redraw AFTER async load
+              canvas.renderAll()
 
-              setTimeout(() => {
-                if (handleCanvasChange) handleCanvasChange()
-              }, 100)
+              if (handleCanvasChange) {
+                handleCanvasChange();
+                canvas.fire('path:created', { path: fabricImage });
+                canvas.fire('object:added', { target: fabricImage });
+              }
 
               resolve()
-            })
+            }
+
+            imgElement.onerror = () => {
+              if (src === persistentImageUrl && src !== imageUrl) {
+                loadImage(imageUrl)
+              } else {
+                console.error('Failed to load image')
+                reject(new Error('Failed to load image'))
+              }
+            }
+
+            imgElement.src = src
           }
 
           loadImage(persistentImageUrl)
@@ -317,7 +319,7 @@ export function useImageOperations({
     const imageObjects = activeObjects.filter((obj: any) => obj.type === 'image')
 
     if (imageObjects.length === 0) {
-      const dataURL = canvas.toDataURL({ format: "png", multiplier: 1 })
+      const dataURL = canvas.toDataURL({ format: "png" })
       const link = document.createElement('a')
       link.href = dataURL
       link.download = `canvas-export-${Date.now()}.png`
@@ -328,10 +330,11 @@ export function useImageOperations({
     }
 
     imageObjects.forEach((obj: any, index: number) => {
-      if (obj.src || obj._originalElement?.src) {
+      if (obj.getSrc) {
         const link = document.createElement('a')
-        link.href = obj.src || obj._originalElement.src
+        link.href = obj.getSrc()
         link.download = `canvas-image-${index + 1}.png`
+        link.crossOrigin = 'anonymous'
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
@@ -394,8 +397,7 @@ export function useImageOperations({
     if (imageObjects.length === 0) return
 
     const firstImage = imageObjects[0]
-    const imageSrc = firstImage.src || firstImage._originalElement?.src
-    if (!imageSrc) return
+    if (!firstImage.getSrc) return
 
     try {
       const response = await fetch('/api/multiply/generate', {
@@ -404,7 +406,7 @@ export function useImageOperations({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          image: imageSrc,
+          image: firstImage.getSrc(),
           outputs: 4,
           prompt: 'Create professional design variations maintaining core elements'
         }),
@@ -443,8 +445,7 @@ export function useImageOperations({
     if (imageObjects.length === 0) return
 
     const firstImage = imageObjects[0]
-    const imageSrc = firstImage.src || firstImage._originalElement?.src
-    if (!imageSrc) return
+    if (!firstImage.getSrc) return
 
     try {
       const response = await fetch('/api/image-editor', {
@@ -454,7 +455,7 @@ export function useImageOperations({
         },
         body: JSON.stringify({
           prompt: stylePrompt,
-          imageData: imageSrc.split(',')[1],
+          imageData: firstImage.getSrc().split(',')[1],
           model: 'gemini-2.5-flash-image-preview',
           aspectRatio: '1:1',
           outputs: '1'
@@ -491,11 +492,10 @@ export function useImageOperations({
     if (imageObjects.length === 0) return
 
     const firstImage = imageObjects[0]
-    const imageSrc = firstImage.src || firstImage._originalElement?.src
-    if (!imageSrc) return
+    if (!firstImage.getSrc) return
 
     try {
-      const dataURL = firstImage.toDataURL({ format: 'png', multiplier: 1 })
+      const dataURL = firstImage.toDataURL({ format: 'png' })
       const response = await fetch(dataURL)
       const blob = await response.blob()
       const pngBlob = new Blob([blob], { type: 'image/png' })
@@ -508,7 +508,7 @@ export function useImageOperations({
     } catch (error) {
       console.error('Failed to copy image to clipboard:', error)
       try {
-        await navigator.clipboard.writeText(imageSrc)
+        await navigator.clipboard.writeText(firstImage.getSrc())
       } catch (fallbackError) {
         console.error('Failed to copy image URL:', fallbackError)
       }
