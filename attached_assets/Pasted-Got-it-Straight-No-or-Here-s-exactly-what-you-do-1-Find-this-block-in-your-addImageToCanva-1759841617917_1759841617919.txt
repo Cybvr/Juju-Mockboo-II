@@ -1,0 +1,96 @@
+Got it. Straight. No “or.”
+
+Here’s exactly what you do:
+
+1️⃣ Find this block in your addImageToCanvas:
+// Create Fabric.js image object
+const imgElement = new Image()
+imgElement.crossOrigin = 'anonymous'
+imgElement.src = persistentImageUrl
+
+imgElement.onload = () => {
+  const fabricImage = new fabric.Image(imgElement, {
+    left: position?.x ?? Math.random() * Math.max(0, canvas.width - imgElement.width),
+    top: position?.y ?? Math.random() * Math.max(0, canvas.height - imgElement.height),
+    scaleX: scale,
+    scaleY: scale,
+    selectable: true,
+    evented: true,
+    src: persistentImageUrl,
+  })
+
+  if (replaceObjects) {
+    if (replaceObjects.placeholder) canvas.remove(replaceObjects.placeholder)
+    if (replaceObjects.text) canvas.remove(replaceObjects.text)
+  }
+
+  canvas.add(fabricImage)
+  canvas.setActiveObject(fabricImage)
+  canvas.renderAll()
+
+  setTimeout(() => {
+    if (handleCanvasChange) handleCanvasChange()
+  }, 100)
+
+  resolve()
+}
+
+imgElement.onerror = reject
+
+2️⃣ DELETE everything above (the whole block from // Create Fabric.js image object to imgElement.onerror = reject).
+3️⃣ REPLACE it with this:
+fabric.Image.fromURL(persistentImageUrl, (fabricImage: any) => {
+  const imgWidth = fabricImage.width || fabricImage.getScaledWidth()
+  const imgHeight = fabricImage.height || fabricImage.getScaledHeight()
+  const maxWidth = 400
+  const maxHeight = 400
+  const scale = Math.min(maxWidth / imgWidth, maxHeight / imgHeight, 1)
+
+  const left = (position?.x ?? Math.random() * Math.max(0, canvas.width - imgWidth * scale))
+  const top = (position?.y ?? Math.random() * Math.max(0, canvas.height - imgHeight * scale))
+
+  fabricImage.set({
+    left,
+    top,
+    scaleX: scale,
+    scaleY: scale,
+    selectable: true,
+    evented: true,
+    src: persistentImageUrl,
+    crossOrigin: 'anonymous'
+  })
+
+  // Strip non-serializable fields for Firestore
+  const originalToObject = fabricImage.toObject.bind(fabricImage)
+  fabricImage.toObject = function(props: any) {
+    const obj = originalToObject(props)
+    delete obj._element
+    delete obj._originalElement
+    delete obj.canvas
+    delete obj.el
+    delete obj.cacheCanvas
+    delete obj.cacheKey
+    return obj
+  }
+
+  if (replaceObjects) {
+    if (replaceObjects.placeholder) canvas.remove(replaceObjects.placeholder)
+    if (replaceObjects.text) canvas.remove(replaceObjects.text)
+  }
+
+  canvas.add(fabricImage)
+  canvas.setActiveObject(fabricImage)
+  canvas.renderAll()
+
+  setTimeout(() => {
+    if (handleCanvasChange) handleCanvasChange()
+  }, 100)
+
+  resolve()
+}, {
+  crossOrigin: 'anonymous'
+})
+
+
+✅ Done.
+This replacement makes Fabric handle the image correctly, removes DOM refs, and prevents the “invalid nested entity” Firestore error.
