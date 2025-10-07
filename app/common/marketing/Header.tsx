@@ -41,7 +41,7 @@ export function MarketingHeader({ onAuthClick }: MarketingHeaderProps) {
                 alt="Juju Logo"
                 width={80}
                 height={80}
-                className="object-contain dark:invert"
+                className="object-contain"
               />
             </div>
           </div>

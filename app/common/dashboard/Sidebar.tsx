@@ -122,7 +122,7 @@ export function Sidebar({ className, onNavigate }: SidebarProps) {
                     alt="Logo"
                     width={64}
                     height={64}
-                    className="object-contain dark:invert"
+                    className="object-contain"
                   />
                 </div>
               </Link>
