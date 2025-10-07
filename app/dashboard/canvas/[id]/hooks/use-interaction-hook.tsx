@@ -107,26 +107,20 @@ export function useInteractionHook({
         isTextObject: target.isTextObject
       })
 
-      // Handle sticky note group double-click editing
-      if (target.type === "group" && (target.stickyNoteGroup || target.stickyColor)) {
-        console.log("🟡 STICKY NOTE GROUP CLICKED - Looking for textbox...")
-        const objects = target.getObjects()
-        const textObj = objects.find((obj: any) => obj.type === "textbox")
-        console.log("🟡 Found textbox:", !!textObj)
-        if (textObj) {
-          canvas.setActiveObject(textObj)
-          textObj.enterEditing()
-          textObj.hiddenTextarea?.focus()
-          const onEditExit = () => {
-            textObj.off("editing:exited", onEditExit)
-            handleCanvasChange()
-          }
-          textObj.on("editing:exited", onEditExit)
-          console.log("🟡 STICKY NOTE EDITING STARTED")
+      // Handle sticky note double-click editing (now single textbox objects)
+      if ((target.type === "textbox" || target.type === "i-text") && target.stickyColor) {
+        console.log("🟡 STICKY NOTE TEXTBOX CLICKED")
+        target.enterEditing()
+        target.hiddenTextarea?.focus()
+        const onEditExit = () => {
+          target.off("editing:exited", onEditExit)
+          handleCanvasChange()
         }
+        target.on("editing:exited", onEditExit)
+        console.log("🟡 STICKY NOTE EDITING STARTED")
       }
       // Handle regular text object double-click editing
-      else if ((target.type === "textbox" || target.type === "i-text") && !target.group) {
+      else if ((target.type === "textbox" || target.type === "i-text") && !target.stickyColor && !target.group) {
         console.log("📝 REGULAR TEXT EDITING")
         target.enterEditing()
         target.hiddenTextarea?.focus()

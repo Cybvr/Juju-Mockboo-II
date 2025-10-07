@@ -26,75 +26,80 @@ export function useStickyNote({ fabricCanvasRef, handleCanvasChange }: StickyNot
 
       const selectedColor = stickyColors.find(c => c.name === (options?.color || "yellow")) || stickyColors[0]
 
-      // Create the sticky note background rectangle
-      const stickyBackground = new fabric.Rect({
+      // Create sticky note as a single Textbox with background
+      const stickyNote = new fabric.Textbox(options?.text || "Type your note here...", {
         left: x,
         top: y,
         width: 200,
         height: 200,
-        fill: selectedColor.bg,
-        stroke: selectedColor.bg,
-        strokeWidth: 1,
-        rx: 5,
-        ry: 5,
-        selectable: false,
-        evented: false,
-      })
-
-      // Create the text on top
-      const textObj = new fabric.Textbox(options?.text || "Type your note here...", {
-        left: x + 15,
-        top: y + 15,
-        width: 170,
-        height: 170,
         fontSize: 16,
         fontFamily: "Arial",
         fill: "#374151",
         textAlign: "left",
         splitByGrapheme: true,
         editable: true,
-        selectable: false,
-        hasControls: false,
-        hasBorders: false,
-        backgroundColor: "transparent",
-        padding: 0,
-      })
-
-      // Group them together to make one sticky note
-      const stickyGroup = new fabric.Group([stickyBackground, textObj], {
-        left: x,
-        top: y,
         selectable: true,
         hasControls: true,
         hasBorders: true,
         cornerColor: "#2563eb",
         cornerSize: 8,
         transparentCorners: false,
-        // Set properties directly in constructor for better serialization
-        isTextObject: true,
-        stickyColor: options?.color || "yellow",
         backgroundColor: selectedColor.bg,
-        stickyNoteGroup: true,
-      })
-      
-      console.log("🟡 CREATING STICKY NOTE:", {
-        backgroundColor: selectedColor.bg,
-        stickyColor: stickyGroup.stickyColor,
-        isTextObject: stickyGroup.isTextObject,
-        text: textObj.text
+        padding: 15,
+        borderRadius: 5,
       })
 
-      canvas.add(stickyGroup)
-      canvas.setActiveObject(stickyGroup)
+      // Set custom properties for identification
+      Object.defineProperty(stickyNote, 'isTextObject', {
+        value: true,
+        writable: true,
+        enumerable: true,
+        configurable: true
+      })
+      
+      Object.defineProperty(stickyNote, 'stickyColor', {
+        value: options?.color || "yellow",
+        writable: true,
+        enumerable: true,
+        configurable: true
+      })
+
+      Object.defineProperty(stickyNote, 'stickyNoteGroup', {
+        value: true,
+        writable: true,
+        enumerable: true,
+        configurable: true
+      })
+
+      // Override toObject to include custom properties
+      const originalToObject = stickyNote.toObject.bind(stickyNote)
+      stickyNote.toObject = function(propertiesToInclude?: string[]) {
+        const obj = originalToObject(propertiesToInclude)
+        return {
+          ...obj,
+          isTextObject: this.isTextObject,
+          stickyColor: this.stickyColor,
+          stickyNoteGroup: this.stickyNoteGroup
+        }
+      }
+
+      console.log("🟡 CREATING STICKY NOTE:", {
+        backgroundColor: selectedColor.bg,
+        stickyColor: stickyNote.stickyColor,
+        isTextObject: stickyNote.isTextObject,
+        text: stickyNote.text
+      })
+
+      canvas.add(stickyNote)
+      canvas.setActiveObject(stickyNote)
       canvas.renderAll()
       handleCanvasChange()
 
-      // Auto-enter editing mode for the text
+      // Auto-enter editing mode
       setTimeout(() => {
-        canvas.setActiveObject(textObj)
-        textObj.enterEditing()
-        textObj.hiddenTextarea?.focus()
-        textObj.selectAll()
+        stickyNote.enterEditing()
+        stickyNote.hiddenTextarea?.focus()
+        stickyNote.selectAll()
       }, 100)
     })
   }, [fabricCanvasRef, handleCanvasChange])
