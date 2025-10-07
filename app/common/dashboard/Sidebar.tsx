@@ -118,18 +118,11 @@ export function Sidebar({ className, onNavigate }: SidebarProps) {
               <Link href="/dashboard" className="flex">
                 <div className="flex items-center justify-center">
                   <Image
-                    src="/images/logowhite.png"
-                    alt="Logo"
-                    width={64}
-                    height={64}
-                    className="object-contain dark:hidden"
-                  />
-                  <Image
                     src="/images/juju.png"
                     alt="Logo"
                     width={64}
                     height={64}
-                    className="object-contain hidden dark:block"
+                    className="object-contain"
                   />
                 </div>
               </Link>
