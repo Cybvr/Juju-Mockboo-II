@@ -162,10 +162,10 @@ export function useCanvasCore(documentId: string, document: Document | null) {
       // Specific sticky note detection
       const stickyNotes = textObjects.filter((obj: any) => obj.backgroundColor && obj.stickyColor)
       console.log("🟡 STICKY NOTES BEING SAVED:", stickyNotes.length)
+      
       // Debug logs for text objects
       console.log("🔍 Saving canvas state - Raw data:", rawCanvasData)
-      const textObjects = rawCanvasData.objects?.filter(obj => obj.type === 'i-text' || obj.type === 'textbox' || obj.type === 'text')
-      console.log("📝 Text objects found:", textObjects)
+      console.log("📝 Text objects found:", textObjects.length)
       textObjects?.forEach((textObj, index) => {
         console.log(`📝 Text ${index + 1}:`, {
           text: textObj.text,
