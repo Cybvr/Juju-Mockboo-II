@@ -71,6 +71,38 @@ export function useFabricCanvas(
         // Setup resize handler ONCE
         const cleanupResize = canvasCore.setupResizeHandler(canvas)
 
+        // Center content in viewport helper
+        const centerContentInViewport = (canvas: any) => {
+          const objects = canvas.getObjects()
+          if (objects.length === 0) return
+
+          // Calculate bounding box of all objects
+          let minLeft = Number.POSITIVE_INFINITY
+          let minTop = Number.POSITIVE_INFINITY
+          let maxRight = Number.NEGATIVE_INFINITY
+          let maxBottom = Number.NEGATIVE_INFINITY
+
+          objects.forEach((obj: any) => {
+            const bounds = obj.getBoundingRect()
+            minLeft = Math.min(minLeft, bounds.left)
+            minTop = Math.min(minTop, bounds.top)
+            maxRight = Math.max(maxRight, bounds.left + bounds.width)
+            maxBottom = Math.max(maxBottom, bounds.top + bounds.height)
+          })
+
+          const contentCenterX = (minLeft + maxRight) / 2
+          const contentCenterY = (minTop + maxBottom) / 2
+          const viewportCenterX = canvas.width / 2
+          const viewportCenterY = canvas.height / 2
+
+          const vpt = canvas.viewportTransform
+          vpt[4] = viewportCenterX - contentCenterX
+          vpt[5] = viewportCenterY - contentCenterY
+          
+          canvas.setViewportTransform(vpt)
+          canvas.renderAll()
+        }
+
         // Load existing canvas data
         if (documentData.content?.canvasData && Object.keys(documentData.content.canvasData).length > 0) {
           console.log("🔄 STARTING FIREBASE LOAD - Canvas data exists")
@@ -105,7 +137,8 @@ export function useFabricCanvas(
               stickyColor: obj.stickyColor
             })))
 
-            canvas.renderAll()
+            // Center content in viewport after loading
+            centerContentInViewport(canvas)
           })
         } else {
           console.log("🔄 NO FIREBASE DATA TO LOAD")
