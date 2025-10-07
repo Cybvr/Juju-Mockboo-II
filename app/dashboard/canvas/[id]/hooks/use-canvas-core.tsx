@@ -140,7 +140,7 @@ export function useCanvasCore(documentId: string, document: Document | null) {
     if (!fabricCanvasRef.current || !document || isSaving) return
     try {
       setIsSaving(true)
-      const rawCanvasData = fabricCanvasRef.current.toJSON(['name', 'isTextObject', 'text', 'stickyColor', 'backgroundColor'])
+      const rawCanvasData = fabricCanvasRef.current.toJSON(['name', 'isTextObject', 'text', 'stickyColor', 'backgroundColor', 'stickyNoteGroup'])
       
       // Debug logs for ALL text objects
       const textObjects = rawCanvasData.objects?.filter((obj: any) => 

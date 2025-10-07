@@ -120,12 +120,15 @@ export function useFabricCanvas(
                 backgroundColor: obj.backgroundColor,
                 stickyColor: obj.stickyColor,
                 isTextObject: obj.isTextObject,
+                stickyNoteGroup: obj.stickyNoteGroup,
                 isSticky: !!(obj.backgroundColor && obj.stickyColor)
               })
 
-              // Ensure sticky note properties are preserved
-              if (obj.backgroundColor && obj.stickyColor) {
-                console.log(`🟡 STICKY NOTE ${index + 1} LOADED SUCCESSFULLY`)
+              // Restore sticky note properties after loading
+              if (obj.stickyNoteGroup || (obj.backgroundColor && obj.stickyColor)) {
+                obj.isTextObject = true
+                obj.stickyNoteGroup = true
+                console.log(`🟡 STICKY NOTE ${index + 1} RESTORED`)
               }
             })
 
