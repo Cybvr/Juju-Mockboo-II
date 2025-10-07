@@ -140,7 +140,14 @@ export function useCanvasCore(documentId: string, document: Document | null) {
     if (!fabricCanvasRef.current || !document || isSaving) return
     try {
       setIsSaving(true)
-      const rawCanvasData = fabricCanvasRef.current.toJSON(['name', 'isTextObject', 'text', 'stickyColor', 'backgroundColor'])
+      // Use dataless JSON to remove embedded DOM references
+      const rawCanvasData = fabricCanvasRef.current.toDatalessJSON([
+        'name',
+        'isTextObject', 
+        'text',
+        'stickyColor',
+        'backgroundColor'
+      ])
       
       // Debug logs for ALL text objects
       const textObjects = rawCanvasData.objects?.filter((obj: any) => 
