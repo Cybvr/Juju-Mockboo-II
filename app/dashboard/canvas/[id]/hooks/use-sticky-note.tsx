@@ -30,7 +30,7 @@ export function useStickyNote({ fabricCanvasRef, handleCanvasChange }: StickyNot
       const stickyNote = new fabric.Textbox(options?.text || "Type your note here...", {
         left: x,
         top: y,
-        width: 200,
+        width: 150,
         height: 150,
         fontSize: 14,
         fontFamily: "Arial",
@@ -45,7 +45,7 @@ export function useStickyNote({ fabricCanvasRef, handleCanvasChange }: StickyNot
         cornerSize: 8,
         transparentCorners: false,
         backgroundColor: selectedColor.bg,
-        padding: 15,
+        padding: 50,
         borderRadius: 8,
         lineHeight: 1.4,
         charSpacing: 0,
