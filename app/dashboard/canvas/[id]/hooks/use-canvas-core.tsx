@@ -142,67 +142,58 @@ export function useCanvasCore(documentId: string, document: Document | null) {
       setIsSaving(true)
       const rawCanvasData = fabricCanvasRef.current.toJSON(['name', 'isTextObject', 'text', 'stickyColor', 'backgroundColor', 'stickyNoteGroup'])
       
-      // Debug logs for ALL text objects (including groups with sticky notes)
-      const textObjects = rawCanvasData.objects?.filter((obj: any) => 
-        obj.type === 'textbox' || obj.type === 'i-text' || obj.isTextObject ||
-        (obj.type === 'group' && (obj.stickyNoteGroup || obj.stickyColor))
-      ) || []
-      
-      console.log("📝 ALL TEXT OBJECTS BEING SAVED:", textObjects.length)
+      // ✅ Recursive extractor for text + sticky notes
+      const extractTextObjects = (objs: any[]): any[] => {
+        if (!objs) return []
+        return objs.flatMap((obj: any) => {
+          if (!obj) return []
+          if (
+            obj.type === 'textbox' || 
+            obj.type === 'i-text' || 
+            obj.isTextObject ||
+            (obj.backgroundColor && obj.stickyColor)
+          ) {
+            return [obj]
+          }
+          if (obj.type === 'group' && obj.objects?.length) {
+            const inner = extractTextObjects(obj.objects)
+            // Mark parent group as sticky if its children are sticky
+            if (inner.some(o => o.stickyColor)) obj.stickyNoteGroup = true
+            return [obj, ...inner]
+          }
+          return []
+        })
+      }
+
+      const textObjects = extractTextObjects(rawCanvasData.objects || [])
+      console.log("📝 ALL TEXT/STICKY OBJECTS FOUND:", textObjects.length)
       textObjects.forEach((obj: any, index: number) => {
-        console.log(`📝 Text Object ${index + 1}:`, {
+        console.log(`📝 Object ${index + 1}:`, {
           type: obj.type,
           text: obj.text,
-          backgroundColor: obj.backgroundColor,
-          stickyColor: obj.stickyColor,
+          sticky: !!obj.stickyColor,
           stickyNoteGroup: obj.stickyNoteGroup,
-          isTextObject: obj.isTextObject,
-          isSticky: !!(obj.backgroundColor && obj.stickyColor)
         })
       })
-      
-      // Specific sticky note detection
-      const stickyNotes = textObjects.filter((obj: any) => obj.backgroundColor && obj.stickyColor)
-      console.log("🟡 STICKY NOTES BEING SAVED:", stickyNotes.length)
-      console.log("💾 FULL SAVE DATA:", JSON.stringify(rawCanvasData, null, 2))
-      
-      // Debug logs for text objects
-      console.log("🔍 Saving canvas state - Raw data:", rawCanvasData)
-      console.log("📝 Text objects found:", textObjects.length)
-      textObjects?.forEach((textObj, index) => {
-        console.log(`📝 Text ${index + 1}:`, {
-          text: textObj.text,
-          type: textObj.type,
-          fontSize: textObj.fontSize,
-          fontFamily: textObj.fontFamily
-        })
-      })
-      // Clean the canvas data for Firestore
+
       const cleanCanvasData = JSON.parse(JSON.stringify(rawCanvasData))
-      // Generate thumbnail
+
       const thumbnail = fabricCanvasRef.current.toDataURL({
         format: "png",
         quality: 0.6,
         multiplier: 0.2,
       })
-      console.log("💾 Saving to Firebase with data:", {
-        canvasData: cleanCanvasData,
-        thumbnail: thumbnail ? "Generated" : "None",
-        textObjectsCount: cleanCanvasData.objects?.filter(obj => 
-          obj.type === 'i-text' || obj.type === 'textbox' || obj.type === 'text' || 
-          (obj.type === 'group' && (obj.stickyNoteGroup || obj.stickyColor))
-        ).length
-      })
+
       await documentService.updateDocument(documentId, {
         content: {
           ...document.content,
           canvasData: cleanCanvasData,
-          thumbnail: thumbnail,
+          thumbnail,
         },
       })
-      console.log("✅ Canvas saved to Firebase successfully")
-      const now = new Date()
-      setLastSaved(now)
+
+      console.log("✅ Canvas (with groups/sticky notes) saved to Firebase successfully")
+      setLastSaved(new Date())
     } catch (error) {
       console.error("Error saving canvas:", error)
     } finally {
