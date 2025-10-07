@@ -175,7 +175,21 @@ export function useCanvasCore(documentId: string, document: Document | null) {
         })
       })
       // Clean the canvas data for Firestore
-      const cleanCanvasData = JSON.parse(JSON.stringify(rawCanvasData))
+      const cleanCanvasData = JSON.parse(JSON.stringify(rawCanvasData, (key, value) => {
+  if (
+    key === 'canvas' ||
+    key === 'fillRule' ||
+    key === '_element' ||
+    key === '_originalElement' ||
+    key === 'dirty' ||
+    key === 'cacheKey' ||
+    key === 'cacheCanvas' ||
+    key === 'el'
+  ) {
+    return undefined
+  }
+  return value
+}))
       // Generate thumbnail
       const thumbnail = fabricCanvasRef.current.toDataURL({
         format: "png",
