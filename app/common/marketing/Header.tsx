@@ -37,11 +37,18 @@ export function MarketingHeader({ onAuthClick }: MarketingHeaderProps) {
           <div className="flex items-center space-x-2">
             <div className="rounded-lg overflow-hidden w-20 h-20 flex items-center justify-center">
               <Image
+                src="/images/logowhite.png"
+                alt="Juju Logo"
+                width={80}
+                height={80}
+                className="object-contain dark:hidden"
+              />
+              <Image
                 src="/images/juju.png"
                 alt="Juju Logo"
                 width={80}
                 height={80}
-                className="object-contain"
+                className="object-contain hidden dark:block"
               />
             </div>
           </div>
