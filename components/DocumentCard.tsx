@@ -126,7 +126,7 @@ export function DocumentCard({
 
   return (
     <div
-      className="group relative border hover:shadow-md transition-all duration-200 overflow-hidden cursor-pointer"
+      className="group relative hover:shadow-md transition-all duration-200 overflow-hidden cursor-pointer"
       onClick={handleCardClick}
     >
       <div className="py-4">

@@ -12,7 +12,7 @@ export default function Dashboard() {
   const { toast } = useToast();
 
   return (
-    <div className="h-screen flex flex-col relative">
+    <div className="h-screen flex flex-col relative mx-auto max-w-4xl">
       <div className="lg:hidden">
         <DashboardHeader />
       </div>
@@ -21,9 +21,6 @@ export default function Dashboard() {
         <div className="container mx-auto max-w-5xl px-4 py-6">
           {/* Documents Section */}
           <div>
-            <div className="mb-4">
-              <h2 className="text-lg font-semibold">Recent</h2>
-            </div>
             <DocumentGallery />
           </div>
         </div>

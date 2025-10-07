@@ -11,12 +11,7 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   const [user, loading] = useAuthState(auth)
-  const [isSidebarExpanded, setIsSidebarExpanded] = useState(false)
   const pathname = usePathname()
-
-  const handleToggle = () => {
-    setIsSidebarExpanded((prev) => !prev)
-  }
 
   // Check if current page should hide sidebar
   const shouldHideSidebar = pathname?.includes('/dashboard/images') || pathname?.includes('/dashboard/canvas')
@@ -26,10 +21,9 @@ export default function DashboardLayout({
     <div className="flex h-screen overflow-hidden">
       {!shouldHideSidebar && (
         <div className="hidden md:block">
-          <Sidebar 
-            className="h-full" 
-            isExpanded={isSidebarExpanded} 
-            onToggle={handleToggle} 
+          <Sidebar
+            className="h-full"
+            isExpanded={true}
           />
         </div>
       )}

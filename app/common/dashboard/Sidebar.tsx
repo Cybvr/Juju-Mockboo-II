@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import { Button } from '@/components/ui/button';
 import {
   Tooltip,
@@ -13,7 +13,6 @@ import {
   Image as ImageIcon,
   Video,
   Settings,
-  PanelLeft,
   Folder,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -54,11 +53,9 @@ function SimpleCreditDisplay() {
 interface SidebarProps {
   className?: string;
   onNavigate?: () => void;
-  isExpanded?: boolean;
-  onToggle?: () => void;
 }
 
-export function Sidebar({ className, onNavigate, isExpanded = true, onToggle }: SidebarProps) {
+export function Sidebar({ className, onNavigate }: SidebarProps) {
   const pathname = usePathname();
   const [user] = useAuthState(auth);
   const createNewCanvas = async () => {
@@ -84,7 +81,6 @@ export function Sidebar({ className, onNavigate, isExpanded = true, onToggle }: 
       console.error('Error creating new canvas:', error);
     }
   };
-
   const navItems = [
     {
       label: 'New',
@@ -106,52 +102,30 @@ export function Sidebar({ className, onNavigate, isExpanded = true, onToggle }: 
       active: pathname.startsWith('/dashboard/account'),
     },
   ];
-
-  const showLabels = isExpanded;
-
+  const showLabels = true; // Always show labels since sidebar is always expanded
   return (
     <TooltipProvider delayDuration={300}>
       <div
         className={cn(
-          'h-full rounded-none transition-all duration-300 relative',
-          isExpanded ? 'w-64' : 'w-16',
+          'h-full rounded-none transition-all duration-300 relative w-56 bg-card',
           className
         )}
       >
         <div className="p-4 h-full flex flex-col justify-between">
           <div className="text-muted-foreground">
-            {/* Toggle Button */}
+            {/* Logo */}
             <div className="mb-4 flex items-center justify-center">
-              {isExpanded && (
-                <Link href="/dashboard" className="flex">
-                  <div className="flex items-center justify-center">
-                    <Image
-                      src="/images/juju.png"
-                      alt="Logo"
-                      width={64}
-                      height={64}
-                      className="object-contain"
-                    />
-                  </div>
-                </Link>
-              )}
-              {onToggle && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={onToggle}
-                      className="h-8 w-8"
-                    >
-                      <PanelLeft className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent side="right" align="center">
-                    <p>{isExpanded ? 'Collapse Sidebar' : 'Expand Sidebar'}</p>
-                  </TooltipContent>
-                </Tooltip>
-              )}
+              <Link href="/dashboard" className="flex">
+                <div className="flex items-center justify-center">
+                  <Image
+                    src="/images/juju.png"
+                    alt="Logo"
+                    width={64}
+                    height={64}
+                    className="object-contain"
+                  />
+                </div>
+              </Link>
             </div>
             {/* Navigation */}
             <nav className="space-y-2 mb-4">

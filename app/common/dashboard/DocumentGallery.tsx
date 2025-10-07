@@ -278,9 +278,10 @@ export function DocumentGallery({
     <>
       <div>
         <div>
-          <div className="flex items-center justify-between">
-            <div className="flex gap-2">
-              {/* Filter buttons removed */}
+          <div className="flex items-center justify-between mb-2">
+
+            <div className="">
+              <h2 className="text-lg font-semibold">Recent</h2>
             </div>
             <div className="flex items-center">
               <Button
@@ -296,7 +297,7 @@ export function DocumentGallery({
         </div>
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+            <div className="w-8 h-8  rounded-full animate-spin"></div>
           </div>
         ) : (
           <div className="space-y-6">
