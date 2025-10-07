@@ -43,7 +43,7 @@ export function useInteractionHook({
     const handleMouseDown = (e: any) => {
       const tool = activeToolRef.current
       const pointer = canvas.getPointer(e.e)
-      
+
       // Handle tool-specific creation
       if (tool === "sticky-note") {
         window.stickyNoteHook?.createStickyNote?.(pointer.x, pointer.y)
@@ -63,21 +63,21 @@ export function useInteractionHook({
         return
       }
       if (tool === "select" || tool === "pan") return
-      
+
       // Only create shapes if clicking on empty canvas (no target)
       if (e.target) return
-      
+
       // Handle shape drawing
       startX = pointer.x
       startY = pointer.y
       setIsDrawing(true)
-      
+
       // Disable selection while drawing
       canvas.selection = false
       canvas.forEachObject((obj: any) => {
         obj.selectable = false
       })
-      
+
       import("fabric").then((FabricModule) => {
         const fabric = FabricModule
         if (tool === "square") {
@@ -94,12 +94,10 @@ export function useInteractionHook({
         if (activeShape) canvas.add(activeShape)
       })
     }
-
     // Handle double-click for sticky note and text editing
     const handleDoubleClick = (e: any) => {
       const target = e.target
       if (!target) return
-
       // Handle sticky note double-click editing
       if (target.name?.startsWith('sticky-note-') && target.type === "group") {
         const objects = target.getObjects()
@@ -110,7 +108,7 @@ export function useInteractionHook({
           textObj.enterEditing()
           textObj.hiddenTextarea?.focus()
           textObj.selectAll()
-          
+
           const onEditExit = () => {
             textObj.off("editing:exited", onEditExit)
             handleCanvasChange()
@@ -219,46 +217,30 @@ export function useInteractionHook({
     const handleMouseWheel = (opt: any) => {
       const evt = opt.e
       evt.preventDefault()
-
-      console.log("🔍 TRACKPAD EVENT:", {
-        ctrlKey: evt.ctrlKey,
-        shiftKey: evt.shiftKey,
-        deltaX: evt.deltaX,
-        deltaY: evt.deltaY,
-        type: evt.ctrlKey ? "PINCH_ZOOM" : Math.abs(evt.deltaX) > Math.abs(evt.deltaY) ? "PAN_HORIZONTAL" : "PAN_VERTICAL"
-      })
-
       // Trackpad pinch zoom (ctrlKey indicates pinch gesture)
       if (evt.ctrlKey) {
-        console.log("📏 PINCH ZOOM DETECTED")
         const delta = evt.deltaY
         const zoom = canvas.getZoom()
         let newZoom = zoom * (1 - delta / 100)
         newZoom = Math.max(0.001, Math.min(1000, newZoom))
-
         import("fabric").then((FabricModule) => {
           const fabric = FabricModule
           const canvasElement = canvas.getElement()
           const rect = canvasElement.getBoundingClientRect()
           const pointer = new fabric.Point(evt.clientX - rect.left, evt.clientY - rect.top)
           canvas.zoomToPoint(pointer, newZoom)
-          console.log("📏 ZOOM APPLIED:", newZoom)
         })
         return
       }
-      
+
       // Two-finger pan (horizontal movement dominates OR shift key held)
       if (Math.abs(evt.deltaX) > Math.abs(evt.deltaY) || evt.shiftKey) {
-        console.log("👆 TWO-FINGER PAN DETECTED")
         const vpt = canvas.viewportTransform
         vpt[4] -= evt.deltaX * 0.5 // Reduce sensitivity
         vpt[5] -= evt.deltaY * 0.5
         canvas.requestRenderAll()
         return
       }
-
-      // Regular scroll (vertical only, small movements)
-      console.log("📜 REGULAR SCROLL - IGNORED")
     }
     const handleMouseDown = (opt: any) => {
       const evt = opt.e as MouseEvent
@@ -303,13 +285,11 @@ export function useInteractionHook({
     const canvas = fabricCanvasRef.current
     const canvasElement = canvas.getElement()
     let isPanning = false, lastPanX = 0, lastPanY = 0, lastDistance = 0
-
     const getDistance = (touch1: Touch, touch2: Touch) => {
       const dx = touch1.clientX - touch2.clientX
       const dy = touch1.clientY - touch2.clientY
       return Math.sqrt(dx * dx + dy * dy)
     }
-
     const handleTouchStart = (e: TouchEvent) => {
       if (e.touches.length === 1) {
         const touch = e.touches[0]
@@ -336,18 +316,15 @@ export function useInteractionHook({
         const centerX = (touch1.clientX + touch2.clientX) / 2
         const centerY = (touch1.clientY + touch2.clientY) / 2
         const distance = getDistance(touch1, touch2)
-
         // Pan
         const vpt = canvas.viewportTransform
         vpt[4] += centerX - lastPanX
         vpt[5] += centerY - lastPanY
-
         // Zoom
         if (lastDistance > 0) {
           const scale = distance / lastDistance
           const zoom = canvas.getZoom() * scale
           const clampedZoom = Math.min(Math.max(zoom, 0.1), 10)
-
           import("fabric").then((FabricModule) => {
             const fabric = FabricModule
             const rect = canvasElement.getBoundingClientRect()
@@ -357,7 +334,6 @@ export function useInteractionHook({
             canvas.zoomToPoint(point, clampedZoom)
           })
         }
-
         canvas.requestRenderAll()
         lastPanX = centerX
         lastPanY = centerY
