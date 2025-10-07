@@ -105,32 +105,7 @@ export function useFabricCanvas(
               stickyColor: obj.stickyColor
             })))
 
-            // Center viewport on loaded content
-            if (allObjects.length > 0) {
-              import("fabric").then((FabricModule) => {
-                const fabric = FabricModule
-                let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity
-
-                allObjects.forEach((obj: any) => {
-                  const bounds = obj.getBoundingRect()
-                  minX = Math.min(minX, bounds.left)
-                  minY = Math.min(minY, bounds.top)
-                  maxX = Math.max(maxX, bounds.left + bounds.width)
-                  maxY = Math.max(maxY, bounds.top + bounds.height)
-                })
-
-                const centerX = (minX + maxX) / 2
-                const centerY = (minY + maxY) / 2
-                const viewportCenterX = canvas.width / 2
-                const viewportCenterY = canvas.height / 2
-
-                const panX = viewportCenterX - centerX
-                const panY = viewportCenterY - centerY
-
-                canvas.setViewportTransform([1, 0, 0, 1, panX, panY])
-                canvas.renderAll()
-              })
-            }
+            canvas.renderAll()
           })
         } else {
           console.log("🔄 NO FIREBASE DATA TO LOAD")
