@@ -107,7 +107,7 @@ export function Sidebar({ className, onNavigate }: SidebarProps) {
     <TooltipProvider delayDuration={300}>
       <div
         className={cn(
-          'h-full rounded-none transition-all duration-300 relative w-56 bg-card',
+          'h-full rounded-none transition-all duration-300 relative w-56 bg-card m-3 rounded-2xl ',
           className
         )}
       >
