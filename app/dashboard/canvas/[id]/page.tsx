@@ -8,7 +8,6 @@ import {
   MousePointer2,
   Square,
   Circle,
-  Upload,
   Share2,
   Home,
   ZoomIn,
@@ -27,12 +26,10 @@ import ChatterBox from "../common/chatterbox"
 import { documentService } from "@/services/documentService"
 import { useAuth } from "@/hooks/useAuth"
 import type { Document } from "@/types/firebase"
-import { useCanvasCore } from "./hooks/use-canvas-core"
 import { useImageOperations } from "./hooks/use-image-operations"
 import { GeneratingMedia } from "./GeneratingMedia"
 import { ProfileDropdown } from "@/app/common/dashboard/ProfileDropdown"
 import { ShareModal } from "@/components/ShareModal"
-import { useSnapGrid } from "./hooks/use-snap-grid"
 import { FloatingToolbar } from "./toolbars/image-toolbar"
 import { ShapeToolbar } from "./toolbars/shape-toolbar"
 import { StickyNoteToolbar } from "./toolbars/sticky-note-toolbar"
@@ -63,11 +60,13 @@ export default function CanvasEditor() {
   const documentId = params.id as string
 
   // Use fabric canvas hook for canvas initialization - this includes canvasCore internally
-  const { FloatingToolbarComponent, addImageToCanvas, canvasRef: fabricCanvasRef, snapGrid, canvasCore } = useFabricCanvas(
-    document,
-    documentId,
-    (images) => setSelectedImages(images)
-  )
+  const {
+    FloatingToolbarComponent,
+    addImageToCanvas,
+    canvasRef: fabricCanvasRef,
+    snapGrid,
+    canvasCore,
+  } = useFabricCanvas(document, documentId, (images) => setSelectedImages(images))
 
   // Image operations hook
   const imageOps = useImageOperations({
@@ -106,7 +105,15 @@ export default function CanvasEditor() {
       delete window.textToolHook
       delete window.canvasCore
     }
-  }, [createStickyNote, createTextObject, canvasCore.handleUndo, canvasCore.handleRedo, canvasCore.handleCopy, canvasCore.handlePaste, canvasCore.handleDelete])
+  }, [
+    createStickyNote,
+    createTextObject,
+    canvasCore.handleUndo,
+    canvasCore.handleRedo,
+    canvasCore.handleCopy,
+    canvasCore.handlePaste,
+    canvasCore.handleDelete,
+  ])
 
   // Import and setup interaction hook
   const { useInteractionHook } = require("./hooks/use-interaction-hook")
@@ -121,8 +128,6 @@ export default function CanvasEditor() {
     brushColor: canvasCore.brushColor,
     drawingMode: canvasCore.drawingMode,
   })
-
-
 
   // Setup interactions after canvas is loaded
   useEffect(() => {
@@ -143,7 +148,14 @@ export default function CanvasEditor() {
       if (cleanupDragDrop) cleanupDragDrop()
       if (cleanupTextTool) cleanupTextTool()
     }
-  }, [canvasCore.fabricLoaded, setupInteractions, setupKeyboardHandlers, setupPanAndZoom, setupTouchHandlers, imageOps.setupDragAndDrop])
+  }, [
+    canvasCore.fabricLoaded,
+    setupInteractions,
+    setupKeyboardHandlers,
+    setupPanAndZoom,
+    setupTouchHandlers,
+    imageOps.setupDragAndDrop,
+  ])
 
   // Canvas initialization is handled by useFabricCanvas hook
 
@@ -212,22 +224,13 @@ export default function CanvasEditor() {
   return (
     <div className="relative h-full w-full overflow-hidden" data-user-id={user?.uid}>
       {/* Floating Toolbar */}
-      <div className="flex items-center gap-2 absolute left-4 top-4 z-10 bg-background rounded-xl px-4 py-2">
+      <div className="flex items-center gap-1.5 sm:gap-2 absolute left-2 sm:left-4 top-2 sm:top-4 z-10 bg-background rounded-lg sm:rounded-xl px-2 sm:px-4 h-10">
         {/* Logo Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className=" px-2 flex items-center gap-2"
-            >
+            <Button variant="ghost" size="sm" className="h-8 px-1.5 sm:px-2 flex items-center gap-1 sm:gap-2">
               <div className="relative w-4 h-4">
-                <Image
-                  src="/assets/images/logowhite.png"
-                  alt="Logo"
-                  fill
-                  className="object-contain"
-                />
+                <Image src="/assets/images/logowhite.png" alt="Logo" fill className="object-contain" />
               </div>
               <ChevronDown className="h-3 w-3 text-muted-foreground" />
             </Button>
@@ -263,62 +266,81 @@ export default function CanvasEditor() {
         </DropdownMenu>
 
         {/* Title */}
-        <div className="flex items-left gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 h-8">
           {isViewOnly ? (
-            <div className="flex items-center gap-2">
-              <h1 className="text-sm font-normal">{titleValue}</h1>
-              <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">View Only</span>
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <h1 className="text-xs sm:text-sm font-normal truncate max-w-[120px] sm:max-w-none">{titleValue}</h1>
+              <span className="text-[10px] sm:text-xs text-muted-foreground bg-muted px-1.5 sm:px-2 py-0.5 sm:py-1 rounded whitespace-nowrap">
+                View Only
+              </span>
             </div>
           ) : (
-      <Input
-        value={titleValue}
-        onChange={(e) => setTitleValue(e.target.value)}
-        onBlur={handleTitleSave}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") e.currentTarget.blur()
-          if (e.key === "Escape") {
-            handleTitleCancel()
-            e.currentTarget.blur()
-          }
-        }}
-        className="h-6 text-sm font-semibold bg-transparent border-none px-0 focus-visible:ring-0 focus-visible:ring-offset-0 w-auto max-w-[100px]"
-      />
+            <Input
+              value={titleValue}
+              onChange={(e) => setTitleValue(e.target.value)}
+              onBlur={handleTitleSave}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") e.currentTarget.blur()
+                if (e.key === "Escape") {
+                  handleTitleCancel()
+                  e.currentTarget.blur()
+                }
+              }}
+              className="h-8 text-xs sm:text-sm font-semibold bg-transparent border-none px-0 focus-visible:ring-0 focus-visible:ring-offset-0 w-auto max-w-[120px] sm:max-w-[200px]"
+            />
           )}
         </div>
       </div>
 
       {/* Profile and Share Buttons */}
-      <div className="absolute right-4 top-4 z-10 flex items-center gap-2">
+      <div className="absolute right-2 sm:right-4 top-2 sm:top-4 z-10 flex items-center gap-1.5 sm:gap-2 h-10">
         <ProfileDropdown />
-        <Button variant="default" onClick={() => setShowShareModal(true)} className="h-10 px-4" title="Share">
-          <Share2 className="mr-2 h-4 w-4" />
-          Share
+        <Button
+          variant="default"
+          onClick={() => setShowShareModal(true)}
+          className="h-8 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm"
+          title="Share"
+        >
+          <Share2 className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+          <span className="hidden sm:inline">Share</span>
         </Button>
       </div>
 
       {/* Controls Panel */}
-      <div className="absolute right-4 top-1/2 z-10 -translate-y-1/2">
-        <div className="flex flex-col gap-2 rounded-lg bg-background p-2 shadow-lg border w-12">
-          <Button variant="ghost" size="icon" onClick={canvasCore.handleZoomIn} className="h-8 w-8" title="Zoom In">
-            <ZoomIn className="h-4 w-4" />
+      <div className="absolute right-2 sm:right-4 top-1/2 z-10 -translate-y-1/2">
+        <div className="flex flex-col gap-1.5 sm:gap-2 rounded-lg bg-background p-1.5 sm:p-2 shadow-lg border w-10 sm:w-12">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={canvasCore.handleZoomIn}
+            className="h-7 w-7 sm:h-8 sm:w-8"
+            title="Zoom In"
+          >
+            <ZoomIn className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           </Button>
-          <div className="text-xs text-center text-muted-foreground px-1">
+          <div className="text-[10px] sm:text-xs text-center text-muted-foreground px-0.5 sm:px-1">
             {Math.round(canvasCore.zoomLevel * 100)}%
           </div>
-          <Button variant="ghost" size="icon" onClick={canvasCore.handleZoomOut} className="h-8 w-8" title="Zoom Out">
-            <ZoomOut className="h-4 w-4" />
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={canvasCore.handleZoomOut}
+            className="h-7 w-7 sm:h-8 sm:w-8"
+            title="Zoom Out"
+          >
+            <ZoomOut className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
             onClick={canvasCore.handleResetZoom}
-            className="h-8 w-8"
+            className="h-7 w-7 sm:h-8 sm:w-8"
             title="Reset Zoom"
           >
-            <RotateCcw className="h-4 w-4" />
+            <RotateCcw className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           </Button>
 
-          <div className="h-px bg-border my-1"></div>
+          <div className="h-px bg-border my-0.5 sm:my-1"></div>
         </div>
       </div>
 
@@ -326,20 +348,19 @@ export default function CanvasEditor() {
       {!isViewOnly && (
         <ShapeToolbar
           isVisible={
-            canvasCore.selectedObjects.length === 1 && 
+            canvasCore.selectedObjects.length === 1 &&
             (canvasCore.selectedObjects[0]?.type === "rect" || canvasCore.selectedObjects[0]?.type === "circle")
           }
-          selectedShapeObject={canvasCore.selectedObjects.find(obj => obj.type === "rect" || obj.type === "circle")}
+          selectedShapeObject={canvasCore.selectedObjects.find((obj) => obj.type === "rect" || obj.type === "circle")}
           fabricCanvas={canvasCore.fabricCanvasRef.current}
           onShapeChange={canvasCore.handleCanvasChange}
         />
       )}
 
-
       {/* Floating Toolbar - Hide in view-only mode */}
       {!isViewOnly && (
-        <div className="absolute left-4 top-1/2 z-10 -translate-y-1/2">
-          <div className="flex flex-col gap-2 rounded-lg bg-background p-2 shadow-lg border">
+        <div className="absolute left-2 sm:left-4 top-1/2 z-10 -translate-y-1/2">
+          <div className="flex flex-col gap-1.5 sm:gap-2 rounded-lg bg-background p-1.5 sm:p-2 shadow-lg border">
             {tools.map((tool) => {
               const Icon = tool.icon
               return (
@@ -350,10 +371,10 @@ export default function CanvasEditor() {
                   onClick={() => {
                     canvasCore.setActiveTool(tool.id)
                   }}
-                  className="h-10 w-10"
+                  className="h-8 w-8 sm:h-10 sm:w-10"
                   title={tool.label}
                 >
-                  <Icon className="h-5 w-5" />
+                  <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
               )
             })}
@@ -379,7 +400,7 @@ export default function CanvasEditor() {
 
       {/* ChatterBox */}
       {!isViewOnly && (
-        <div className="absolute bottom-4 left-1/2 z-10 -translate-x-1/2 transform w-full max-w-2xl p-4">
+        <div className="absolute bottom-2 sm:bottom-4 left-1/2 z-10 -translate-x-1/2 transform w-full max-w-2xl px-2 sm:px-4">
           <ChatterBox
             selectedImages={selectedImages}
             onImageGenerated={async (imageUrl) => {
@@ -417,14 +438,15 @@ export default function CanvasEditor() {
         />
       )}
 
-
-
-
       {/* Sticky Note Toolbar - only for sticky notes with backgroundColor */}
       {!isViewOnly && (
         <StickyNoteToolbar
-          isVisible={canvasCore.selectedObjects.length === 1 && canvasCore.selectedObjects[0]?.backgroundColor && canvasCore.selectedObjects[0]?.stickyColor}
-          selectedTextObject={canvasCore.selectedObjects.find(obj => obj.backgroundColor && obj.stickyColor)}
+          isVisible={
+            canvasCore.selectedObjects.length === 1 &&
+            canvasCore.selectedObjects[0]?.backgroundColor &&
+            canvasCore.selectedObjects[0]?.stickyColor
+          }
+          selectedTextObject={canvasCore.selectedObjects.find((obj) => obj.backgroundColor && obj.stickyColor)}
           fabricCanvas={canvasCore.fabricCanvasRef.current}
           onNoteChange={canvasCore.handleCanvasChange}
         />
@@ -434,15 +456,14 @@ export default function CanvasEditor() {
       {!isViewOnly && (
         <TextToolbar
           isVisible={
-            canvasCore.selectedObjects.length === 1 && 
-            (canvasCore.selectedObjects[0]?.type === "textbox" || 
-             canvasCore.selectedObjects[0]?.type === "i-text" || 
-             canvasCore.selectedObjects[0]?.isTextObject) && 
+            canvasCore.selectedObjects.length === 1 &&
+            (canvasCore.selectedObjects[0]?.type === "textbox" ||
+              canvasCore.selectedObjects[0]?.type === "i-text" ||
+              canvasCore.selectedObjects[0]?.isTextObject) &&
             !canvasCore.selectedObjects[0]?.stickyColor
           }
-          selectedTextObject={canvasCore.selectedObjects.find(obj => 
-            (obj.type === "textbox" || obj.type === "i-text" || obj.isTextObject) && 
-            !obj.stickyColor
+          selectedTextObject={canvasCore.selectedObjects.find(
+            (obj) => (obj.type === "textbox" || obj.type === "i-text" || obj.isTextObject) && !obj.stickyColor,
           )}
           fabricCanvas={canvasCore.fabricCanvasRef.current}
           onTextChange={canvasCore.handleCanvasChange}
@@ -454,13 +475,13 @@ export default function CanvasEditor() {
         <canvas
           ref={fabricCanvasRef}
           className="block border-none outline-none"
-          style={{ 
-            width: "100vw", 
-            height: "100vh", 
+          style={{
+            width: "100vw",
+            height: "100vh",
             touchAction: "none",
             position: "absolute",
             top: 0,
-            left: 0
+            left: 0,
           }}
         />
 
