@@ -98,12 +98,12 @@ export function useInteractionHook({
     const handleDoubleClick = (e: any) => {
       const target = e.target
       if (!target) return
-      // Handle sticky note double-click editing
-      if (target.name?.startsWith('sticky-note-') && target.type === "group") {
+      
+      // Handle sticky note group double-click editing
+      if (target.type === "group" && target.stickyColor) {
         const objects = target.getObjects()
         const textObj = objects.find((obj: any) => obj.type === "textbox")
         if (textObj) {
-          textObj.set({ editable: true, selectable: true })
           canvas.setActiveObject(textObj)
           textObj.enterEditing()
           textObj.hiddenTextarea?.focus()
@@ -116,8 +116,8 @@ export function useInteractionHook({
           textObj.on("editing:exited", onEditExit)
         }
       }
-      // Handle text object double-click editing
-      else if (target.type === "textbox" || target.type === "i-text" || target.isTextObject) {
+      // Handle regular text object double-click editing
+      else if ((target.type === "textbox" || target.type === "i-text") && !target.group) {
         target.enterEditing()
         target.hiddenTextarea?.focus()
         target.selectAll()
