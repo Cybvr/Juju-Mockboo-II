@@ -328,9 +328,9 @@ export function useImageOperations({
     }
 
     imageObjects.forEach((obj: any, index: number) => {
-      if (obj.getSrc) {
+      if (obj.src || obj._originalElement?.src) {
         const link = document.createElement('a')
-        link.href = obj.getSrc()
+        link.href = obj.src || obj._originalElement.src
         link.download = `canvas-image-${index + 1}.png`
         document.body.appendChild(link)
         link.click()
@@ -394,7 +394,8 @@ export function useImageOperations({
     if (imageObjects.length === 0) return
 
     const firstImage = imageObjects[0]
-    if (!firstImage.getSrc) return
+    const imageSrc = firstImage.src || firstImage._originalElement?.src
+    if (!imageSrc) return
 
     try {
       const response = await fetch('/api/multiply/generate', {
@@ -403,7 +404,7 @@ export function useImageOperations({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          image: firstImage.getSrc(),
+          image: imageSrc,
           outputs: 4,
           prompt: 'Create professional design variations maintaining core elements'
         }),
@@ -442,7 +443,8 @@ export function useImageOperations({
     if (imageObjects.length === 0) return
 
     const firstImage = imageObjects[0]
-    if (!firstImage.getSrc) return
+    const imageSrc = firstImage.src || firstImage._originalElement?.src
+    if (!imageSrc) return
 
     try {
       const response = await fetch('/api/image-editor', {
@@ -452,7 +454,7 @@ export function useImageOperations({
         },
         body: JSON.stringify({
           prompt: stylePrompt,
-          imageData: firstImage.getSrc().split(',')[1],
+          imageData: imageSrc.split(',')[1],
           model: 'gemini-2.5-flash-image-preview',
           aspectRatio: '1:1',
           outputs: '1'
@@ -489,7 +491,8 @@ export function useImageOperations({
     if (imageObjects.length === 0) return
 
     const firstImage = imageObjects[0]
-    if (!firstImage.getSrc) return
+    const imageSrc = firstImage.src || firstImage._originalElement?.src
+    if (!imageSrc) return
 
     try {
       const dataURL = firstImage.toDataURL({ format: 'png', multiplier: 1 })
@@ -505,7 +508,7 @@ export function useImageOperations({
     } catch (error) {
       console.error('Failed to copy image to clipboard:', error)
       try {
-        await navigator.clipboard.writeText(firstImage.getSrc())
+        await navigator.clipboard.writeText(imageSrc)
       } catch (fallbackError) {
         console.error('Failed to copy image URL:', fallbackError)
       }
