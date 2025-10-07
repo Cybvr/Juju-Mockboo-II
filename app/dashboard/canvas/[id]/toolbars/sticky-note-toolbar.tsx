@@ -42,8 +42,8 @@ export function StickyNoteToolbar({
   const [currentFontSize, setCurrentFontSize] = useState(16)
   const [currentAlignment, setCurrentAlignment] = useState("left")
 
-  // Only show for sticky notes (text objects with backgroundColor)
-  const isSticky = selectedTextObject?.backgroundColor && selectedTextObject?.stickyColor
+  // Only show for sticky notes (custom StickyNote objects)
+  const isSticky = selectedTextObject?.type === 'stickyNote'
 
   useEffect(() => {
     if (!isVisible || !selectedTextObject || !fabricCanvas || !isSticky) {
@@ -68,14 +68,7 @@ export function StickyNoteToolbar({
     setCurrentColor(colorName)
     if (!selectedTextObject || !fabricCanvas) return
 
-    const color = stickyColors.find(c => c.name === colorName)
-    if (!color) return
-
-    selectedTextObject.set({ 
-      backgroundColor: color.bg,
-      stickyColor: colorName
-    })
-    fabricCanvas.renderAll()
+    selectedTextObject.setStickyColor(colorName)
     onNoteChange()
   }
 
@@ -83,8 +76,7 @@ export function StickyNoteToolbar({
     setCurrentFontSize(size)
     if (!selectedTextObject || !fabricCanvas) return
 
-    selectedTextObject.set({ fontSize: size })
-    fabricCanvas.renderAll()
+    selectedTextObject.setFontSize(size)
     onNoteChange()
   }
 
@@ -92,8 +84,7 @@ export function StickyNoteToolbar({
     setCurrentAlignment(alignment)
     if (!selectedTextObject || !fabricCanvas) return
 
-    selectedTextObject.set({ textAlign: alignment })
-    fabricCanvas.renderAll()
+    selectedTextObject.setTextAlign(alignment)
     onNoteChange()
   }
 

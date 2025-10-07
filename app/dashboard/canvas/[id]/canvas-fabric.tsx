@@ -34,8 +34,11 @@ export function useFabricCanvas(
 
     // Wait for DOM to be fully ready and window to be properly sized
     const initCanvas = () => {
-      import("fabric").then((FabricModule) => {
+      import("fabric").then(async (FabricModule) => {
         const fabric = FabricModule
+        
+        // Import custom StickyNote class
+        await import("./fabric/stickyNote")
 
         const canvas = new fabric.Canvas(canvasCore.canvasRef.current, {
           width: window.innerWidth,
@@ -242,8 +245,8 @@ export function useFabricCanvas(
         currentMode={canvasCore.drawingMode}
       />
       <StickyNoteToolbar
-        isVisible={canvasCore.selectedObjects.length === 1 && canvasCore.selectedObjects[0]?.backgroundColor && canvasCore.selectedObjects[0]?.stickyColor}
-        selectedTextObject={canvasCore.selectedObjects.find(obj => obj.backgroundColor && obj.stickyColor)}
+        isVisible={canvasCore.selectedObjects.length === 1 && canvasCore.selectedObjects[0]?.type === 'stickyNote'}
+        selectedTextObject={canvasCore.selectedObjects.find(obj => obj.type === 'stickyNote')}
         fabricCanvas={canvasCore.fabricCanvasRef.current}
         onNoteChange={canvasCore.handleCanvasChange}
       />

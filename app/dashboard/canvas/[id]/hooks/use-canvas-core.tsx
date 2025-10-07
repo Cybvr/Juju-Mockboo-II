@@ -142,37 +142,21 @@ export function useCanvasCore(documentId: string, document: Document | null) {
       setIsSaving(true)
       const rawCanvasData = fabricCanvasRef.current.toJSON(['name', 'isTextObject', 'text', 'stickyColor', 'backgroundColor', 'stickyNoteGroup'])
       
-      // ✅ Recursive extractor for text + sticky notes
-      const extractTextObjects = (objs: any[]): any[] => {
-        if (!objs) return []
-        return objs.flatMap((obj: any) => {
-          if (!obj) return []
-          if (
-            obj.type === 'textbox' || 
-            obj.type === 'i-text' || 
-            obj.isTextObject ||
-            (obj.backgroundColor && obj.stickyColor)
-          ) {
-            return [obj]
-          }
-          if (obj.type === 'group' && obj.objects?.length) {
-            const inner = extractTextObjects(obj.objects)
-            // Mark parent group as sticky if its children are sticky
-            if (inner.some(o => o.stickyColor)) obj.stickyNoteGroup = true
-            return [obj, ...inner]
-          }
-          return []
-        })
-      }
-
-      const textObjects = extractTextObjects(rawCanvasData.objects || [])
+      // Simple object filtering - sticky notes are now single objects
+      const textObjects = rawCanvasData.objects?.filter((obj: any) => 
+        obj.type === 'textbox' || 
+        obj.type === 'i-text' || 
+        obj.type === 'stickyNote' ||
+        obj.isTextObject
+      ) || []
+      
       console.log("📝 ALL TEXT/STICKY OBJECTS FOUND:", textObjects.length)
       textObjects.forEach((obj: any, index: number) => {
         console.log(`📝 Object ${index + 1}:`, {
           type: obj.type,
-          text: obj.text,
-          sticky: !!obj.stickyColor,
-          stickyNoteGroup: obj.stickyNoteGroup,
+          text: obj.text || obj.getText?.(),
+          stickyColor: obj.stickyColor,
+          isTextObject: obj.isTextObject,
         })
       })
 
