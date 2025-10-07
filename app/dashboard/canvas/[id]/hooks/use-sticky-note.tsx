@@ -47,8 +47,18 @@ export function useStickyNote({ fabricCanvasRef, handleCanvasChange }: StickyNot
       })
 
       // Mark as sticky note specifically - CRITICAL for saving
-      textObj.isTextObject = true
-      textObj.stickyColor = options?.color || "yellow"
+      Object.defineProperty(textObj, 'isTextObject', {
+        value: true,
+        writable: true,
+        enumerable: true,
+        configurable: true
+      })
+      Object.defineProperty(textObj, 'stickyColor', {
+        value: options?.color || "yellow",
+        writable: true,
+        enumerable: true,
+        configurable: true
+      })
       
       console.log("🟡 CREATING STICKY NOTE:", {
         backgroundColor: selectedColor.bg,
