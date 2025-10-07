@@ -70,21 +70,12 @@ export function useStickyNote({ fabricCanvasRef, handleCanvasChange }: StickyNot
         cornerColor: "#2563eb",
         cornerSize: 8,
         transparentCorners: false,
+        // Set properties directly in constructor for better serialization
         isTextObject: true,
         stickyColor: options?.color || "yellow",
         backgroundColor: selectedColor.bg,
         stickyNoteGroup: true,
       })
-
-      // Override toObject to include custom properties (per Fabric.js docs)
-      stickyGroup.toObject = function(propertiesToInclude) {
-        return fabric.util.object.extend(fabric.Group.prototype.toObject.call(this, propertiesToInclude), {
-          isTextObject: this.isTextObject,
-          stickyColor: this.stickyColor,
-          backgroundColor: this.backgroundColor,
-          stickyNoteGroup: this.stickyNoteGroup
-        })
-      }
       
       console.log("🟡 CREATING STICKY NOTE:", {
         backgroundColor: selectedColor.bg,
