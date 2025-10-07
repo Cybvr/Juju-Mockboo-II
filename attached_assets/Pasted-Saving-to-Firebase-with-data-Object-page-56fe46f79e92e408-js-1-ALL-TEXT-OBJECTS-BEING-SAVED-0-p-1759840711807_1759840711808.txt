@@ -1,0 +1,145 @@
+Saving to Firebase with data: Object
+page-56fe46f79e92e408.js:1 📝 ALL TEXT OBJECTS BEING SAVED: 0
+page-56fe46f79e92e408.js:1 🟡 STICKY NOTES BEING SAVED: 0
+page-56fe46f79e92e408.js:1 🔍 Saving canvas state - Raw data: Object
+page-56fe46f79e92e408.js:1 📝 Text objects found: 0
+page-56fe46f79e92e408.js:1 💾 Saving to Firebase with data: ObjectcanvasData: {version: '6.7.1', objects: Array(13)}textObjectsCount: 0thumbnail: "Generated"[[Prototype]]: Object
+page-56fe46f79e92e408.js:1 📝 ALL TEXT OBJECTS BEING SAVED: 0
+page-56fe46f79e92e408.js:1 🟡 STICKY NOTES BEING SAVED: 0
+page-56fe46f79e92e408.js:1 🔍 Saving canvas state - Raw data: Object
+page-56fe46f79e92e408.js:1 📝 Text objects found: 0
+page-56fe46f79e92e408.js:1 💾 Saving to Firebase with data: Object
+page-56fe46f79e92e408.js:1 📝 ALL TEXT OBJECTS BEING SAVED: 0
+page-56fe46f79e92e408.js:1 🟡 STICKY NOTES BEING SAVED: 0
+page-56fe46f79e92e408.js:1 🔍 Saving canvas state - Raw data: Object
+page-56fe46f79e92e408.js:1 📝 Text objects found: 0
+page-56fe46f79e92e408.js:1 💾 Saving to Firebase with data: Object
+page-56fe46f79e92e408.js:1 📝 ALL TEXT OBJECTS BEING SAVED: 0
+page-56fe46f79e92e408.js:1 🟡 STICKY NOTES BEING SAVED: 0
+page-56fe46f79e92e408.js:1 🔍 Saving canvas state - Raw data: {version: '6.7.1', objects: Array(15)}
+page-56fe46f79e92e408.js:1 📝 Text objects found: 0
+page-56fe46f79e92e408.js:1 💾 Saving to Firebase with data: {canvasData: {…}, thumbnail: 'Generated', textObjectsCount: 0}
+2289-a44e85f4b0a8ca21.js:1 [2025-10-07T12:25:24.917Z]  @firebase/firestore: Firestore (10.14.1): FirebaseError: [code=resource-exhausted]: Write stream exhausted maximum allowed queued writes.
+h @ 2289-a44e85f4b0a8ca21.js:1
+error @ 2289-a44e85f4b0a8ca21.js:1
+_ @ bc9e92e6-28a297b10a1676fe.js:1
+close @ bc9e92e6-28a297b10a1676fe.js:4
+I_ @ bc9e92e6-28a297b10a1676fe.js:4
+(anonymous) @ bc9e92e6-28a297b10a1676fe.js:4
+(anonymous) @ bc9e92e6-28a297b10a1676fe.js:4
+(anonymous) @ bc9e92e6-28a297b10a1676fe.js:5
+(anonymous) @ bc9e92e6-28a297b10a1676fe.js:5
+Promise.then
+gu @ bc9e92e6-28a297b10a1676fe.js:5
+enqueue @ bc9e92e6-28a297b10a1676fe.js:5
+enqueueAndForget @ bc9e92e6-28a297b10a1676fe.js:5
+(anonymous) @ bc9e92e6-28a297b10a1676fe.js:4
+(anonymous) @ bc9e92e6-28a297b10a1676fe.js:4
+So @ bc9e92e6-28a297b10a1676fe.js:4
+(anonymous) @ bc9e92e6-28a297b10a1676fe.js:4
+(anonymous) @ bc9e92e6-28a297b10a1676fe.js:4
+tc @ 2289-a44e85f4b0a8ca21.js:1
+tf @ 2289-a44e85f4b0a8ca21.js:1
+re.ta @ 2289-a44e85f4b0a8ca21.js:1
+tQ @ 2289-a44e85f4b0a8ca21.js:1
+tH.Y @ 2289-a44e85f4b0a8ca21.js:1
+tH.ca @ 2289-a44e85f4b0a8ca21.js:1
+tc @ 2289-a44e85f4b0a8ca21.js:1
+tf @ 2289-a44e85f4b0a8ca21.js:1
+eL @ 2289-a44e85f4b0a8ca21.js:1
+r.bb @ 2289-a44e85f4b0a8ca21.js:1
+r.Ea @ 2289-a44e85f4b0a8ca21.js:1
+eS @ 2289-a44e85f4b0a8ca21.js:1
+r.Pa @ 2289-a44e85f4b0a8ca21.js:1
+Promise.then
+eT @ 2289-a44e85f4b0a8ca21.js:1
+r.Pa @ 2289-a44e85f4b0a8ca21.js:1
+Promise.then
+eT @ 2289-a44e85f4b0a8ca21.js:1
+r.Sa @ 2289-a44e85f4b0a8ca21.js:1
+Promise.then
+r.send @ 2289-a44e85f4b0a8ca21.js:1
+r.ea @ 2289-a44e85f4b0a8ca21.js:1
+tX @ 2289-a44e85f4b0a8ca21.js:1
+eZ @ 2289-a44e85f4b0a8ca21.js:1
+r.Fa @ 2289-a44e85f4b0a8ca21.js:1
+$ @ 2289-a44e85f4b0a8ca21.js:1
+Promise.then
+P @ 2289-a44e85f4b0a8ca21.js:1
+eJ @ 2289-a44e85f4b0a8ca21.js:1
+e0 @ 2289-a44e85f4b0a8ca21.js:1
+tH.Y @ 2289-a44e85f4b0a8ca21.js:1
+tH.ca @ 2289-a44e85f4b0a8ca21.js:1
+tc @ 2289-a44e85f4b0a8ca21.js:1
+tf @ 2289-a44e85f4b0a8ca21.js:1
+eL @ 2289-a44e85f4b0a8ca21.js:1
+r.bb @ 2289-a44e85f4b0a8ca21.js:1
+r.Ea @ 2289-a44e85f4b0a8ca21.js:1
+eS @ 2289-a44e85f4b0a8ca21.js:1
+eO @ 2289-a44e85f4b0a8ca21.js:1
+r.Pa @ 2289-a44e85f4b0a8ca21.js:1
+Promise.then
+eT @ 2289-a44e85f4b0a8ca21.js:1
+r.Pa @ 2289-a44e85f4b0a8ca21.js:1Understand this error
+2289-a44e85f4b0a8ca21.js:1 [2025-10-07T12:25:24.917Z]  @firebase/firestore: Firestore (10.14.1): Using maximum backoff delay to prevent overloading the backend.
+h @ 2289-a44e85f4b0a8ca21.js:1
+error @ 2289-a44e85f4b0a8ca21.js:1
+_ @ bc9e92e6-28a297b10a1676fe.js:1
+close @ bc9e92e6-28a297b10a1676fe.js:4
+I_ @ bc9e92e6-28a297b10a1676fe.js:4
+(anonymous) @ bc9e92e6-28a297b10a1676fe.js:4
+(anonymous) @ bc9e92e6-28a297b10a1676fe.js:4
+(anonymous) @ bc9e92e6-28a297b10a1676fe.js:5
+(anonymous) @ bc9e92e6-28a297b10a1676fe.js:5
+Promise.then
+gu @ bc9e92e6-28a297b10a1676fe.js:5
+enqueue @ bc9e92e6-28a297b10a1676fe.js:5
+enqueueAndForget @ bc9e92e6-28a297b10a1676fe.js:5
+(anonymous) @ bc9e92e6-28a297b10a1676fe.js:4
+(anonymous) @ bc9e92e6-28a297b10a1676fe.js:4
+So @ bc9e92e6-28a297b10a1676fe.js:4
+(anonymous) @ bc9e92e6-28a297b10a1676fe.js:4
+(anonymous) @ bc9e92e6-28a297b10a1676fe.js:4
+tc @ 2289-a44e85f4b0a8ca21.js:1
+tf @ 2289-a44e85f4b0a8ca21.js:1
+re.ta @ 2289-a44e85f4b0a8ca21.js:1
+tQ @ 2289-a44e85f4b0a8ca21.js:1
+tH.Y @ 2289-a44e85f4b0a8ca21.js:1
+tH.ca @ 2289-a44e85f4b0a8ca21.js:1
+tc @ 2289-a44e85f4b0a8ca21.js:1
+tf @ 2289-a44e85f4b0a8ca21.js:1
+eL @ 2289-a44e85f4b0a8ca21.js:1
+r.bb @ 2289-a44e85f4b0a8ca21.js:1
+r.Ea @ 2289-a44e85f4b0a8ca21.js:1
+eS @ 2289-a44e85f4b0a8ca21.js:1
+r.Pa @ 2289-a44e85f4b0a8ca21.js:1
+Promise.then
+eT @ 2289-a44e85f4b0a8ca21.js:1
+r.Pa @ 2289-a44e85f4b0a8ca21.js:1
+Promise.then
+eT @ 2289-a44e85f4b0a8ca21.js:1
+r.Sa @ 2289-a44e85f4b0a8ca21.js:1
+Promise.then
+r.send @ 2289-a44e85f4b0a8ca21.js:1
+r.ea @ 2289-a44e85f4b0a8ca21.js:1
+tX @ 2289-a44e85f4b0a8ca21.js:1
+eZ @ 2289-a44e85f4b0a8ca21.js:1
+r.Fa @ 2289-a44e85f4b0a8ca21.js:1
+$ @ 2289-a44e85f4b0a8ca21.js:1
+Promise.then
+P @ 2289-a44e85f4b0a8ca21.js:1
+eJ @ 2289-a44e85f4b0a8ca21.js:1
+e0 @ 2289-a44e85f4b0a8ca21.js:1
+tH.Y @ 2289-a44e85f4b0a8ca21.js:1
+tH.ca @ 2289-a44e85f4b0a8ca21.js:1
+tc @ 2289-a44e85f4b0a8ca21.js:1
+tf @ 2289-a44e85f4b0a8ca21.js:1
+eL @ 2289-a44e85f4b0a8ca21.js:1
+r.bb @ 2289-a44e85f4b0a8ca21.js:1
+r.Ea @ 2289-a44e85f4b0a8ca21.js:1
+eS @ 2289-a44e85f4b0a8ca21.js:1
+eO @ 2289-a44e85f4b0a8ca21.js:1
+r.Pa @ 2289-a44e85f4b0a8ca21.js:1
+Promise.then
+eT @ 2289-a44e85f4b0a8ca21.js:1
+r.Pa @ 2289-a44e85f4b0a8ca21.js:1Understand this error
