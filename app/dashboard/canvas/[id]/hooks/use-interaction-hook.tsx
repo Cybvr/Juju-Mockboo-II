@@ -220,8 +220,17 @@ export function useInteractionHook({
       const evt = opt.e
       evt.preventDefault()
 
-      // Trackpad pinch zoom (when ctrlKey is true - this is the pinch gesture)
+      console.log("🔍 TRACKPAD EVENT:", {
+        ctrlKey: evt.ctrlKey,
+        shiftKey: evt.shiftKey,
+        deltaX: evt.deltaX,
+        deltaY: evt.deltaY,
+        type: evt.ctrlKey ? "PINCH_ZOOM" : Math.abs(evt.deltaX) > Math.abs(evt.deltaY) ? "PAN_HORIZONTAL" : "PAN_VERTICAL"
+      })
+
+      // Trackpad pinch zoom (ctrlKey indicates pinch gesture)
       if (evt.ctrlKey) {
+        console.log("📏 PINCH ZOOM DETECTED")
         const delta = evt.deltaY
         const zoom = canvas.getZoom()
         let newZoom = zoom * (1 - delta / 100)
@@ -233,15 +242,23 @@ export function useInteractionHook({
           const rect = canvasElement.getBoundingClientRect()
           const pointer = new fabric.Point(evt.clientX - rect.left, evt.clientY - rect.top)
           canvas.zoomToPoint(pointer, newZoom)
+          console.log("📏 ZOOM APPLIED:", newZoom)
         })
+        return
       }
-      // Two-finger trackpad pan (when shift is held or significant horizontal movement)
-      else if (evt.shiftKey || Math.abs(evt.deltaX) > Math.abs(evt.deltaY)) {
+      
+      // Two-finger pan (horizontal movement dominates OR shift key held)
+      if (Math.abs(evt.deltaX) > Math.abs(evt.deltaY) || evt.shiftKey) {
+        console.log("👆 TWO-FINGER PAN DETECTED")
         const vpt = canvas.viewportTransform
-        vpt[4] -= evt.deltaX
-        vpt[5] -= evt.deltaY
+        vpt[4] -= evt.deltaX * 0.5 // Reduce sensitivity
+        vpt[5] -= evt.deltaY * 0.5
         canvas.requestRenderAll()
+        return
       }
+
+      // Regular scroll (vertical only, small movements)
+      console.log("📜 REGULAR SCROLL - IGNORED")
     }
     const handleMouseDown = (opt: any) => {
       const evt = opt.e as MouseEvent

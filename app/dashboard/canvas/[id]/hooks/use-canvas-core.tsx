@@ -141,9 +141,27 @@ export function useCanvasCore(documentId: string, document: Document | null) {
     try {
       setIsSaving(true)
       const rawCanvasData = fabricCanvasRef.current.toJSON(['name', 'isTextObject', 'text', 'stickyColor', 'backgroundColor'])
-      // Debug logs for sticky notes
-      const stickyNotes = rawCanvasData.objects?.filter((obj: any) => obj.name?.startsWith('sticky-note-'))
-      console.log("🟡 STICKY NOTES BEING SAVED:", stickyNotes?.length || 0)
+      
+      // Debug logs for ALL text objects
+      const textObjects = rawCanvasData.objects?.filter((obj: any) => 
+        obj.type === 'textbox' || obj.type === 'i-text' || obj.isTextObject
+      ) || []
+      
+      console.log("📝 ALL TEXT OBJECTS BEING SAVED:", textObjects.length)
+      textObjects.forEach((obj: any, index: number) => {
+        console.log(`📝 Text Object ${index + 1}:`, {
+          type: obj.type,
+          text: obj.text,
+          backgroundColor: obj.backgroundColor,
+          stickyColor: obj.stickyColor,
+          isTextObject: obj.isTextObject,
+          isSticky: !!(obj.backgroundColor && obj.stickyColor)
+        })
+      })
+      
+      // Specific sticky note detection
+      const stickyNotes = textObjects.filter((obj: any) => obj.backgroundColor && obj.stickyColor)
+      console.log("🟡 STICKY NOTES BEING SAVED:", stickyNotes.length)
       // Debug logs for text objects
       console.log("🔍 Saving canvas state - Raw data:", rawCanvasData)
       const textObjects = rawCanvasData.objects?.filter(obj => obj.type === 'i-text' || obj.type === 'textbox' || obj.type === 'text')

@@ -82,14 +82,19 @@ export function useFabricCanvas(
             console.log("🔄 LOADING FROM FIREBASE - Total objects:", allObjects.length)
 
             allObjects.forEach((obj: any, index) => {
-              console.log(`🔄 Object ${index + 1} RAW:`, {
+              console.log(`🔄 Object ${index + 1} LOADED:`, {
                 type: obj.type,
-                stickyNoteGroup: obj.stickyNoteGroup,
+                text: obj.text,
+                backgroundColor: obj.backgroundColor,
                 stickyColor: obj.stickyColor,
-                hasToObject: typeof obj.toObject === 'function'
+                isTextObject: obj.isTextObject,
+                isSticky: !!(obj.backgroundColor && obj.stickyColor)
               })
 
-              // Sticky notes are now simple text objects with background colors
+              // Ensure sticky note properties are preserved
+              if (obj.backgroundColor && obj.stickyColor) {
+                console.log(`🟡 STICKY NOTE ${index + 1} LOADED SUCCESSFULLY`)
+              }
             })
 
             console.log("🔄 CANVAS LOADED - Final object count:", canvas.getObjects().length)
