@@ -142,9 +142,10 @@ export function useCanvasCore(documentId: string, document: Document | null) {
       setIsSaving(true)
       const rawCanvasData = fabricCanvasRef.current.toJSON(['name', 'isTextObject', 'text', 'stickyColor', 'backgroundColor', 'stickyNoteGroup'])
       
-      // Debug logs for ALL text objects
+      // Debug logs for ALL text objects (including groups with sticky notes)
       const textObjects = rawCanvasData.objects?.filter((obj: any) => 
-        obj.type === 'textbox' || obj.type === 'i-text' || obj.isTextObject
+        obj.type === 'textbox' || obj.type === 'i-text' || obj.isTextObject ||
+        (obj.type === 'group' && (obj.stickyNoteGroup || obj.stickyColor))
       ) || []
       
       console.log("📝 ALL TEXT OBJECTS BEING SAVED:", textObjects.length)
@@ -187,7 +188,10 @@ export function useCanvasCore(documentId: string, document: Document | null) {
       console.log("💾 Saving to Firebase with data:", {
         canvasData: cleanCanvasData,
         thumbnail: thumbnail ? "Generated" : "None",
-        textObjectsCount: cleanCanvasData.objects?.filter(obj => obj.type === 'i-text' || obj.type === 'textbox' || obj.type === 'text').length
+        textObjectsCount: cleanCanvasData.objects?.filter(obj => 
+          obj.type === 'i-text' || obj.type === 'textbox' || obj.type === 'text' || 
+          (obj.type === 'group' && (obj.stickyNoteGroup || obj.stickyColor))
+        ).length
       })
       await documentService.updateDocument(documentId, {
         content: {
