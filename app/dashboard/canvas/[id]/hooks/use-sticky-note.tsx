@@ -70,13 +70,12 @@ export function useStickyNote({ fabricCanvasRef, handleCanvasChange }: StickyNot
         cornerColor: "#2563eb",
         cornerSize: 8,
         transparentCorners: false,
+        // Set properties directly in constructor for better serialization
+        isTextObject: true,
+        stickyColor: options?.color || "yellow",
+        backgroundColor: selectedColor.bg,
+        stickyNoteGroup: true,
       })
-
-      // Mark as sticky note specifically - CRITICAL for saving
-      stickyGroup.isTextObject = true
-      stickyGroup.stickyColor = options?.color || "yellow"
-      stickyGroup.backgroundColor = selectedColor.bg
-      stickyGroup.stickyNoteGroup = true
       
       console.log("🟡 CREATING STICKY NOTE:", {
         backgroundColor: selectedColor.bg,
