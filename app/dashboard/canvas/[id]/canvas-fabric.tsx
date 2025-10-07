@@ -128,9 +128,22 @@ export function useFabricCanvas(
               if (obj.stickyNoteGroup || (obj.backgroundColor && obj.stickyColor)) {
                 obj.isTextObject = true
                 obj.stickyNoteGroup = true
-                console.log(`🟡 STICKY NOTE ${index + 1} RESTORED`)
+                console.log(`🟡 STICKY NOTE ${index + 1} RESTORED WITH PROPERTIES:`, {
+                  isTextObject: obj.isTextObject,
+                  stickyNoteGroup: obj.stickyNoteGroup,
+                  canEdit: true
+                })
               }
             })
+            
+            console.log("🔄 CANVAS LOADED - All objects with sticky detection:", 
+              allObjects.map((obj, i) => ({
+                index: i + 1,
+                type: obj.type,
+                isSticky: !!(obj.backgroundColor && obj.stickyColor),
+                hasText: !!obj.text
+              }))
+            )
 
             console.log("🔄 CANVAS LOADED - Final object count:", canvas.getObjects().length)
             console.log("🔄 All objects after loading:", canvas.getObjects().map((obj: any, i) => ({
