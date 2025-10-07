@@ -126,19 +126,7 @@ export function useFabricCanvas(
 
               // Restore sticky note properties after loading
               if (obj.stickyNoteGroup || (obj.backgroundColor && obj.stickyColor)) {
-                // Use Object.defineProperty for better persistence
-                Object.defineProperty(obj, 'isTextObject', {
-                  value: true,
-                  writable: true,
-                  enumerable: true,
-                  configurable: true
-                })
-                Object.defineProperty(obj, 'stickyNoteGroup', {
-                  value: true,
-                  writable: true,
-                  enumerable: true,
-                  configurable: true
-                })
+                // Properties should already be restored by Fabric.js toObject/fromObject
                 console.log(`🟡 STICKY NOTE ${index + 1} RESTORED WITH PROPERTIES:`, {
                   isTextObject: obj.isTextObject,
                   stickyNoteGroup: obj.stickyNoteGroup,
