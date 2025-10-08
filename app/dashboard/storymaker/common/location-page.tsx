@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Trash2, MapPin, Sparkles, Upload } from "lucide-react"
-import { useStorymaker } from "@/app/common/storymaker/storymaker-context"
+import { useStorymaker } from "./storymaker-context"
 
 type Location = {
   id: number

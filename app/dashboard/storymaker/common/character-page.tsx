@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Plus, Trash2, Sparkles, Upload } from "lucide-react"
-import { useStorymaker } from "@/app/common/storymaker/storymaker-context"
+import { useStorymaker } from "./storymaker-context"
 
 type Character = {
   id: number
