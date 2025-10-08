@@ -60,6 +60,22 @@ export interface Scene {
   videos: Video[]
 }
 
+export interface ProjectConfig {
+  projectName: string
+  projectDescription: string
+  aspectRatio: string
+  duration: string
+  fps: string
+  resolution: string
+  autoTransitions: boolean
+  backgroundMusic: boolean
+  autoSave: boolean
+  watermark: boolean
+  aiModel: string
+  stylePreset: string
+  variations: string
+}
+
 export interface Template {
   id: string
   name: string
@@ -174,6 +190,23 @@ export const initialSounds: Sound[] = [
     duration: "2:15",
   },
 ]
+
+// Default Project Configuration
+export const defaultProjectConfig: ProjectConfig = {
+  projectName: "My AI Video Project",
+  projectDescription: "",
+  aspectRatio: "16:9",
+  duration: "60",
+  fps: "30",
+  resolution: "1080p",
+  autoTransitions: true,
+  backgroundMusic: false,
+  autoSave: true,
+  watermark: false,
+  aiModel: "standard",
+  stylePreset: "realistic",
+  variations: "4",
+}
 
 // Template Data
 export const templates: Template[] = [

@@ -325,12 +325,22 @@ export function VideoMaker() {
                       </div>
                     </div>
                   </Card>
-                  <Textarea
-                    value={scene.prompt}
-                    onChange={(e) => updateScene(scene.id, { prompt: e.target.value })}
-                    placeholder="Describe your scene or upload an image..."
-                    className="mt-2 text-xs min-h-20 resize-none"
-                  />
+                  <div className="mt-2 space-y-2">
+                    <Textarea
+                      value={scene.prompt}
+                      onChange={(e) => updateScene(scene.id, { prompt: e.target.value })}
+                      placeholder="Describe your scene or upload an image..."
+                      className="text-xs min-h-20 resize-none"
+                    />
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="w-full h-7 text-xs gap-1"
+                      onClick={() => regenerateVariations(scene.id)}
+                    >
+                      Send Prompt
+                    </Button>
+                  </div>
                 </div>
 
                 <div className="col-span-5">
