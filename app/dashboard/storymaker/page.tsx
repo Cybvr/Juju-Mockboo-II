@@ -1,4 +1,4 @@
-import { VideoMaker } from "@/components/video-maker"
+import { VideoMaker } from "@/app/common/storymaker/video-maker"
 
 export default function Home() {
   return <VideoMaker />
