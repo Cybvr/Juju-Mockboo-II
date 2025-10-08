@@ -1,0 +1,210 @@
+"use client"
+
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Switch } from "@/components/ui/switch"
+
+export function ProjectSetupPage() {
+  const [projectName, setProjectName] = useState("My AI Video Project")
+  const [aspectRatio, setAspectRatio] = useState("16:9")
+  const [duration, setDuration] = useState("60")
+  const [fps, setFps] = useState("30")
+  const [resolution, setResolution] = useState("1080p")
+  const [autoTransitions, setAutoTransitions] = useState(true)
+  const [backgroundMusic, setBackgroundMusic] = useState(false)
+
+  return (
+    <div className="p-6 max-w-4xl mx-auto">
+      <div className="mb-6">
+        <h2 className="text-2xl font-semibold mb-2">Project Setup</h2>
+        <p className="text-muted-foreground">Configure your video project settings and preferences</p>
+      </div>
+
+      <div className="space-y-6">
+        {/* Basic Information */}
+        <Card className="p-6">
+          <h3 className="text-lg font-semibold mb-4">Basic Information</h3>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="project-name">Project Name</Label>
+              <Input
+                id="project-name"
+                value={projectName}
+                onChange={(e) => setProjectName(e.target.value)}
+                placeholder="Enter project name"
+                className="mt-1"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="project-description">Project Description</Label>
+              <Textarea id="project-description" placeholder="Describe your video project" className="mt-1 min-h-24" />
+            </div>
+          </div>
+        </Card>
+
+        {/* Video Settings */}
+        <Card className="p-6">
+          <h3 className="text-lg font-semibold mb-4">Video Settings</h3>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="aspect-ratio">Aspect Ratio</Label>
+              <Select value={aspectRatio} onValueChange={setAspectRatio}>
+                <SelectTrigger id="aspect-ratio" className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="16:9">16:9 (Landscape)</SelectItem>
+                  <SelectItem value="9:16">9:16 (Portrait)</SelectItem>
+                  <SelectItem value="1:1">1:1 (Square)</SelectItem>
+                  <SelectItem value="4:3">4:3 (Standard)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="resolution">Resolution</Label>
+              <Select value={resolution} onValueChange={setResolution}>
+                <SelectTrigger id="resolution" className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="4k">4K (3840x2160)</SelectItem>
+                  <SelectItem value="1080p">1080p (1920x1080)</SelectItem>
+                  <SelectItem value="720p">720p (1280x720)</SelectItem>
+                  <SelectItem value="480p">480p (854x480)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="fps">Frame Rate (FPS)</Label>
+              <Select value={fps} onValueChange={setFps}>
+                <SelectTrigger id="fps" className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="24">24 FPS (Cinematic)</SelectItem>
+                  <SelectItem value="30">30 FPS (Standard)</SelectItem>
+                  <SelectItem value="60">60 FPS (Smooth)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="duration">Default Scene Duration (seconds)</Label>
+              <Input
+                id="duration"
+                type="number"
+                value={duration}
+                onChange={(e) => setDuration(e.target.value)}
+                placeholder="60"
+                className="mt-1"
+              />
+            </div>
+          </div>
+        </Card>
+
+        {/* AI Generation Settings */}
+        <Card className="p-6">
+          <h3 className="text-lg font-semibold mb-4">AI Generation Settings</h3>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="ai-model">AI Model</Label>
+              <Select defaultValue="standard">
+                <SelectTrigger id="ai-model" className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="standard">Standard Quality</SelectItem>
+                  <SelectItem value="high">High Quality (Slower)</SelectItem>
+                  <SelectItem value="ultra">Ultra Quality (Premium)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="style-preset">Style Preset</Label>
+              <Select defaultValue="realistic">
+                <SelectTrigger id="style-preset" className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="realistic">Realistic</SelectItem>
+                  <SelectItem value="animated">Animated</SelectItem>
+                  <SelectItem value="cinematic">Cinematic</SelectItem>
+                  <SelectItem value="artistic">Artistic</SelectItem>
+                  <SelectItem value="documentary">Documentary</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="variations">Number of Variations per Scene</Label>
+              <Select defaultValue="4">
+                <SelectTrigger id="variations" className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="2">2 Variations</SelectItem>
+                  <SelectItem value="4">4 Variations</SelectItem>
+                  <SelectItem value="6">6 Variations</SelectItem>
+                  <SelectItem value="8">8 Variations</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </Card>
+
+        {/* Advanced Options */}
+        <Card className="p-6">
+          <h3 className="text-lg font-semibold mb-4">Advanced Options</h3>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Auto Transitions</Label>
+                <p className="text-sm text-muted-foreground">Automatically add transitions between scenes</p>
+              </div>
+              <Switch checked={autoTransitions} onCheckedChange={setAutoTransitions} />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Background Music</Label>
+                <p className="text-sm text-muted-foreground">Add AI-generated background music</p>
+              </div>
+              <Switch checked={backgroundMusic} onCheckedChange={setBackgroundMusic} />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Auto-Save</Label>
+                <p className="text-sm text-muted-foreground">Automatically save project changes</p>
+              </div>
+              <Switch defaultChecked />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Watermark</Label>
+                <p className="text-sm text-muted-foreground">Add watermark to exported videos</p>
+              </div>
+              <Switch />
+            </div>
+          </div>
+        </Card>
+
+        {/* Action Buttons */}
+        <div className="flex justify-end gap-3">
+          <Button variant="outline">Reset to Defaults</Button>
+          <Button>Save Settings</Button>
+        </div>
+      </div>
+    </div>
+  )
+}
