@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -40,6 +40,23 @@ export function ProjectSetupPage() {
   const [aiModel, setAiModel] = useState(config.aiModel)
   const [stylePreset, setStylePreset] = useState(config.stylePreset)
   const [variations, setVariations] = useState(config.variations)
+
+  // Update local state when config changes (like when template is selected)
+  useEffect(() => {
+    setProjectName(config.projectName)
+    setProjectDescription(config.projectDescription)
+    setAspectRatio(config.aspectRatio)
+    setDuration(config.duration)
+    setFps(config.fps)
+    setResolution(config.resolution)
+    setAutoTransitions(config.autoTransitions)
+    setBackgroundMusic(config.backgroundMusic)
+    setAutoSave(config.autoSave)
+    setWatermark(config.watermark)
+    setAiModel(config.aiModel)
+    setStylePreset(config.stylePreset)
+    setVariations(config.variations)
+  }, [config])
 
   const handleSaveSettings = () => {
     setConfig({
