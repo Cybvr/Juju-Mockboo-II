@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Plus, Trash2, Sparkles, Upload } from "lucide-react"
+import { initialCharacters } from "@/data/storymakerData"
 
 type Character = {
   id: number
@@ -17,32 +18,15 @@ type Character = {
 }
 
 export function CharacterPage() {
-  const [characters, setCharacters] = useState<Character[]>([
-    {
-      id: 1,
-      name: "Isabelle Laurent",
-      description:
-        "Elegant French brand ambassador in her early 30s with flowing dark hair, sophisticated style, embodies the essence of Lumière Parfum",
-      imageUrl: "/elegant-french-woman-with-dark-hair-in-white-dress.jpg",
-      traits: ["Elegant", "Sophisticated", "Graceful", "Timeless"],
-    },
-    {
-      id: 2,
-      name: "Jean-Claude Moreau",
-      description:
-        "Distinguished master perfumer in his 50s, silver hair, wearing white lab coat, passionate about fragrance creation",
-      imageUrl: "/distinguished-french-perfumer-man-in-white-lab-coa.jpg",
-      traits: ["Expert", "Passionate", "Refined", "Artistic"],
-    },
-    {
-      id: 3,
-      name: "Sofia Chen",
-      description:
-        "Modern muse in her mid-20s, minimalist style, represents the contemporary woman who wears Lumière Parfum",
-      imageUrl: "/young-asian-woman-in-minimalist-black-outfit-holdi.jpg",
-      traits: ["Modern", "Confident", "Minimalist", "Bold"],
-    },
-  ])
+  const [characters, setCharacters] = useState<Character[]>(
+    initialCharacters.map((char, index) => ({
+      id: index + 1,
+      name: char.name,
+      description: char.description || "",
+      imageUrl: char.imageUrl,
+      traits: char.traits || [],
+    }))
+  )
 
   const addCharacter = () => {
     const newCharacter: Character = {

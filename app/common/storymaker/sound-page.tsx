@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Upload, Music, Trash2, Sparkles } from "lucide-react"
+import { initialSounds } from "@/data/storymakerData"
 
 type Sound = {
   id: string
@@ -20,40 +21,16 @@ type Sound = {
 }
 
 export function SoundPage() {
-  const [sounds, setSounds] = useState<Sound[]>([
-    {
-      id: "1",
-      name: "Ethereal Piano - Brand Theme",
-      type: "music",
-      duration: "2:15",
-      description: "Elegant piano composition with subtle strings, embodies the sophistication of Lumière Parfum",
-      tags: ["elegant", "sophisticated", "piano", "brand"],
-    },
-    {
-      id: "2",
-      name: "Ambient Boutique Atmosphere",
-      type: "ambient",
-      duration: "3:00",
-      description: "Subtle background ambience for luxury boutique scenes, soft murmurs, gentle footsteps on marble",
-      tags: ["ambient", "luxury", "boutique", "subtle"],
-    },
-    {
-      id: "3",
-      name: "Lavender Fields Nature",
-      type: "ambient",
-      duration: "2:30",
-      description: "Natural sounds of Provence countryside, gentle breeze through lavender, distant birds",
-      tags: ["nature", "lavender", "peaceful", "countryside"],
-    },
-    {
-      id: "4",
-      name: "French Voiceover - Isabelle",
-      type: "voiceover",
-      duration: "0:45",
-      description: "Elegant French-accented voiceover: 'Lumière Parfum. L'essence de l'élégance.'",
-      tags: ["voiceover", "french", "elegant", "brand"],
-    },
-  ])
+  const [sounds, setSounds] = useState<Sound[]>(
+    initialSounds.map((sound) => ({
+      id: sound.id,
+      name: sound.name,
+      type: sound.type || "music",
+      duration: sound.duration || "0:00",
+      description: `Professional ${sound.type} for Lumière Parfum commercial`,
+      tags: [sound.type || "music", "parfum", "commercial"],
+    }))
+  )
 
   const addSound = () => {
     const newSound: Sound = {

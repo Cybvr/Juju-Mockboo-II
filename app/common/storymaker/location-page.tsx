@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Trash2, MapPin, Sparkles, Upload } from "lucide-react"
+import { initialLocations } from "@/data/storymakerData"
 
 type Location = {
   id: number
@@ -20,48 +21,17 @@ type Location = {
 }
 
 export function LocationPage() {
-  const [locations, setLocations] = useState<Location[]>([
-    {
-      id: 1,
-      name: "Provence Lavender Fields",
-      description:
-        "Endless rows of purple lavender stretching to the horizon, golden hour lighting, rustic French countryside atmosphere",
-      type: "outdoor",
-      timeOfDay: "golden-hour",
-      weather: "clear",
-      imageUrl: "/provence-lavender-fields-at-golden-hour-purple-flo.jpg",
-    },
-    {
-      id: 2,
-      name: "Lumière Boutique Paris",
-      description:
-        "Elegant perfume boutique on Rue Saint-Honoré, marble floors, gold accents, crystal chandeliers, minimalist luxury design",
-      type: "indoor",
-      timeOfDay: "afternoon",
-      weather: "clear",
-      imageUrl: "/placeholder.svg?height=600&width=900",
-    },
-    {
-      id: 3,
-      name: "Perfume Laboratory",
-      description:
-        "Modern fragrance creation lab with glass equipment, botanical ingredients, natural light, clean white aesthetic",
-      type: "indoor",
-      timeOfDay: "morning",
-      weather: "clear",
-      imageUrl: "/placeholder.svg?height=600&width=900",
-    },
-    {
-      id: 4,
-      name: "Parisian Rooftop Terrace",
-      description:
-        "Exclusive rooftop terrace overlooking Paris skyline, Eiffel Tower view, sunset ambiance, elegant outdoor furniture",
-      type: "outdoor",
-      timeOfDay: "evening",
-      weather: "clear",
-      imageUrl: "/placeholder.svg?height=600&width=900",
-    },
-  ])
+  const [locations, setLocations] = useState<Location[]>(
+    initialLocations.map((loc, index) => ({
+      id: index + 1,
+      name: loc.name,
+      description: loc.description || "",
+      type: loc.timeOfDay === "Day" ? "indoor" : "outdoor",
+      timeOfDay: loc.timeOfDay?.toLowerCase() || "day",
+      weather: loc.weather?.toLowerCase() || "clear",
+      imageUrl: loc.imageUrl,
+    }))
+  )
 
   const addLocation = () => {
     const newLocation: Location = {
