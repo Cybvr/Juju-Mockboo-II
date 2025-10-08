@@ -897,3 +897,24 @@ export function getInitialAppData(): AppData {
     templates: [], // Templates imported from separate file
   }
 }
+
+// Function to create project config from template
+export function createProjectConfigFromTemplate(template: any): ProjectConfig {
+  return {
+    projectName: template.name,
+    projectDescription: template.description,
+    aspectRatio: "16:9",
+    duration: "60",
+    fps: "30", 
+    resolution: "1080p",
+    autoTransitions: true,
+    backgroundMusic: template.category === "animated" || template.category === "anime",
+    autoSave: true,
+    watermark: false,
+    aiModel: template.category === "anime" ? "ultra" : "high",
+    stylePreset: template.category === "anime" ? "animated" : 
+                template.category === "product-ads" ? "cinematic" :
+                template.category === "travel" ? "documentary" : "realistic",
+    variations: "4",
+  }
+}

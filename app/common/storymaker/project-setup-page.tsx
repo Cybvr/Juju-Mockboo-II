@@ -8,30 +8,56 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
-import { 
-  defaultProjectConfig, 
-  aspectRatioOptions, 
-  resolutionOptions, 
-  fpsOptions, 
-  aiModelOptions, 
-  stylePresetOptions, 
-  variationOptions 
+import {
+  defaultProjectConfig,
+  aspectRatioOptions,
+  resolutionOptions,
+  fpsOptions,
+  aiModelOptions,
+  stylePresetOptions,
+  variationOptions
 } from "@/data/storymakerData"
+import { useStorymaker } from "@/context/storymakerContext"
+
 
 export function ProjectSetupPage() {
-  const [projectName, setProjectName] = useState(defaultProjectConfig.projectName)
-  const [projectDescription, setProjectDescription] = useState(defaultProjectConfig.projectDescription)
-  const [aspectRatio, setAspectRatio] = useState(defaultProjectConfig.aspectRatio)
-  const [duration, setDuration] = useState(defaultProjectConfig.duration)
-  const [fps, setFps] = useState(defaultProjectConfig.fps)
-  const [resolution, setResolution] = useState(defaultProjectConfig.resolution)
-  const [autoTransitions, setAutoTransitions] = useState(defaultProjectConfig.autoTransitions)
-  const [backgroundMusic, setBackgroundMusic] = useState(defaultProjectConfig.backgroundMusic)
-  const [autoSave, setAutoSave] = useState(defaultProjectConfig.autoSave)
-  const [watermark, setWatermark] = useState(defaultProjectConfig.watermark)
-  const [aiModel, setAiModel] = useState(defaultProjectConfig.aiModel)
-  const [stylePreset, setStylePreset] = useState(defaultProjectConfig.stylePreset)
-  const [variations, setVariations] = useState(defaultProjectConfig.variations)
+  const { projectConfig: config, updateProjectConfig } = useStorymaker()
+
+  const setConfig = (newConfig: any) => {
+    updateProjectConfig(newConfig)
+  }
+
+  const [projectName, setProjectName] = useState(config.projectName)
+  const [projectDescription, setProjectDescription] = useState(config.projectDescription)
+  const [aspectRatio, setAspectRatio] = useState(config.aspectRatio)
+  const [duration, setDuration] = useState(config.duration)
+  const [fps, setFps] = useState(config.fps)
+  const [resolution, setResolution] = useState(config.resolution)
+  const [autoTransitions, setAutoTransitions] = useState(config.autoTransitions)
+  const [backgroundMusic, setBackgroundMusic] = useState(config.backgroundMusic)
+  const [autoSave, setAutoSave] = useState(config.autoSave)
+  const [watermark, setWatermark] = useState(config.watermark)
+  const [aiModel, setAiModel] = useState(config.aiModel)
+  const [stylePreset, setStylePreset] = useState(config.stylePreset)
+  const [variations, setVariations] = useState(config.variations)
+
+  const handleSaveSettings = () => {
+    setConfig({
+      projectName,
+      projectDescription,
+      aspectRatio,
+      duration,
+      fps,
+      resolution,
+      autoTransitions,
+      backgroundMusic,
+      autoSave,
+      watermark,
+      aiModel,
+      stylePreset,
+      variations
+    })
+  }
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
@@ -58,12 +84,12 @@ export function ProjectSetupPage() {
 
             <div>
               <Label htmlFor="project-description">Project Description</Label>
-              <Textarea 
-                id="project-description" 
+              <Textarea
+                id="project-description"
                 value={projectDescription}
                 onChange={(e) => setProjectDescription(e.target.value)}
-                placeholder="Describe your video project" 
-                className="mt-1 min-h-24" 
+                placeholder="Describe your video project"
+                className="mt-1 min-h-24"
               />
             </div>
           </div>
@@ -230,7 +256,7 @@ export function ProjectSetupPage() {
         {/* Action Buttons */}
         <div className="flex justify-end gap-3">
           <Button variant="outline">Reset to Defaults</Button>
-          <Button>Save Settings</Button>
+          <Button onClick={handleSaveSettings}>Save Settings</Button>
         </div>
       </div>
     </div>

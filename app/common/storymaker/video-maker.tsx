@@ -16,6 +16,7 @@ import { ThumbnailSelect } from "@/app/common/storymaker/thumbnail-select"
 import { TemplateModal } from "@/app/common/storymaker/template-modal"
 import { initialScenes, initialCharacters, initialLocations, initialSounds } from "@/data/storymakerData"
 import { templates, type Template } from "@/data/storymakerTemplatesData"
+import { useStorymaker } from "@/app/common/storymaker/storymaker-context"
 
 type LegacyVideo = {
   id: string
@@ -35,6 +36,7 @@ type LegacyScene = {
 }
 
 export function VideoMaker() {
+  const { selectedTemplate, setSelectedTemplate } = useStorymaker()
   const [activeTab, setActiveTab] = useState("creator")
   const [scenes, setScenes] = useState<LegacyScene[]>(
     initialScenes.map((scene, idx) => ({
@@ -73,13 +75,17 @@ export function VideoMaker() {
   }))
 
   const handleSelectTemplate = (template: Template) => {
+    // Update context with selected template
+    setSelectedTemplate(template)
+    
+    // Replace all scenes with template scenes
     const newScenes: LegacyScene[] = template.scenes.map((scene, idx) => ({
-      id: scenes.length + idx + 1,
+      id: idx + 1,
       prompt: scene.prompt,
       variations: [],
       videos: [],
     }))
-    setScenes([...scenes, ...newScenes])
+    setScenes(newScenes)
   }
 
   const addScene = () => {
@@ -205,7 +211,9 @@ export function VideoMaker() {
       {/* Header */}
       <header className="border-b border-border px-6 py-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-semibold">Lumière Parfum Studio</h1>
+          <h1 className="text-xl font-semibold">
+            {selectedTemplate ? selectedTemplate.name : "Lumière Parfum Studio"}
+          </h1>
           <div className="flex gap-2">
             <Button variant="outline" className="gap-2 bg-transparent" onClick={() => setIsTemplateModalOpen(true)}>
               <LayoutTemplate className="h-4 w-4" />
