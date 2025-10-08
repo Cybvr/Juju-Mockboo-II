@@ -1,4 +1,3 @@
-
 export interface Template {
   id: string
   name: string
@@ -27,10 +26,10 @@ export const templates: Template[] = [
   // UGC Ads Templates
   {
     id: "t1",
-    name: "Product Unboxing",
+    name: "GlowKit Beauty Unboxing",
     category: "ugc-ads",
     thumbnailUrl: "/assets/images/storymaker/young-asian-woman-in-minimalist-black-outfit-holdi.jpg",
-    description: "Authentic unboxing experience with genuine reactions",
+    description: "Authentic unboxing experience for skincare subscription boxes - viral format used by brands like FabFitFun and Ipsy creators",
     scenes: [
       {
         name: "Package Arrival",
@@ -54,10 +53,10 @@ export const templates: Template[] = [
   },
   {
     id: "t2",
-    name: "Day in My Life",
+    name: "Day with Luna Wellness Products",
     category: "ugc-ads",
     thumbnailUrl: "/assets/images/storymaker/elegant-woman-in-white-dress-walking-through-purpl.jpg",
-    description: "Natural lifestyle content featuring your product",
+    description: "Natural lifestyle content featuring wellness supplements seamlessly integrated into daily routines - popular with brands like Ritual and Athletic Greens",
     scenes: [
       {
         name: "Morning Routine",
@@ -75,10 +74,10 @@ export const templates: Template[] = [
   },
   {
     id: "t3",
-    name: "Before & After",
+    name: "ClearSkin 30-Day Challenge",
     category: "ugc-ads",
     thumbnailUrl: "/assets/images/juju/woman-holding-bottle-on-beach-ugc-style.jpg",
-    description: "Transformation content showing product results",
+    description: "Transformation content showing real results from acne treatments and skincare serums - proven format for brands like Curology and The Ordinary",
     scenes: [
       {
         name: "Before State",
@@ -100,14 +99,14 @@ export const templates: Template[] = [
       },
     ],
   },
-  
+
   // Entertainment Templates
   {
     id: "t4",
-    name: "Behind the Scenes",
+    name: "Making of Artisan Candles BTS",
     category: "entertainment",
     thumbnailUrl: "/assets/images/storymaker/distinguished-french-perfumer-man-in-white-lab-coa.jpg",
-    description: "Show the process behind your content creation",
+    description: "Behind the scenes of handcrafted product creation - engaging format for artisan brands like Paddywax and small batch makers",
     scenes: [
       {
         name: "Setup",
@@ -131,10 +130,10 @@ export const templates: Template[] = [
   },
   {
     id: "t5",
-    name: "Tutorial & Tips",
+    name: "StyleVault Fashion Hacks",
     category: "entertainment",
     thumbnailUrl: "/assets/images/templates/fashion.jpg",
-    description: "Educational content with entertainment value",
+    description: "Quick styling tips and outfit formulas - viral educational format used by fashion influencers and brands like Zara and H&M creators",
     scenes: [
       {
         name: "Introduction",
@@ -156,14 +155,14 @@ export const templates: Template[] = [
       },
     ],
   },
-  
+
   // Food Templates  
   {
     id: "t6",
-    name: "Recipe Showcase",
+    name: "Mama Rosa's 15-Minute Pasta",
     category: "food",
     thumbnailUrl: "/assets/images/marketing/food.jpg",
-    description: "Mouth-watering recipe presentation",
+    description: "Quick, crave-worthy recipe videos perfect for pasta sauces, meal kits, or kitchen gadget brands like Barilla, HelloFresh, or OXO",
     scenes: [
       {
         name: "Ingredients",
@@ -187,10 +186,10 @@ export const templates: Template[] = [
   },
   {
     id: "t7",
-    name: "Food Review",
+    name: "TasteBudz Street Food Hunt",
     category: "food",
     thumbnailUrl: "/assets/images/storymaker/farm-scene.jpg",
-    description: "Honest food tasting and review",
+    description: "Honest reactions to trying new restaurants and food products - popular format for food delivery apps like DoorDash, Uber Eats, and snack brands",
     scenes: [
       {
         name: "Food Reveal",
@@ -212,14 +211,14 @@ export const templates: Template[] = [
       },
     ],
   },
-  
+
   // Montage Templates
   {
     id: "t8",
-    name: "Transformation Montage",
+    name: "RoomRevive Makeover Montage",
     category: "montage",
     thumbnailUrl: "/assets/images/storymaker/perfume-bottle-on-wooden-table-with-lavender-bouqu.jpg",
-    description: "Fast-paced before and after transformation",
+    description: "Fast-paced home decor and furniture transformations - trending format for brands like IKEA, Wayfair, and interior design products",
     scenes: [
       {
         name: "Starting Point",
@@ -243,10 +242,10 @@ export const templates: Template[] = [
   },
   {
     id: "t9",
-    name: "Daily Routine Montage",
+    name: "Hustle & Flow Daily Reset",
     category: "montage",
     thumbnailUrl: "/assets/images/templates/moodboard.jpg",
-    description: "Aesthetic daily routine in quick cuts",
+    description: "Aesthetic productivity and self-care routine montages - ideal for planners, productivity apps like Notion, and wellness brands",
     scenes: [
       {
         name: "Morning",
@@ -268,14 +267,14 @@ export const templates: Template[] = [
       },
     ],
   },
-  
+
   // Product Ads Templates
   {
     id: "t10",
-    name: "Luxury Product Launch",
+    name: "Noir Élégance Perfume Launch",
     category: "product-ads",
     thumbnailUrl: "/assets/images/storymaker/luxury-perfume-bottle-on-white-marble-pedestal-wit.jpg",
-    description: "Premium product reveal with cinematic shots",
+    description: "Premium fragrance and luxury goods reveal with cinematic cinematography - signature style for brands like Chanel, Dior, and high-end cosmetics",
     scenes: [
       {
         name: "Teaser",
@@ -299,10 +298,10 @@ export const templates: Template[] = [
   },
   {
     id: "t11",
-    name: "Problem Solution Ad",
+    name: "BackEase Pain Relief Story",
     category: "product-ads",
     thumbnailUrl: "/assets/images/marketing/consistent.jpg",
-    description: "Address customer pain points with your solution",
+    description: "Problem-solution narrative for pain relief, sleep aids, or productivity tools - effective for brands like Theragun, Purple Mattress, and wellness tech",
     scenes: [
       {
         name: "The Problem",
@@ -324,14 +323,14 @@ export const templates: Template[] = [
       },
     ],
   },
-  
+
   // Travel Templates
   {
     id: "t12",
-    name: "City Exploration",
+    name: "Wanderluxe Paris Hidden Gems",
     category: "travel",
     thumbnailUrl: "/assets/images/storymaker/paris-eiffel-tower-romantic.png",
-    description: "Discover hidden gems in a beautiful city",
+    description: "Discover secret cafes and boutiques in iconic cities - perfect for travel booking platforms like Airbnb, travel gear brands, and city guide apps",
     scenes: [
       {
         name: "Arrival",
@@ -355,10 +354,10 @@ export const templates: Template[] = [
   },
   {
     id: "t13",
-    name: "Nature Adventure",
+    name: "Summit Seekers Mountain Trek",
     category: "travel",
     thumbnailUrl: "/assets/images/storymaker/provence-lavender-fields-at-golden-hour-purple-flo.jpg",
-    description: "Outdoor adventure in stunning landscapes",
+    description: "Epic outdoor adventures showcasing hiking boots, camping gear, and outdoor apparel - used by brands like Patagonia, REI, and GoPro",
     scenes: [
       {
         name: "Journey Begins",
@@ -380,14 +379,14 @@ export const templates: Template[] = [
       },
     ],
   },
-  
+
   // Explainer Templates
   {
     id: "t14",
-    name: "How It Works",
+    name: "TechFlow AI Tool Breakdown",
     category: "explainer",
     thumbnailUrl: "/assets/images/storymaker/perfume-ingredients-diagram.jpg",
-    description: "Clear explanation of product or process",
+    description: "Clear walkthrough of software features and SaaS platforms - essential for tech companies like Slack, Notion, and productivity startups",
     scenes: [
       {
         name: "Introduction",
@@ -411,10 +410,10 @@ export const templates: Template[] = [
   },
   {
     id: "t15",
-    name: "Educational Tips",
+    name: "MoneyWise Finance Tips",
     category: "explainer",
     thumbnailUrl: "/assets/images/templates/poster.jpg",
-    description: "Share knowledge with helpful tips",
+    description: "Educational content about budgeting, investing, and financial literacy - popular format for fintech apps like Acorns, Robinhood, and financial coaches",
     scenes: [
       {
         name: "Hook",
@@ -436,14 +435,14 @@ export const templates: Template[] = [
       },
     ],
   },
-  
+
   // Animated Templates
   {
     id: "t16",
-    name: "Motion Graphics Ad",
+    name: "FlashFit App Promo Animation",
     category: "animated",
     thumbnailUrl: "/assets/images/templates/logo.jpg",
-    description: "Eye-catching animated promotional content",
+    description: "Eye-catching motion graphics for fitness apps, mobile games, and digital products - high-energy style for brands like Nike Training Club and Headspace",
     scenes: [
       {
         name: "Animated Intro",
@@ -467,10 +466,10 @@ export const templates: Template[] = [
   },
   {
     id: "t17",
-    name: "Infographic Video",
+    name: "ClimateWatch Data Story",
     category: "animated",
     thumbnailUrl: "/assets/images/templates/bc.jpg",
-    description: "Data visualization with smooth animations",
+    description: "Engaging data visualization for environmental stats, market research, and annual reports - professional format for sustainability brands and B2B companies",
     scenes: [
       {
         name: "Title Card",
@@ -492,14 +491,14 @@ export const templates: Template[] = [
       },
     ],
   },
-  
+
   // Anime Templates
   {
     id: "t18",
-    name: "Character Introduction",
+    name: "Shadow Blade Hero Origin",
     category: "anime",
     thumbnailUrl: "/assets/images/restyle/anime.jpg",
-    description: "Anime-style character reveal and backstory",
+    description: "Anime-style character introduction for gaming channels, manga promotions, and anime merchandise - inspired by Crunchyroll and anime studio marketing",
     scenes: [
       {
         name: "Mystery Silhouette",
@@ -523,10 +522,10 @@ export const templates: Template[] = [
   },
   {
     id: "t19",
-    name: "Anime Product Commercial",
+    name: "Pixel Energy Drink Anime Ad",
     category: "anime",
     thumbnailUrl: "/assets/images/templates/ad.jpg",
-    description: "Product ad in anime art style",
+    description: "Anime-styled product commercial for energy drinks, gaming peripherals, and youth-focused brands - bold format used by brands like G Fuel and Razer",
     scenes: [
       {
         name: "Anime Opening",
