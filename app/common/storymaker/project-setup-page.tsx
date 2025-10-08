@@ -17,7 +17,7 @@ import {
   stylePresetOptions,
   variationOptions
 } from "@/data/storymakerData"
-import { useStorymaker } from "@/context/storymakerContext"
+import { useStorymaker } from "@/app/common/storymaker/storymaker-context"
 
 
 export function ProjectSetupPage() {
