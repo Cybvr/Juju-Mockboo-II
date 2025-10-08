@@ -193,18 +193,18 @@ export const initialSounds: Sound[] = [
 
 // Default Project Configuration
 export const defaultProjectConfig: ProjectConfig = {
-  projectName: "My AI Video Project",
-  projectDescription: "",
+  projectName: "Lumière Parfum Studio",
+  projectDescription: "Elegant fragrance commercial showcasing the artistry and sophistication of Lumière Parfum through cinematic storytelling",
   aspectRatio: "16:9",
-  duration: "60",
+  duration: "45",
   fps: "30",
   resolution: "1080p",
   autoTransitions: true,
-  backgroundMusic: false,
+  backgroundMusic: true,
   autoSave: true,
   watermark: false,
-  aiModel: "standard",
-  stylePreset: "realistic",
+  aiModel: "high",
+  stylePreset: "cinematic",
   variations: "4",
 }
 
