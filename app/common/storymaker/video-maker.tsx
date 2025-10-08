@@ -212,9 +212,8 @@ export function VideoMaker() {
             </Button>
             <Button variant="default" onClick={() => setIsModalOpen(true)} className="gap-2">
               <Film className="h-4 w-4" />
-              View Final Video
+              Preview
             </Button>
-            <Button variant="outline">Edit</Button>
             <Button variant="outline">Share</Button>
           </div>
         </div>
