@@ -14,7 +14,8 @@ import { SoundPage } from "@/app/common/storymaker/sound-page"
 import { FinalVideoModal } from "@/app/common/storymaker/final-video-modal"
 import { ThumbnailSelect } from "@/app/common/storymaker/thumbnail-select"
 import { TemplateModal } from "@/app/common/storymaker/template-modal"
-import { initialScenes, initialCharacters, initialLocations, initialSounds, type Template } from "@/data/storymakerData"
+import { initialScenes, initialCharacters, initialLocations, initialSounds } from "@/data/storymakerData"
+import { templates, type Template } from "@/data/storymakerTemplatesData"
 
 type LegacyVideo = {
   id: string

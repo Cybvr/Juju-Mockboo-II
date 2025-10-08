@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import { templates, type Template } from "@/data/storymakerData"
+import { templates, type Template } from "@/data/storymakerTemplatesData"
 import { Sparkles } from "lucide-react"
 
 interface TemplateModalProps {
