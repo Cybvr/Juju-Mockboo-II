@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/tooltip';
 import {
   LayoutDashboard,
-  Home,
+  Home, Drama,
   Clapperboard,
   Image as ImageIcon,
   Video,
@@ -89,11 +89,17 @@ export function Sidebar({ className, onNavigate }: SidebarProps) {
       active: false,
       onClick: createNewCanvas,
     },
-    {
-      label: 'Scenes',
-      icon: Clapperboard,
-      href: '/dashboard/scenes',
-      active: pathname.startsWith('/dashboard/scenes'),
+      {
+        label: 'Scenes',
+        icon: Clapperboard,
+        href: '/dashboard/scenes',
+        active: pathname.startsWith('/dashboard/scenes'),
+    },
+      {
+        label: 'Storymaker',
+        icon: Drama,
+        href: '/dashboard/storymaker',
+        active: pathname.startsWith('/dashboard/storymaker'),
     },
     {
       label: 'Settings',
