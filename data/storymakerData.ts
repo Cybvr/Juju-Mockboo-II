@@ -454,6 +454,48 @@ export const initialScenes: Scene[] = [
   },
 ]
 
+// Project Setup Options
+export const aspectRatioOptions = [
+  { value: "16:9", label: "16:9 (Landscape)" },
+  { value: "9:16", label: "9:16 (Portrait)" },
+  { value: "1:1", label: "1:1 (Square)" },
+  { value: "4:3", label: "4:3 (Standard)" },
+]
+
+export const resolutionOptions = [
+  { value: "4k", label: "4K (3840x2160)" },
+  { value: "1080p", label: "1080p (1920x1080)" },
+  { value: "720p", label: "720p (1280x720)" },
+  { value: "480p", label: "480p (854x480)" },
+]
+
+export const fpsOptions = [
+  { value: "24", label: "24 FPS (Cinematic)" },
+  { value: "30", label: "30 FPS (Standard)" },
+  { value: "60", label: "60 FPS (Smooth)" },
+]
+
+export const aiModelOptions = [
+  { value: "standard", label: "Standard Quality" },
+  { value: "high", label: "High Quality (Slower)" },
+  { value: "ultra", label: "Ultra Quality (Premium)" },
+]
+
+export const stylePresetOptions = [
+  { value: "realistic", label: "Realistic" },
+  { value: "animated", label: "Animated" },
+  { value: "cinematic", label: "Cinematic" },
+  { value: "artistic", label: "Artistic" },
+  { value: "documentary", label: "Documentary" },
+]
+
+export const variationOptions = [
+  { value: "2", label: "2 Variations" },
+  { value: "4", label: "4 Variations" },
+  { value: "6", label: "6 Variations" },
+  { value: "8", label: "8 Variations" },
+]
+
 export function getInitialAppData(): AppData {
   return {
     scenes: initialScenes,
