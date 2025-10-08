@@ -8,15 +8,19 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
+import { defaultProjectConfig } from "@/data/storymakerData"
 
 export function ProjectSetupPage() {
-  const [projectName, setProjectName] = useState("My AI Video Project")
-  const [aspectRatio, setAspectRatio] = useState("16:9")
-  const [duration, setDuration] = useState("60")
-  const [fps, setFps] = useState("30")
-  const [resolution, setResolution] = useState("1080p")
-  const [autoTransitions, setAutoTransitions] = useState(true)
-  const [backgroundMusic, setBackgroundMusic] = useState(false)
+  const [projectName, setProjectName] = useState(defaultProjectConfig.projectName)
+  const [aspectRatio, setAspectRatio] = useState(defaultProjectConfig.aspectRatio)
+  const [duration, setDuration] = useState(defaultProjectConfig.duration)
+  const [fps, setFps] = useState(defaultProjectConfig.fps)
+  const [resolution, setResolution] = useState(defaultProjectConfig.resolution)
+  const [autoTransitions, setAutoTransitions] = useState(defaultProjectConfig.autoTransitions)
+  const [backgroundMusic, setBackgroundMusic] = useState(defaultProjectConfig.backgroundMusic)
+  const [aiModel, setAiModel] = useState(defaultProjectConfig.aiModel)
+  const [stylePreset, setStylePreset] = useState(defaultProjectConfig.stylePreset)
+  const [variations, setVariations] = useState(defaultProjectConfig.variations)
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
@@ -116,7 +120,7 @@ export function ProjectSetupPage() {
           <div className="space-y-4">
             <div>
               <Label htmlFor="ai-model">AI Model</Label>
-              <Select defaultValue="standard">
+              <Select value={aiModel} onValueChange={setAiModel}>
                 <SelectTrigger id="ai-model" className="mt-1">
                   <SelectValue />
                 </SelectTrigger>
@@ -130,7 +134,7 @@ export function ProjectSetupPage() {
 
             <div>
               <Label htmlFor="style-preset">Style Preset</Label>
-              <Select defaultValue="realistic">
+              <Select value={stylePreset} onValueChange={setStylePreset}>
                 <SelectTrigger id="style-preset" className="mt-1">
                   <SelectValue />
                 </SelectTrigger>
@@ -146,7 +150,7 @@ export function ProjectSetupPage() {
 
             <div>
               <Label htmlFor="variations">Number of Variations per Scene</Label>
-              <Select defaultValue="4">
+              <Select value={variations} onValueChange={setVariations}>
                 <SelectTrigger id="variations" className="mt-1">
                   <SelectValue />
                 </SelectTrigger>
