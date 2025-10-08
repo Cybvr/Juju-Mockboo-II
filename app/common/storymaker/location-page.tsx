@@ -1,6 +1,7 @@
+
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -8,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Trash2, MapPin, Sparkles, Upload } from "lucide-react"
-import { initialLocations } from "@/data/storymakerData"
+import { useStorymaker } from "@/app/common/storymaker/storymaker-context"
 
 type Location = {
   id: number
@@ -21,17 +22,59 @@ type Location = {
 }
 
 export function LocationPage() {
-  const [locations, setLocations] = useState<Location[]>(
-    initialLocations.map((loc, index) => ({
-      id: index + 1,
-      name: loc.name,
-      description: loc.description || "",
-      type: loc.timeOfDay === "Day" ? "indoor" : "outdoor",
-      timeOfDay: loc.timeOfDay?.toLowerCase() || "day",
-      weather: loc.weather?.toLowerCase() || "clear",
-      imageUrl: loc.imageUrl,
-    }))
-  )
+  const { selectedTemplate } = useStorymaker()
+  const [locations, setLocations] = useState<Location[]>([])
+
+  // Update locations when template changes
+  useEffect(() => {
+    if (selectedTemplate) {
+      // Extract unique locations from template scenes
+      const templateLocations = selectedTemplate.scenes
+        .map((scene, index) => ({
+          id: index + 1,
+          name: `Location ${index + 1}`,
+          description: scene.prompt.substring(0, 100) + "...",
+          type: "outdoor",
+          timeOfDay: "day",
+          weather: "clear",
+          imageUrl: "/placeholder.svg",
+        }))
+        .slice(0, 3) // Limit to 3 locations
+      
+      setLocations(templateLocations)
+    } else {
+      // Default locations when no template selected
+      setLocations([
+        {
+          id: 1,
+          name: "Provence Lavender Fields",
+          description: "Endless purple lavender fields in the French countryside",
+          type: "outdoor",
+          timeOfDay: "golden-hour",
+          weather: "clear",
+          imageUrl: "/assets/images/storymaker/provence-lavender-fields-at-golden-hour-purple-flo.jpg",
+        },
+        {
+          id: 2,
+          name: "Lumière Boutique Paris",
+          description: "Flagship boutique on the Champs-Élysées",
+          type: "indoor",
+          timeOfDay: "day",
+          weather: "indoor",
+          imageUrl: "/assets/images/storymaker/luxury-perfume-boutique-interior.jpg",
+        },
+        {
+          id: 3,
+          name: "Perfume Laboratory",
+          description: "State-of-the-art fragrance creation facility",
+          type: "indoor",
+          timeOfDay: "day",
+          weather: "indoor",
+          imageUrl: "/assets/images/storymaker/modern-perfume-laboratory.jpg",
+        },
+      ])
+    }
+  }, [selectedTemplate])
 
   const addLocation = () => {
     const newLocation: Location = {
@@ -58,7 +101,12 @@ export function LocationPage() {
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-semibold mb-2">Location Management</h2>
-          <p className="text-muted-foreground">Define filming locations for your Lumière Parfum commercial scenes</p>
+          <p className="text-muted-foreground">
+            {selectedTemplate 
+              ? `Locations for ${selectedTemplate.name} template`
+              : "Define filming locations for your commercial scenes"
+            }
+          </p>
         </div>
         <Button onClick={addLocation}>
           <Plus className="h-4 w-4 mr-2" />

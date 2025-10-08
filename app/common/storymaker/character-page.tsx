@@ -1,13 +1,14 @@
+
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Plus, Trash2, Sparkles, Upload } from "lucide-react"
-import { initialCharacters } from "@/data/storymakerData"
+import { useStorymaker } from "@/app/common/storymaker/storymaker-context"
 
 type Character = {
   id: number
@@ -18,15 +19,51 @@ type Character = {
 }
 
 export function CharacterPage() {
-  const [characters, setCharacters] = useState<Character[]>(
-    initialCharacters.map((char, index) => ({
-      id: index + 1,
-      name: char.name,
-      description: char.description || "",
-      imageUrl: char.imageUrl,
-      traits: char.traits || [],
-    }))
-  )
+  const { selectedTemplate } = useStorymaker()
+  const [characters, setCharacters] = useState<Character[]>([])
+
+  // Update characters when template changes
+  useEffect(() => {
+    if (selectedTemplate) {
+      // Extract unique characters from template scenes
+      const templateCharacters = selectedTemplate.scenes
+        .map((scene, index) => ({
+          id: index + 1,
+          name: `Character ${index + 1}`,
+          description: scene.prompt.substring(0, 100) + "...",
+          imageUrl: "/placeholder.svg",
+          traits: ["Template Character"],
+        }))
+        .slice(0, 3) // Limit to 3 characters
+      
+      setCharacters(templateCharacters)
+    } else {
+      // Default characters when no template selected
+      setCharacters([
+        {
+          id: 1,
+          name: "Isabelle Laurent",
+          description: "Lead brand ambassador, elegant and sophisticated",
+          imageUrl: "/assets/images/storymaker/elegant-french-woman-with-dark-hair-in-white-dress.jpg",
+          traits: ["Elegant", "Sophisticated", "Graceful"],
+        },
+        {
+          id: 2,
+          name: "Jean-Claude Moreau",
+          description: "Master perfumer with 30 years of experience",
+          imageUrl: "/assets/images/storymaker/distinguished-french-perfumer-man-in-white-lab-coa.jpg",
+          traits: ["Expert", "Distinguished", "Passionate"],
+        },
+        {
+          id: 3,
+          name: "Sofia Chen",
+          description: "Modern influencer and brand partner",
+          imageUrl: "/assets/images/storymaker/young-asian-woman-in-minimalist-black-outfit-holdi.jpg",
+          traits: ["Modern", "Confident", "Stylish"],
+        },
+      ])
+    }
+  }, [selectedTemplate])
 
   const addCharacter = () => {
     const newCharacter: Character = {
@@ -52,7 +89,10 @@ export function CharacterPage() {
         <div>
           <h2 className="text-2xl font-semibold mb-2">Character Management</h2>
           <p className="text-muted-foreground">
-            Define brand ambassadors, models, and perfumers for your Lumière Parfum videos
+            {selectedTemplate 
+              ? `Characters for ${selectedTemplate.name} template`
+              : "Define brand ambassadors, models, and perfumers for your videos"
+            }
           </p>
         </div>
         <Button onClick={addCharacter}>

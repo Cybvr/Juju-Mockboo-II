@@ -1,6 +1,7 @@
+
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -8,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Upload, Music, Trash2, Sparkles } from "lucide-react"
-import { initialSounds } from "@/data/storymakerData"
+import { useStorymaker } from "@/app/common/storymaker/storymaker-context"
 
 type Sound = {
   id: string
@@ -21,16 +22,140 @@ type Sound = {
 }
 
 export function SoundPage() {
-  const [sounds, setSounds] = useState<Sound[]>(
-    initialSounds.map((sound) => ({
-      id: sound.id,
-      name: sound.name,
-      type: sound.type || "music",
-      duration: sound.duration || "0:00",
-      description: `Professional ${sound.type} for Lumière Parfum commercial`,
-      tags: [sound.type || "music", "parfum", "commercial"],
-    }))
-  )
+  const { selectedTemplate } = useStorymaker()
+  const [sounds, setSounds] = useState<Sound[]>([])
+
+  // Update sounds when template changes
+  useEffect(() => {
+    if (selectedTemplate) {
+      // Generate template-specific sounds based on category
+      let templateSounds: Sound[] = []
+      
+      switch (selectedTemplate.category) {
+        case "ugc-ads":
+          templateSounds = [
+            {
+              id: "1",
+              name: "Upbeat Background Music",
+              type: "music",
+              duration: "1:30",
+              description: "Energetic music perfect for UGC content",
+              tags: ["upbeat", "energetic", "positive"],
+            },
+            {
+              id: "2", 
+              name: "Natural Ambient Sound",
+              type: "ambient",
+              duration: "2:00",
+              description: "Subtle background ambience for authentic feel",
+              tags: ["ambient", "natural", "background"],
+            }
+          ]
+          break
+        case "food":
+          templateSounds = [
+            {
+              id: "1",
+              name: "Kitchen Sounds",
+              type: "sfx",
+              duration: "0:30",
+              description: "Sizzling, chopping, and cooking sounds",
+              tags: ["cooking", "kitchen", "sizzle"],
+            },
+            {
+              id: "2",
+              name: "Warm Acoustic Music",
+              type: "music", 
+              duration: "2:00",
+              description: "Cozy background music for food content",
+              tags: ["acoustic", "warm", "cozy"],
+            }
+          ]
+          break
+        case "travel":
+          templateSounds = [
+            {
+              id: "1",
+              name: "Adventure Music",
+              type: "music",
+              duration: "2:30",
+              description: "Inspiring music for travel adventures",
+              tags: ["adventure", "inspiring", "travel"],
+            },
+            {
+              id: "2",
+              name: "Nature Ambience",
+              type: "ambient",
+              duration: "3:00", 
+              description: "Natural sounds from beautiful locations",
+              tags: ["nature", "outdoor", "peaceful"],
+            }
+          ]
+          break
+        case "animated":
+          templateSounds = [
+            {
+              id: "1",
+              name: "Motion Graphics Music",
+              type: "music",
+              duration: "1:00",
+              description: "Dynamic music for animated content",
+              tags: ["dynamic", "electronic", "modern"],
+            },
+            {
+              id: "2",
+              name: "Sound Effects Pack", 
+              type: "sfx",
+              duration: "0:15",
+              description: "Various sound effects for animations",
+              tags: ["effects", "whoosh", "pop"],
+            }
+          ]
+          break
+        default:
+          templateSounds = [
+            {
+              id: "1",
+              name: `${selectedTemplate.name} Theme Music`,
+              type: "music",
+              duration: "2:00",
+              description: `Custom music for ${selectedTemplate.name} template`,
+              tags: ["theme", "custom", selectedTemplate.category],
+            }
+          ]
+      }
+      
+      setSounds(templateSounds)
+    } else {
+      // Default sounds when no template selected
+      setSounds([
+        {
+          id: "1",
+          name: "Ethereal Piano - Brand Theme",
+          type: "music",
+          duration: "2:30",
+          description: "Professional music for Lumière Parfum commercial",
+          tags: ["music", "parfum", "commercial"],
+        },
+        {
+          id: "2",
+          name: "Ambient Boutique Atmosphere",
+          type: "ambient",
+          duration: "3:00", 
+          description: "Professional ambient for Lumière Parfum commercial",
+          tags: ["ambient", "parfum", "commercial"],
+        },
+        {
+          id: "3",
+          name: "Nature Sounds - Lavender Fields",
+          type: "ambient",
+          duration: "2:45",
+          description: "Professional ambient for Lumière Parfum commercial",
+          tags: ["ambient", "parfum", "commercial"],
+        },
+      ])
+    }
+  }, [selectedTemplate])
 
   const addSound = () => {
     const newSound: Sound = {
@@ -58,7 +183,10 @@ export function SoundPage() {
         <div>
           <h2 className="text-2xl font-semibold mb-2">Sound Library</h2>
           <p className="text-sm text-muted-foreground">
-            Manage music, ambient sounds, and voiceovers for Lumière Parfum commercials
+            {selectedTemplate 
+              ? `Audio for ${selectedTemplate.name} template`
+              : "Manage music, ambient sounds, and voiceovers for commercials"
+            }
           </p>
         </div>
         <Button onClick={addSound} className="gap-2">
