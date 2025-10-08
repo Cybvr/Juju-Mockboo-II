@@ -325,29 +325,12 @@ export function VideoMaker() {
                       </div>
                     </div>
                   </Card>
-                  <div className="mt-2 space-y-2">
-                    <Textarea
-                      value={scene.prompt}
-                      onChange={(e) => updateScene(scene.id, { prompt: e.target.value })}
-                      placeholder="Describe your scene or upload an image..."
-                      className="text-xs min-h-20 resize-none"
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-                          regenerateVariations(scene.id)
-                        }
-                      }}
-                    />
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => regenerateVariations(scene.id)}
-                      className="h-7 text-xs gap-1 bg-transparent w-full"
-                      disabled={!scene.prompt.trim()}
-                    >
-                      <Sparkles className="h-3 w-3" />
-                      Generate Scene
-                    </Button>
-                  </div>
+                  <Textarea
+                    value={scene.prompt}
+                    onChange={(e) => updateScene(scene.id, { prompt: e.target.value })}
+                    placeholder="Describe your scene or upload an image..."
+                    className="mt-2 text-xs min-h-20 resize-none"
+                  />
                 </div>
 
                 <div className="col-span-5">

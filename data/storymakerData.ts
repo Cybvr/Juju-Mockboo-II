@@ -60,6 +60,24 @@ export interface Scene {
   videos: Video[]
 }
 
+export interface Template {
+  id: string
+  name: string
+  category:
+    | "ugc-ads"
+    | "entertainment"
+    | "food"
+    | "montage"
+    | "product-ads"
+    | "travel"
+    | "explainer"
+    | "animated"
+    | "anime"
+  thumbnailUrl: string
+  description: string
+  scenes: Omit<Scene, "id">[]
+}
+
 export interface AppData {
   scenes: Scene[]
   characters: Character[]
