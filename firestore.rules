@@ -71,29 +71,20 @@ service cloud.firestore {
 
     // Stories collection
     match /stories/{storyId} {
-      // Allow read for non-existent docs, owner, public, and shared stories
+      // Read: owner, public stories, or shared stories
       allow read: if request.auth != null && 
         (resource == null || 
          resource.data.userId == request.auth.uid ||
          resource.data.isPublic == true ||
          resource.data.shared == true);
       
-      // Allow create if authenticated and owns the story
+      // Create: authenticated users can create their own stories
       allow create: if request.auth != null && 
         request.resource.data.userId == request.auth.uid;
 
-      // Owner can write/delete their own stories
+      // Write/Delete: only the owner
       allow write, delete: if request.auth != null && 
         resource.data.userId == request.auth.uid;
-
-      // Allow specific field updates
-      allow update: if request.auth != null && 
-        resource.data.userId == request.auth.uid &&
-        request.resource.data.keys().hasAny([
-          'title', 'description', 'thumbnail', 'projectConfig', 'scenes', 
-          'characters', 'locations', 'sounds', 'selectedTemplate', 'updatedAt',
-          'isPublic', 'shared', 'tags', 'category'
-        ]);
     }
 
     // Credit transactions collection
