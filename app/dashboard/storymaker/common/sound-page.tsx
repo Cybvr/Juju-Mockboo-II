@@ -114,35 +114,8 @@ export function SoundPage() {
       }
 
       updateSounds(templateSounds)
-    } else {
-      // Default sounds when no template selected
-      updateSounds([
-        {
-          id: "1",
-          name: "Ethereal Piano - Brand Theme",
-          type: "music",
-          duration: "2:30",
-          description: "Professional music for Lumière Parfum commercial",
-          tags: ["music", "parfum", "commercial"],
-        },
-        {
-          id: "2",
-          name: "Ambient Boutique Atmosphere",
-          type: "ambient",
-          duration: "3:00",
-          description: "Professional ambient for Lumière Parfum commercial",
-          tags: ["ambient", "parfum", "commercial"],
-        },
-        {
-          id: "3",
-          name: "Nature Sounds - Lavender Fields",
-          type: "ambient",
-          duration: "2:45",
-          description: "Professional ambient for Lumière Parfum commercial",
-          tags: ["ambient", "parfum", "commercial"],
-        },
-      ])
     }
+    // No default sounds - let Firebase handle the data
   }, [selectedTemplate])
 
   const addSound = () => {
