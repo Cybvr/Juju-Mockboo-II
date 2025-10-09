@@ -1,6 +1,4 @@
-
 'use client';
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,11 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { storiesService, StoryDocument } from '@/services/storiesService';
-import { 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Save, 
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Save,
   X,
   BookOpen,
   Search,
@@ -42,23 +40,25 @@ export default function AdminStoriesPage() {
   const [storyToDelete, setStoryToDelete] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchAllStories();
+    const fetchStories = async () => {
+      try {
+        setLoading(true);
+        console.log('Fetching all stories...');
+        const stories = await storiesService.getAllStories();
+        console.log('Fetched stories:', stories);
+        setStories(stories);
+      } catch (error) {
+        console.error('Error fetching stories:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStories();
   }, []);
 
-  const fetchAllStories = async () => {
-    try {
-      setLoading(true);
-      // Get all public stories first
-      const publicStories = await storiesService.getPublicStories(100);
-      setStories(publicStories);
-    } catch (error) {
-      console.error('Error fetching stories:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleSelectAll = (checked: boolean) => {
+    console.log('Select all checkbox clicked:', checked);
     if (checked) {
       setSelectedStories(filteredStories.map(story => story.id));
     } else {
@@ -67,6 +67,7 @@ export default function AdminStoriesPage() {
   };
 
   const handleSelectStory = (storyId: string, checked: boolean) => {
+    console.log('Story selection changed:', storyId, checked);
     if (checked) {
       setSelectedStories(prev => [...prev, storyId]);
     } else {
@@ -75,6 +76,7 @@ export default function AdminStoriesPage() {
   };
 
   const handleEdit = (story: StoryDocument) => {
+    console.log('Editing story:', story.id);
     setEditingItem({
       id: story.id,
       title: story.title,
@@ -87,7 +89,7 @@ export default function AdminStoriesPage() {
 
   const handleUpdate = async () => {
     if (!editingItem) return;
-
+    console.log('Updating story:', editingItem.id);
     try {
       await storiesService.updateStory(editingItem.id, {
         title: editingItem.title,
@@ -96,8 +98,10 @@ export default function AdminStoriesPage() {
         shared: editingItem.shared,
         category: editingItem.category,
       });
-      
-      await fetchAllStories();
+
+      // Refresh stories after update
+      const stories = await storiesService.getAllStories();
+      setStories(stories);
       setEditingItem(null);
     } catch (error) {
       console.error('Error updating story:', error);
@@ -105,16 +109,19 @@ export default function AdminStoriesPage() {
   };
 
   const handleDeleteSingle = (storyId: string) => {
+    console.log('Preparing to delete story:', storyId);
     setStoryToDelete(storyId);
     setDeleteDialogOpen(true);
   };
 
   const handleDeleteConfirm = async () => {
     if (!storyToDelete) return;
-
+    console.log('Deleting story:', storyToDelete);
     try {
       await storiesService.deleteStory(storyToDelete);
-      await fetchAllStories();
+      // Refresh stories after deletion
+      const stories = await storiesService.getAllStories();
+      setStories(stories);
       setSelectedStories(prev => prev.filter(id => id !== storyToDelete));
     } catch (error) {
       console.error('Error deleting story:', error);
@@ -126,13 +133,17 @@ export default function AdminStoriesPage() {
 
   const handleBulkDelete = () => {
     if (selectedStories.length === 0) return;
+    console.log('Preparing to bulk delete stories:', selectedStories);
     setBulkDeleteDialogOpen(true);
   };
 
   const handleBulkDeleteConfirm = async () => {
+    console.log('Confirming bulk delete of stories:', selectedStories);
     try {
       await Promise.all(selectedStories.map(id => storiesService.deleteStory(id)));
-      await fetchAllStories();
+      // Refresh stories after bulk deletion
+      const stories = await storiesService.getAllStories();
+      setStories(stories);
       setSelectedStories([]);
     } catch (error) {
       console.error('Error bulk deleting stories:', error);
@@ -159,8 +170,8 @@ export default function AdminStoriesPage() {
           </CardTitle>
           <div className="flex gap-2">
             {selectedStories.length > 0 && (
-              <Button 
-                variant="destructive" 
+              <Button
+                variant="destructive"
                 size="sm"
                 onClick={handleBulkDelete}
               >
@@ -190,7 +201,6 @@ export default function AdminStoriesPage() {
             />
           </div>
         </div>
-
         {/* Bulk Selection Header */}
         <div className="mb-4 p-3 border rounded-lg bg-muted/20">
           <div className="flex items-center gap-3">
@@ -200,14 +210,12 @@ export default function AdminStoriesPage() {
               className={someSelected ? "data-[state=checked]:bg-orange-600" : ""}
             />
             <span className="text-sm font-medium">
-              {selectedStories.length > 0 
-                ? `${selectedStories.length} selected` 
-                : `Select all (${filteredStories.length} stories)`
-              }
+              {selectedStories.length > 0
+                ? `${selectedStories.length} selected`
+                : `Select all (${filteredStories.length} stories)`}
             </span>
           </div>
         </div>
-
         {/* Stories List */}
         <div className="space-y-3">
           {loading ? (
@@ -311,9 +319,9 @@ export default function AdminStoriesPage() {
                       <Button size="sm" variant="outline" onClick={() => handleEdit(story)}>
                         <Edit className="h-4 w-4" />
                       </Button>
-                      <Button 
-                        size="sm" 
-                        variant="destructive" 
+                      <Button
+                        size="sm"
+                        variant="destructive"
                         onClick={() => handleDeleteSingle(story.id)}
                       >
                         <Trash2 className="h-4 w-4" />
@@ -330,7 +338,6 @@ export default function AdminStoriesPage() {
           )}
         </div>
       </CardContent>
-
       {/* Single Delete Dialog */}
       <AlertDialog open={deleteDialogOpen}>
         <AlertDialogContent>
@@ -350,7 +357,6 @@ export default function AdminStoriesPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
       {/* Bulk Delete Dialog */}
       <AlertDialog open={bulkDeleteDialogOpen}>
         <AlertDialogContent>
