@@ -23,7 +23,10 @@ export function ScenesLeftToolbar({
         variant={showEditingPanel ? "default" : "ghost"}
         size="sm"
         className="w-8 h-8 p-0"
-        onClick={onToggleEditingPanel}
+        onClick={() => {
+          onToggleEditingPanel()
+          if (showAIImagePanel) onToggleAIImagePanel()
+        }}
         title="Edit"
       >
         <Edit3 className="w-4 h-4" />
@@ -33,7 +36,10 @@ export function ScenesLeftToolbar({
         variant={showAIImagePanel ? "default" : "ghost"}
         size="sm"
         className="w-8 h-8 p-0"
-        onClick={onToggleAIImagePanel}
+        onClick={() => {
+          onToggleAIImagePanel()
+          if (showEditingPanel) onToggleEditingPanel()
+        }}
         title="AI Image Generator"
       >
         <Image className="w-4 h-4" />
