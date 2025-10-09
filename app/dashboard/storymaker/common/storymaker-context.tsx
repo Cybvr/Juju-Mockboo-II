@@ -228,7 +228,7 @@ export function StorymakerProvider({
   }, [documentId, user])
 
   const setSelectedTemplate = async (template: Template) => {
-    if (!user) return
+    if (!user || !storyData) return
     
     setSelectedTemplateState(template)
     const newConfig = createProjectConfigFromTemplate(template)
@@ -246,7 +246,7 @@ export function StorymakerProvider({
     const newConfig = { ...projectConfig, ...config }
     setProjectConfig(newConfig)
     
-    if (user) {
+    if (user && storyData) {
       try {
         await storiesService.updateProjectConfig(documentId, newConfig)
       } catch (error) {
@@ -258,7 +258,7 @@ export function StorymakerProvider({
   const updateScenes = async (newScenes: Scene[]) => {
     setScenes(newScenes)
     
-    if (user) {
+    if (user && storyData) {
       try {
         await storiesService.updateScenes(documentId, newScenes)
       } catch (error) {
@@ -270,7 +270,7 @@ export function StorymakerProvider({
   const updateCharacters = async (newCharacters: Character[]) => {
     setCharacters(newCharacters)
     
-    if (user) {
+    if (user && storyData) {
       try {
         await storiesService.updateCharacters(documentId, newCharacters)
       } catch (error) {
@@ -282,7 +282,7 @@ export function StorymakerProvider({
   const updateLocations = async (newLocations: Location[]) => {
     setLocations(newLocations)
     
-    if (user) {
+    if (user && storyData) {
       try {
         await storiesService.updateLocations(documentId, newLocations)
       } catch (error) {
@@ -294,7 +294,7 @@ export function StorymakerProvider({
   const updateSounds = async (newSounds: Sound[]) => {
     setSounds(newSounds)
     
-    if (user) {
+    if (user && storyData) {
       try {
         await storiesService.updateSounds(documentId, newSounds)
       } catch (error) {
