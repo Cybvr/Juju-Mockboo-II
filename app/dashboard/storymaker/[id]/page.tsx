@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useState } from "react"
+import React, { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -551,8 +551,8 @@ function VideoMaker() {
   )
 }
 
-export default async function StorymakerPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params
+export default function StorymakerPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = React.use(params)
   
   return (
     <StorymakerProvider documentId={id}>
