@@ -109,24 +109,34 @@ export function DocumentGallery({
 
   const flattenedDocuments: FlattenedDocument[] = documents.map(doc => {
     let mediaUrl = '/placeholder.svg'
+    let mediaType: 'image' | 'video' = 'image'
+    
     if (doc.type === 'canvas') {
       if (doc.content?.thumbnail) {
         mediaUrl = doc.content.thumbnail
       } else if (doc.content?.canvasData?.thumbnail) {
         mediaUrl = doc.content.canvasData.thumbnail
       }
+    } else if (doc.type === 'video') {
+      mediaType = 'video'
+      if (doc.content?.videoUrls && doc.content.videoUrls.length > 0) {
+        mediaUrl = doc.content.videoUrls[0]
+      } else if (doc.content?.thumbnail) {
+        mediaUrl = doc.content.thumbnail
+      }
     } else if (doc.content?.thumbnail) {
       mediaUrl = doc.content.thumbnail
     } else if (doc.content?.imageUrls && doc.content.imageUrls.length > 0) {
       mediaUrl = doc.content.imageUrls[0]
     }
+    
     return {
       id: doc.id,
       originalDocId: doc.id,
       title: doc.title,
       type: doc.type,
       mediaUrl: mediaUrl,
-      mediaType: 'image',
+      mediaType: mediaType,
       updatedAt: doc.updatedAt,
       likedBy: doc.likedBy,
       likesCount: doc.likesCount,
@@ -134,8 +144,8 @@ export function DocumentGallery({
     }
   })
 
-  // Filter to show only canvas documents
-  const canvasDocuments = flattenedDocuments.filter(item => item.type === "canvas");
+  // Filter to show canvas and video documents
+  const displayDocuments = flattenedDocuments.filter(item => item.type === "canvas" || item.type === "video");
 
   const handleDeleteClick = (documentId: string) => {
     const flatDoc = flattenedDocuments.find(item => item.id === documentId)
@@ -282,6 +292,8 @@ export function DocumentGallery({
     const document = flatDoc.originalDoc
     if (document?.type === "canvas") {
       router.push(`/dashboard/canvas/${flatDoc.originalDocId}`)
+    } else if (document?.type === "video") {
+      router.push(`/dashboard/videos/${flatDoc.originalDocId}`)
     } else {
       router.push(`/m/${flatDoc.originalDocId}`)
     }
@@ -318,9 +330,9 @@ export function DocumentGallery({
           </div>
         ) : (
           <div className="space-y-6">
-            {canvasDocuments.length > 0 ? (
+            {displayDocuments.length > 0 ? (
               <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                {canvasDocuments.map((flatDoc) => (
+                {displayDocuments.map((flatDoc) => (
                   <DocumentCard
                     key={flatDoc.id}
                     document={{
