@@ -1,3 +1,4 @@
+
 "use client"
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react"
@@ -98,22 +99,9 @@ const defaultProjectConfig: ProjectConfig = {
 
 interface StorymakerContextType {
   documentId: string
-  selectedTemplate: Template | null
-  projectConfig: ProjectConfig
-  scenes: Scene[]
-  characters: Character[]
-  locations: Location[]
-  sounds: Sound[]
   storyData: StoryDocument | null
-  setSelectedTemplate: (template: Template) => void
-  updateProjectConfig: (config: Partial<ProjectConfig>) => void
-  updateScenes: (scenes: Scene[]) => void
-  updateCharacters: (characters: Character[]) => void
-  updateLocations: (locations: Location[]) => void
-  updateSounds: (sounds: Sound[]) => void
-  saveStory: () => Promise<void>
+  updateStoryData: (updates: Partial<StoryDocument>) => void
   isLoading: boolean
-  isSaving: boolean
 }
 
 const StorymakerContext = createContext<StorymakerContextType | undefined>(undefined)
@@ -126,17 +114,10 @@ export function StorymakerProvider({
   documentId: string 
 }) {
   const [user] = useAuthState(auth)
-  const [selectedTemplate, setSelectedTemplateState] = useState<Template | null>(null)
-  const [projectConfig, setProjectConfig] = useState<ProjectConfig>(defaultProjectConfig)
-  const [scenes, setScenes] = useState<Scene[]>([])
-  const [characters, setCharacters] = useState<Character[]>([])
-  const [locations, setLocations] = useState<Location[]>([])
-  const [sounds, setSounds] = useState<Sound[]>([])
   const [storyData, setStoryData] = useState<StoryDocument | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [isSaving, setIsSaving] = useState(false)
 
-  // Simple data loading - no auto-save nonsense
+  // Load story data
   useEffect(() => {
     const loadStory = async () => {
       if (!user) return
@@ -145,12 +126,19 @@ export function StorymakerProvider({
         const story = await storiesService.getStory(documentId)
         if (story) {
           setStoryData(story)
-          setProjectConfig(story.projectConfig || defaultProjectConfig)
-          setScenes(story.scenes || [])
-          setCharacters(story.characters || [])
-          setLocations(story.locations || [])
-          setSounds(story.sounds || [])
-          setSelectedTemplateState(story.selectedTemplate || null)
+        } else {
+          // Create new story if it doesn't exist
+          const newStoryId = await storiesService.createStory(user.uid, {
+            title: defaultProjectConfig.projectName,
+            description: defaultProjectConfig.projectDescription,
+            projectConfig: defaultProjectConfig,
+            scenes: [],
+            characters: [],
+            locations: [],
+            sounds: [],
+          })
+          const newStory = await storiesService.getStory(newStoryId)
+          setStoryData(newStory)
         }
       } catch (error) {
         console.error('Load error:', error)
@@ -162,89 +150,33 @@ export function StorymakerProvider({
     loadStory()
   }, [documentId, user])
 
-  const setSelectedTemplate = (template: Template) => {
-    setSelectedTemplateState(template)
-    const newConfig = { ...defaultProjectConfig, projectName: template.name, projectDescription: template.description }
-    setProjectConfig(newConfig)
-  }
+  // Auto-save when data changes
+  useEffect(() => {
+    if (!storyData || !user || isLoading) return
 
-  const updateProjectConfig = (updates: Partial<ProjectConfig>) => {
-    setProjectConfig(prev => ({ ...prev, ...updates }))
-  }
-
-  const updateScenes = (newScenes: Scene[]) => {
-    setScenes(newScenes)
-  }
-
-  const updateCharacters = (newCharacters: Character[]) => {
-    setCharacters(newCharacters)
-  }
-
-  const updateLocations = (newLocations: Location[]) => {
-    setLocations(newLocations)
-  }
-
-  const updateSounds = (newSounds: Sound[]) => {
-    setSounds(newSounds)
-  }
-
-  const saveStory = async () => {
-    if (!user) return
-
-    setIsSaving(true)
-    try {
-      if (storyData) {
-        // Update existing story
-        await storiesService.updateStory(documentId, {
-          title: projectConfig.projectName,
-          description: projectConfig.projectDescription,
-          projectConfig,
-          scenes,
-          characters,
-          locations,
-          sounds,
-          selectedTemplate
-        })
-      } else {
-        // Create new story
-        await storiesService.createStory(user.uid, {
-          title: projectConfig.projectName,
-          description: projectConfig.projectDescription,
-          projectConfig,
-          scenes,
-          characters,
-          locations,
-          sounds,
-          selectedTemplate
-        })
+    const saveData = async () => {
+      try {
+        await storiesService.updateStory(documentId, storyData)
+      } catch (error) {
+        console.error('Auto-save error:', error)
       }
-    } catch (error) {
-      console.error('Save error:', error)
-    } finally {
-      setIsSaving(false)
     }
+
+    const timeoutId = setTimeout(saveData, 1000) // Debounce saves
+    return () => clearTimeout(timeoutId)
+  }, [storyData, documentId, user, isLoading])
+
+  const updateStoryData = (updates: Partial<StoryDocument>) => {
+    setStoryData(prev => prev ? { ...prev, ...updates } : null)
   }
 
   return (
     <StorymakerContext.Provider 
       value={{ 
         documentId,
-        selectedTemplate,
-        projectConfig,
-        scenes,
-        characters,
-        locations,
-        sounds,
         storyData,
-        setSelectedTemplate,
-        updateProjectConfig,
-        updateScenes,
-        updateCharacters,
-        updateLocations,
-        updateSounds,
-        saveStory,
-        isLoading,
-        isSaving
+        updateStoryData,
+        isLoading
       }}
     >
       {children}

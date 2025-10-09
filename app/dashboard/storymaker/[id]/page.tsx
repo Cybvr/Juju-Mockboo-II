@@ -1,3 +1,4 @@
+
 "use client"
 import React, { useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -31,24 +32,14 @@ type LegacyScene = {
 }
 
 function VideoMaker() {
-  const {
-    selectedTemplate,
-    setSelectedTemplate,
-    projectConfig,
-    scenes,
-    characters,
-    locations,
-    sounds,
-    updateScenes,
-    isLoading
-  } = useStorymaker()
+  const { storyData, updateStoryData, isLoading } = useStorymaker()
 
   const [activeTab, setActiveTab] = useState("creator")
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false)
 
   // Convert Firebase scenes to legacy format for compatibility
-  const legacyScenes: LegacyScene[] = scenes.map((scene, idx) => ({
+  const legacyScenes: LegacyScene[] = (storyData?.scenes || []).map((scene, idx) => ({
     id: idx + 1,
     prompt: scene.prompt,
     variations: scene.variations?.map(v => v.imageUrl) || [],
@@ -64,7 +55,6 @@ function VideoMaker() {
   }))
 
   const handleSelectTemplate = (template: Template) => {
-    setSelectedTemplate(template)
     const newScenes = template.scenes.map((scene, idx) => ({
       id: `scene-${idx + 1}`,
       name: `Scene ${idx + 1}`,
@@ -75,13 +65,23 @@ function VideoMaker() {
       location: undefined,
       sound: undefined,
     }))
-    updateScenes(newScenes)
+    
+    updateStoryData({
+      selectedTemplate: template,
+      scenes: newScenes,
+      projectConfig: {
+        ...storyData?.projectConfig || {},
+        projectName: template.name,
+        projectDescription: template.description
+      }
+    })
   }
 
   const addScene = () => {
+    const currentScenes = storyData?.scenes || []
     const newScene = {
-      id: `scene-${scenes.length + 1}`,
-      name: `Scene ${scenes.length + 1}`,
+      id: `scene-${currentScenes.length + 1}`,
+      name: `Scene ${currentScenes.length + 1}`,
       prompt: "",
       variations: [],
       videos: [],
@@ -89,16 +89,16 @@ function VideoMaker() {
       location: undefined,
       sound: undefined,
     }
-    updateScenes([...scenes, newScene])
+    updateStoryData({ scenes: [...currentScenes, newScene] })
   }
 
   const removeScene = (id: number) => {
-    const filteredScenes = scenes.filter((_, idx) => idx + 1 !== id)
-    updateScenes(filteredScenes)
+    const filteredScenes = (storyData?.scenes || []).filter((_, idx) => idx + 1 !== id)
+    updateStoryData({ scenes: filteredScenes })
   }
 
   const removeVideoFromScene = (sceneId: number, videoId: string) => {
-    const updatedScenes = scenes.map((scene, idx) => {
+    const updatedScenes = (storyData?.scenes || []).map((scene, idx) => {
       if (idx + 1 === sceneId) {
         return {
           ...scene,
@@ -107,11 +107,11 @@ function VideoMaker() {
       }
       return scene
     })
-    updateScenes(updatedScenes)
+    updateStoryData({ scenes: updatedScenes })
   }
 
   const updateScene = (sceneId: number, updates: any) => {
-    const updatedScenes = scenes.map((scene, idx) => {
+    const updatedScenes = (storyData?.scenes || []).map((scene, idx) => {
       if (idx + 1 === sceneId) {
         const updatedScene = { ...scene }
 
@@ -120,7 +120,7 @@ function VideoMaker() {
         }
 
         if (updates.characterId !== undefined) {
-          const character = characters.find(c => c.id === updates.characterId)
+          const character = storyData?.characters?.find(c => c.id === updates.characterId)
           updatedScene.character = character ? {
             id: character.id,
             name: character.name,
@@ -129,7 +129,7 @@ function VideoMaker() {
         }
 
         if (updates.locationId !== undefined) {
-          const location = locations.find(l => l.id === updates.locationId)
+          const location = storyData?.locations?.find(l => l.id === updates.locationId)
           updatedScene.location = location ? {
             id: location.id,
             name: location.name,
@@ -138,7 +138,7 @@ function VideoMaker() {
         }
 
         if (updates.soundId !== undefined) {
-          const sound = sounds.find(s => s.id === updates.soundId)
+          const sound = storyData?.sounds?.find(s => s.id === updates.soundId)
           updatedScene.sound = sound ? {
             id: sound.id,
             name: sound.name,
@@ -149,11 +149,11 @@ function VideoMaker() {
       }
       return scene
     })
-    updateScenes(updatedScenes)
+    updateStoryData({ scenes: updatedScenes })
   }
 
   const selectVariation = (sceneId: number, variationUrl: string) => {
-    const updatedScenes = scenes.map((scene, idx) => {
+    const updatedScenes = (storyData?.scenes || []).map((scene, idx) => {
       if (idx + 1 === sceneId) {
         const updatedVideos = scene.videos && scene.videos.length > 0
           ? scene.videos.map((video, vidIdx) => vidIdx === 0 ? { ...video, thumbnailUrl: variationUrl } : video)
@@ -170,13 +170,14 @@ function VideoMaker() {
       }
       return scene
     })
-    updateScenes(updatedScenes)
+    updateStoryData({ scenes: updatedScenes })
   }
 
   const generateVideo = (sceneId: number) => {
-    const scene = scenes.find((_, idx) => idx + 1 === sceneId)
+    const scene = (storyData?.scenes || []).find((_, idx) => idx + 1 === sceneId)
     if (!scene) return
-    const updatedScenes = scenes.map((s, idx) => {
+    
+    const updatedScenes = (storyData?.scenes || []).map((s, idx) => {
       if (idx + 1 === sceneId) {
         const newVideo = {
           id: `v${Date.now()}`,
@@ -191,7 +192,7 @@ function VideoMaker() {
       }
       return s
     })
-    updateScenes(updatedScenes)
+    updateStoryData({ scenes: updatedScenes })
   }
 
   const regenerateVariations = (sceneId: number) => {
@@ -271,9 +272,9 @@ function VideoMaker() {
                 scene={scene}
                 index={index}
                 totalScenes={legacyScenes.length}
-                characters={characters}
-                locations={locations}
-                sounds={sounds}
+                characters={storyData?.characters || []}
+                locations={storyData?.locations || []}
+                sounds={storyData?.sounds || []}
                 onRemove={removeScene}
                 onUpdate={updateScene}
                 onSelectVariation={selectVariation}
