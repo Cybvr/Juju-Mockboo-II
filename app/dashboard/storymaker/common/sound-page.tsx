@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -22,15 +21,14 @@ type Sound = {
 }
 
 export function SoundPage() {
-  const { selectedTemplate } = useStorymaker()
-  const [sounds, setSounds] = useState<Sound[]>([])
+  const { sounds, updateSounds, selectedTemplate } = useStorymaker()
 
   // Update sounds when template changes
   useEffect(() => {
     if (selectedTemplate) {
       // Generate template-specific sounds based on category
       let templateSounds: Sound[] = []
-      
+
       switch (selectedTemplate.category) {
         case "ugc-ads":
           templateSounds = [
@@ -43,7 +41,7 @@ export function SoundPage() {
               tags: ["upbeat", "energetic", "positive"],
             },
             {
-              id: "2", 
+              id: "2",
               name: "Natural Ambient Sound",
               type: "ambient",
               duration: "2:00",
@@ -65,7 +63,7 @@ export function SoundPage() {
             {
               id: "2",
               name: "Warm Acoustic Music",
-              type: "music", 
+              type: "music",
               duration: "2:00",
               description: "Cozy background music for food content",
               tags: ["acoustic", "warm", "cozy"],
@@ -86,7 +84,7 @@ export function SoundPage() {
               id: "2",
               name: "Nature Ambience",
               type: "ambient",
-              duration: "3:00", 
+              duration: "3:00",
               description: "Natural sounds from beautiful locations",
               tags: ["nature", "outdoor", "peaceful"],
             }
@@ -104,7 +102,7 @@ export function SoundPage() {
             },
             {
               id: "2",
-              name: "Sound Effects Pack", 
+              name: "Sound Effects Pack",
               type: "sfx",
               duration: "0:15",
               description: "Various sound effects for animations",
@@ -124,11 +122,11 @@ export function SoundPage() {
             }
           ]
       }
-      
-      setSounds(templateSounds)
+
+      updateSounds(templateSounds)
     } else {
       // Default sounds when no template selected
-      setSounds([
+      updateSounds([
         {
           id: "1",
           name: "Ethereal Piano - Brand Theme",
@@ -141,7 +139,7 @@ export function SoundPage() {
           id: "2",
           name: "Ambient Boutique Atmosphere",
           type: "ambient",
-          duration: "3:00", 
+          duration: "3:00",
           description: "Professional ambient for Lumière Parfum commercial",
           tags: ["ambient", "parfum", "commercial"],
         },
@@ -166,15 +164,15 @@ export function SoundPage() {
       description: "",
       tags: [],
     }
-    setSounds([...sounds, newSound])
+    updateSounds([...sounds, newSound])
   }
 
   const removeSound = (id: string) => {
-    setSounds(sounds.filter((sound) => sound.id !== id))
+    updateSounds(sounds.filter((sound) => sound.id !== id))
   }
 
   const updateSound = (id: string, updates: Partial<Sound>) => {
-    setSounds(sounds.map((sound) => (sound.id === id ? { ...sound, ...updates } : sound)))
+    updateSounds(sounds.map((sound) => (sound.id === id ? { ...sound, ...updates } : sound)))
   }
 
   return (
@@ -183,7 +181,7 @@ export function SoundPage() {
         <div>
           <h2 className="text-2xl font-semibold mb-2">Sound Library</h2>
           <p className="text-sm text-muted-foreground">
-            {selectedTemplate 
+            {selectedTemplate
               ? `Audio for ${selectedTemplate.name} template`
               : "Manage music, ambient sounds, and voiceovers for commercials"
             }

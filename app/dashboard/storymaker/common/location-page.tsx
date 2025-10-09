@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -12,7 +11,7 @@ import { Plus, Trash2, MapPin, Sparkles, Upload } from "lucide-react"
 import { useStorymaker } from "./storymaker-context"
 
 type Location = {
-  id: number
+  id: string
   name: string
   description: string
   type: string
@@ -22,78 +21,26 @@ type Location = {
 }
 
 export function LocationPage() {
-  const { selectedTemplate } = useStorymaker()
-  const [locations, setLocations] = useState<Location[]>([])
-
-  // Update locations when template changes
-  useEffect(() => {
-    if (selectedTemplate) {
-      // Extract unique locations from template scenes
-      const templateLocations = selectedTemplate.scenes
-        .map((scene, index) => ({
-          id: index + 1,
-          name: `Location ${index + 1}`,
-          description: scene.prompt.substring(0, 100) + "...",
-          type: "outdoor",
-          timeOfDay: "day",
-          weather: "clear",
-          imageUrl: "/placeholder.svg",
-        }))
-        .slice(0, 3) // Limit to 3 locations
-      
-      setLocations(templateLocations)
-    } else {
-      // Default locations when no template selected
-      setLocations([
-        {
-          id: 1,
-          name: "Provence Lavender Fields",
-          description: "Endless purple lavender fields in the French countryside",
-          type: "outdoor",
-          timeOfDay: "golden-hour",
-          weather: "clear",
-          imageUrl: "/assets/images/storymaker/provence-lavender-fields-at-golden-hour-purple-flo.jpg",
-        },
-        {
-          id: 2,
-          name: "Lumière Boutique Paris",
-          description: "Flagship boutique on the Champs-Élysées",
-          type: "indoor",
-          timeOfDay: "day",
-          weather: "indoor",
-          imageUrl: "/assets/images/storymaker/luxury-perfume-boutique-interior.jpg",
-        },
-        {
-          id: 3,
-          name: "Perfume Laboratory",
-          description: "State-of-the-art fragrance creation facility",
-          type: "indoor",
-          timeOfDay: "day",
-          weather: "indoor",
-          imageUrl: "/assets/images/storymaker/modern-perfume-laboratory.jpg",
-        },
-      ])
-    }
-  }, [selectedTemplate])
+  const { locations, updateLocations, selectedTemplate } = useStorymaker()
 
   const addLocation = () => {
     const newLocation: Location = {
-      id: locations.length + 1,
+      id: crypto.randomUUID(),
       name: "",
       description: "",
       type: "outdoor",
       timeOfDay: "day",
       weather: "clear",
     }
-    setLocations([...locations, newLocation])
+    updateLocations([...locations, newLocation])
   }
 
-  const removeLocation = (id: number) => {
-    setLocations(locations.filter((loc) => loc.id !== id))
+  const removeLocation = (id: string) => {
+    updateLocations(locations.filter((loc) => loc.id !== id))
   }
 
-  const updateLocation = (id: number, field: keyof Location, value: any) => {
-    setLocations(locations.map((loc) => (loc.id === id ? { ...loc, [field]: value } : loc)))
+  const updateLocation = (id: string, field: keyof Location, value: any) => {
+    updateLocations(locations.map((loc) => (loc.id === id ? { ...loc, [field]: value } : loc)))
   }
 
   return (
@@ -102,7 +49,7 @@ export function LocationPage() {
         <div>
           <h2 className="text-2xl font-semibold mb-2">Location Management</h2>
           <p className="text-muted-foreground">
-            {selectedTemplate 
+            {selectedTemplate
               ? `Locations for ${selectedTemplate.name} template`
               : "Define filming locations for your commercial scenes"
             }
@@ -204,7 +151,7 @@ export function LocationPage() {
                             <SelectItem value="afternoon">Afternoon</SelectItem>
                             <SelectItem value="evening">Evening</SelectItem>
                             <SelectItem value="night">Night</SelectItem>
-                            <SelectItem value="golden-hour">Golden Hour</SelectItem>
+                            <SelectItem value="golden hour">Golden Hour</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
