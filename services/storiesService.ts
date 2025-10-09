@@ -1,7 +1,7 @@
 
 import { db } from '@/lib/firebase';
 import { collection, doc, setDoc, getDoc, getDocs, query, where, orderBy, updateDoc, deleteDoc, Timestamp, arrayUnion, arrayRemove } from 'firebase/firestore';
-import { ProjectConfig, Scene, Character, Location, Sound } from '@/data/storymakerData';
+import { ProjectConfig, Scene, Character, Location, Sound } from '@/app/dashboard/storymaker/common/storymaker-context';
 import { Template } from '@/data/storymakerTemplatesData';
 
 export interface StoryDocument {
