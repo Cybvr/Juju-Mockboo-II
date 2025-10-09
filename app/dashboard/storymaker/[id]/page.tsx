@@ -1,9 +1,11 @@
 import { VideoMaker } from "./video-maker"
 import { StorymakerProvider } from "../common/storymaker-context"
 
-export default function StorymakerPage({ params }: { params: { id: string } }) {
+export default async function StorymakerPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  
   return (
-    <StorymakerProvider documentId={params.id}>
+    <StorymakerProvider documentId={id}>
       <VideoMaker />
     </StorymakerProvider>
   )

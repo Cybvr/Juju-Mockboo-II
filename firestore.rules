@@ -132,6 +132,30 @@ service cloud.firestore {
         request.resource.data.keys().hasAny(['documentIds', 'updatedAt']);
     }
 
+    // Stories collection
+    match /stories/{storyId} {
+      // Users can create stories if they own them
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+
+      // Owner can read/write their own stories
+      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
+
+      // Anyone authenticated can read public stories
+      allow read: if request.auth != null && resource.data.isPublic == true;
+
+      // Anyone authenticated can read shared stories
+      allow read: if request.auth != null && resource.data.shared == true;
+
+      // Allow updating specific fields
+      allow update: if request.auth != null && 
+        request.auth.uid == resource.data.userId &&
+        request.resource.data.keys().hasAny([
+          'title', 'description', 'thumbnail', 'projectConfig', 'scenes', 
+          'characters', 'locations', 'sounds', 'selectedTemplate', 'updatedAt',
+          'isPublic', 'shared', 'tags', 'category'
+        ]);
+    }
+
     // Credit transactions collection
     match /creditTransactions/{transactionId} {
       allow read: if request.auth != null && request.auth.uid == resource.data.userId;
