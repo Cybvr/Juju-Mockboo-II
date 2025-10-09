@@ -1,18 +1,35 @@
-
 "use client"
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Plus, FileText, Calendar, User } from "lucide-react"
+import { Plus, FileText, Calendar, Trash2, Copy, MoreVertical } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useAuthState } from "react-firebase-hooks/auth"
 import { auth } from "@/lib/firebase"
 import { storiesService, StoryDocument } from "@/services/storiesService"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 export default function StorymakerDocumentsPage() {
   const router = useRouter()
   const [user, loading] = useAuthState(auth)
   const [documents, setDocuments] = useState<StoryDocument[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [storyToDelete, setStoryToDelete] = useState<string | null>(null)
 
   useEffect(() => {
     const loadStories = async () => {
@@ -21,7 +38,6 @@ export default function StorymakerDocumentsPage() {
         return
       }
 
-      // Wait a bit for auth to fully initialize
       await new Promise(resolve => setTimeout(resolve, 100))
 
       try {
@@ -29,7 +45,6 @@ export default function StorymakerDocumentsPage() {
         setDocuments(userStories)
       } catch (error) {
         console.error('Error loading stories:', error)
-        // Still set loading to false even on error
         setDocuments([])
       } finally {
         setIsLoading(false)
@@ -52,6 +67,40 @@ export default function StorymakerDocumentsPage() {
     router.push(`/dashboard/storymaker/${newId}`)
   }
 
+  const handleDuplicate = async (e: React.MouseEvent, doc: StoryDocument) => {
+    e.stopPropagation()
+    if (!user) return
+
+    try {
+      const newId = await storiesService.duplicateStory(doc.id, user.uid)
+      const updatedStories = await storiesService.getUserStories(user.uid)
+      setDocuments(updatedStories)
+    } catch (error) {
+      console.error('Error duplicating story:', error)
+    }
+  }
+
+  const handleDeleteClick = (e: React.MouseEvent, docId: string) => {
+    e.stopPropagation()
+    setStoryToDelete(docId)
+    setDeleteDialogOpen(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!storyToDelete || !user) return
+
+    try {
+      await storiesService.deleteStory(storyToDelete)
+      const updatedStories = await storiesService.getUserStories(user.uid)
+      setDocuments(updatedStories)
+    } catch (error) {
+      console.error('Error deleting story:', error)
+    } finally {
+      setDeleteDialogOpen(false)
+      setStoryToDelete(null)
+    }
+  }
+
   if (loading || isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -65,10 +114,9 @@ export default function StorymakerDocumentsPage() {
       <div className="">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-xl font-bold ">Stories</h1>
-            
+            <h1 className="text-xl font-bold">Stories</h1>
           </div>
-          <Button onClick={handleCreateNew} size="lg" className="bg-card" >
+          <Button onClick={handleCreateNew} size="lg" className="bg-card">
             <Plus className="h-5 w-5 mr-2" />
             New
           </Button>
@@ -93,7 +141,7 @@ export default function StorymakerDocumentsPage() {
         {documents.map((doc) => (
           <div
             key={doc.id}
-            className="overflow-hidden cursor-pointer hover:shadow-lg transition-all group rounded-lg border"
+            className="overflow-hidden cursor-pointer hover:shadow-lg transition-all group rounded-lg border relative"
             onClick={() => handleOpenDocument(doc.id)}
           >
             <div className="aspect-video bg-muted overflow-hidden">
@@ -104,20 +152,32 @@ export default function StorymakerDocumentsPage() {
               />
             </div>
             <div className="py-2">
-              <h3 className="text-md font-semibold mb-2 group-hover:text-primary transition-colors">
-                {doc.title}
-              </h3>
-
-              <div className="flex items-center justify-between text-sm text-muted-foreground mb-3">
-                <div className="flex items-center gap-1">
-                  <FileText className="h-4 w-4" />
-                  <span>{doc.scenes?.length || 0} scenes</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <User className="h-4 w-4" />
-                  <span>You</span>
-                </div>
+              <div className="flex items-start justify-between mb-2">
+                <h3 className="text-md font-semibold group-hover:text-primary transition-colors flex-1">
+                  {doc.title}
+                </h3>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={(e) => handleDuplicate(e, doc)}>
+                      <Copy className="h-4 w-4 mr-2" />
+                      Duplicate
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={(e) => handleDeleteClick(e, doc.id)}
+                      className="text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
+
               <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <div className="flex items-center gap-1">
                   <Calendar className="h-3 w-3" />
@@ -128,7 +188,23 @@ export default function StorymakerDocumentsPage() {
           </div>
         ))}
       </div>
-      
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Story</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this story? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

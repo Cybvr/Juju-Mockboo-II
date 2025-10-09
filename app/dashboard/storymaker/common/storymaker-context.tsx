@@ -1,4 +1,3 @@
-
 "use client"
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react"
@@ -158,11 +157,11 @@ export function StorymakerProvider({
       await new Promise(resolve => setTimeout(resolve, 100))
 
       setIsLoading(true)
-      
+
       try {
         // Try to load existing story
         const story = await storiesService.getStory(documentId)
-        
+
         if (story && story.userId === user.uid) {
           // Load existing story
           setStoryData(story)
@@ -175,42 +174,14 @@ export function StorymakerProvider({
             setSelectedTemplateState(story.selectedTemplate)
           }
         } else {
-          // Create new story with default or preset configs
-          const documentConfigs: Record<string, Partial<ProjectConfig>> = {
-            "lumiere-parfum": {
-              projectName: "Lumière Parfum Studio",
-              projectDescription: "Elegant fragrance commercial showcasing the artistry and sophistication of Lumière Parfum through cinematic storytelling",
-              stylePreset: "cinematic",
-              aiModel: "high"
-            },
-            "product-launch": {
-              projectName: "Product Launch Campaign", 
-              projectDescription: "Dynamic product reveal campaign with multiple character perspectives",
-              stylePreset: "realistic",
-              aiModel: "high"
-            },
-            "travel-adventure": {
-              projectName: "Paris Travel Story",
-              projectDescription: "Cinematic travel documentary through the streets of Paris", 
-              stylePreset: "documentary",
-              aiModel: "standard"
-            }
-          }
+          // Create new story with default config
+          setProjectConfig(defaultProjectConfig)
 
-          const docConfig = documentConfigs[documentId]
-          const newConfig = docConfig ? { ...defaultProjectConfig, ...docConfig } : {
-            ...defaultProjectConfig,
-            projectName: `Story Project ${documentId.split('-').pop() || documentId}`,
-            projectDescription: "New video storytelling project"
-          }
-
-          setProjectConfig(newConfig)
-          
           // Auto-save new story
           const newStoryId = await storiesService.createStory(user.uid, {
-            title: newConfig.projectName,
-            description: newConfig.projectDescription,
-            projectConfig: newConfig,
+            title: defaultProjectConfig.projectName,
+            description: defaultProjectConfig.projectDescription,
+            projectConfig: defaultProjectConfig,
             scenes: [],
             characters: [],
             locations: [],
@@ -229,11 +200,11 @@ export function StorymakerProvider({
 
   const setSelectedTemplate = async (template: Template) => {
     if (!user || !storyData) return
-    
+
     setSelectedTemplateState(template)
     const newConfig = createProjectConfigFromTemplate(template)
     setProjectConfig(newConfig)
-    
+
     try {
       await storiesService.setTemplate(documentId, template)
       await storiesService.updateProjectConfig(documentId, newConfig)
@@ -245,7 +216,7 @@ export function StorymakerProvider({
   const updateProjectConfig = async (config: Partial<ProjectConfig>) => {
     const newConfig = { ...projectConfig, ...config }
     setProjectConfig(newConfig)
-    
+
     if (user && storyData) {
       try {
         await storiesService.updateProjectConfig(documentId, newConfig)
@@ -257,7 +228,7 @@ export function StorymakerProvider({
 
   const updateScenes = async (newScenes: Scene[]) => {
     setScenes(newScenes)
-    
+
     if (user && storyData) {
       try {
         await storiesService.updateScenes(documentId, newScenes)
@@ -269,7 +240,7 @@ export function StorymakerProvider({
 
   const updateCharacters = async (newCharacters: Character[]) => {
     setCharacters(newCharacters)
-    
+
     if (user && storyData) {
       try {
         await storiesService.updateCharacters(documentId, newCharacters)
@@ -281,7 +252,7 @@ export function StorymakerProvider({
 
   const updateLocations = async (newLocations: Location[]) => {
     setLocations(newLocations)
-    
+
     if (user && storyData) {
       try {
         await storiesService.updateLocations(documentId, newLocations)
@@ -293,7 +264,7 @@ export function StorymakerProvider({
 
   const updateSounds = async (newSounds: Sound[]) => {
     setSounds(newSounds)
-    
+
     if (user && storyData) {
       try {
         await storiesService.updateSounds(documentId, newSounds)
@@ -305,7 +276,7 @@ export function StorymakerProvider({
 
   const saveStory = async () => {
     if (!user) return
-    
+
     setIsSaving(true)
     try {
       await storiesService.updateStory(documentId, {
