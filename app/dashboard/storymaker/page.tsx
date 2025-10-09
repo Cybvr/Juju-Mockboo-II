@@ -93,10 +93,10 @@ export default function StorymakerDocumentsPage() {
       await storiesService.deleteStory(storyToDelete)
       // Immediately update state to remove the deleted story
       setDocuments((prev) => prev.filter((doc) => doc.id !== storyToDelete))
-      setDeleteDialogOpen(false)
-      setStoryToDelete(null)
     } catch (error) {
       console.error('Error deleting story:', error)
+    } finally {
+      // Always close dialog and reset state
       setDeleteDialogOpen(false)
       setStoryToDelete(null)
     }

@@ -151,11 +151,11 @@ export function DocumentGallery({
       // Immediately update state to remove the deleted document
       setDocuments((prev) => prev.filter((doc) => doc.id !== deleteDocumentId))
       toast.success("Document deleted successfully")
-      setShowDeleteDialog(false)
-      setDeleteDocumentId("")
     } catch (error) {
       console.error("Error deleting document:", error)
       toast.error("Failed to delete document")
+    } finally {
+      // Always close dialog and reset state
       setShowDeleteDialog(false)
       setDeleteDocumentId("")
     }
