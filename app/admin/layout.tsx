@@ -14,6 +14,7 @@ const AdminNav = () => {
     { href: '/admin/users', label: 'Users', icon: Users },
     { href: '/admin/documents', label: 'Documents', icon: FileText },
     { href: '/admin/templates', label: 'Templates', icon: Layout },
+    { href: '/admin/stories', label: 'Stories', icon: FileText },
     { href: '/admin/brain', label: 'Knowledge', icon: Layout },
   ];
 
