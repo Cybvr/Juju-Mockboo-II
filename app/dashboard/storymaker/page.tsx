@@ -1,9 +1,6 @@
-
 "use client"
-
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
 import { Plus, FileText, Calendar, User } from "lucide-react"
 import { useRouter } from "next/navigation"
 
@@ -58,30 +55,28 @@ export default function StorymakerDocumentsPage() {
   }
 
   const handleCreateNew = () => {
-    // Generate a new ID and redirect to the editor
     const newId = `story-${Date.now()}`
     router.push(`/dashboard/storymaker/${newId}`)
   }
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-8">
+      <div className="">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Your Story Projects</h1>
-            <p className="text-muted-foreground">Create and manage your video storytelling projects</p>
+            <h1 className="text-xl font-bold ">Stories</h1>
+            
           </div>
-          <Button onClick={handleCreateNew} size="lg">
+          <Button onClick={handleCreateNew} size="lg" className="bg-card" >
             <Plus className="h-5 w-5 mr-2" />
-            New Story Project
+            New
           </Button>
         </div>
       </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Create New Project Card */}
-        <Card 
-          className="p-6 border-2 border-dashed border-border hover:border-primary transition-colors cursor-pointer group"
+        {/* Create New Project Div */}
+        <div
+          className="p-6 border-2 border-dashed border-border hover:border-primary transition-colors cursor-pointer group rounded-lg"
           onClick={handleCreateNew}
         >
           <div className="text-center">
@@ -91,30 +86,27 @@ export default function StorymakerDocumentsPage() {
             <h3 className="text-lg font-semibold mb-2">Create New Story</h3>
             <p className="text-sm text-muted-foreground">Start a new video storytelling project</p>
           </div>
-        </Card>
+        </div>
 
         {/* Existing Documents */}
         {documents.map((doc) => (
-          <Card 
-            key={doc.id} 
-            className="overflow-hidden cursor-pointer hover:shadow-lg transition-all group"
+          <div
+            key={doc.id}
+            className="overflow-hidden cursor-pointer hover:shadow-lg transition-all group rounded-lg border"
             onClick={() => handleOpenDocument(doc.id)}
           >
             <div className="aspect-video bg-muted overflow-hidden">
-              <img 
-                src={doc.thumbnail} 
+              <img
+                src={doc.thumbnail}
                 alt={doc.title}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               />
             </div>
-            <div className="p-6">
-              <h3 className="text-xl font-semibold mb-2 group-hover:text-primary transition-colors">
+            <div className="py-2">
+              <h3 className="text-md font-semibold mb-2 group-hover:text-primary transition-colors">
                 {doc.title}
               </h3>
-              <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                {doc.description}
-              </p>
-              
+
               <div className="flex items-center justify-between text-sm text-muted-foreground mb-3">
                 <div className="flex items-center gap-1">
                   <FileText className="h-4 w-4" />
@@ -125,21 +117,16 @@ export default function StorymakerDocumentsPage() {
                   <span>{doc.author}</span>
                 </div>
               </div>
-
               <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <div className="flex items-center gap-1">
                   <Calendar className="h-3 w-3" />
                   <span>Updated {doc.updatedAt}</span>
                 </div>
-                <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
-                  Open Project
-                </Button>
               </div>
             </div>
-          </Card>
+          </div>
         ))}
       </div>
-
       {documents.length === 0 && (
         <div className="text-center py-16">
           <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-muted flex items-center justify-center">

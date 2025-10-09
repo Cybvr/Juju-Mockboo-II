@@ -8,7 +8,8 @@ import {
 } from '@/components/ui/tooltip';
 import {
   LayoutDashboard,
-  Home, Drama,
+  Home,
+  Drama,
   Clapperboard,
   Image as ImageIcon,
   Video,
@@ -29,11 +30,13 @@ import { CreditService } from '@/lib/credits';
 function SimpleCreditDisplay() {
   const [user] = useAuthState(auth);
   const [credits, setCredits] = useState<number | null>(null);
+
   useEffect(() => {
     if (user) {
       fetchCredits();
     }
   }, [user]);
+
   const fetchCredits = async () => {
     try {
       const creditData = await CreditService.getUserCredits(user!.uid);
@@ -42,7 +45,9 @@ function SimpleCreditDisplay() {
       console.error('Failed to fetch credits:', error);
     }
   };
+
   if (!user || credits === null) return null;
+
   return (
     <div className="text-xs text-muted-foreground mb-2 px-2">
       💰 {credits.toLocaleString()} credits
@@ -58,6 +63,7 @@ interface SidebarProps {
 export function Sidebar({ className, onNavigate }: SidebarProps) {
   const pathname = usePathname();
   const [user] = useAuthState(auth);
+
   const createNewCanvas = async () => {
     if (!user) return;
     try {
@@ -66,7 +72,7 @@ export function Sidebar({ className, onNavigate }: SidebarProps) {
         title: 'New Canvas',
         content: {
           elements: [],
-          version: '1.0'
+          version: '1.0',
         },
         tags: ['canvas'],
         type: 'canvas' as const,
@@ -81,25 +87,26 @@ export function Sidebar({ className, onNavigate }: SidebarProps) {
       console.error('Error creating new canvas:', error);
     }
   };
+
   const navItems = [
     {
       label: 'New',
       icon: Folder,
-      href: '#', // Placeholder
+      href: '#',
       active: false,
       onClick: createNewCanvas,
     },
-      {
-        label: 'Scenes',
-        icon: Clapperboard,
-        href: '/dashboard/scenes',
-        active: pathname.startsWith('/dashboard/scenes'),
+    {
+      label: 'Scenes',
+      icon: Clapperboard,
+      href: '/dashboard/scenes',
+      active: pathname.startsWith('/dashboard/scenes'),
     },
-      {
-        label: 'Storymaker',
-        icon: Drama,
-        href: '/dashboard/storymaker',
-        active: pathname.startsWith('/dashboard/storymaker'),
+    {
+      label: 'Storymaker',
+      icon: Drama,
+      href: '/dashboard/storymaker',
+      active: pathname.startsWith('/dashboard/storymaker'),
     },
     {
       label: 'Settings',
@@ -108,7 +115,9 @@ export function Sidebar({ className, onNavigate }: SidebarProps) {
       active: pathname.startsWith('/dashboard/account'),
     },
   ];
-  const showLabels = true; // Always show labels since sidebar is always expanded
+
+  const showLabels = true;
+
   return (
     <TooltipProvider delayDuration={300}>
       <div
@@ -140,6 +149,7 @@ export function Sidebar({ className, onNavigate }: SidebarProps) {
                 </div>
               </Link>
             </div>
+
             {/* Navigation */}
             <nav className="space-y-2 mb-4">
               {navItems.map((item) => {
@@ -147,7 +157,7 @@ export function Sidebar({ className, onNavigate }: SidebarProps) {
                 return (
                   <Tooltip key={item.href}>
                     <TooltipTrigger asChild>
-                      {item.label === 'New Canvas' ? (
+                      {item.label === 'New' ? (
                         <Button
                           onClick={item.onClick}
                           variant="outline"
@@ -162,11 +172,11 @@ export function Sidebar({ className, onNavigate }: SidebarProps) {
                       ) : (
                         <Link href={item.href} onClick={onNavigate}>
                           <Button
-                            variant={item.active ? 'default' : 'ghost'}
+                            variant="ghost"
                             className={cn(
                               'w-full transition-all duration-200',
                               showLabels ? 'justify-start gap-3 h-10' : 'justify-center px-2 h-10',
-                              item.active && 'bg-background-50 text-primary-foreground'
+                              item.active && 'text-primary bg-background-50'
                             )}
                           >
                             <Icon className="h-4 w-4 flex-shrink-0" />
@@ -185,6 +195,7 @@ export function Sidebar({ className, onNavigate }: SidebarProps) {
               })}
             </nav>
           </div>
+
           {/* Bottom Section - Credits and Profile */}
           <div className="pt-4 border-t text-muted-foreground">
             <SimpleCreditDisplay />

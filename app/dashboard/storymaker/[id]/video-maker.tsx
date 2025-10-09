@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Play, X, Film, Sparkles, Download, RotateCw, Upload, LayoutTemplate } from "lucide-react"
+import { Play, X, Film, Sparkles, Download, RotateCw, Upload, LayoutTemplate, Home } from "lucide-react"
 import { CharacterPage } from "../common/character-page"
 import { ProjectSetupPage } from "../common/project-setup-page"
 import { LocationPage } from "../common/location-page"
@@ -75,10 +75,8 @@ export function VideoMaker() {
   }))
 
   const handleSelectTemplate = (template: Template) => {
-    // Update context with selected template
     setSelectedTemplate(template)
-    
-    // Replace all scenes with template scenes
+
     const newScenes: LegacyScene[] = template.scenes.map((scene, idx) => ({
       id: idx + 1,
       prompt: scene.prompt,
@@ -218,29 +216,35 @@ export function VideoMaker() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background ">
       {/* Header */}
-      <header className="border-b border-border px-6 py-4">
+      <header className="border-b border-border px-6 py-4 bg-card">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-semibold">
-            {selectedTemplate ? selectedTemplate.name : projectConfig.projectName}
-          </h1>
-          <div className="flex gap-2">
-            <Button variant="outline" className="gap-2 bg-transparent" onClick={() => setIsTemplateModalOpen(true)}>
-              <LayoutTemplate className="h-4 w-4" />
-              Choose Template
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="icon" className="h-9 w-9" asChild>
+              <a href="/dashboard/storymaker">
+                <Home className="h-5 w-5" />
+              </a>
             </Button>
-            <Button variant="default" onClick={() => setIsModalOpen(true)} className="gap-2">
+            <h1 className="text-xl font-semibold">
+              {selectedTemplate ? selectedTemplate.name : projectConfig.projectName}
+            </h1>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="default" className="bg-background" onClick={() => setIsTemplateModalOpen(true)}>
+              <LayoutTemplate className="h-4 w-4" /> Template
+            </Button>
+            <Button variant="default" onClick={() => setIsModalOpen(true)} className="bg-background" >
               <Film className="h-4 w-4" />
               Preview
             </Button>
-            <Button variant="outline">Share</Button>
+            <Button variant="default" className="bg-background" >Share</Button>
           </div>
         </div>
       </header>
-
+       <div className="pt-6 mx-auto max-w-5xl">
       {/* Navigation Tabs */}
-      <div className="border-b border-border px-6 py-4">
+      <div className="pt-2">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="bg-transparent border border-border h-auto p-0">
             <TabsTrigger
@@ -275,7 +279,7 @@ export function VideoMaker() {
       </div>
 
       {activeTab === "creator" && (
-        <div className="max-w-7xl mx-auto p-6 space-y-6">
+        <div className="max-w-7xl mx-auto py-2 space-y-1">
           {scenes.map((scene, index) => (
             <Card key={scene.id} className="p-6">
               <div className="flex items-center justify-between mb-4">
@@ -506,6 +510,6 @@ export function VideoMaker() {
         onOpenChange={setIsTemplateModalOpen}
         onSelectTemplate={handleSelectTemplate}
       />
-    </div>
+        </div> </div>
   )
 }
