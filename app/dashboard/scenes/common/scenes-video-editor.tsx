@@ -13,6 +13,7 @@ import { ScenesHeader } from "./scenes-header"
 import { ScenesLeftToolbar } from "./scenes-left-toolbar"
 import { VidsToolbar } from "./vids-toolbar"
 import { AIImagePanel } from "./AIImagePanel"
+import { TextPanel } from "./TextPanel"
 import { Film, Edit3, Clock } from "lucide-react"
 
 export interface Scene {
@@ -44,6 +45,7 @@ export function ScenesVideoEditor({ projectId }: ScenesVideoEditorProps) {
   const [activeTab, setActiveTab] = useState<"preview" | "edit" | "timeline">("preview")
   const [showEditingPanel, setShowEditingPanel] = useState(false)
   const [showAIImagePanel, setShowAIImagePanel] = useState(false)
+  const [showTextPanel, setShowTextPanel] = useState(false)
 
   useEffect(() => {
     const loadProject = async () => {
@@ -316,6 +318,8 @@ export function ScenesVideoEditor({ projectId }: ScenesVideoEditorProps) {
             onToggleEditingPanel={() => setShowEditingPanel(!showEditingPanel)}
             showAIImagePanel={showAIImagePanel}
             onToggleAIImagePanel={() => setShowAIImagePanel(!showAIImagePanel)}
+            showTextPanel={showTextPanel}
+            onToggleTextPanel={() => setShowTextPanel(!showTextPanel)}
           />
 
           {/* Editing Panel (conditional) */}
@@ -330,6 +334,14 @@ export function ScenesVideoEditor({ projectId }: ScenesVideoEditorProps) {
             <div className="border-r border-border">
               <AIImagePanel />
             </div>
+          )}
+
+          {/* Text Panel (conditional) */}
+          {showTextPanel && (
+            <TextPanel 
+              isOpen={showTextPanel}
+              onClose={() => setShowTextPanel(false)}
+            />
           )}
 
           {/* Center - Preview */}
