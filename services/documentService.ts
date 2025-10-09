@@ -118,6 +118,15 @@ export class DocumentService {
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Document));
   }
 
+  async getAllDocumentsForAdmin(): Promise<Document[]> {
+    const q = query(
+      collection(db, this.collectionName),
+      orderBy('createdAt', 'desc')
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Document));
+  }
+
   async getDocumentsByCategory(category: string): Promise<Document[]> {
     if (category === 'all') {
       const q = query(
