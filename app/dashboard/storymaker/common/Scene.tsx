@@ -115,18 +115,7 @@ export function Scene({
             onValueChange={(value) => onUpdate(scene.id, { characterId: value === "none" ? null : value })}
           >
             <SelectTrigger className="w-full h-auto p-2">
-              <SelectValue placeholder="Select character">
-                {scene.character && (
-                  <div className="flex items-center gap-2">
-                    <img
-                      src={scene.character.imageUrl || "/placeholder.svg"}
-                      alt={scene.character.name}
-                      className="w-6 h-6 rounded object-cover flex-shrink-0"
-                    />
-                    <span className="truncate text-sm">{scene.character.name}</span>
-                  </div>
-                )}
-              </SelectValue>
+              <SelectValue placeholder="Select character" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="none">No character</SelectItem>
@@ -154,18 +143,7 @@ export function Scene({
             onValueChange={(value) => onUpdate(scene.id, { locationId: value === "none" ? null : value })}
           >
             <SelectTrigger className="w-full h-auto p-2">
-              <SelectValue placeholder="Select location">
-                {scene.location && (
-                  <div className="flex items-center gap-2">
-                    <img
-                      src={scene.location.imageUrl || "/placeholder.svg"}
-                      alt={scene.location.name}
-                      className="w-6 h-6 rounded object-cover flex-shrink-0"
-                    />
-                    <span className="truncate text-sm">{scene.location.name}</span>
-                  </div>
-                )}
-              </SelectValue>
+              <SelectValue placeholder="Select location" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="none">No location</SelectItem>
@@ -193,11 +171,7 @@ export function Scene({
             onValueChange={(value) => onUpdate(scene.id, { soundId: value === "none" ? null : value })}
           >
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select sound">
-                {scene.sound && (
-                  <span className="truncate text-sm">{scene.sound.name}</span>
-                )}
-              </SelectValue>
+              <SelectValue placeholder="Select sound" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="none">No sound</SelectItem>
