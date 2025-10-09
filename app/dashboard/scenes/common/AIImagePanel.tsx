@@ -1,7 +1,7 @@
 "use client"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 import { Sparkles, Loader2 } from "lucide-react"
 
 export function AIImagePanel() {
@@ -13,7 +13,6 @@ export function AIImagePanel() {
     if (!prompt.trim()) return
 
     setIsGenerating(true)
-
     // Simulate AI generation delay
     setTimeout(() => {
       // For demo purposes, using placeholder images
@@ -24,39 +23,34 @@ export function AIImagePanel() {
     }, 2000)
   }
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !isGenerating) {
-      handleGenerate()
-    }
-  }
-
   return (
     <div className="w-80 border-r border-border bg-background flex flex-col h-full">
       {/* Header */}
       <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2 mb-3">
-          <Sparkles className="w-5 h-5 text-indigo-500" />
-          <h2 className="font-semibold text-lg">AI Image Generator</h2>
+          <h2 className="font-semibold text-sm">AI Media Clip</h2>
         </div>
 
         {/* Prompt Input */}
-        <div className="flex gap-2">
-          <Input
-            placeholder="Describe the image you want..."
+        <div className="flex flex-col gap-2">
+          <Textarea
+            placeholder="Generate an 8-second video. Describe what you want the content to be."
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            onKeyPress={handleKeyPress}
             disabled={isGenerating}
-            className="flex-1"
+            className="resize-none min-h-[100px]"
           />
-          <Button 
+          <Button
             onClick={handleGenerate}
             disabled={isGenerating || !prompt.trim()}
             size="sm"
-            className="px-3"
+            className="w-full"
           >
             {isGenerating ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <>
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                Generating...
+              </>
             ) : (
               "Generate"
             )}
@@ -75,19 +69,18 @@ export function AIImagePanel() {
 
         {generatedImages.length === 0 && !isGenerating && (
           <div className="flex flex-col items-center justify-center h-full text-muted-foreground text-center">
-            <Sparkles className="w-12 h-12 mb-3 opacity-50" />
-            <p className="text-sm">Enter a prompt above to generate AI images</p>
+
           </div>
         )}
 
         <div className="grid grid-cols-2 gap-3">
           {generatedImages.map((image, index) => (
-            <div 
+            <div
               key={index}
               className="aspect-square rounded-lg overflow-hidden border border-border hover:border-primary transition-colors cursor-pointer group relative"
             >
-              <img 
-                src={image} 
+              <img
+                src={image}
                 alt={`Generated ${index + 1}`}
                 className="w-full h-full object-cover"
               />
