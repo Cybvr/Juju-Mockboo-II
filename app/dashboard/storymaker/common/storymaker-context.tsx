@@ -2,8 +2,10 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react"
 import { Template } from "@/data/storymakerTemplatesData" 
+import { storiesService, StoryDocument } from "@/services/storiesService"
+import { useAuthState } from "react-firebase-hooks/auth"
+import { auth } from "@/lib/firebase"
 
-// Inline types since we moved to Firebase
 export interface ProjectConfig {
   projectName: string
   projectDescription: string
@@ -94,17 +96,6 @@ const defaultProjectConfig: ProjectConfig = {
   variations: "4",
 }
 
-const createProjectConfigFromTemplate = (template: Template): ProjectConfig => {
-  return {
-    ...defaultProjectConfig,
-    projectName: template.name,
-    projectDescription: template.description,
-  }
-}
-import { storiesService, StoryDocument } from "@/services/storiesService"
-import { useAuthState } from "react-firebase-hooks/auth"
-import { auth } from "@/lib/firebase"
-
 interface StorymakerContextType {
   documentId: string
   selectedTemplate: Template | null
@@ -145,139 +136,56 @@ export function StorymakerProvider({
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
 
-  // Load story from Firebase
+  // Simple data loading - no auto-save nonsense
   useEffect(() => {
-    const loadStoryData = async () => {
-      if (!user) {
-        setIsLoading(false)
-        return
-      }
-
-      // Wait for auth to fully initialize
-      await new Promise(resolve => setTimeout(resolve, 100))
-
-      setIsLoading(true)
+    const loadStory = async () => {
+      if (!user) return
 
       try {
-        // Try to load existing story
         const story = await storiesService.getStory(documentId)
-
-        if (story && story.userId === user.uid) {
-          // Load existing story
+        if (story) {
           setStoryData(story)
-          setProjectConfig(story.projectConfig)
+          setProjectConfig(story.projectConfig || defaultProjectConfig)
           setScenes(story.scenes || [])
           setCharacters(story.characters || [])
           setLocations(story.locations || [])
           setSounds(story.sounds || [])
-          if (story.selectedTemplate) {
-            setSelectedTemplateState(story.selectedTemplate)
-          }
-        } else {
-          // Create new story with default config
-          setProjectConfig(defaultProjectConfig)
-
-          // Auto-save new story
-          const newStoryId = await storiesService.createStory(user.uid, {
-            title: defaultProjectConfig.projectName,
-            description: defaultProjectConfig.projectDescription,
-            projectConfig: defaultProjectConfig,
-            scenes: [],
-            characters: [],
-            locations: [],
-            sounds: []
-          })
-
-          // Load the newly created story
-          const newStory = await storiesService.getStory(newStoryId)
-          if (newStory) {
-            setStoryData(newStory)
-          }
+          setSelectedTemplateState(story.selectedTemplate || null)
         }
       } catch (error) {
-        console.error('Error loading story:', error)
+        console.error('Load error:', error)
       } finally {
         setIsLoading(false)
       }
     }
 
-    loadStoryData()
+    loadStory()
   }, [documentId, user])
 
-  const setSelectedTemplate = async (template: Template) => {
-    if (!user || !storyData) return
-
+  const setSelectedTemplate = (template: Template) => {
     setSelectedTemplateState(template)
-    const newConfig = createProjectConfigFromTemplate(template)
+    const newConfig = { ...defaultProjectConfig, projectName: template.name, projectDescription: template.description }
     setProjectConfig(newConfig)
-
-    try {
-      await storiesService.setTemplate(documentId, template)
-      await storiesService.updateProjectConfig(documentId, newConfig)
-    } catch (error) {
-      console.error('Error setting template:', error)
-    }
   }
 
-  const updateProjectConfig = async (updates: Partial<ProjectConfig>) => {
-    const newConfig = { ...projectConfig, ...updates }
-    setProjectConfig(newConfig)
-
-    if (user && storyData) {
-      try {
-        await storiesService.updateProjectConfig(documentId, newConfig)
-      } catch (error) {
-        console.error('Error updating project config:', error)
-      }
-    }
+  const updateProjectConfig = (updates: Partial<ProjectConfig>) => {
+    setProjectConfig(prev => ({ ...prev, ...updates }))
   }
 
-  const updateScenes = async (newScenes: Scene[]) => {
+  const updateScenes = (newScenes: Scene[]) => {
     setScenes(newScenes)
-
-    if (user && storyData) {
-      try {
-        await storiesService.updateScenes(documentId, newScenes)
-      } catch (error) {
-        console.error('Error updating scenes:', error)
-      }
-    }
   }
 
-  const updateCharacters = async (newCharacters: Character[]) => {
+  const updateCharacters = (newCharacters: Character[]) => {
     setCharacters(newCharacters)
-
-    if (user && storyData) {
-      try {
-        await storiesService.updateCharacters(documentId, newCharacters)
-      } catch (error) {
-        console.error('Error updating characters:', error)
-      }
-    }
   }
 
-  const updateLocations = async (newLocations: Location[]) => {
+  const updateLocations = (newLocations: Location[]) => {
     setLocations(newLocations)
-
-    if (user && storyData) {
-      try {
-        await storiesService.updateLocations(documentId, newLocations)
-      } catch (error) {
-        console.error('Error updating locations:', error)
-      }
-    }
   }
 
-  const updateSounds = async (newSounds: Sound[]) => {
+  const updateSounds = (newSounds: Sound[]) => {
     setSounds(newSounds)
-
-    if (user && storyData) {
-      try {
-        await storiesService.updateSounds(documentId, newSounds)
-      } catch (error) {
-        console.error('Error updating sounds:', error)
-      }
-    }
   }
 
   const saveStory = async () => {
@@ -285,18 +193,33 @@ export function StorymakerProvider({
 
     setIsSaving(true)
     try {
-      await storiesService.updateStory(documentId, {
-        title: projectConfig.projectName,
-        description: projectConfig.projectDescription,
-        projectConfig,
-        scenes,
-        characters,
-        locations,
-        sounds,
-        selectedTemplate
-      })
+      if (storyData) {
+        // Update existing story
+        await storiesService.updateStory(documentId, {
+          title: projectConfig.projectName,
+          description: projectConfig.projectDescription,
+          projectConfig,
+          scenes,
+          characters,
+          locations,
+          sounds,
+          selectedTemplate
+        })
+      } else {
+        // Create new story
+        await storiesService.createStory(user.uid, {
+          title: projectConfig.projectName,
+          description: projectConfig.projectDescription,
+          projectConfig,
+          scenes,
+          characters,
+          locations,
+          sounds,
+          selectedTemplate
+        })
+      }
     } catch (error) {
-      console.error('Error saving story:', error)
+      console.error('Save error:', error)
     } finally {
       setIsSaving(false)
     }
