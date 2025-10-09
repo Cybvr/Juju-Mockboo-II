@@ -32,23 +32,22 @@ export default function AdminDashboard() {
       try {
         setLoading(true);
 
-        // Fetch real stories data
-        const { storiesService } = await import('@/services/storiesService');
-        const allStories = await storiesService.getAllStories();
-        const publicStories = allStories.filter(story => story.isPublic);
-        const privateStories = allStories.filter(story => !story.isPublic);
+        // Fetch real documents data
+        const allDocuments = await documentService.getAllDocumentsForAdmin();
+        const publicDocuments = allDocuments.filter(doc => doc.isPublic);
+        const privateDocuments = allDocuments.filter(doc => !doc.isPublic);
 
-        // Fetch recent stories  
-        const recent = allStories.slice(0, 5);
+        // Fetch recent documents
+        const recent = await documentService.getRecentDocuments(5);
         setRecentDocuments(recent);
 
         // Update stats with real data
         setStats({
           users: { total: 0, verified: 0, admins: 0 }, // TODO: Implement user service
           documents: {
-            total: allStories.length,
-            public: publicStories.length,
-            private: privateStories.length
+            total: allDocuments.length,
+            public: publicDocuments.length,
+            private: privateDocuments.length
           }
         });
       } catch (error) {
