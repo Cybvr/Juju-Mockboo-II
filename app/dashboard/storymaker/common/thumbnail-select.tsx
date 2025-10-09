@@ -1,10 +1,15 @@
 "use client"
-import React from "react"; 
-import { Check } from "lucide-react"
+import React from "react"
+import { Check, ChevronDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 type ThumbnailOption = {
   id: string
@@ -20,18 +25,12 @@ interface ThumbnailSelectProps {
 }
 
 export function ThumbnailSelect({ options, value, onValueChange, placeholder = "Select..." }: ThumbnailSelectProps) {
-  const [open, setOpen] = React.useState(false)
   const selectedOption = options.find((option) => option.id === value)
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="w-full justify-start h-auto p-2 bg-transparent"
-        >
+    <Select value={value || ""} onValueChange={onValueChange}>
+      <SelectTrigger className="w-full h-auto p-2 bg-transparent">
+        <SelectValue asChild>
           {selectedOption ? (
             <div className="flex items-center gap-2 w-full">
               {selectedOption.imageUrl && (
@@ -46,39 +45,24 @@ export function ThumbnailSelect({ options, value, onValueChange, placeholder = "
           ) : (
             <span className="text-muted-foreground text-sm">{placeholder}</span>
           )}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-[300px] p-0" align="start">
-        <Command>
-          <CommandInput placeholder="Search..." className="h-9" />
-          <CommandList>
-            <CommandEmpty>No results found.</CommandEmpty>
-            <CommandGroup>
-              {options.map((option) => (
-                <CommandItem
-                  key={option.id}
-                  value={option.name}
-                  onSelect={() => {
-                    onValueChange(option.id)
-                    setOpen(false)
-                  }}
-                  className="flex items-center gap-2 cursor-pointer"
-                >
-                  {option.imageUrl && (
-                    <img
-                      src={option.imageUrl || "/placeholder.svg"}
-                      alt={option.name}
-                      className="w-10 h-10 rounded object-cover flex-shrink-0"
-                    />
-                  )}
-                  <span className="flex-1 truncate">{option.name}</span>
-                  <Check className={cn("h-4 w-4 flex-shrink-0", value === option.id ? "opacity-100" : "opacity-0")} />
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
+        </SelectValue>
+      </SelectTrigger>
+      <SelectContent className="w-[300px]">
+        {options.map((option) => (
+          <SelectItem key={option.id} value={option.id} className="flex items-center gap-2 cursor-pointer p-2">
+            <div className="flex items-center gap-2 w-full">
+              {option.imageUrl && (
+                <img
+                  src={option.imageUrl || "/placeholder.svg"}
+                  alt={option.name}
+                  className="w-10 h-10 rounded object-cover flex-shrink-0"
+                />
+              )}
+              <span className="flex-1 truncate">{option.name}</span>
+            </div>
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   )
 }
