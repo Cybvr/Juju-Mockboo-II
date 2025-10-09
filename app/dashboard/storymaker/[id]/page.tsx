@@ -129,29 +129,41 @@ function VideoMaker() {
       }
 
       if (updates.characterId !== undefined) {
-        const character = storyData?.characters?.find(c => c.id === updates.characterId)
-        updatedScene.character = character ? {
-          id: character.id,
-          name: character.name,
-          imageUrl: character.imageUrl,
-        } : undefined
+        if (updates.characterId === null || updates.characterId === "") {
+          updatedScene.character = undefined
+        } else {
+          const character = storyData?.characters?.find(c => c.id === updates.characterId)
+          updatedScene.character = character ? {
+            id: character.id,
+            name: character.name,
+            imageUrl: character.imageUrl,
+          } : undefined
+        }
       }
 
       if (updates.locationId !== undefined) {
-        const location = storyData?.locations?.find(l => l.id === updates.locationId)
-        updatedScene.location = location ? {
-          id: location.id,
-          name: location.name,
-          imageUrl: location.imageUrl,
-        } : undefined
+        if (updates.locationId === null || updates.locationId === "") {
+          updatedScene.location = undefined
+        } else {
+          const location = storyData?.locations?.find(l => l.id === updates.locationId)
+          updatedScene.location = location ? {
+            id: location.id,
+            name: location.name,
+            imageUrl: location.imageUrl,
+          } : undefined
+        }
       }
 
       if (updates.soundId !== undefined) {
-        const sound = storyData?.sounds?.find(s => s.id === updates.soundId)
-        updatedScene.sound = sound ? {
-          id: sound.id,
-          name: sound.name,
-        } : undefined
+        if (updates.soundId === null || updates.soundId === "") {
+          updatedScene.sound = undefined
+        } else {
+          const sound = storyData?.sounds?.find(s => s.id === updates.soundId)
+          updatedScene.sound = sound ? {
+            id: sound.id,
+            name: sound.name,
+          } : undefined
+        }
       }
 
       return updatedScene

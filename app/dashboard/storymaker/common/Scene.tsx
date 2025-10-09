@@ -112,7 +112,7 @@ export function Scene({
           <ThumbnailSelect
             options={characters.map(c => ({ id: c.id, name: c.name, imageUrl: c.imageUrl }))}
             value={scene.character?.id || ""}
-            onValueChange={(value) => onUpdate(scene.id, { characterId: value || undefined })}
+            onValueChange={(value) => onUpdate(scene.id, { characterId: value || null })}
             placeholder="Select character"
           />
         </div>
@@ -123,7 +123,7 @@ export function Scene({
           <ThumbnailSelect
             options={locations.map(l => ({ id: l.id, name: l.name, imageUrl: l.imageUrl }))}
             value={scene.location?.id || ""}
-            onValueChange={(value) => onUpdate(scene.id, { locationId: value || undefined })}
+            onValueChange={(value) => onUpdate(scene.id, { locationId: value || null })}
             placeholder="Select location"
           />
         </div>
@@ -134,7 +134,7 @@ export function Scene({
           <ThumbnailSelect
             options={sounds.map(s => ({ id: s.id, name: s.name }))}
             value={scene.sound?.id || ""}
-            onValueChange={(value) => onUpdate(scene.id, { soundId: value || undefined })}
+            onValueChange={(value) => onUpdate(scene.id, { soundId: value || null })}
             placeholder="Select sound"
           />
         </div>
