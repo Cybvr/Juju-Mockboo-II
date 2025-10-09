@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Play, X, Sparkles, Download, RotateCw, Send, ImageIcon } from "lucide-react"
+import { Play, X, Sparkles, Download, RotateCw, Send, ImageIcon, User, MapPin, Volume2 } from "lucide-react"
 
 type Video = {
   id: string
@@ -91,9 +91,16 @@ export function Scene({
   onRegenerateVideo,
   onRemoveVideo,
 }: SceneProps) {
+  const hasVariations = scene.variations.length > 0
+  const hasVideos = scene.videos.length > 0
+  const selectedCharacter = characters.find(c => c.id === (scene.characterId || scene.character?.id))
+  const selectedLocation = locations.find(l => l.id === (scene.locationId || scene.location?.id))
+  const selectedSound = sounds.find(s => s.id === (scene.soundId || scene.sound?.id))
+
   return (
-    <div className="p-6 px-6 leading-3">
-      <div className="flex items-center justify-between mb-2">
+    <div className="p-6">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
         <Input
           value={scene.name || `Scene ${index + 1}`}
           onChange={(e) => onUpdate(scene.id, { name: e.target.value })}
@@ -104,263 +111,272 @@ export function Scene({
             size="sm"
             variant="ghost"
             onClick={() => onRemove(scene.id)}
-            className="text-destructive hover:text-destructive"
+            className="text-gray-400 hover:text-red-500 h-8"
           >
-            <X className="h-4 w-4 mr-1" />
-            Remove Scene
+            <X className="h-4 w-4" />
           </Button>
         )}
       </div>
-      {/* Character, Location, Sound selectors */}
-      <div className="grid grid-cols-3 gap-4 mb-2 p-4 bg-muted/30 rounded-lg px-[0]">
-        <div className="space-y-2">
-          <Label htmlFor={`character-${scene.id}`} className="text-xs font-medium">
-            Character
-          </Label>
-          <Select
-            value={scene.characterId || scene.character?.id || "none"}
-            onValueChange={(value) => onUpdate(scene.id, { characterId: value === "none" ? null : value })}
-          >
-            <SelectTrigger className="w-full h-auto p-2">
-              <SelectValue placeholder="Select character" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">No character</SelectItem>
-              {characters.map((character) => (
-                <SelectItem key={character.id} value={character.id}>
-                  <div className="flex items-center gap-2">
-                    <img
-                      src={character.imageUrl || "/placeholder.svg"}
-                      alt={character.name}
-                      className="w-6 h-6 rounded object-cover flex-shrink-0"
-                    />
-                    <span className="truncate text-sm">{character.name}</span>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor={`location-${scene.id}`} className="text-xs font-medium">
-            Location
-          </Label>
-          <Select
-            value={scene.locationId || scene.location?.id || "none"}
-            onValueChange={(value) => onUpdate(scene.id, { locationId: value === "none" ? null : value })}
-          >
-            <SelectTrigger className="w-full h-auto p-2">
-              <SelectValue placeholder="Select location" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">No location</SelectItem>
-              {locations.map((location) => (
-                <SelectItem key={location.id} value={location.id}>
-                  <div className="flex items-center gap-2">
-                    <img
-                      src={location.imageUrl || "/placeholder.svg"}
-                      alt={location.name}
-                      className="w-6 h-6 rounded object-cover flex-shrink-0"
-                    />
-                    <span className="truncate text-sm">{location.name}</span>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor={`sound-${scene.id}`} className="text-xs font-medium">
-            Sound
-          </Label>
-          <Select
-            value={scene.soundId || scene.sound?.id || "none"}
-            onValueChange={(value) => onUpdate(scene.id, { soundId: value === "none" ? null : value })}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select sound" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">No sound</SelectItem>
-              {sounds.map((sound) => (
-                <SelectItem key={sound.id} value={sound.id}>
-                  <span className="truncate text-sm">{sound.name}</span>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-      {/* Main content grid */}
+
+      {/* Main Content */}
       <div className="grid grid-cols-12 gap-6">
-        {/* Left section: Upload and Prompt side by side, then Images below */}
-        <div className="col-span-7 space-y-6">
-          {/* Upload left, Prompt right */}
-          <div className="grid grid-cols-12 gap-4">
-            {/* Upload section */}
-            <div className="col-span-3">
-              <Card className="border-2 border-dashed border-gray-300 hover:border-primary transition-colors cursor-pointer group bg-gray-50">
-                <div className="aspect-square flex items-center justify-center">
-                  <div className="text-gray-400 text-4xl font-light">+</div>
-                </div>
-              </Card>
-            </div>
-            {/* Prompt section */}
-            <div className="col-span-9">
-              <Card className="p-0 overflow-hidden border-gray-200 h-full">
-                <Textarea
-                  value={scene.prompt}
-                  onChange={(e) => onUpdate(scene.id, { prompt: e.target.value })}
-                  placeholder="Describe your scene or upload an image..."
-                  className="text-sm h-[calc(100%-48px)] resize-none focus-visible:ring-0 rounded-b-none border-none border-0"
-                />
-                <div className="border-t border-gray-200 p-3 flex items-center justify-end gap-2 bg-white border-none">
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-8 w-8 text-gray-600 hover:text-gray-900"
-                    onClick={() => onRegenerateVariations(scene.id)}
-                  >
-                    <RotateCw className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-8 w-8 text-gray-600 hover:text-gray-900"
-                    onClick={() => onRegenerateVariations(scene.id)}
-                  >
-                    <Send className="h-4 w-4" />
-                  </Button>
-                </div>
-              </Card>
-            </div>
-          </div>
-          {/* Images section below */}
-          <div>
-            <div className="mb-3">
-              <h3 className="text-sm font-medium">Images</h3>
-            </div>
-            <div className="grid grid-cols-4 gap-3 bg-card">
-              {scene.variations.length === 0
-                ? // Show 4 placeholders with image icons
-                  Array.from({ length: 4 }).map((_, idx) => (
-                    <div key={idx}>
-                      <Card className="aspect-square bg-muted overflow-hidden relative">
-                        <div className="w-full h-full flex items-center justify-center">
-                          <ImageIcon className="h-10 w-10 text-gray-400" />
+        {/* Left: Prompt & Images */}
+        <div className="col-span-7 space-y-4">
+          {/* Prompt Card */}
+          <Card className="overflow-hidden border">
+            <Textarea
+              value={scene.prompt}
+              onChange={(e) => onUpdate(scene.id, { prompt: e.target.value })}
+              placeholder="Describe your scene..."
+              className="min-h-[120px] text-sm resize-none border-none focus-visible:ring-0 p-4"
+            />
+
+            {/* Context Pills & Actions */}
+            <div className="border-t bg-gray-50/50 p-3 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2 flex-1 overflow-x-auto">
+                {/* Character Pill */}
+                <Select
+                  value={scene.characterId || scene.character?.id || "none"}
+                  onValueChange={(value) => onUpdate(scene.id, { characterId: value === "none" ? null : value })}
+                >
+                  <SelectTrigger className="h-7 w-auto border-none bg-white shadow-sm hover:bg-gray-50">
+                    <div className="flex items-center gap-1.5">
+                      {selectedCharacter ? (
+                        <>
+                          <img src={selectedCharacter.imageUrl} alt="" className="w-4 h-4 rounded-full object-cover" />
+                          <span className="text-xs">{selectedCharacter.name}</span>
+                        </>
+                      ) : (
+                        <>
+                          <User className="h-3.5 w-3.5 text-gray-400" />
+                          <span className="text-xs text-gray-500">Character</span>
+                        </>
+                      )}
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No character</SelectItem>
+                    {characters.map((character) => (
+                      <SelectItem key={character.id} value={character.id}>
+                        <div className="flex items-center gap-2">
+                          <img src={character.imageUrl} alt={character.name} className="w-5 h-5 rounded-full object-cover" />
+                          <span className="text-sm">{character.name}</span>
                         </div>
-                      </Card>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                {/* Location Pill */}
+                <Select
+                  value={scene.locationId || scene.location?.id || "none"}
+                  onValueChange={(value) => onUpdate(scene.id, { locationId: value === "none" ? null : value })}
+                >
+                  <SelectTrigger className="h-7 w-auto border-none bg-white shadow-sm hover:bg-gray-50">
+                    <div className="flex items-center gap-1.5">
+                      {selectedLocation ? (
+                        <>
+                          <img src={selectedLocation.imageUrl} alt="" className="w-4 h-4 rounded object-cover" />
+                          <span className="text-xs">{selectedLocation.name}</span>
+                        </>
+                      ) : (
+                        <>
+                          <MapPin className="h-3.5 w-3.5 text-gray-400" />
+                          <span className="text-xs text-gray-500">Location</span>
+                        </>
+                      )}
                     </div>
-                  ))
-                : // Show existing variations
-                  scene.variations.map((variation, idx) => (
-                    <div key={idx} className="group">
-                      <Card
-                        className="aspect-square bg-muted overflow-hidden hover:ring-2 hover:ring-primary cursor-pointer transition-all relative"
-                        onClick={() => onSelectVariation(scene.id, variation)}
-                      >
-                        <img
-                          src={variation || "/placeholder.svg"}
-                          alt={`Variation ${idx + 1}`}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                        />
-                        <Button
-                          size="icon"
-                          variant="secondary"
-                          className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            onSaveVariation(variation, scene.id, idx)
-                          }}
-                        >
-                          <Download className="h-3 w-3" />
-                        </Button>
-                      </Card>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No location</SelectItem>
+                    {locations.map((location) => (
+                      <SelectItem key={location.id} value={location.id}>
+                        <div className="flex items-center gap-2">
+                          <img src={location.imageUrl} alt={location.name} className="w-5 h-5 rounded object-cover" />
+                          <span className="text-sm">{location.name}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                {/* Sound Pill */}
+                <Select
+                  value={scene.soundId || scene.sound?.id || "none"}
+                  onValueChange={(value) => onUpdate(scene.id, { soundId: value === "none" ? null : value })}
+                >
+                  <SelectTrigger className="h-7 w-auto border-none bg-white shadow-sm hover:bg-gray-50">
+                    <div className="flex items-center gap-1.5">
+                      {selectedSound ? (
+                        <>
+                          <Volume2 className="h-3.5 w-3.5" />
+                          <span className="text-xs">{selectedSound.name}</span>
+                        </>
+                      ) : (
+                        <>
+                          <Volume2 className="h-3.5 w-3.5 text-gray-400" />
+                          <span className="text-xs text-gray-500">Sound</span>
+                        </>
+                      )}
                     </div>
-                  ))}
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No sound</SelectItem>
+                    {sounds.map((sound) => (
+                      <SelectItem key={sound.id} value={sound.id}>
+                        <span className="text-sm">{sound.name}</span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex items-center gap-1">
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-7 w-7"
+                  onClick={() => onRegenerateVariations(scene.id)}
+                  title="Regenerate"
+                >
+                  <RotateCw className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  size="sm"
+                  className="h-7 px-3 gap-1.5"
+                  onClick={() => onRegenerateVariations(scene.id)}
+                >
+                  <Send className="h-3.5 w-3.5" />
+                  Generate
+                </Button>
+              </div>
             </div>
+          </Card>
+
+          {/* Images Grid */}
+          <div className="grid grid-cols-4 gap-3">
+            {!hasVariations ? (
+              Array.from({ length: 4 }).map((_, idx) => (
+                <Card key={idx} className="aspect-square bg-gray-50 border-dashed flex items-center justify-center">
+                  <ImageIcon className="h-8 w-8 text-gray-300" />
+                </Card>
+              ))
+            ) : (
+              scene.variations.map((variation, idx) => (
+                <Card
+                  key={idx}
+                  className="aspect-square overflow-hidden relative group cursor-pointer hover:ring-2 hover:ring-primary transition-all"
+                  onClick={() => onSelectVariation(scene.id, variation)}
+                >
+                  <img
+                    src={variation}
+                    alt={`Variation ${idx + 1}`}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                  />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+                  <Button
+                    size="icon"
+                    variant="secondary"
+                    className="absolute top-2 right-2 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onSaveVariation(variation, scene.id, idx)
+                    }}
+                  >
+                    <Download className="h-3.5 w-3.5" />
+                  </Button>
+                </Card>
+              ))
+            )}
           </div>
         </div>
-        {/* Videos section - stays on the right */}
+
+        {/* Right: Videos */}
         <div className="col-span-5">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-medium">Videos</h3>
-            <Button size="sm" variant="outline" onClick={() => onGenerateVideo(scene.id)} className="h-7 text-xs gap-1">
-              <Sparkles className="h-3 w-3" />
-              Make
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-medium text-gray-700">Videos</h3>
+            <Button
+              size="sm"
+              onClick={() => onGenerateVideo(scene.id)}
+              className="h-7 px-3 gap-1.5"
+            >
+              <Sparkles className="h-3.5 w-3.5" />
+              Create
             </Button>
           </div>
+
           <div className="space-y-3">
-            {scene.videos.length === 0 ? (
-              <Card className="p-3">
-                <div className="aspect-video bg-black rounded mb-2 flex items-center justify-center">
-                  <p className="text-white text-sm text-center px-4">
-                    No videos yet. Click &quot;Generate Video&quot; to create one.
+            {!hasVideos ? (
+              <Card className="p-4 border-dashed">
+                <div className="aspect-video bg-gray-100 rounded-lg mb-3 flex items-center justify-center">
+                  <p className="text-sm text-gray-400 text-center px-4">
+                    Generate a video from your images
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Button size="icon" variant="ghost" className="h-6 w-6 flex-shrink-0" disabled>
+                <div className="flex items-center gap-2 opacity-50">
+                  <Button size="icon" variant="ghost" className="h-6 w-6" disabled>
                     <Play className="h-3 w-3" />
                   </Button>
-                  <div className="flex-1 h-1 bg-muted rounded-full" />
-                  <span className="text-xs text-muted-foreground flex-shrink-0">0:00</span>
+                  <div className="flex-1 h-1 bg-gray-200 rounded-full" />
+                  <span className="text-xs text-gray-400">0:00</span>
                 </div>
               </Card>
             ) : (
               scene.videos.map((video) => (
-                <Card key={`${scene.id}-${video.id}`} className="p-3 relative group">
+                <Card key={video.id} className="p-3 relative group">
                   <Button
                     size="icon"
-                    variant="destructive"
-                    className="absolute -top-2 -right-2 h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      onRemoveVideo(scene.id, video.id)
-                    }}
+                    variant="ghost"
+                    className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-white shadow-md opacity-0 group-hover:opacity-100 transition-opacity z-10 hover:bg-red-50 hover:text-red-500"
+                    onClick={() => onRemoveVideo(scene.id, video.id)}
                   >
                     <X className="h-3 w-3" />
                   </Button>
-                  <div className="aspect-video bg-black rounded mb-2 flex items-center justify-center overflow-hidden">
+
+                  <div className="aspect-video bg-black rounded-lg mb-3 overflow-hidden">
                     {video.url ? (
-                      <img
-                        src={video.url || "/placeholder.svg"}
-                        alt="Video preview"
-                        className="w-full h-full object-cover"
-                      />
+                      <img src={video.url} alt="Video" className="w-full h-full object-cover" />
                     ) : (
-                      <div className="w-full h-full bg-black" />
+                      <div className="w-full h-full flex items-center justify-center">
+                        <div className="animate-pulse text-white text-sm">Generating...</div>
+                      </div>
                     )}
                   </div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <Button size="icon" variant="ghost" className="h-6 w-6 flex-shrink-0">
+
+                  <div className="flex items-center gap-2 mb-3">
+                    <Button size="icon" variant="ghost" className="h-6 w-6">
                       <Play className="h-3 w-3" />
                     </Button>
-                    <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden">
-                      <div className="h-full w-1/3 bg-orange-500" />
+                    <div className="flex-1 h-1 bg-gray-200 rounded-full overflow-hidden">
+                      <div className="h-full w-1/3 bg-primary" />
                     </div>
-                    <span className="text-xs text-muted-foreground flex-shrink-0">{video.duration}</span>
+                    <span className="text-xs text-gray-500">{video.duration}</span>
                   </div>
-                  <div className="flex gap-2 mb-2">
+
+                  <div className="flex gap-2">
                     <Button
                       size="sm"
                       variant="outline"
-                      className="flex-1 h-7 text-xs gap-1 bg-transparent"
+                      className="flex-1 h-7 text-xs"
                       onClick={() => video.url && onSaveVideo(video.url, video.id)}
                     >
-                      <Download className="h-3 w-3" />
+                      <Download className="h-3 w-3 mr-1" />
                       Save
                     </Button>
                     <Button
                       size="sm"
                       variant="outline"
-                      className="flex-1 h-7 text-xs gap-1 bg-transparent"
+                      className="flex-1 h-7 text-xs"
                       onClick={() => onRegenerateVideo(scene.id, video.id)}
                     >
-                      <RotateCw className="h-3 w-3" />
-                      Regen
+                      <RotateCw className="h-3 w-3 mr-1" />
+                      Regenerate
                     </Button>
                   </div>
-                  <p className="text-xs text-muted-foreground leading-tight">{video.prompt}</p>
+
+                  {video.prompt && (
+                    <p className="text-xs text-gray-500 mt-2 leading-relaxed line-clamp-2">{video.prompt}</p>
+                  )}
                 </Card>
               ))
             )}
