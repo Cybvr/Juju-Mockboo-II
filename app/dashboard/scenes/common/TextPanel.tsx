@@ -5,21 +5,16 @@ import { X, Type, Heading1, Heading2, TextIcon } from "lucide-react"
 interface TextPanelProps {
   isOpen: boolean
   onClose: () => void
-  onAddText?: (textType: 'title' | 'subtitle' | 'body', text: string) => void
+  onAddText?: (textType: 'title' | 'subtitle' | 'body') => void
 }
 
 export function TextPanel({ isOpen, onClose, onAddText }: TextPanelProps) {
   if (!isOpen) return null
 
   const handleAddText = (textType: 'title' | 'subtitle' | 'body') => {
-    const defaultTexts = {
-      title: "Your Title Here",
-      subtitle: "Your Subtitle Here", 
-      body: "Your text here"
-    }
-    
+    // This will add text directly to the canvas/preview area
     if (onAddText) {
-      onAddText(textType, defaultTexts[textType])
+      onAddText(textType)
     }
   }
 

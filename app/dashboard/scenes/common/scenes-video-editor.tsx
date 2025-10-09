@@ -152,15 +152,11 @@ export function ScenesVideoEditor({ projectId }: ScenesVideoEditorProps) {
     setSelectedSceneId(newScene.id)
   }
 
-  const handleAddText = (textType: 'title' | 'subtitle' | 'body', text: string) => {
-    // Create a text scene that will be rendered as a text overlay
-    const textScene: Omit<Scene, "id"> = {
-      name: `Text - ${textType}`,
-      duration: 3,
-      type: "image",
-      imageUrl: `https://via.placeholder.com/800x600/4F46E5/white?text=${encodeURIComponent(text)}`,
-    }
-    addScene(textScene)
+  const handleAddText = (textType: 'title' | 'subtitle' | 'body') => {
+    // Add text element to the current scene's canvas
+    // This should work with the preview canvas, not create placeholder images
+    console.log(`Adding ${textType} text to scene editor`)
+    // TODO: Implement proper text editing on the canvas preview
   }
 
   const updateScene = (sceneId: string, updates: Partial<Scene>) => {
