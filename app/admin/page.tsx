@@ -36,7 +36,7 @@ export default function AdminDashboard() {
         setLoading(true);
         
         // Fetch real documents data
-        const allDocuments = await documentService.getDocumentsByType('all');
+        const allDocuments = await documentService.getDocumentsByCategory('all');
         const publicDocuments = allDocuments.filter(doc => doc.isPublic);
         const privateDocuments = allDocuments.filter(doc => !doc.isPublic);
         
