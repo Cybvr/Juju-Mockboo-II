@@ -226,12 +226,6 @@ export function StorymakerProvider({
     if (user && storyData) {
       try {
         await storiesService.updateProjectConfig(documentId, newConfig)
-        // Also update the story title if projectName changed
-        if (updates.projectName) {
-          await storiesService.updateStory(documentId, {
-            title: updates.projectName
-          })
-        }
       } catch (error) {
         console.error('Error updating project config:', error)
       }
