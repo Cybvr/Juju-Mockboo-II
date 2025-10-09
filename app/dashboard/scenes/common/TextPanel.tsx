@@ -5,10 +5,23 @@ import { X, Type, Heading1, Heading2, TextIcon } from "lucide-react"
 interface TextPanelProps {
   isOpen: boolean
   onClose: () => void
+  onAddText?: (textType: 'title' | 'subtitle' | 'body', text: string) => void
 }
 
-export function TextPanel({ isOpen, onClose }: TextPanelProps) {
+export function TextPanel({ isOpen, onClose, onAddText }: TextPanelProps) {
   if (!isOpen) return null
+
+  const handleAddText = (textType: 'title' | 'subtitle' | 'body') => {
+    const defaultTexts = {
+      title: "Your Title Here",
+      subtitle: "Your Subtitle Here", 
+      body: "Your text here"
+    }
+    
+    if (onAddText) {
+      onAddText(textType, defaultTexts[textType])
+    }
+  }
 
   return (
     <div className="w-64 border-r border-border bg-card/50 flex flex-col h-full">
@@ -33,6 +46,7 @@ export function TextPanel({ isOpen, onClose }: TextPanelProps) {
         <Button 
           variant="outline" 
           className="w-full justify-start gap-2 h-12"
+          onClick={() => handleAddText('title')}
         >
           <Heading1 className="w-5 h-5" />
           <span>Add a title</span>
@@ -41,6 +55,7 @@ export function TextPanel({ isOpen, onClose }: TextPanelProps) {
         <Button 
           variant="outline" 
           className="w-full justify-start gap-2 h-12"
+          onClick={() => handleAddText('subtitle')}
         >
           <Heading2 className="w-5 h-5" />
           <span>Add a subtitle</span>
@@ -49,6 +64,7 @@ export function TextPanel({ isOpen, onClose }: TextPanelProps) {
         <Button 
           variant="outline" 
           className="w-full justify-start gap-2 h-12"
+          onClick={() => handleAddText('body')}
         >
           <TextIcon className="w-5 h-5" />
           <span>Add body text</span>

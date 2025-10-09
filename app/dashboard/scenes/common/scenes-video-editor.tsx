@@ -152,6 +152,17 @@ export function ScenesVideoEditor({ projectId }: ScenesVideoEditorProps) {
     setSelectedSceneId(newScene.id)
   }
 
+  const handleAddText = (textType: 'title' | 'subtitle' | 'body', text: string) => {
+    // Create a text scene that will be rendered as a text overlay
+    const textScene: Omit<Scene, "id"> = {
+      name: `Text - ${textType}`,
+      duration: 3,
+      type: "image",
+      imageUrl: `https://via.placeholder.com/800x600/4F46E5/white?text=${encodeURIComponent(text)}`,
+    }
+    addScene(textScene)
+  }
+
   const updateScene = (sceneId: string, updates: Partial<Scene>) => {
     setScenes((prev) => prev.map((scene) => (scene.id === sceneId ? { ...scene, ...updates } : scene)))
   }
@@ -341,6 +352,7 @@ export function ScenesVideoEditor({ projectId }: ScenesVideoEditorProps) {
             <TextPanel 
               isOpen={showTextPanel}
               onClose={() => setShowTextPanel(false)}
+              onAddText={handleAddText}
             />
           )}
 
