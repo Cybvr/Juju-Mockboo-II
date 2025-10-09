@@ -36,7 +36,7 @@ type LegacyScene = {
 }
 
 export function VideoMaker() {
-  const { selectedTemplate, setSelectedTemplate } = useStorymaker()
+  const { selectedTemplate, setSelectedTemplate, projectConfig, isLoading } = useStorymaker()
   const [activeTab, setActiveTab] = useState("creator")
   const [scenes, setScenes] = useState<LegacyScene[]>(
     initialScenes.map((scene, idx) => ({
@@ -206,13 +206,24 @@ export function VideoMaker() {
     console.log("[v0] Regenerating video", videoId, "for scene", sceneId)
   }
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p>Loading project...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b border-border px-6 py-4">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-semibold">
-            {selectedTemplate ? selectedTemplate.name : "Lumière Parfum Studio"}
+            {selectedTemplate ? selectedTemplate.name : projectConfig.projectName}
           </h1>
           <div className="flex gap-2">
             <Button variant="outline" className="gap-2 bg-transparent" onClick={() => setIsTemplateModalOpen(true)}>
