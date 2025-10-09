@@ -89,7 +89,11 @@ export default function StorymakerDocumentsPage() {
   }
 
   const handleDeleteConfirm = async () => {
-    console.log('DELETE: handleDeleteConfirm started', { storyToDelete, user: !!user })
+    console.log('DELETE: handleDeleteConfirm started', { 
+      storyToDelete, 
+      user: !!user, 
+      dialogOpen: deleteDialogOpen 
+    })
     
     if (!storyToDelete || !user) {
       console.log('DELETE: Early return - missing storyToDelete or user')
@@ -117,10 +121,25 @@ export default function StorymakerDocumentsPage() {
     } catch (error) {
       console.error('DELETE: Error deleting story:', error)
     } finally {
-      console.log('DELETE: In finally block - closing dialog')
-      // Always close dialog and reset state
+      console.log('DELETE: In finally block - closing dialog', { 
+        currentDialogOpen: deleteDialogOpen,
+        currentStoryToDelete: storyToDelete
+      })
+      
+      // Force close dialog and reset state
       setDeleteDialogOpen(false)
       setStoryToDelete(null)
+      
+      // Add a small delay and double-check
+      setTimeout(() => {
+        console.log('DELETE: Post-timeout check', {
+          dialogStillOpen: deleteDialogOpen,
+          storyStillSet: storyToDelete
+        })
+        setDeleteDialogOpen(false)
+        setStoryToDelete(null)
+      }, 100)
+      
       console.log('DELETE: Dialog closed and state reset')
     }
   }
@@ -134,7 +153,17 @@ export default function StorymakerDocumentsPage() {
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div 
+      className="p-6 max-w-7xl mx-auto"
+      onClick={(e) => {
+        console.log('PAGE CLICK:', {
+          target: e.target,
+          dialogOpen: deleteDialogOpen,
+          storyToDelete,
+          timestamp: new Date().toISOString()
+        })
+      }}
+    >
       <div className="">
         <div className="flex items-center justify-between mb-4">
           <div>
@@ -213,8 +242,18 @@ export default function StorymakerDocumentsPage() {
         ))}
       </div>
 
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
+      <AlertDialog 
+        open={deleteDialogOpen} 
+        onOpenChange={(open) => {
+          console.log('DIALOG: onOpenChange called', { open, currentState: deleteDialogOpen })
+          setDeleteDialogOpen(open)
+          if (!open) {
+            setStoryToDelete(null)
+            console.log('DIALOG: Closed via onOpenChange')
+          }
+        }}
+      >
+        <AlertDialogContent className="z-[9999]">
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Story</AlertDialogTitle>
             <AlertDialogDescription>
@@ -222,7 +261,13 @@ export default function StorymakerDocumentsPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel onClick={() => {
+              console.log('DIALOG: Cancel button clicked')
+              setDeleteDialogOpen(false)
+              setStoryToDelete(null)
+            }}>
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
               Delete
             </AlertDialogAction>
