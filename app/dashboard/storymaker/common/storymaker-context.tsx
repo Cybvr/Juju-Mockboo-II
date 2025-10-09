@@ -187,6 +187,12 @@ export function StorymakerProvider({
             locations: [],
             sounds: []
           })
+
+          // Load the newly created story
+          const newStory = await storiesService.getStory(newStoryId)
+          if (newStory) {
+            setStoryData(newStory)
+          }
         }
       } catch (error) {
         console.error('Error loading story:', error)
