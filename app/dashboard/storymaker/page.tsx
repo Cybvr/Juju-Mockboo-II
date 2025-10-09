@@ -31,8 +31,10 @@ export default function StorymakerDocumentsPage() {
       }
     }
 
-    if (!loading) {
+    if (!loading && user) {
       loadStories()
+    } else if (!loading && !user) {
+      setIsLoading(false)
     }
   }, [user, loading])
 
