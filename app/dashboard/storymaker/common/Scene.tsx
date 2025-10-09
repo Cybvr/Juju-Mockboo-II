@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Play, X, Sparkles, Download, RotateCw, Send } from "lucide-react"
 
 
@@ -109,89 +110,104 @@ export function Scene({
           <Label htmlFor={`character-${scene.id}`} className="text-xs font-medium">
             Character
           </Label>
-          <div className="space-y-1">
-            <Button
-              variant="outline"
-              className={`w-full h-auto p-2 justify-start ${!scene.character ? 'text-muted-foreground' : ''}`}
-              onClick={() => onUpdate(scene.id, { characterId: null })}
-            >
-              {!scene.character ? "Select character" : "Clear selection"}
-            </Button>
-            <div className="max-h-32 overflow-y-auto space-y-1">
+          <Select
+            value={scene.character?.id || ""}
+            onValueChange={(value) => onUpdate(scene.id, { characterId: value || null })}
+          >
+            <SelectTrigger className="w-full h-auto p-2">
+              <SelectValue placeholder="Select character">
+                {scene.character && (
+                  <div className="flex items-center gap-2">
+                    <img
+                      src={scene.character.imageUrl || "/placeholder.svg"}
+                      alt={scene.character.name}
+                      className="w-6 h-6 rounded object-cover flex-shrink-0"
+                    />
+                    <span className="truncate text-sm">{scene.character.name}</span>
+                  </div>
+                )}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">No character</SelectItem>
               {characters.map((character) => (
-                <Button
-                  key={character.id}
-                  variant={scene.character?.id === character.id ? "default" : "ghost"}
-                  className="w-full h-auto p-2 justify-start"
-                  onClick={() => onUpdate(scene.id, { characterId: character.id })}
-                >
-                  <img
-                    src={character.imageUrl || "/placeholder.svg"}
-                    alt={character.name}
-                    className="w-6 h-6 rounded object-cover flex-shrink-0 mr-2"
-                  />
-                  <span className="truncate text-sm">{character.name}</span>
-                </Button>
+                <SelectItem key={character.id} value={character.id}>
+                  <div className="flex items-center gap-2">
+                    <img
+                      src={character.imageUrl || "/placeholder.svg"}
+                      alt={character.name}
+                      className="w-6 h-6 rounded object-cover flex-shrink-0"
+                    />
+                    <span className="truncate text-sm">{character.name}</span>
+                  </div>
+                </SelectItem>
               ))}
-            </div>
-          </div>
+            </SelectContent>
+          </Select>
         </div>
         <div className="space-y-2">
           <Label htmlFor={`location-${scene.id}`} className="text-xs font-medium">
             Location
           </Label>
-          <div className="space-y-1">
-            <Button
-              variant="outline"
-              className={`w-full h-auto p-2 justify-start ${!scene.location ? 'text-muted-foreground' : ''}`}
-              onClick={() => onUpdate(scene.id, { locationId: null })}
-            >
-              {!scene.location ? "Select location" : "Clear selection"}
-            </Button>
-            <div className="max-h-32 overflow-y-auto space-y-1">
+          <Select
+            value={scene.location?.id || ""}
+            onValueChange={(value) => onUpdate(scene.id, { locationId: value || null })}
+          >
+            <SelectTrigger className="w-full h-auto p-2">
+              <SelectValue placeholder="Select location">
+                {scene.location && (
+                  <div className="flex items-center gap-2">
+                    <img
+                      src={scene.location.imageUrl || "/placeholder.svg"}
+                      alt={scene.location.name}
+                      className="w-6 h-6 rounded object-cover flex-shrink-0"
+                    />
+                    <span className="truncate text-sm">{scene.location.name}</span>
+                  </div>
+                )}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">No location</SelectItem>
               {locations.map((location) => (
-                <Button
-                  key={location.id}
-                  variant={scene.location?.id === location.id ? "default" : "ghost"}
-                  className="w-full h-auto p-2 justify-start"
-                  onClick={() => onUpdate(scene.id, { locationId: location.id })}
-                >
-                  <img
-                    src={location.imageUrl || "/placeholder.svg"}
-                    alt={location.name}
-                    className="w-6 h-6 rounded object-cover flex-shrink-0 mr-2"
-                  />
-                  <span className="truncate text-sm">{location.name}</span>
-                </Button>
+                <SelectItem key={location.id} value={location.id}>
+                  <div className="flex items-center gap-2">
+                    <img
+                      src={location.imageUrl || "/placeholder.svg"}
+                      alt={location.name}
+                      className="w-6 h-6 rounded object-cover flex-shrink-0"
+                    />
+                    <span className="truncate text-sm">{location.name}</span>
+                  </div>
+                </SelectItem>
               ))}
-            </div>
-          </div>
+            </SelectContent>
+          </Select>
         </div>
         <div className="space-y-2">
           <Label htmlFor={`sound-${scene.id}`} className="text-xs font-medium">
             Sound
           </Label>
-          <div className="space-y-1">
-            <Button
-              variant="outline"
-              className={`w-full h-auto p-2 justify-start ${!scene.sound ? 'text-muted-foreground' : ''}`}
-              onClick={() => onUpdate(scene.id, { soundId: null })}
-            >
-              {!scene.sound ? "Select sound" : "Clear selection"}
-            </Button>
-            <div className="max-h-32 overflow-y-auto space-y-1">
+          <Select
+            value={scene.sound?.id || ""}
+            onValueChange={(value) => onUpdate(scene.id, { soundId: value || null })}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select sound">
+                {scene.sound && (
+                  <span className="truncate text-sm">{scene.sound.name}</span>
+                )}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">No sound</SelectItem>
               {sounds.map((sound) => (
-                <Button
-                  key={sound.id}
-                  variant={scene.sound?.id === sound.id ? "default" : "ghost"}
-                  className="w-full h-auto p-2 justify-start"
-                  onClick={() => onUpdate(scene.id, { soundId: sound.id })}
-                >
+                <SelectItem key={sound.id} value={sound.id}>
                   <span className="truncate text-sm">{sound.name}</span>
-                </Button>
+                </SelectItem>
               ))}
-            </div>
-          </div>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
