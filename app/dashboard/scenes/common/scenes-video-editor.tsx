@@ -152,7 +152,7 @@ export function ScenesVideoEditor({ projectId }: ScenesVideoEditorProps) {
     setSelectedSceneId(newScene.id)
   }
 
-  const handleAddTextToScene = (textType: 'title' | 'subtitle' | 'body') => {
+  const handleAddText = (textType: 'title' | 'subtitle' | 'body') => {
     // Add text element to the current scene's canvas
     // This should work with the preview canvas, not create placeholder images
     console.log(`Adding ${textType} text to scene editor`)
@@ -320,7 +320,7 @@ export function ScenesVideoEditor({ projectId }: ScenesVideoEditorProps) {
       <div className="flex-1 flex overflow-hidden">
         <div className="hidden md:flex flex-1 overflow-hidden">
           {/* Left Toolbar */}
-          <ScenesLeftToolbar
+          <ScenesLeftToolbar 
             showEditingPanel={showEditingPanel}
             onToggleEditingPanel={() => setShowEditingPanel(!showEditingPanel)}
             showAIImagePanel={showAIImagePanel}
@@ -345,10 +345,10 @@ export function ScenesVideoEditor({ projectId }: ScenesVideoEditorProps) {
 
           {/* Text Panel (conditional) */}
           {showTextPanel && (
-            <TextPanel
+            <TextPanel 
               isOpen={showTextPanel}
               onClose={() => setShowTextPanel(false)}
-              onAddText={handleAddTextToScene}
+              onAddText={handleAddText}
             />
           )}
 
@@ -363,12 +363,11 @@ export function ScenesVideoEditor({ projectId }: ScenesVideoEditorProps) {
               isPlaying={isPlaying}
               onPlayStateChange={setIsPlaying}
               onTimeUpdate={setCurrentTime}
-              onAddTextToScene={handleAddTextToScene}
             />
           </div>
 
           {/* Right - Properties */}
-          <VidsToolbar
+          <VidsToolbar 
             selectedScene={selectedScene}
             onUpdateScene={updateScene}
           />
@@ -385,7 +384,6 @@ export function ScenesVideoEditor({ projectId }: ScenesVideoEditorProps) {
               isPlaying={isPlaying}
               onPlayStateChange={setIsPlaying}
               onTimeUpdate={setCurrentTime}
-              onAddTextToScene={handleAddTextToScene}
             />
           )}
 
