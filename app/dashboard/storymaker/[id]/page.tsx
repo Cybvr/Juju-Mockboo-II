@@ -16,7 +16,6 @@ import { FinalVideoModal } from "../common/final-video-modal"
 import { ThumbnailSelect } from "@/app/common/storymaker/thumbnail-select"
 import { TemplateModal } from "../common/template-modal"
 import { templates, type Template } from "@/data/storymakerTemplatesData"
-import { initialScenes, initialCharacters, initialLocations, initialSounds } from "@/data/storymakerData"
 import { StorymakerProvider, useStorymaker } from "../common/storymaker-context"
 
 type LegacyVideo = {
@@ -37,156 +36,193 @@ type LegacyScene = {
 }
 
 function VideoMaker() {
-  const { selectedTemplate, setSelectedTemplate, projectConfig, isLoading } = useStorymaker()
+  const { 
+    selectedTemplate, 
+    setSelectedTemplate, 
+    projectConfig, 
+    scenes,
+    characters,
+    locations,
+    sounds,
+    updateScenes,
+    isLoading 
+  } = useStorymaker()
+  
   const [activeTab, setActiveTab] = useState("creator")
-  const [scenes, setScenes] = useState<LegacyScene[]>(
-    initialScenes.map((scene, idx) => ({
-      id: idx + 1,
-      prompt: scene.prompt,
-      variations: scene.variations.map((v) => v.imageUrl),
-      videos: scene.videos.map((v) => ({
-        id: v.id,
-        url: v.thumbnailUrl,
-        prompt: v.prompt,
-        duration: v.duration,
-      })),
-      characterId: scene.character?.id,
-      locationId: scene.location?.id,
-      soundId: scene.sound?.id,
-    })),
-  )
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false)
 
-  const characters = initialCharacters.map((c) => ({
-    id: c.id,
-    name: c.name,
-    imageUrl: c.imageUrl,
-  }))
-
-  const locations = initialLocations.map((l) => ({
-    id: l.id,
-    name: l.name,
-    imageUrl: l.imageUrl,
-  }))
-
-  const sounds = initialSounds.map((s) => ({
-    id: s.id,
-    name: s.name,
+  // Convert Firebase scenes to legacy format for compatibility
+  const legacyScenes: LegacyScene[] = scenes.map((scene, idx) => ({
+    id: idx + 1,
+    prompt: scene.prompt,
+    variations: scene.variations?.map(v => v.imageUrl) || [],
+    videos: scene.videos?.map(v => ({
+      id: v.id,
+      url: v.thumbnailUrl,
+      prompt: v.prompt,
+      duration: v.duration,
+    })) || [],
+    characterId: scene.character?.id,
+    locationId: scene.location?.id,
+    soundId: scene.sound?.id,
   }))
 
   const handleSelectTemplate = (template: Template) => {
     setSelectedTemplate(template)
 
-    const newScenes: LegacyScene[] = template.scenes.map((scene, idx) => ({
-      id: idx + 1,
+    const newScenes = template.scenes.map((scene, idx) => ({
+      id: `scene-${idx + 1}`,
+      name: `Scene ${idx + 1}`,
       prompt: scene.prompt,
       variations: [],
       videos: [],
+      character: undefined,
+      location: undefined,
+      sound: undefined,
     }))
-    setScenes(newScenes)
+    updateScenes(newScenes)
   }
 
   const addScene = () => {
-    const newScene: LegacyScene = {
-      id: scenes.length + 1,
+    const newScene = {
+      id: `scene-${scenes.length + 1}`,
+      name: `Scene ${scenes.length + 1}`,
       prompt: "",
       variations: [],
       videos: [],
+      character: undefined,
+      location: undefined,
+      sound: undefined,
     }
-    setScenes([...scenes, newScene])
+    updateScenes([...scenes, newScene])
   }
 
   const removeScene = (id: number) => {
-    setScenes(scenes.filter((scene) => scene.id !== id))
+    const filteredScenes = scenes.filter((_, idx) => idx + 1 !== id)
+    updateScenes(filteredScenes)
   }
 
   const addVideoToScene = (sceneId: number) => {
-    setScenes((prevScenes) =>
-      prevScenes.map((scene) => {
-        if (scene.id === sceneId) {
-          return {
-            ...scene,
-            videos: [
-              ...scene.videos,
-              {
-                id: `v${Date.now()}`,
-                prompt: "New video prompt",
-                duration: "0s",
-              },
-            ],
-          }
+    const updatedScenes = scenes.map((scene, idx) => {
+      if (idx + 1 === sceneId) {
+        return {
+          ...scene,
+          videos: [
+            ...(scene.videos || []),
+            {
+              id: `v${Date.now()}`,
+              videoUrl: "",
+              thumbnailUrl: "",
+              status: "pending" as const,
+              prompt: "New video prompt",
+              duration: "0s",
+              timestamp: new Date().toISOString(),
+            },
+          ],
         }
-        return scene
-      }),
-    )
+      }
+      return scene
+    })
+    updateScenes(updatedScenes)
   }
 
   const removeVideoFromScene = (sceneId: number, videoId: string) => {
-    setScenes((prevScenes) =>
-      prevScenes.map((scene) => {
-        if (scene.id === sceneId) {
-          return {
-            ...scene,
-            videos: scene.videos.filter((video) => video.id !== videoId),
-          }
+    const updatedScenes = scenes.map((scene, idx) => {
+      if (idx + 1 === sceneId) {
+        return {
+          ...scene,
+          videos: scene.videos?.filter(video => video.id !== videoId) || [],
         }
-        return scene
-      }),
-    )
+      }
+      return scene
+    })
+    updateScenes(updatedScenes)
   }
 
-  const updateScene = (sceneId: number, updates: Partial<LegacyScene>) => {
-    setScenes((prevScenes) =>
-      prevScenes.map((scene) => {
-        if (scene.id === sceneId) {
-          return { ...scene, ...updates }
+  const updateScene = (sceneId: number, updates: any) => {
+    const updatedScenes = scenes.map((scene, idx) => {
+      if (idx + 1 === sceneId) {
+        const updatedScene = { ...scene }
+        
+        if (updates.prompt !== undefined) {
+          updatedScene.prompt = updates.prompt
         }
-        return scene
-      }),
-    )
+        
+        if (updates.characterId !== undefined) {
+          const character = characters.find(c => c.id === updates.characterId)
+          updatedScene.character = character ? {
+            id: character.id,
+            name: character.name,
+            imageUrl: character.imageUrl,
+          } : undefined
+        }
+        
+        if (updates.locationId !== undefined) {
+          const location = locations.find(l => l.id === updates.locationId)
+          updatedScene.location = location ? {
+            id: location.id,
+            name: location.name,
+            imageUrl: location.imageUrl,
+          } : undefined
+        }
+        
+        if (updates.soundId !== undefined) {
+          const sound = sounds.find(s => s.id === updates.soundId)
+          updatedScene.sound = sound ? {
+            id: sound.id,
+            name: sound.name,
+          } : undefined
+        }
+        
+        return updatedScene
+      }
+      return scene
+    })
+    updateScenes(updatedScenes)
   }
 
   const selectVariation = (sceneId: number, variationUrl: string) => {
-    setScenes((prevScenes) =>
-      prevScenes.map((scene) => {
-        if (scene.id === sceneId) {
-          const updatedVideos =
-            scene.videos.length > 0
-              ? scene.videos.map((video, idx) => (idx === 0 ? { ...video, url: variationUrl } : video))
-              : [
-                  {
-                    id: `v${Date.now()}`,
-                    url: variationUrl,
-                    prompt: scene.prompt,
-                    duration: "0:00",
-                  },
-                ]
-          return { ...scene, videos: updatedVideos }
-        }
-        return scene
-      }),
-    )
+    const updatedScenes = scenes.map((scene, idx) => {
+      if (idx + 1 === sceneId) {
+        const updatedVideos = scene.videos && scene.videos.length > 0
+          ? scene.videos.map((video, vidIdx) => vidIdx === 0 ? { ...video, thumbnailUrl: variationUrl } : video)
+          : [{
+              id: `v${Date.now()}`,
+              videoUrl: "",
+              thumbnailUrl: variationUrl,
+              status: "pending" as const,
+              prompt: scene.prompt,
+              duration: "0:00",
+              timestamp: new Date().toISOString(),
+            }]
+        return { ...scene, videos: updatedVideos }
+      }
+      return scene
+    })
+    updateScenes(updatedScenes)
   }
 
   const generateVideo = (sceneId: number) => {
-    const scene = scenes.find((s) => s.id === sceneId)
+    const scene = scenes.find((_, idx) => idx + 1 === sceneId)
     if (!scene) return
 
-    setScenes((prevScenes) =>
-      prevScenes.map((s) => {
-        if (s.id === sceneId) {
-          const newVideo = {
-            id: `v${Date.now()}`,
-            url: scene.variations[0] || "/placeholder.svg",
-            prompt: scene.prompt,
-            duration: "0:45",
-          }
-          return { ...s, videos: [...s.videos, newVideo] }
+    const updatedScenes = scenes.map((s, idx) => {
+      if (idx + 1 === sceneId) {
+        const newVideo = {
+          id: `v${Date.now()}`,
+          videoUrl: "",
+          thumbnailUrl: scene.variations?.[0]?.imageUrl || "/placeholder.svg",
+          status: "complete" as const,
+          prompt: scene.prompt,
+          duration: "0:45",
+          timestamp: new Date().toISOString(),
         }
-        return s
-      }),
-    )
+        return { ...s, videos: [...(s.videos || []), newVideo] }
+      }
+      return s
+    })
+    updateScenes(updatedScenes)
   }
 
   const regenerateVariations = (sceneId: number) => {
@@ -281,11 +317,11 @@ function VideoMaker() {
 
       {activeTab === "creator" && (
         <div className="max-w-7xl mx-auto py-2 space-y-1">
-          {scenes.map((scene, index) => (
+          {legacyScenes.map((scene, index) => (
             <Card key={scene.id} className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold">Scene {index + 1}</h2>
-                {scenes.length > 1 && (
+                {legacyScenes.length > 1 && (
                   <Button
                     size="sm"
                     variant="ghost"
@@ -304,7 +340,7 @@ function VideoMaker() {
                     Character
                   </Label>
                   <ThumbnailSelect
-                    options={characters}
+                    options={characters.map(c => ({ id: c.id, name: c.name, imageUrl: c.imageUrl }))}
                     value={scene.characterId}
                     onValueChange={(value) => updateScene(scene.id, { characterId: value })}
                     placeholder="Select character"
@@ -316,7 +352,7 @@ function VideoMaker() {
                     Location
                   </Label>
                   <ThumbnailSelect
-                    options={locations}
+                    options={locations.map(l => ({ id: l.id, name: l.name, imageUrl: l.imageUrl }))}
                     value={scene.locationId}
                     onValueChange={(value) => updateScene(scene.id, { locationId: value })}
                     placeholder="Select location"
@@ -328,7 +364,7 @@ function VideoMaker() {
                     Sound
                   </Label>
                   <ThumbnailSelect
-                    options={sounds}
+                    options={sounds.map(s => ({ id: s.id, name: s.name }))}
                     value={scene.soundId}
                     onValueChange={(value) => updateScene(scene.id, { soundId: value })}
                     placeholder="Select sound"
@@ -505,7 +541,7 @@ function VideoMaker() {
       {activeTab === "location" && <LocationPage />}
       {activeTab === "sound" && <SoundPage />}
 
-      <FinalVideoModal open={isModalOpen} onOpenChange={setIsModalOpen} scenes={scenes} />
+      <FinalVideoModal open={isModalOpen} onOpenChange={setIsModalOpen} scenes={legacyScenes} />
       <TemplateModal
         open={isTemplateModalOpen}
         onOpenChange={setIsTemplateModalOpen}
