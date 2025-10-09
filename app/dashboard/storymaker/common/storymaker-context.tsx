@@ -3,7 +3,105 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react"
 import { Template } from "@/data/storymakerTemplatesData" 
-import { ProjectConfig, createProjectConfigFromTemplate, defaultProjectConfig, Scene, Character, Location, Sound } from "@/data/storymakerData"
+
+// Inline types since we moved to Firebase
+export interface ProjectConfig {
+  projectName: string
+  projectDescription: string
+  aspectRatio: string
+  duration: string
+  fps: string
+  resolution: string
+  autoTransitions: boolean
+  backgroundMusic: boolean
+  autoSave: boolean
+  watermark: boolean
+  aiModel: string
+  stylePreset: string
+  variations: string
+}
+
+export interface Scene {
+  id: string
+  name: string
+  prompt: string
+  variations?: Array<{
+    id: string
+    imageUrl: string
+    timestamp: string
+  }>
+  videos?: Array<{
+    id: string
+    videoUrl: string
+    thumbnailUrl: string
+    status: "pending" | "processing" | "complete" | "error"
+    prompt: string
+    duration: string
+    timestamp: string
+  }>
+  character?: {
+    id: string
+    name: string
+    imageUrl: string
+  }
+  location?: {
+    id: string
+    name: string
+    imageUrl: string
+  }
+  sound?: {
+    id: string
+    name: string
+  }
+}
+
+export interface Character {
+  id: string
+  name: string
+  imageUrl: string
+  description: string
+  traits: string[]
+}
+
+export interface Location {
+  id: string
+  name: string
+  imageUrl: string
+  description: string
+  type: string
+}
+
+export interface Sound {
+  id: string
+  name: string
+  description: string
+  type: string
+  audioUrl?: string
+}
+
+const defaultProjectConfig: ProjectConfig = {
+  projectName: "New Story Project",
+  projectDescription: "A new video storytelling project",
+  aspectRatio: "16:9",
+  duration: "60",
+  fps: "30",
+  resolution: "1080p",
+  autoTransitions: true,
+  backgroundMusic: false,
+  autoSave: true,
+  watermark: true,
+  aiModel: "standard",
+  stylePreset: "realistic",
+  variations: "4",
+}
+
+const createProjectConfigFromTemplate = (template: Template): ProjectConfig => {
+  return {
+    ...defaultProjectConfig,
+    projectName: template.name,
+    projectDescription: template.description,
+  }
+}
 import { storiesService, StoryDocument } from "@/services/storiesService"
 import { useAuthState } from "react-firebase-hooks/auth"
 import { auth } from "@/lib/firebase"
