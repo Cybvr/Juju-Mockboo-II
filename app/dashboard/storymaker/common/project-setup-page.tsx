@@ -8,47 +8,6 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
-// Hardcoded options since we moved to Firebase
-const aspectRatioOptions = [
-  { value: "16:9", label: "16:9 (Landscape)" },
-  { value: "9:16", label: "9:16 (Portrait)" },
-  { value: "1:1", label: "1:1 (Square)" },
-  { value: "4:3", label: "4:3 (Standard)" },
-]
-
-const resolutionOptions = [
-  { value: "4k", label: "4K (3840x2160)" },
-  { value: "1080p", label: "1080p (1920x1080)" },
-  { value: "720p", label: "720p (1280x720)" },
-  { value: "480p", label: "480p (854x480)" },
-]
-
-const fpsOptions = [
-  { value: "24", label: "24 FPS (Cinematic)" },
-  { value: "30", label: "30 FPS (Standard)" },
-  { value: "60", label: "60 FPS (Smooth)" },
-]
-
-const aiModelOptions = [
-  { value: "standard", label: "Standard Quality" },
-  { value: "high", label: "High Quality (Slower)" },
-  { value: "ultra", label: "Ultra Quality (Premium)" },
-]
-
-const stylePresetOptions = [
-  { value: "realistic", label: "Realistic" },
-  { value: "animated", label: "Animated" },
-  { value: "cinematic", label: "Cinematic" },
-  { value: "artistic", label: "Artistic" },
-  { value: "documentary", label: "Documentary" },
-]
-
-const variationOptions = [
-  { value: "2", label: "2 Variations" },
-  { value: "4", label: "4 Variations" },
-  { value: "6", label: "6 Variations" },
-  { value: "8", label: "8 Variations" },
-]
 import { useStorymaker } from "./storymaker-context"
 
 
@@ -155,11 +114,10 @@ export function ProjectSetupPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {aspectRatioOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="16:9">16:9 (Landscape)</SelectItem>
+                  <SelectItem value="9:16">9:16 (Portrait)</SelectItem>
+                  <SelectItem value="1:1">1:1 (Square)</SelectItem>
+                  <SelectItem value="4:3">4:3 (Standard)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -171,11 +129,10 @@ export function ProjectSetupPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {resolutionOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="4k">4K (3840x2160)</SelectItem>
+                  <SelectItem value="1080p">1080p (1920x1080)</SelectItem>
+                  <SelectItem value="720p">720p (1280x720)</SelectItem>
+                  <SelectItem value="480p">480p (854x480)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -187,11 +144,9 @@ export function ProjectSetupPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {fpsOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="24">24 FPS (Cinematic)</SelectItem>
+                  <SelectItem value="30">30 FPS (Standard)</SelectItem>
+                  <SelectItem value="60">60 FPS (Smooth)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -221,11 +176,9 @@ export function ProjectSetupPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {aiModelOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="standard">Standard Quality</SelectItem>
+                  <SelectItem value="high">High Quality (Slower)</SelectItem>
+                  <SelectItem value="ultra">Ultra Quality (Premium)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -237,11 +190,11 @@ export function ProjectSetupPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {stylePresetOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="realistic">Realistic</SelectItem>
+                  <SelectItem value="animated">Animated</SelectItem>
+                  <SelectItem value="cinematic">Cinematic</SelectItem>
+                  <SelectItem value="artistic">Artistic</SelectItem>
+                  <SelectItem value="documentary">Documentary</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -253,11 +206,10 @@ export function ProjectSetupPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {variationOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="2">2 Variations</SelectItem>
+                  <SelectItem value="4">4 Variations</SelectItem>
+                  <SelectItem value="6">6 Variations</SelectItem>
+                  <SelectItem value="8">8 Variations</SelectItem>
                 </SelectContent>
               </Select>
             </div>

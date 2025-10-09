@@ -9,25 +9,16 @@ import { Textarea } from "@/components/ui/textarea"
 import { Plus, Trash2, Sparkles, Upload } from "lucide-react"
 import { useStorymaker } from "./storymaker-context"
 
-type Character = {
-  id: number
-  name: string
-  description: string
-  imageUrl?: string
-  traits: string[]
-}
-
 export function CharacterPage() {
   const { selectedTemplate, characters, updateCharacters } = useStorymaker()
-  const [localCharacters, setLocalCharacters] = useState<Character[]>([])
 
-  // Update local state when context characters change or template changes
+  // Update characters when template changes
   useEffect(() => {
-    if (selectedTemplate) {
+    if (selectedTemplate && characters.length === 0) {
       // Extract unique characters from template scenes
       const templateCharacters = selectedTemplate.scenes
         .map((scene, index) => ({
-          id: index + 1,
+          id: `char-${index + 1}`,
           name: `Character ${index + 1}`,
           description: scene.prompt.substring(0, 100) + "...",
           imageUrl: "/placeholder.svg",

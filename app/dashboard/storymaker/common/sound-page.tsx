@@ -10,24 +10,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Upload, Music, Trash2, Sparkles } from "lucide-react"
 import { useStorymaker } from "./storymaker-context"
 
-type Sound = {
-  id: string
-  name: string
-  type: "music" | "sfx" | "voiceover" | "ambient"
-  duration: string
-  description: string
-  file?: string
-  tags: string[]
-}
-
 export function SoundPage() {
   const { sounds, updateSounds, selectedTemplate } = useStorymaker()
 
   // Update sounds when template changes
   useEffect(() => {
-    if (selectedTemplate) {
+    if (selectedTemplate && sounds.length === 0) {
       // Generate template-specific sounds based on category
-      let templateSounds: Sound[] = []
+      let templateSounds = []
 
       switch (selectedTemplate.category) {
         case "ugc-ads":
