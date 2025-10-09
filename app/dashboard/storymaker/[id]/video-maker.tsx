@@ -15,6 +15,7 @@ import { FinalVideoModal } from "../common/final-video-modal"
 import { ThumbnailSelect } from "@/app/common/storymaker/thumbnail-select"
 import { TemplateModal } from "../common/template-modal"
 import { templates, type Template } from "@/data/storymakerTemplatesData"
+import { initialScenes, initialCharacters, initialLocations, initialSounds } from "@/data/storymakerData"
 import { useStorymaker } from "../common/storymaker-context"
 
 type LegacyVideo = {
