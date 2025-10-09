@@ -1,17 +1,15 @@
 'use client';
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { documentService } from '@/services/documentService';
-import { templateService } from '@/services/templateService';
-import { 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Save, 
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Save,
   X,
   Users,
   FileText,
@@ -25,7 +23,6 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState({
     users: { total: 0, verified: 0, admins: 0 },
     documents: { total: 0, public: 0, private: 0 },
-    templates: { total: 0, premium: 0, free: 0 }
   });
   const [recentDocuments, setRecentDocuments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -34,33 +31,23 @@ export default function AdminDashboard() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        
+
         // Fetch real documents data
         const allDocuments = await documentService.getDocumentsByCategory('all');
         const publicDocuments = allDocuments.filter(doc => doc.isPublic);
         const privateDocuments = allDocuments.filter(doc => !doc.isPublic);
-        
-        // Fetch real templates data
-        const allTemplates = await templateService.getTemplatesByCategory('all');
-        const premiumTemplates = allTemplates.filter(template => template.premium);
-        const freeTemplates = allTemplates.filter(template => !template.premium);
-        
+
         // Fetch recent documents
         const recent = await documentService.getRecentDocuments(5);
         setRecentDocuments(recent);
-        
+
         // Update stats with real data
         setStats({
           users: { total: 0, verified: 0, admins: 0 }, // TODO: Implement user service
-          documents: { 
-            total: allDocuments.length, 
-            public: publicDocuments.length, 
-            private: privateDocuments.length 
-          },
-          templates: { 
-            total: allTemplates.length, 
-            premium: premiumTemplates.length, 
-            free: freeTemplates.length 
+          documents: {
+            total: allDocuments.length,
+            public: publicDocuments.length,
+            private: privateDocuments.length
           }
         });
       } catch (error) {
@@ -69,7 +56,6 @@ export default function AdminDashboard() {
         setLoading(false);
       }
     };
-
     fetchData();
   }, []);
 
@@ -147,7 +133,7 @@ export default function AdminDashboard() {
               <div key={doc.id} className="flex items-center justify-between border-b pb-2">
                 <div className="flex items-center gap-2">
                   <FileText className={`h-4 w-4 ${
-                    doc.type === 'image' ? 'text-blue-600' : 
+                    doc.type === 'image' ? 'text-blue-600' :
                     doc.type === 'template' ? 'text-purple-600' : 'text-green-600'
                   }`} />
                   <span className="text-sm truncate max-w-64">{doc.title}</span>
@@ -174,29 +160,21 @@ export default function AdminDashboard() {
         <h1 className="text-3xl font-bold">Dashboard</h1>
         <p className="text-muted-foreground">Overview of your admin portal</p>
       </div>
-
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <StatCard 
-          title="Users" 
-          icon={Users} 
-          stats={stats.users} 
-          color="blue" 
+        <StatCard
+          title="Users"
+          icon={Users}
+          stats={stats.users}
+          color="blue"
         />
-        <StatCard 
-          title="Documents" 
-          icon={FileText} 
-          stats={stats.documents} 
-          color="green" 
-        />
-        <StatCard 
-          title="Templates" 
-          icon={Layout} 
-          stats={stats.templates} 
-          color="purple" 
+        <StatCard
+          title="Documents"
+          icon={FileText}
+          stats={stats.documents}
+          color="green"
         />
       </div>
-
       {/* Quick Actions and Recent Activity */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <QuickActions />
