@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Play, X, Sparkles, Download, RotateCw, Send, ImageIcon } from "lucide-react"
 
@@ -15,6 +16,7 @@ type Video = {
 
 type SceneData = {
   id: number
+  name?: string
   prompt: string
   variations: string[]
   videos: Video[]
@@ -92,7 +94,11 @@ export function Scene({
   return (
     <div className="p-6 px-6 leading-3">
       <div className="flex items-center justify-between mb-2">
-        <h2 className="text-lg font-semibold">Scene {index + 1}</h2>
+        <Input
+          value={scene.name || `Scene ${index + 1}`}
+          onChange={(e) => onUpdate(scene.id, { name: e.target.value })}
+          className="text-lg font-semibold bg-transparent border-none px-0 focus-visible:ring-0 focus-visible:ring-offset-0 w-auto max-w-[300px] h-8"
+        />
         {totalScenes > 1 && (
           <Button
             size="sm"

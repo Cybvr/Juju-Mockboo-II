@@ -23,6 +23,7 @@ type LegacyVideo = {
 }
 type LegacyScene = {
   id: number
+  name?: string
   prompt: string
   variations: string[]
   videos: LegacyVideo[]
@@ -42,6 +43,7 @@ function VideoMaker() {
   const legacyScenes: LegacyScene[] = useMemo(() => 
     (storyData?.scenes || []).map((scene, idx) => ({
       id: idx + 1,
+      name: scene.name,
       prompt: scene.prompt,
       variations: scene.variations?.map(v => v.imageUrl) || [],
       videos: scene.videos?.map(v => ({
@@ -126,6 +128,10 @@ function VideoMaker() {
   const updateScene = useCallback((sceneId: number, updates: any) => {
     updateSceneByIndex(sceneId - 1, (scene: any) => {
       const updatedScene = { ...scene }
+
+      if (updates.name !== undefined) {
+        updatedScene.name = updates.name
+      }
 
       if (updates.prompt !== undefined) {
         updatedScene.prompt = updates.prompt
