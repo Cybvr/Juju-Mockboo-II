@@ -4,22 +4,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Home, LayoutTemplate, Film } from "lucide-react";
 import { ProfileDropdown } from "@/app/common/dashboard/ProfileDropdown";
+import { useStorymaker } from "./storymaker-context";
 
 interface HeaderProps {
-  selectedTemplate: any;
-  projectConfig: any;
   setIsTemplateModalOpen: (value: boolean) => void;
   setIsModalOpen: (value: boolean) => void;
-  onTitleChange?: (newTitle: string) => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
-  selectedTemplate,
-  projectConfig,
   setIsTemplateModalOpen,
-  setIsModalOpen,
-  onTitleChange
+  setIsModalOpen
 }) => {
+  const { selectedTemplate, projectConfig, updateProjectConfig } = useStorymaker();
   const [titleValue, setTitleValue] = useState("");
 
   const currentTitle = selectedTemplate ? selectedTemplate.name : projectConfig.projectName || "Untitled Story";
@@ -29,8 +25,8 @@ export const Header: React.FC<HeaderProps> = ({
   }, [currentTitle]);
 
   const handleTitleSave = () => {
-    if (onTitleChange && titleValue.trim() && titleValue !== currentTitle) {
-      onTitleChange(titleValue.trim());
+    if (titleValue.trim() && titleValue !== currentTitle) {
+      updateProjectConfig({ projectName: titleValue.trim() });
     }
   };
 

@@ -251,8 +251,6 @@ function VideoMaker() {
   return (
     <div className="min-h-screen bg-background ">
       <Header
-        selectedTemplate={selectedTemplate}
-        projectConfig={projectConfig}
         setIsTemplateModalOpen={setIsTemplateModalOpen}
         setIsModalOpen={setIsModalOpen}
       />
