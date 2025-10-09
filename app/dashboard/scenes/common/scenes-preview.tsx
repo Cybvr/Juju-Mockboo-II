@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { Play } from "lucide-react"
 import { Scene } from "./scenes-video-editor"
 
@@ -13,6 +13,7 @@ interface ScenesPreviewProps {
   isPlaying?: boolean;
   onPlayStateChange?: (playing: boolean) => void;
   onTimeUpdate?: (time: number) => void;
+  onAddTextToScene?: (sceneId: string, textObject: any) => void;
 }
 
 export function ScenesPreview({
@@ -23,10 +24,14 @@ export function ScenesPreview({
   currentTime = 0,
   isPlaying = false,
   onPlayStateChange,
-  onTimeUpdate
+  onTimeUpdate,
+  onAddTextToScene,
 }: ScenesPreviewProps) {
   const [currentSceneIndex, setCurrentSceneIndex] = useState(0)
   const videoRef = useRef<HTMLVideoElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const fabricCanvasRef = useRef<any>(null)
+  const [fabricLoaded, setFabricLoaded] = useState(false)
 
   // Calculate which scene should be showing based on currentTime
   useEffect(() => {
@@ -75,9 +80,103 @@ export function ScenesPreview({
     }
   }, [currentTime, currentSceneIndex, scenes, currentScene])
 
+  // Initialize Fabric canvas for editing
+  useEffect(() => {
+    if (!canvasRef.current || fabricLoaded) return
+
+    import("fabric").then((FabricModule) => {
+      const fabric = FabricModule
+
+      const canvas = new fabric.Canvas(canvasRef.current, {
+        width: 800,
+        height: 450,
+        backgroundColor: "white",
+      })
+
+      fabricCanvasRef.current = canvas
+      setFabricLoaded(true)
+
+      // Load scene background if available
+      if (currentScene?.imageUrl) {
+        fabric.Image.fromURL(currentScene.imageUrl).then((img) => {
+          img.set({
+            left: 0,
+            top: 0,
+            scaleX: canvas.width! / img.width!,
+            scaleY: canvas.height! / img.height!,
+            selectable: false,
+          })
+          canvas.add(img)
+          canvas.sendToBack(img)
+          canvas.renderAll()
+        })
+      }
+
+      return () => {
+        canvas.dispose()
+      }
+    })
+  }, [canvasRef.current, fabricLoaded, currentScene?.imageUrl])
+
+  // Function to add text to canvas
+  const addTextToCanvas = useCallback((textType: 'title' | 'subtitle' | 'body') => {
+    if (!fabricCanvasRef.current) return
+
+    const canvas = fabricCanvasRef.current
+
+    const textStyles = {
+      title: { fontSize: 32, fontFamily: 'Arial', fontWeight: 'bold' },
+      subtitle: { fontSize: 24, fontFamily: 'Arial', fontWeight: 'normal' },
+      body: { fontSize: 18, fontFamily: 'Arial', fontWeight: 'normal' }
+    }
+
+    const textContent = {
+      title: 'Your Title Here',
+      subtitle: 'Your Subtitle Here',
+      body: 'Your text here'
+    }
+
+    import("fabric").then((FabricModule) => {
+      const fabric = FabricModule
+
+      const text = new fabric.Textbox(textContent[textType], {
+        left: canvas.width! / 2 - 100,
+        top: canvas.height! / 2 - 50,
+        width: 200,
+        fill: '#000000',
+        ...textStyles[textType],
+      })
+
+      canvas.add(text)
+      canvas.setActiveObject(text)
+      canvas.renderAll()
+
+      // Notify parent about text addition
+      if (onAddTextToScene && selectedSceneId) {
+        onAddTextToScene(selectedSceneId, {
+          type: textType,
+          content: textContent[textType],
+          position: { x: text.left, y: text.top },
+          style: textStyles[textType]
+        })
+      }
+    })
+  }, [selectedSceneId, onAddTextToScene])
+
+  // Expose addTextToCanvas globally so TextPanel can access it
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.addTextToCanvas = addTextToCanvas
+    }
+  }, [addTextToCanvas])
+
+
+  // Find the currently selected scene for preview
+  const currentSceneForPreview = scenes.find(scene => scene.id === selectedSceneId)
+
   return (
     <div className="h-full flex flex-col bg-background">
-      
+
 
       {/* Preview Area */}
       <div className="flex-1 flex items-center justify-center p-8">
@@ -92,35 +191,35 @@ export function ScenesPreview({
         ) : (
           <div className="max-w-2xl w-full">
             {/* Video Preview */}
-            <div className="relative bg-black rounded-lg overflow-hidden aspect-video mb-6">
-              {currentScene && (
-                <>
-                  {currentScene.type === 'video' && currentScene.videoUrl ? (
-                    <video
-                      ref={videoRef}
-                      src={currentScene.videoUrl}
-                      className="w-full h-full object-contain"
-                      muted
-                      autoPlay={isPlaying}
-                      loop
-                    />
-                  ) : currentScene.imageUrl ? (
-                    <img
-                      src={currentScene.imageUrl}
-                      alt={currentScene.name}
-                      className="w-full h-full object-contain"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-white">
-                      <div className="text-center">
-                        <Play className="w-16 h-16 mx-auto mb-2" />
-                        <p>{currentScene.name}</p>
-                      </div>
+            <div className="aspect-video bg-black rounded-lg overflow-hidden relative flex items-center justify-center">
+              {fabricLoaded ? (
+                <canvas
+                  ref={canvasRef}
+                  className="max-w-full max-h-full"
+                  style={{ border: '1px solid #ccc' }}
+                />
+              ) : currentSceneForPreview ? (
+                currentSceneForPreview.imageUrl ? (
+                  <img
+                    src={currentSceneForPreview.imageUrl}
+                    alt={currentSceneForPreview.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-white">
+                    <div className="text-center">
+                      <div className="text-lg font-medium">{currentSceneForPreview.name}</div>
+                      <div className="text-sm opacity-70">{currentSceneForPreview.duration}s duration</div>
                     </div>
-                  )}
-
-
-                </>
+                  </div>
+                )
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-white">
+                  <div className="text-center">
+                    <div className="text-lg font-medium">No Scene Selected</div>
+                    <div className="text-sm opacity-70">Select a scene to preview</div>
+                  </div>
+                </div>
               )}
             </div>
           </div>

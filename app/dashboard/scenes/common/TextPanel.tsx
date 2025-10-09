@@ -12,7 +12,11 @@ export function TextPanel({ isOpen, onClose, onAddText }: TextPanelProps) {
   if (!isOpen) return null
 
   const handleAddText = (textType: 'title' | 'subtitle' | 'body') => {
-    // This will add text directly to the canvas/preview area
+    // Add text directly to the canvas
+    if (typeof window !== 'undefined' && window.addTextToCanvas) {
+      window.addTextToCanvas(textType)
+    }
+    
     if (onAddText) {
       onAddText(textType)
     }
