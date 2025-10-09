@@ -62,9 +62,13 @@ export default function StorymakerDocumentsPage() {
     router.push(`/dashboard/storymaker/${id}`)
   }
 
-  const handleCreateNew = () => {
-    const newId = `story-${Date.now()}`
-    router.push(`/dashboard/storymaker/${newId}`)
+  const handleCreateNew = async () => {
+    if (!user) return
+
+    const newStoryId = await storiesService.createStory(user.uid, {
+      title: "Untitled Story"
+    })
+    router.push(`/dashboard/storymaker/${newStoryId}`)
   }
 
   const handleDuplicate = async (e: React.MouseEvent, doc: StoryDocument) => {
