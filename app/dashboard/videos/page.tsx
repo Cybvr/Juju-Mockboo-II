@@ -1,10 +1,12 @@
+// @/app/dashboard/scenes/page.tsx
+"use client"
 
-import { VideoEditor } from "./common/video-editor"
+import { ScenesVideoEditor } from "./common/scenes-video-editor"
 
-export default function VideoPage() {
+export default function ScenesPage() {
   return (
     <div className="min-h-screen">
-      <VideoEditor />
+      <ScenesVideoEditor />
     </div>
   )
 }
