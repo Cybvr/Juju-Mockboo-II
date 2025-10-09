@@ -7,11 +7,15 @@ import { Edit3, Image, Video, Layers, Settings } from "lucide-react"
 interface ScenesLeftToolbarProps {
   showEditingPanel: boolean
   onToggleEditingPanel: () => void
+  showAIImagePanel: boolean
+  onToggleAIImagePanel: () => void
 }
 
 export function ScenesLeftToolbar({ 
   showEditingPanel, 
-  onToggleEditingPanel 
+  onToggleEditingPanel,
+  showAIImagePanel,
+  onToggleAIImagePanel
 }: ScenesLeftToolbarProps) {
   return (
     <div className="w-12 border-r border-border bg-card/30 flex flex-col items-center py-3 gap-2">
@@ -26,10 +30,11 @@ export function ScenesLeftToolbar({
       </Button>
       
       <Button
-        variant="ghost"
+        variant={showAIImagePanel ? "default" : "ghost"}
         size="sm"
         className="w-8 h-8 p-0"
-        title="Media"
+        onClick={onToggleAIImagePanel}
+        title="AI Image Generator"
       >
         <Image className="w-4 h-4" />
       </Button>

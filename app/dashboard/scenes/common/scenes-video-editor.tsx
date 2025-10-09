@@ -12,6 +12,7 @@ import { ScenesPreview } from "./scenes-preview"
 import { ScenesHeader } from "./scenes-header"
 import { ScenesLeftToolbar } from "./scenes-left-toolbar"
 import { VidsToolbar } from "./vids-toolbar"
+import { AIImagePanel } from "./AIImagePanel"
 import { Film, Edit3, Clock } from "lucide-react"
 
 export interface Scene {
@@ -42,6 +43,7 @@ export function ScenesVideoEditor({ projectId }: ScenesVideoEditorProps) {
   const [projectLoaded, setProjectLoaded] = useState(false)
   const [activeTab, setActiveTab] = useState<"preview" | "edit" | "timeline">("preview")
   const [showEditingPanel, setShowEditingPanel] = useState(false)
+  const [showAIImagePanel, setShowAIImagePanel] = useState(false)
 
   useEffect(() => {
     const loadProject = async () => {
@@ -312,12 +314,21 @@ export function ScenesVideoEditor({ projectId }: ScenesVideoEditorProps) {
           <ScenesLeftToolbar 
             showEditingPanel={showEditingPanel}
             onToggleEditingPanel={() => setShowEditingPanel(!showEditingPanel)}
+            showAIImagePanel={showAIImagePanel}
+            onToggleAIImagePanel={() => setShowAIImagePanel(!showAIImagePanel)}
           />
 
           {/* Editing Panel (conditional) */}
           {showEditingPanel && (
             <div className="w-80 border-r border-border">
               <ScenesEditingPanel onAddScene={addScene} selectedScene={selectedScene} onUpdateScene={updateScene} />
+            </div>
+          )}
+
+          {/* AI Image Panel (conditional) */}
+          {showAIImagePanel && (
+            <div className="border-r border-border">
+              <AIImagePanel />
             </div>
           )}
 
