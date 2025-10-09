@@ -146,18 +146,35 @@ export function DocumentGallery({
   }
 
   const handleDelete = async () => {
+    console.log('GALLERY DELETE: handleDelete started', { deleteDocumentId })
+    
     try {
+      console.log('GALLERY DELETE: About to call documentService.deleteDocument')
       await documentService.deleteDocument(deleteDocumentId)
+      console.log('GALLERY DELETE: Successfully deleted document from Firebase')
+      
       // Immediately update state to remove the deleted document
-      setDocuments((prev) => prev.filter((doc) => doc.id !== deleteDocumentId))
+      setDocuments((prev) => {
+        const newDocs = prev.filter((doc) => doc.id !== deleteDocumentId)
+        console.log('GALLERY DELETE: Updated documents state', { 
+          oldCount: prev.length, 
+          newCount: newDocs.length,
+          deletedId: deleteDocumentId 
+        })
+        return newDocs
+      })
+      
       toast.success("Document deleted successfully")
+      console.log('GALLERY DELETE: Success toast shown')
     } catch (error) {
-      console.error("Error deleting document:", error)
+      console.error("GALLERY DELETE: Error deleting document:", error)
       toast.error("Failed to delete document")
     } finally {
+      console.log('GALLERY DELETE: In finally block - closing dialog')
       // Always close dialog and reset state
       setShowDeleteDialog(false)
       setDeleteDocumentId("")
+      console.log('GALLERY DELETE: Dialog closed and state reset')
     }
   }
 

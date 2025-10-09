@@ -81,24 +81,47 @@ export default function StorymakerDocumentsPage() {
   }
 
   const handleDeleteClick = (e: React.MouseEvent, docId: string) => {
+    console.log('DELETE: Delete button clicked', { docId })
     e.stopPropagation()
     setStoryToDelete(docId)
     setDeleteDialogOpen(true)
+    console.log('DELETE: Dialog should now be open')
   }
 
   const handleDeleteConfirm = async () => {
-    if (!storyToDelete || !user) return
+    console.log('DELETE: handleDeleteConfirm started', { storyToDelete, user: !!user })
+    
+    if (!storyToDelete || !user) {
+      console.log('DELETE: Early return - missing storyToDelete or user')
+      return
+    }
 
+    console.log('DELETE: About to call storiesService.deleteStory')
+    
     try {
       await storiesService.deleteStory(storyToDelete)
+      console.log('DELETE: Successfully deleted story from Firebase')
+      
       // Immediately update state to remove the deleted story
-      setDocuments((prev) => prev.filter((doc) => doc.id !== storyToDelete))
+      setDocuments((prev) => {
+        const newDocs = prev.filter((doc) => doc.id !== storyToDelete)
+        console.log('DELETE: Updated documents state', { 
+          oldCount: prev.length, 
+          newCount: newDocs.length,
+          deletedId: storyToDelete 
+        })
+        return newDocs
+      })
+      
+      console.log('DELETE: State updated successfully')
     } catch (error) {
-      console.error('Error deleting story:', error)
+      console.error('DELETE: Error deleting story:', error)
     } finally {
+      console.log('DELETE: In finally block - closing dialog')
       // Always close dialog and reset state
       setDeleteDialogOpen(false)
       setStoryToDelete(null)
+      console.log('DELETE: Dialog closed and state reset')
     }
   }
 
