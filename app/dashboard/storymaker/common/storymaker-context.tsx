@@ -164,7 +164,9 @@ export function StorymakerProvider({
         // Only save if data actually changed
         if (currentDataString === lastSavedDataRef.current) return
 
-        await storiesService.updateStory(documentId, storyData)
+        // Clean undefined values before saving
+        const cleanedData = cleanUndefinedValues(storyData)
+        await storiesService.updateStory(documentId, cleanedData)
         lastSavedDataRef.current = currentDataString
         setSaveError(null) // Clear any previous errors
       } catch (error) {
@@ -184,10 +186,8 @@ export function StorymakerProvider({
     setStoryData(newData)
 
     try {
-      // Clean undefined values before sending to Firestore
-      const cleanUpdates = Object.fromEntries(
-        Object.entries(updates).filter(([_, value]) => value !== undefined)
-      )
+      // Deep clean undefined values before sending to Firestore
+      const cleanUpdates = cleanUndefinedValues(updates)
       await storiesService.updateStory(documentId, cleanUpdates)
       setSaveError(null)
     } catch (error) {
@@ -195,6 +195,29 @@ export function StorymakerProvider({
       setSaveError('Failed to save changes. Please try again.')
     }
   }, [storyData, documentId])
+
+  // Helper function to recursively clean undefined values
+  const cleanUndefinedValues = (obj: any): any => {
+    if (obj === null || obj === undefined) {
+      return null
+    }
+    
+    if (Array.isArray(obj)) {
+      return obj.map(cleanUndefinedValues)
+    }
+    
+    if (typeof obj === 'object') {
+      const cleaned: any = {}
+      for (const [key, value] of Object.entries(obj)) {
+        if (value !== undefined) {
+          cleaned[key] = cleanUndefinedValues(value)
+        }
+      }
+      return cleaned
+    }
+    
+    return obj
+  }
 
 
   const value = {
