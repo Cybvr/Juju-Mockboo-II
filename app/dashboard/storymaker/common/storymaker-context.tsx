@@ -154,6 +154,9 @@ export function StorymakerProvider({
         return
       }
 
+      // Wait for auth to fully initialize
+      await new Promise(resolve => setTimeout(resolve, 100))
+
       setIsLoading(true)
       
       try {

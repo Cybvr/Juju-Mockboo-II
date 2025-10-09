@@ -21,11 +21,16 @@ export default function StorymakerDocumentsPage() {
         return
       }
 
+      // Wait a bit for auth to fully initialize
+      await new Promise(resolve => setTimeout(resolve, 100))
+
       try {
         const userStories = await storiesService.getUserStories(user.uid)
         setDocuments(userStories)
       } catch (error) {
         console.error('Error loading stories:', error)
+        // Still set loading to false even on error
+        setDocuments([])
       } finally {
         setIsLoading(false)
       }
