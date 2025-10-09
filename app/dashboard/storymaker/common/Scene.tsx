@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Play, X, Sparkles, Download, RotateCw, Send } from "lucide-react"
-import { ThumbnailSelect } from "@/app/common/storymaker/thumbnail-select"
+
 
 type Video = {
   id: string
@@ -109,34 +109,89 @@ export function Scene({
           <Label htmlFor={`character-${scene.id}`} className="text-xs font-medium">
             Character
           </Label>
-          <ThumbnailSelect
-            options={characters.map(c => ({ id: c.id, name: c.name, imageUrl: c.imageUrl }))}
-            value={scene.character?.id || ""}
-            onValueChange={(value) => onUpdate(scene.id, { characterId: value || null })}
-            placeholder="Select character"
-          />
+          <div className="space-y-1">
+            <Button
+              variant="outline"
+              className={`w-full h-auto p-2 justify-start ${!scene.character ? 'text-muted-foreground' : ''}`}
+              onClick={() => onUpdate(scene.id, { characterId: null })}
+            >
+              {!scene.character ? "Select character" : "Clear selection"}
+            </Button>
+            <div className="max-h-32 overflow-y-auto space-y-1">
+              {characters.map((character) => (
+                <Button
+                  key={character.id}
+                  variant={scene.character?.id === character.id ? "default" : "ghost"}
+                  className="w-full h-auto p-2 justify-start"
+                  onClick={() => onUpdate(scene.id, { characterId: character.id })}
+                >
+                  <img
+                    src={character.imageUrl || "/placeholder.svg"}
+                    alt={character.name}
+                    className="w-6 h-6 rounded object-cover flex-shrink-0 mr-2"
+                  />
+                  <span className="truncate text-sm">{character.name}</span>
+                </Button>
+              ))}
+            </div>
+          </div>
         </div>
         <div className="space-y-2">
           <Label htmlFor={`location-${scene.id}`} className="text-xs font-medium">
             Location
           </Label>
-          <ThumbnailSelect
-            options={locations.map(l => ({ id: l.id, name: l.name, imageUrl: l.imageUrl }))}
-            value={scene.location?.id || ""}
-            onValueChange={(value) => onUpdate(scene.id, { locationId: value || null })}
-            placeholder="Select location"
-          />
+          <div className="space-y-1">
+            <Button
+              variant="outline"
+              className={`w-full h-auto p-2 justify-start ${!scene.location ? 'text-muted-foreground' : ''}`}
+              onClick={() => onUpdate(scene.id, { locationId: null })}
+            >
+              {!scene.location ? "Select location" : "Clear selection"}
+            </Button>
+            <div className="max-h-32 overflow-y-auto space-y-1">
+              {locations.map((location) => (
+                <Button
+                  key={location.id}
+                  variant={scene.location?.id === location.id ? "default" : "ghost"}
+                  className="w-full h-auto p-2 justify-start"
+                  onClick={() => onUpdate(scene.id, { locationId: location.id })}
+                >
+                  <img
+                    src={location.imageUrl || "/placeholder.svg"}
+                    alt={location.name}
+                    className="w-6 h-6 rounded object-cover flex-shrink-0 mr-2"
+                  />
+                  <span className="truncate text-sm">{location.name}</span>
+                </Button>
+              ))}
+            </div>
+          </div>
         </div>
         <div className="space-y-2">
           <Label htmlFor={`sound-${scene.id}`} className="text-xs font-medium">
             Sound
           </Label>
-          <ThumbnailSelect
-            options={sounds.map(s => ({ id: s.id, name: s.name }))}
-            value={scene.sound?.id || ""}
-            onValueChange={(value) => onUpdate(scene.id, { soundId: value || null })}
-            placeholder="Select sound"
-          />
+          <div className="space-y-1">
+            <Button
+              variant="outline"
+              className={`w-full h-auto p-2 justify-start ${!scene.sound ? 'text-muted-foreground' : ''}`}
+              onClick={() => onUpdate(scene.id, { soundId: null })}
+            >
+              {!scene.sound ? "Select sound" : "Clear selection"}
+            </Button>
+            <div className="max-h-32 overflow-y-auto space-y-1">
+              {sounds.map((sound) => (
+                <Button
+                  key={sound.id}
+                  variant={scene.sound?.id === sound.id ? "default" : "ghost"}
+                  className="w-full h-auto p-2 justify-start"
+                  onClick={() => onUpdate(scene.id, { soundId: sound.id })}
+                >
+                  <span className="truncate text-sm">{sound.name}</span>
+                </Button>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
