@@ -10,6 +10,7 @@ import { ScenesEditingPanel } from "./scenes-editing-panel"
 import { ScenesTimeline } from "./scenes-timeline"
 import { ScenesPreview } from "./scenes-preview"
 import { ScenesHeader } from "./scenes-header"
+import { ScenesLeftToolbar } from "./scenes-left-toolbar"
 import { VidsToolbar } from "./vids-toolbar"
 import { Film, Edit3, Clock } from "lucide-react"
 
@@ -40,6 +41,7 @@ export function ScenesVideoEditor({ projectId }: ScenesVideoEditorProps) {
   const [savedProjectTitle, setSavedProjectTitle] = useState("Untitled Project")
   const [projectLoaded, setProjectLoaded] = useState(false)
   const [activeTab, setActiveTab] = useState<"preview" | "edit" | "timeline">("preview")
+  const [showEditingPanel, setShowEditingPanel] = useState(false)
 
   useEffect(() => {
     const loadProject = async () => {
@@ -306,10 +308,18 @@ export function ScenesVideoEditor({ projectId }: ScenesVideoEditorProps) {
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
         <div className="hidden md:flex flex-1 overflow-hidden">
-          {/* Left - Media Library */}
-          <div className="w-80 border-r border-border">
-            <ScenesEditingPanel onAddScene={addScene} selectedScene={selectedScene} onUpdateScene={updateScene} />
-          </div>
+          {/* Left Toolbar */}
+          <ScenesLeftToolbar 
+            showEditingPanel={showEditingPanel}
+            onToggleEditingPanel={() => setShowEditingPanel(!showEditingPanel)}
+          />
+
+          {/* Editing Panel (conditional) */}
+          {showEditingPanel && (
+            <div className="w-80 border-r border-border">
+              <ScenesEditingPanel onAddScene={addScene} selectedScene={selectedScene} onUpdateScene={updateScene} />
+            </div>
+          )}
 
           {/* Center - Preview */}
           <div className="flex-1">
