@@ -91,11 +91,12 @@ export default function StorymakerDocumentsPage() {
 
     try {
       await storiesService.deleteStory(storyToDelete)
-      const updatedStories = await storiesService.getUserStories(user.uid)
-      setDocuments(updatedStories)
+      // Immediately update state to remove the deleted story
+      setDocuments((prev) => prev.filter((doc) => doc.id !== storyToDelete))
+      setDeleteDialogOpen(false)
+      setStoryToDelete(null)
     } catch (error) {
       console.error('Error deleting story:', error)
-    } finally {
       setDeleteDialogOpen(false)
       setStoryToDelete(null)
     }

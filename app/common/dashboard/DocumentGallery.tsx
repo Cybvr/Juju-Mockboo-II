@@ -148,14 +148,14 @@ export function DocumentGallery({
   const handleDelete = async () => {
     try {
       await documentService.deleteDocument(deleteDocumentId)
-      setDocuments((prev) => {
-        return prev.filter((doc) => doc.id !== deleteDocumentId)
-      })
+      // Immediately update state to remove the deleted document
+      setDocuments((prev) => prev.filter((doc) => doc.id !== deleteDocumentId))
       toast.success("Document deleted successfully")
+      setShowDeleteDialog(false)
+      setDeleteDocumentId("")
     } catch (error) {
       console.error("Error deleting document:", error)
       toast.error("Failed to delete document")
-    } finally {
       setShowDeleteDialog(false)
       setDeleteDocumentId("")
     }
