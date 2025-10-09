@@ -20,7 +20,8 @@ service cloud.firestore {
         (resource == null || resource.data.userId == request.auth.uid);
       allow delete: if request.auth != null && resource.data.userId == request.auth.uid;
       allow create: if true;
-      allow update: if request.resource.data.keys().hasAny(['content', 'updatedAt']);
+      allow update: if request.auth != null && 
+        (resource == null || resource.data.userId == request.auth.uid);
     }
     // Chat sessions collection
     match /chats/{chatId} {
@@ -74,8 +75,9 @@ service cloud.firestore {
       // Create: authenticated users can create their own stories
       allow create: if request.auth != null && 
         request.resource.data.userId == request.auth.uid;
-      // Write/Delete: only the owner
-      allow write, delete: if request.auth != null && 
+        
+      // Update/Delete: only the owner can modify their stories
+      allow update, delete: if request.auth != null && 
         resource.data.userId == request.auth.uid;
     }
     // Credit transactions collection
