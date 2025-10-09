@@ -10,6 +10,7 @@ import { ScenesEditingPanel } from "./scenes-editing-panel"
 import { ScenesTimeline } from "./scenes-timeline"
 import { ScenesPreview } from "./scenes-preview"
 import { ScenesHeader } from "./scenes-header"
+import { VidsToolbar } from "./vids-toolbar"
 import { Film, Edit3, Clock } from "lucide-react"
 
 export interface Scene {
@@ -93,11 +94,11 @@ export function ScenesVideoEditor({ projectId }: ScenesVideoEditorProps) {
       const firstSceneWithMedia = scenes.find(scene => scene.imageUrl || scene.videoUrl)
       console.log('🎬 SCENES SAVE: All scenes:', scenes)
       console.log('🎬 SCENES SAVE: First scene with media:', firstSceneWithMedia)
-      
+
       if (firstSceneWithMedia) {
         thumbnail = firstSceneWithMedia.imageUrl || firstSceneWithMedia.videoUrl || '/placeholder.svg'
       }
-      
+
       console.log('🎬 SCENES SAVE: Generated thumbnail:', thumbnail)
       console.log('🎬 SCENES SAVE: Thumbnail is placeholder?', thumbnail === '/placeholder.svg')
 
@@ -117,7 +118,7 @@ export function ScenesVideoEditor({ projectId }: ScenesVideoEditorProps) {
         shared: false,
         category: "UGC" as const,
       }
-      
+
       console.log('🎬 SCENES SAVE: Final document content.imageUrls:', documentData.content.imageUrls)
       console.log('🎬 SCENES SAVE: Complete documentData:', documentData)
 
@@ -180,11 +181,11 @@ export function ScenesVideoEditor({ projectId }: ScenesVideoEditorProps) {
       const firstSceneWithMedia = scenes.find(scene => scene.imageUrl || scene.videoUrl)
       console.log('🎬 SCENES EXPORT: All scenes:', scenes)
       console.log('🎬 SCENES EXPORT: First scene with media:', firstSceneWithMedia)
-      
+
       if (firstSceneWithMedia) {
         thumbnail = firstSceneWithMedia.imageUrl || firstSceneWithMedia.videoUrl || '/placeholder.svg'
       }
-      
+
       console.log('🎬 SCENES EXPORT: Generated thumbnail:', thumbnail)
       console.log('🎬 SCENES EXPORT: Thumbnail is placeholder?', thumbnail === '/placeholder.svg')
 
@@ -204,7 +205,7 @@ export function ScenesVideoEditor({ projectId }: ScenesVideoEditorProps) {
         shared: false,
         category: "UGC" as const,
       }
-      
+
       console.log('🎬 SCENES EXPORT: Final document content.imageUrls:', documentData.content.imageUrls)
       console.log('🎬 SCENES EXPORT: Complete documentData:', documentData)
 
@@ -323,6 +324,12 @@ export function ScenesVideoEditor({ projectId }: ScenesVideoEditorProps) {
               onTimeUpdate={setCurrentTime}
             />
           </div>
+
+          {/* Right - Properties */}
+          <VidsToolbar 
+            selectedScene={selectedScene}
+            onUpdateScene={updateScene}
+          />
         </div>
 
         <div className="md:hidden flex-1 overflow-hidden">
