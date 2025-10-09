@@ -269,10 +269,10 @@ function VideoMaker() {
           </div>
           <div className="flex gap-2">
             <Button variant="default" className="bg-background" onClick={() => setIsTemplateModalOpen(true)}>
-              <LayoutTemplate className="h-4 w-4" /> Template
+              <LayoutTemplate className="h-4 w-4 mr-2" /> Template
             </Button>
             <Button variant="default" onClick={() => setIsModalOpen(true)} className="bg-background" >
-              <Film className="h-4 w-4" />
+              <Film className="h-4 w-4 mr-2" />
               Preview
             </Button>
             <Button variant="default" className="bg-background" >Share</Button>
