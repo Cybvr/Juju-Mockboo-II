@@ -15,10 +15,10 @@ export const Header: React.FC<HeaderProps> = ({
   setIsTemplateModalOpen,
   setIsModalOpen
 }) => {
-  const { selectedTemplate, projectConfig, updateProjectConfig } = useStorymaker();
+  const { storyData, updateStoryData } = useStorymaker();
   const [titleValue, setTitleValue] = useState("");
 
-  const currentTitle = selectedTemplate ? selectedTemplate.name : projectConfig.projectName || "Untitled Story";
+  const currentTitle = storyData?.selectedTemplate?.name || storyData?.projectConfig?.projectName || "Untitled Story";
 
   React.useEffect(() => {
     setTitleValue(currentTitle);
@@ -26,7 +26,12 @@ export const Header: React.FC<HeaderProps> = ({
 
   const handleTitleSave = () => {
     if (titleValue.trim() && titleValue !== currentTitle) {
-      updateProjectConfig({ projectName: titleValue.trim() });
+      updateStoryData({ 
+        projectConfig: { 
+          ...storyData?.projectConfig, 
+          projectName: titleValue.trim() 
+        }
+      });
     }
   };
 
