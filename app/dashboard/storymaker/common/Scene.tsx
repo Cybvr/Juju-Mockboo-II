@@ -18,9 +18,20 @@ type SceneData = {
   prompt: string
   variations: string[]
   videos: Video[]
-  characterId?: string
-  locationId?: string
-  soundId?: string
+  character?: {
+    id: string
+    name: string
+    imageUrl: string
+  }
+  location?: {
+    id: string
+    name: string
+    imageUrl: string
+  }
+  sound?: {
+    id: string
+    name: string
+  }
 }
 
 type Character = {
@@ -100,7 +111,7 @@ export function Scene({
           </Label>
           <ThumbnailSelect
             options={characters.map(c => ({ id: c.id, name: c.name, imageUrl: c.imageUrl }))}
-            value={scene.characterId || ""}
+            value={scene.character?.id || ""}
             onValueChange={(value) => onUpdate(scene.id, { characterId: value || undefined })}
             placeholder="Select character"
           />
@@ -111,7 +122,7 @@ export function Scene({
           </Label>
           <ThumbnailSelect
             options={locations.map(l => ({ id: l.id, name: l.name, imageUrl: l.imageUrl }))}
-            value={scene.locationId || ""}
+            value={scene.location?.id || ""}
             onValueChange={(value) => onUpdate(scene.id, { locationId: value || undefined })}
             placeholder="Select location"
           />
@@ -122,7 +133,7 @@ export function Scene({
           </Label>
           <ThumbnailSelect
             options={sounds.map(s => ({ id: s.id, name: s.name }))}
-            value={scene.soundId || ""}
+            value={scene.sound?.id || ""}
             onValueChange={(value) => onUpdate(scene.id, { soundId: value || undefined })}
             placeholder="Select sound"
           />
