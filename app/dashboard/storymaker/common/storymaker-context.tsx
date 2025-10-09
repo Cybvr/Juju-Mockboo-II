@@ -1,7 +1,7 @@
 
 "use client"
 
-import { createContext, useContext, useState, useEffect, ReactNode } from "react"
+import { createContext, useContext, useState, useEffect, ReactNode, useRef } from "react"
 import { Template } from "@/data/storymakerTemplatesData" 
 import { storiesService, StoryDocument } from "@/services/storiesService"
 import { useAuthState } from "react-firebase-hooks/auth"
@@ -102,6 +102,7 @@ interface StorymakerContextType {
   storyData: StoryDocument | null
   updateStoryData: (updates: Partial<StoryDocument>) => void
   isLoading: boolean
+  saveError: string | null
 }
 
 const StorymakerContext = createContext<StorymakerContextType | undefined>(undefined)
@@ -150,15 +151,26 @@ export function StorymakerProvider({
     loadStory()
   }, [documentId, user])
 
-  // Auto-save when data changes
+  // Track last saved data for change detection
+  const lastSavedDataRef = useRef<string>('')
+  const [saveError, setSaveError] = useState<string | null>(null)
+
+  // Auto-save when data actually changes
   useEffect(() => {
     if (!storyData || !user || isLoading) return
 
     const saveData = async () => {
       try {
+        const currentDataString = JSON.stringify(storyData)
+        // Only save if data actually changed
+        if (currentDataString === lastSavedDataRef.current) return
+
         await storiesService.updateStory(documentId, storyData)
+        lastSavedDataRef.current = currentDataString
+        setSaveError(null) // Clear any previous errors
       } catch (error) {
         console.error('Auto-save error:', error)
+        setSaveError('Failed to save changes. Please try again.')
       }
     }
 
@@ -176,7 +188,8 @@ export function StorymakerProvider({
         documentId,
         storyData,
         updateStoryData,
-        isLoading
+        isLoading,
+        saveError
       }}
     >
       {children}

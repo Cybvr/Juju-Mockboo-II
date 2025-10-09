@@ -1,6 +1,6 @@
 
 "use client"
-import React, { useState } from "react"
+import React, { useState, useMemo, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Plus } from "lucide-react"
@@ -32,27 +32,37 @@ type LegacyScene = {
 }
 
 function VideoMaker() {
-  const { storyData, updateStoryData, isLoading } = useStorymaker()
+  const { storyData, updateStoryData, isLoading, saveError } = useStorymaker()
 
   const [activeTab, setActiveTab] = useState("creator")
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false)
 
-  // Convert Firebase scenes to legacy format for compatibility
-  const legacyScenes: LegacyScene[] = (storyData?.scenes || []).map((scene, idx) => ({
-    id: idx + 1,
-    prompt: scene.prompt,
-    variations: scene.variations?.map(v => v.imageUrl) || [],
-    videos: scene.videos?.map(v => ({
-      id: v.id,
-      url: v.thumbnailUrl,
-      prompt: v.prompt,
-      duration: v.duration,
-    })) || [],
-    characterId: scene.character?.id,
-    locationId: scene.location?.id,
-    soundId: scene.sound?.id,
-  }))
+  // Memoize legacy conversion to avoid recalculating on every render
+  const legacyScenes: LegacyScene[] = useMemo(() => 
+    (storyData?.scenes || []).map((scene, idx) => ({
+      id: idx + 1,
+      prompt: scene.prompt,
+      variations: scene.variations?.map(v => v.imageUrl) || [],
+      videos: scene.videos?.map(v => ({
+        id: v.id,
+        url: v.thumbnailUrl,
+        prompt: v.prompt,
+        duration: v.duration,
+      })) || [],
+      characterId: scene.character?.id,
+      locationId: scene.location?.id,
+      soundId: scene.sound?.id,
+    })), [storyData?.scenes]
+  )
+
+  // Helper function to update scenes
+  const updateSceneByIndex = useCallback((index: number, updater: (scene: any) => any) => {
+    const updatedScenes = (storyData?.scenes || []).map((scene, idx) => 
+      idx === index ? updater(scene) : scene
+    )
+    updateStoryData({ scenes: updatedScenes })
+  }, [storyData?.scenes, updateStoryData])
 
   const handleSelectTemplate = (template: Template) => {
     const newScenes = template.scenes.map((scene, idx) => ({
@@ -110,90 +120,78 @@ function VideoMaker() {
     updateStoryData({ scenes: updatedScenes })
   }
 
-  const updateScene = (sceneId: number, updates: any) => {
-    const updatedScenes = (storyData?.scenes || []).map((scene, idx) => {
-      if (idx + 1 === sceneId) {
-        const updatedScene = { ...scene }
+  const updateScene = useCallback((sceneId: number, updates: any) => {
+    updateSceneByIndex(sceneId - 1, (scene: any) => {
+      const updatedScene = { ...scene }
 
-        if (updates.prompt !== undefined) {
-          updatedScene.prompt = updates.prompt
-        }
-
-        if (updates.characterId !== undefined) {
-          const character = storyData?.characters?.find(c => c.id === updates.characterId)
-          updatedScene.character = character ? {
-            id: character.id,
-            name: character.name,
-            imageUrl: character.imageUrl,
-          } : undefined
-        }
-
-        if (updates.locationId !== undefined) {
-          const location = storyData?.locations?.find(l => l.id === updates.locationId)
-          updatedScene.location = location ? {
-            id: location.id,
-            name: location.name,
-            imageUrl: location.imageUrl,
-          } : undefined
-        }
-
-        if (updates.soundId !== undefined) {
-          const sound = storyData?.sounds?.find(s => s.id === updates.soundId)
-          updatedScene.sound = sound ? {
-            id: sound.id,
-            name: sound.name,
-          } : undefined
-        }
-
-        return updatedScene
+      if (updates.prompt !== undefined) {
+        updatedScene.prompt = updates.prompt
       }
-      return scene
-    })
-    updateStoryData({ scenes: updatedScenes })
-  }
 
-  const selectVariation = (sceneId: number, variationUrl: string) => {
-    const updatedScenes = (storyData?.scenes || []).map((scene, idx) => {
-      if (idx + 1 === sceneId) {
-        const updatedVideos = scene.videos && scene.videos.length > 0
-          ? scene.videos.map((video, vidIdx) => vidIdx === 0 ? { ...video, thumbnailUrl: variationUrl } : video)
-          : [{
-              id: `v${Date.now()}`,
-              videoUrl: "",
-              thumbnailUrl: variationUrl,
-              status: "pending" as const,
-              prompt: scene.prompt,
-              duration: "0:00",
-              timestamp: new Date().toISOString(),
-            }]
-        return { ...scene, videos: updatedVideos }
+      if (updates.characterId !== undefined) {
+        const character = storyData?.characters?.find(c => c.id === updates.characterId)
+        updatedScene.character = character ? {
+          id: character.id,
+          name: character.name,
+          imageUrl: character.imageUrl,
+        } : undefined
       }
-      return scene
-    })
-    updateStoryData({ scenes: updatedScenes })
-  }
 
-  const generateVideo = (sceneId: number) => {
+      if (updates.locationId !== undefined) {
+        const location = storyData?.locations?.find(l => l.id === updates.locationId)
+        updatedScene.location = location ? {
+          id: location.id,
+          name: location.name,
+          imageUrl: location.imageUrl,
+        } : undefined
+      }
+
+      if (updates.soundId !== undefined) {
+        const sound = storyData?.sounds?.find(s => s.id === updates.soundId)
+        updatedScene.sound = sound ? {
+          id: sound.id,
+          name: sound.name,
+        } : undefined
+      }
+
+      return updatedScene
+    })
+  }, [updateSceneByIndex, storyData?.characters, storyData?.locations, storyData?.sounds])
+
+  const selectVariation = useCallback((sceneId: number, variationUrl: string) => {
+    updateSceneByIndex(sceneId - 1, (scene: any) => {
+      const updatedVideos = scene.videos && scene.videos.length > 0
+        ? scene.videos.map((video, vidIdx) => vidIdx === 0 ? { ...video, thumbnailUrl: variationUrl } : video)
+        : [{
+            id: `v${Date.now()}`,
+            videoUrl: "",
+            thumbnailUrl: variationUrl,
+            status: "pending" as const,
+            prompt: scene.prompt,
+            duration: "0:00",
+            timestamp: new Date().toISOString(),
+          }]
+      return { ...scene, videos: updatedVideos }
+    })
+  }, [updateSceneByIndex])
+
+  const generateVideo = useCallback((sceneId: number) => {
     const scene = (storyData?.scenes || []).find((_, idx) => idx + 1 === sceneId)
     if (!scene) return
     
-    const updatedScenes = (storyData?.scenes || []).map((s, idx) => {
-      if (idx + 1 === sceneId) {
-        const newVideo = {
-          id: `v${Date.now()}`,
-          videoUrl: "",
-          thumbnailUrl: scene.variations?.[0]?.imageUrl || "/placeholder.svg",
-          status: "complete" as const,
-          prompt: scene.prompt,
-          duration: "0:45",
-          timestamp: new Date().toISOString(),
-        }
-        return { ...s, videos: [...(s.videos || []), newVideo] }
+    updateSceneByIndex(sceneId - 1, (scene: any) => {
+      const newVideo = {
+        id: `v${Date.now()}`,
+        videoUrl: "",
+        thumbnailUrl: scene.variations?.[0]?.imageUrl || "/placeholder.svg",
+        status: "complete" as const,
+        prompt: scene.prompt,
+        duration: "0:45",
+        timestamp: new Date().toISOString(),
       }
-      return s
+      return { ...scene, videos: [...(scene.videos || []), newVideo] }
     })
-    updateStoryData({ scenes: updatedScenes })
-  }
+  }, [updateSceneByIndex, storyData?.scenes])
 
   const regenerateVariations = (sceneId: number) => {
     console.log("[v0] Regenerating variations for scene", sceneId)
@@ -228,6 +226,11 @@ function VideoMaker() {
         setIsTemplateModalOpen={setIsTemplateModalOpen}
         setIsModalOpen={setIsModalOpen}
       />
+      {saveError && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4 mx-auto max-w-5xl">
+          <p className="text-sm font-medium">⚠️ {saveError}</p>
+        </div>
+      )}
       <div className="pt-6 mx-auto max-w-5xl">
         {/* Navigation Tabs */}
         <div className="pt-2">
