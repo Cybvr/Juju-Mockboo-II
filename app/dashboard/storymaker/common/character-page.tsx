@@ -43,7 +43,6 @@ export function CharacterPage() {
       setLocalCharacters(characters.map(char => ({ ...char, id: Number(char.id) })));
     }
   }, [characters]);
-  }, [selectedTemplate, characters, updateCharacters]);
 
   const addCharacter = () => {
     const newCharacter: Character = {
