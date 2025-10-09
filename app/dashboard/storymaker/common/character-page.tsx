@@ -31,39 +31,18 @@ export function CharacterPage() {
       if (characters.length === 0) {
         updateCharacters(templateCharacters.map(char => ({ ...char, id: String(char.id) })));
       }
-    } else {
-      // If no template is selected, and context characters are empty, use default characters
-      if (characters.length === 0) {
-        const defaultCharacters: Character[] = [
-          {
-            id: 1,
-            name: "Isabelle Laurent",
-            description: "Lead brand ambassador, elegant and sophisticated",
-            imageUrl: "/assets/images/storymaker/elegant-french-woman-with-dark-hair-in-white-dress.jpg",
-            traits: ["Elegant", "Sophisticated", "Graceful"],
-          },
-          {
-            id: 2,
-            name: "Jean-Claude Moreau",
-            description: "Master perfumer with 30 years of experience",
-            imageUrl: "/assets/images/storymaker/distinguished-french-perfumer-man-in-white-lab-coa.jpg",
-            traits: ["Expert", "Distinguished", "Passionate"],
-          },
-          {
-            id: 3,
-            name: "Sofia Chen",
-            description: "Modern influencer and brand partner",
-            imageUrl: "/assets/images/storymaker/young-asian-woman-in-minimalist-black-outfit-holdi.jpg",
-            traits: ["Modern", "Confident", "Stylish"],
-          },
-        ];
-        setLocalCharacters(defaultCharacters);
-        updateCharacters(defaultCharacters.map(char => ({ ...char, id: String(char.id) })));
-      } else {
-        // If context characters exist, use them
-        setLocalCharacters(characters.map(char => ({ ...char, id: Number(char.id) })));
-      }
     }
+    // No default characters - let Firebase handle the data
+  }, [selectedTemplate, characters, updateCharacters]);
+
+  // Fix the local state setup
+  const [localCharacters, setLocalCharacters] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (characters.length > 0) {
+      setLocalCharacters(characters.map(char => ({ ...char, id: Number(char.id) })));
+    }
+  }, [characters]);
   }, [selectedTemplate, characters, updateCharacters]);
 
   const addCharacter = () => {
