@@ -1,3 +1,4 @@
+
 "use client"
 import React from "react"; 
 import { Check } from "lucide-react"
@@ -30,7 +31,7 @@ export function ThumbnailSelect({ options, value, onValueChange, placeholder = "
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-start h-auto p-2 bg-transparent"
+          className="w-full justify-start h-auto p-2 bg-background text-foreground hover:bg-accent hover:text-accent-foreground"
         >
           {selectedOption ? (
             <div className="flex items-center gap-2 w-full">
@@ -41,7 +42,7 @@ export function ThumbnailSelect({ options, value, onValueChange, placeholder = "
                   className="w-8 h-8 rounded object-cover flex-shrink-0"
                 />
               )}
-              <span className="truncate text-sm">{selectedOption.name}</span>
+              <span className="truncate text-sm text-foreground">{selectedOption.name}</span>
             </div>
           ) : (
             <span className="text-muted-foreground text-sm">{placeholder}</span>
@@ -62,7 +63,7 @@ export function ThumbnailSelect({ options, value, onValueChange, placeholder = "
                     onValueChange(option.id)
                     setOpen(false)
                   }}
-                  className="flex items-center gap-2 cursor-pointer"
+                  className="flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground"
                 >
                   {option.imageUrl && (
                     <img
@@ -71,7 +72,7 @@ export function ThumbnailSelect({ options, value, onValueChange, placeholder = "
                       className="w-10 h-10 rounded object-cover flex-shrink-0"
                     />
                   )}
-                  <span className="flex-1 truncate">{option.name}</span>
+                  <span className="flex-1 truncate text-foreground">{option.name}</span>
                   <Check className={cn("h-4 w-4 flex-shrink-0", value === option.id ? "opacity-100" : "opacity-0")} />
                 </CommandItem>
               ))}
