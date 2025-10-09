@@ -53,6 +53,9 @@ function VideoMaker() {
       characterId: scene.character?.id,
       locationId: scene.location?.id,
       soundId: scene.sound?.id,
+      character: scene.character,
+      location: scene.location,
+      sound: scene.sound,
     })), [storyData?.scenes]
   )
 

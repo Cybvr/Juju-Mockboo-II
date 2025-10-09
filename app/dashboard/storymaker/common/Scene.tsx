@@ -19,6 +19,9 @@ type SceneData = {
   prompt: string
   variations: string[]
   videos: Video[]
+  characterId?: string
+  locationId?: string
+  soundId?: string
   character?: {
     id: string
     name: string
@@ -111,7 +114,7 @@ export function Scene({
             Character
           </Label>
           <Select
-            value={scene.character?.id || "none"}
+            value={scene.characterId || scene.character?.id || "none"}
             onValueChange={(value) => onUpdate(scene.id, { characterId: value === "none" ? null : value })}
           >
             <SelectTrigger className="w-full h-auto p-2">
@@ -139,7 +142,7 @@ export function Scene({
             Location
           </Label>
           <Select
-            value={scene.location?.id || "none"}
+            value={scene.locationId || scene.location?.id || "none"}
             onValueChange={(value) => onUpdate(scene.id, { locationId: value === "none" ? null : value })}
           >
             <SelectTrigger className="w-full h-auto p-2">
@@ -167,7 +170,7 @@ export function Scene({
             Sound
           </Label>
           <Select
-            value={scene.sound?.id || "none"}
+            value={scene.soundId || scene.sound?.id || "none"}
             onValueChange={(value) => onUpdate(scene.id, { soundId: value === "none" ? null : value })}
           >
             <SelectTrigger className="w-full">
