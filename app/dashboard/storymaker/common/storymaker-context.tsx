@@ -1,8 +1,7 @@
-
 "use client"
 
-import { createContext, useContext, useState, useEffect, ReactNode, useRef } from "react"
-import { Template } from "@/data/storymakerTemplatesData" 
+import { createContext, useContext, useState, useEffect, ReactNode, useRef, useCallback } from "react"
+import { Template } from "@/data/storymakerTemplatesData"
 import { storiesService, StoryDocument } from "@/services/storiesService"
 import { useAuthState } from "react-firebase-hooks/auth"
 import { auth } from "@/lib/firebase"
@@ -107,12 +106,12 @@ interface StorymakerContextType {
 
 const StorymakerContext = createContext<StorymakerContextType | undefined>(undefined)
 
-export function StorymakerProvider({ 
-  children, 
-  documentId 
-}: { 
+export function StorymakerProvider({
+  children,
+  documentId
+}: {
   children: ReactNode
-  documentId: string 
+  documentId: string
 }) {
   const [user] = useAuthState(auth)
   const [storyData, setStoryData] = useState<StoryDocument | null>(null)
@@ -178,19 +177,63 @@ export function StorymakerProvider({
     return () => clearTimeout(timeoutId)
   }, [storyData, documentId, user, isLoading])
 
-  const updateStoryData = (updates: Partial<StoryDocument>) => {
-    setStoryData(prev => prev ? { ...prev, ...updates } : null)
+  const updateStoryData = useCallback(async (updates: Partial<StoryDocument>) => {
+    if (!storyData) return
+
+    const newData = { ...storyData, ...updates }
+    setStoryData(newData)
+
+    try {
+      // Clean undefined values before sending to Firestore
+      const cleanUpdates = Object.fromEntries(
+        Object.entries(updates).filter(([_, value]) => value !== undefined)
+      )
+      await storiesService.updateStory(documentId, cleanUpdates)
+      setSaveError(null)
+    } catch (error) {
+      console.error('Failed to save changes:', error)
+      setSaveError('Failed to save changes. Please try again.')
+    }
+  }, [storyData, documentId])
+
+
+  const value = {
+    storyData,
+    selectedTemplate: storyData?.selectedTemplate || null,
+    projectConfig: storyData?.projectConfig || {
+      projectName: "",
+      projectDescription: "",
+      aspectRatio: "16:9",
+      duration: "30",
+      fps: "30",
+      resolution: "1920x1080",
+      autoTransitions: true,
+      backgroundMusic: false,
+      autoSave: true,
+      watermark: false,
+      aiModel: "flux-dev",
+      stylePreset: "photorealistic",
+      variations: "4"
+    },
+    scenes: storyData?.scenes || [],
+    characters: storyData?.characters || [],
+    locations: storyData?.locations || [],
+    sounds: storyData?.sounds || [],
+    updateStoryData,
+    updateProjectConfig: (config: ProjectConfig) => updateStoryData({ projectConfig: config }),
+    updateScenes: (scenes: Scene[]) => updateStoryData({ scenes }),
+    updateCharacters: (characters: Character[]) => updateStoryData({ characters }),
+    updateLocations: (locations: Location[]) => updateStoryData({ locations }),
+    updateSounds: (sounds: Sound[]) => updateStoryData({ sounds }),
+    setSelectedTemplate: (template: Template) => updateStoryData({ selectedTemplate: template }),
+    isLoading,
+    saveError
   }
 
+
   return (
-    <StorymakerContext.Provider 
-      value={{ 
-        documentId,
-        storyData,
-        updateStoryData,
-        isLoading,
-        saveError
-      }}
+    <StorymakerContext.Provider
+      value={value}
     >
       {children}
     </StorymakerContext.Provider>
