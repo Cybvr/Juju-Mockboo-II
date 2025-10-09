@@ -1,54 +1,40 @@
+
 "use client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Plus, FileText, Calendar, User } from "lucide-react"
 import { useRouter } from "next/navigation"
-
-interface StorymakerDocument {
-  id: string
-  title: string
-  description: string
-  thumbnail: string
-  createdAt: string
-  updatedAt: string
-  author: string
-  scenes: number
-}
+import { useAuthState } from "react-firebase-hooks/auth"
+import { auth } from "@/lib/firebase"
+import { storiesService, StoryDocument } from "@/services/storiesService"
 
 export default function StorymakerDocumentsPage() {
   const router = useRouter()
-  const [documents] = useState<StorymakerDocument[]>([
-    {
-      id: "lumiere-parfum",
-      title: "Lumière Parfum Studio",
-      description: "Elegant fragrance commercial showcasing the artistry and sophistication of Lumière Parfum through cinematic storytelling",
-      thumbnail: "/assets/images/storymaker/luxury-perfume-bottle-on-white-marble-pedestal-wit.jpg",
-      createdAt: "2024-01-15",
-      updatedAt: "2024-01-20",
-      author: "You",
-      scenes: 3
-    },
-    {
-      id: "product-launch",
-      title: "Product Launch Campaign",
-      description: "Dynamic product reveal campaign with multiple character perspectives",
-      thumbnail: "/assets/images/storymaker/young-asian-woman-in-minimalist-black-outfit-holdi.jpg",
-      createdAt: "2024-01-10",
-      updatedAt: "2024-01-18",
-      author: "You",
-      scenes: 5
-    },
-    {
-      id: "travel-adventure",
-      title: "Paris Travel Story",
-      description: "Cinematic travel documentary through the streets of Paris",
-      thumbnail: "/assets/images/storymaker/paris-eiffel-tower-romantic.png",
-      createdAt: "2024-01-08",
-      updatedAt: "2024-01-16",
-      author: "You",
-      scenes: 4
+  const [user, loading] = useAuthState(auth)
+  const [documents, setDocuments] = useState<StoryDocument[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const loadStories = async () => {
+      if (!user) {
+        setIsLoading(false)
+        return
+      }
+
+      try {
+        const userStories = await storiesService.getUserStories(user.uid)
+        setDocuments(userStories)
+      } catch (error) {
+        console.error('Error loading stories:', error)
+      } finally {
+        setIsLoading(false)
+      }
     }
-  ])
+
+    if (!loading) {
+      loadStories()
+    }
+  }, [user, loading])
 
   const handleOpenDocument = (id: string) => {
     router.push(`/dashboard/storymaker/${id}`)
@@ -57,6 +43,14 @@ export default function StorymakerDocumentsPage() {
   const handleCreateNew = () => {
     const newId = `story-${Date.now()}`
     router.push(`/dashboard/storymaker/${newId}`)
+  }
+
+  if (loading || isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    )
   }
 
   return (
@@ -97,7 +91,7 @@ export default function StorymakerDocumentsPage() {
           >
             <div className="aspect-video bg-muted overflow-hidden">
               <img
-                src={doc.thumbnail}
+                src={doc.thumbnail || "/assets/images/storymaker/placeholder.jpg"}
                 alt={doc.title}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               />
@@ -110,17 +104,17 @@ export default function StorymakerDocumentsPage() {
               <div className="flex items-center justify-between text-sm text-muted-foreground mb-3">
                 <div className="flex items-center gap-1">
                   <FileText className="h-4 w-4" />
-                  <span>{doc.scenes} scenes</span>
+                  <span>{doc.scenes?.length || 0} scenes</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <User className="h-4 w-4" />
-                  <span>{doc.author}</span>
+                  <span>You</span>
                 </div>
               </div>
               <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <div className="flex items-center gap-1">
                   <Calendar className="h-3 w-3" />
-                  <span>Updated {doc.updatedAt}</span>
+                  <span>Updated {doc.updatedAt.toLocaleDateString()}</span>
                 </div>
               </div>
             </div>
