@@ -89,58 +89,16 @@ export default function StorymakerDocumentsPage() {
   }
 
   const handleDeleteConfirm = async () => {
-    console.log('DELETE: handleDeleteConfirm started', { 
-      storyToDelete, 
-      user: !!user, 
-      dialogOpen: deleteDialogOpen 
-    })
-    
-    if (!storyToDelete || !user) {
-      console.log('DELETE: Early return - missing storyToDelete or user')
-      return
-    }
+    if (!storyToDelete || !user) return
 
-    console.log('DELETE: About to call storiesService.deleteStory')
-    
     try {
       await storiesService.deleteStory(storyToDelete)
-      console.log('DELETE: Successfully deleted story from Firebase')
-      
-      // Immediately update state to remove the deleted story
-      setDocuments((prev) => {
-        const newDocs = prev.filter((doc) => doc.id !== storyToDelete)
-        console.log('DELETE: Updated documents state', { 
-          oldCount: prev.length, 
-          newCount: newDocs.length,
-          deletedId: storyToDelete 
-        })
-        return newDocs
-      })
-      
-      console.log('DELETE: State updated successfully')
+      setDocuments((prev) => prev.filter((doc) => doc.id !== storyToDelete))
     } catch (error) {
-      console.error('DELETE: Error deleting story:', error)
+      console.error('Error deleting story:', error)
     } finally {
-      console.log('DELETE: In finally block - closing dialog', { 
-        currentDialogOpen: deleteDialogOpen,
-        currentStoryToDelete: storyToDelete
-      })
-      
-      // Force close dialog and reset state
       setDeleteDialogOpen(false)
       setStoryToDelete(null)
-      
-      // Add a small delay and double-check
-      setTimeout(() => {
-        console.log('DELETE: Post-timeout check', {
-          dialogStillOpen: deleteDialogOpen,
-          storyStillSet: storyToDelete
-        })
-        setDeleteDialogOpen(false)
-        setStoryToDelete(null)
-      }, 100)
-      
-      console.log('DELETE: Dialog closed and state reset')
     }
   }
 
@@ -243,15 +201,7 @@ export default function StorymakerDocumentsPage() {
       </div>
 
       <AlertDialog 
-        open={deleteDialogOpen} 
-        onOpenChange={(open) => {
-          console.log('DIALOG: onOpenChange called', { open, currentState: deleteDialogOpen })
-          setDeleteDialogOpen(open)
-          if (!open) {
-            setStoryToDelete(null)
-            console.log('DIALOG: Closed via onOpenChange')
-          }
-        }}
+        open={deleteDialogOpen}
       >
         <AlertDialogContent className="z-[9999]">
           <AlertDialogHeader>
@@ -262,7 +212,6 @@ export default function StorymakerDocumentsPage() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => {
-              console.log('DIALOG: Cancel button clicked')
               setDeleteDialogOpen(false)
               setStoryToDelete(null)
             }}>
