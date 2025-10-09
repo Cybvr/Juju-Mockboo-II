@@ -111,8 +111,8 @@ export function Scene({
             Character
           </Label>
           <Select
-            value={scene.character?.id || ""}
-            onValueChange={(value) => onUpdate(scene.id, { characterId: value || null })}
+            value={scene.character?.id || "none"}
+            onValueChange={(value) => onUpdate(scene.id, { characterId: value === "none" ? null : value })}
           >
             <SelectTrigger className="w-full h-auto p-2">
               <SelectValue placeholder="Select character">
@@ -129,7 +129,7 @@ export function Scene({
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">No character</SelectItem>
+              <SelectItem value="none">No character</SelectItem>
               {characters.map((character) => (
                 <SelectItem key={character.id} value={character.id}>
                   <div className="flex items-center gap-2">
@@ -150,8 +150,8 @@ export function Scene({
             Location
           </Label>
           <Select
-            value={scene.location?.id || ""}
-            onValueChange={(value) => onUpdate(scene.id, { locationId: value || null })}
+            value={scene.location?.id || "none"}
+            onValueChange={(value) => onUpdate(scene.id, { locationId: value === "none" ? null : value })}
           >
             <SelectTrigger className="w-full h-auto p-2">
               <SelectValue placeholder="Select location">
@@ -168,7 +168,7 @@ export function Scene({
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">No location</SelectItem>
+              <SelectItem value="none">No location</SelectItem>
               {locations.map((location) => (
                 <SelectItem key={location.id} value={location.id}>
                   <div className="flex items-center gap-2">
@@ -189,8 +189,8 @@ export function Scene({
             Sound
           </Label>
           <Select
-            value={scene.sound?.id || ""}
-            onValueChange={(value) => onUpdate(scene.id, { soundId: value || null })}
+            value={scene.sound?.id || "none"}
+            onValueChange={(value) => onUpdate(scene.id, { soundId: value === "none" ? null : value })}
           >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Select sound">
@@ -200,7 +200,7 @@ export function Scene({
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">No sound</SelectItem>
+              <SelectItem value="none">No sound</SelectItem>
               {sounds.map((sound) => (
                 <SelectItem key={sound.id} value={sound.id}>
                   <span className="truncate text-sm">{sound.name}</span>
