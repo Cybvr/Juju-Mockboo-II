@@ -1,6 +1,6 @@
 "use client"
 import { Button } from "@/components/ui/button"
-import { Edit3, Image, Video, Layers, Settings, Type, LucideIcon } from "lucide-react"
+import { FolderOpen, Image, Video, Layers, Settings, Type, LucideIcon } from "lucide-react"
 
 interface ScenesLeftToolbarProps {
   showEditingPanel: boolean
@@ -64,8 +64,8 @@ export function ScenesLeftToolbar({
   return (
     <div className="w-12 border-r border-border bg-card/30 flex flex-col items-center py-3 gap-2">
       <ToolbarButton 
-        icon={Edit3} 
-        label="Edit" 
+        icon={FolderOpen} 
+        label="Uploads" 
         isActive={showEditingPanel}
         onClick={handleEditClick}
       />

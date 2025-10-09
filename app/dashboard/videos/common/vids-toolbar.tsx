@@ -12,7 +12,7 @@ interface VidsToolbarProps {
 
 export function VidsToolbar({ selectedScene, onUpdateScene }: VidsToolbarProps) {
   return (
-    <div className="w-80 border-l border-border bg-card/30 flex flex-col">
+    <div className="w-100 border-l border-border bg-card/30 flex flex-col">
       <div className="p-4 border-b border-border">
         <h3 className="font-semibold text-sm">Properties</h3>
       </div>
