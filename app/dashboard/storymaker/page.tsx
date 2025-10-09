@@ -123,19 +123,7 @@ export default function StorymakerDocumentsPage() {
           </div>
         ))}
       </div>
-      {documents.length === 0 && (
-        <div className="text-center py-16">
-          <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-muted flex items-center justify-center">
-            <FileText className="h-12 w-12 text-muted-foreground" />
-          </div>
-          <h2 className="text-2xl font-semibold mb-2">No story projects yet</h2>
-          <p className="text-muted-foreground mb-6">Create your first video storytelling project to get started</p>
-          <Button onClick={handleCreateNew} size="lg">
-            <Plus className="h-5 w-5 mr-2" />
-            Create Your First Story
-          </Button>
-        </div>
-      )}
+      
     </div>
   )
 }
