@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { ScenesEditingPanel } from "./scenes-editing-panel"
 import { ScenesTimeline } from "./scenes-timeline"
 import { ScenesPreview } from "./scenes-preview"
+import { ScenesHeader } from "./scenes-header"
 import { Film, Edit3, Clock } from "lucide-react"
 
 export interface Scene {
@@ -253,40 +254,15 @@ export function ScenesVideoEditor({ projectId }: ScenesVideoEditorProps) {
 
   return (
     <div className="h-screen flex flex-col">
-      {/* Project Header */}
-      <div className="h-12 border-b border-border flex items-center justify-between px-2 sm:px-4 bg-card/50">
-        <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-          <input
-            type="text"
-            value={projectTitle}
-            onChange={(e) => setProjectTitle(e.target.value)}
-            className="text-sm font-medium bg-transparent border-none outline-none focus:bg-background/50 px-1 sm:px-2 py-1 rounded flex-1 min-w-0"
-          />
-          {isSaving && (
-            <div className="text-xs text-muted-foreground flex items-center gap-1 shrink-0">
-              <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
-              <span className="hidden sm:inline">Saving...</span>
-            </div>
-          )}
-        </div>
-        <div className="flex items-center gap-2 sm:gap-4 shrink-0">
-          <div className="text-xs text-muted-foreground hidden sm:block">
-            {scenes.length} scenes • {scenes.reduce((sum, scene) => sum + scene.duration, 0).toFixed(1)}s total
-          </div>
-          <Button
-            onClick={handleExport}
-            disabled={isExporting || scenes.length === 0}
-            className="bg-primary text-primary-foreground text-xs sm:text-sm px-2 sm:px-4"
-            size="sm"
-          >
-            {isExporting ? (
-              <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-1 sm:mr-2" />
-            ) : null}
-            <span className="hidden sm:inline">{isExporting ? "Exporting..." : "Export Video"}</span>
-            <span className="sm:hidden">{isExporting ? "Export..." : "Export"}</span>
-          </Button>
-        </div>
-      </div>
+      <ScenesHeader
+        projectTitle={projectTitle}
+        setProjectTitle={setProjectTitle}
+        isSaving={isSaving}
+        scenesCount={scenes.length}
+        totalDuration={scenes.reduce((sum, scene) => sum + scene.duration, 0)}
+        isExporting={isExporting}
+        onExport={handleExport}
+      />
 
       <div className="md:hidden border-b border-border bg-card/50">
         <div className="flex">
