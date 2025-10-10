@@ -19,12 +19,21 @@ export function MarketingFooter() {
           {/* Navigation items below logo */}
           <div className="flex flex-wrap items-center justify-center gap-8 md:gap-16">
             <div className="space-y-4">
-              <h3 className="font-normal text-lg">Product</h3>
+              <h3 className="font-normal text-lg">Products</h3>
               <ul className="flex flex-col items-center space-y-3 text-muted-foreground md:flex-row md:space-y-0 md:space-x-8">
+                <li className="hover:text-foreground cursor-pointer">🎨 Mixboard</li>
+                <li className="hover:text-foreground cursor-pointer">🎬 Juju Vids</li>
                 <li className="hover:text-foreground cursor-pointer">Templates</li>
                 <li className="hover:text-foreground cursor-pointer">Tools</li>
+              </ul>
+            </div>
+            <div className="space-y-4">
+              <h3 className="font-normal text-lg">Company</h3>
+              <ul className="flex flex-col items-center space-y-3 text-muted-foreground md:flex-row md:space-y-0 md:space-x-8">
                 <li className="hover:text-foreground cursor-pointer">Pricing</li>
                 <li className="hover:text-foreground cursor-pointer">API</li>
+                <li className="hover:text-foreground cursor-pointer">About</li>
+                <li className="hover:text-foreground cursor-pointer">Contact</li>
               </ul>
             </div>
             <div className="space-y-4">

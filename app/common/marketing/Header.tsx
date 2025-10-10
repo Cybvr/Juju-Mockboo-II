@@ -52,6 +52,57 @@ export function MarketingHeader({ onAuthClick }: MarketingHeaderProps) {
             <NavigationMenuList>
               <NavigationMenuItem>
                 <NavigationMenuTrigger className="bg-transparent hover:bg-accent/50">
+                  Products
+                </NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <div className="grid gap-3 p-6 w-[500px] lg:w-[600px] lg:grid-cols-2">
+                    <NavigationMenuLink asChild>
+                      <Link
+                        href="/dashboard/canvas"
+                        className="flex h-full w-full select-none flex-col justify-end rounded-md relative overflow-hidden p-6 no-underline outline-none focus:shadow-md"
+                      >
+                        <Image
+                          src="/assets/images/workspace.jpg"
+                          alt="Mixboard Background"
+                          fill
+                          className="object-cover"
+                        />
+                        <div className="relative z-10 bg-black/50 p-4 rounded-md">
+                          <div className="mb-2 mt-4 text-lg font-medium text-white">
+                            🎨 Mixboard
+                          </div>
+                          <p className="text-sm leading-tight text-white/80">
+                            Infinite canvas design tool for graphics, mockups, and creative projects.
+                          </p>
+                        </div>
+                      </Link>
+                    </NavigationMenuLink>
+                    <NavigationMenuLink asChild>
+                      <Link
+                        href="/dashboard/videos"
+                        className="flex h-full w-full select-none flex-col justify-end rounded-md relative overflow-hidden p-6 no-underline outline-none focus:shadow-md"
+                      >
+                        <Image
+                          src="/assets/images/scenes.jpg"
+                          alt="Juju Vids Background"
+                          fill
+                          className="object-cover"
+                        />
+                        <div className="relative z-10 bg-black/50 p-4 rounded-md">
+                          <div className="mb-2 mt-4 text-lg font-medium text-white">
+                            🎬 Juju Vids
+                          </div>
+                          <p className="text-sm leading-tight text-white/80">
+                            AI-powered video creation and scene-based editing platform.
+                          </p>
+                        </div>
+                      </Link>
+                    </NavigationMenuLink>
+                  </div>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuTrigger className="bg-transparent hover:bg-accent/50">
                   Tools
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
@@ -179,6 +230,29 @@ export function MarketingHeader({ onAuthClick }: MarketingHeaderProps) {
           </SheetTrigger>
           <SheetContent side="right" className="w-[300px] sm:w-[400px]">
             <div className="flex flex-col space-y-4 mt-8">
+              <Link
+                href="/dashboard"
+                className="text-lg font-medium hover:text-primary transition-colors"
+                onClick={() => setIsOpen(false)}
+              >
+                Products
+              </Link>
+              <div className="pl-4 space-y-2 border-l-2 border-muted">
+                <Link
+                  href="/dashboard/canvas"
+                  className="block text-sm text-muted-foreground hover:text-primary transition-colors"
+                  onClick={() => setIsOpen(false)}
+                >
+                  🎨 Mixboard
+                </Link>
+                <Link
+                  href="/dashboard/videos"
+                  className="block text-sm text-muted-foreground hover:text-primary transition-colors"
+                  onClick={() => setIsOpen(false)}
+                >
+                  🎬 Juju Vids
+                </Link>
+              </div>
               <Link
                 href="/tools"
                 className="text-lg font-medium hover:text-primary transition-colors"
