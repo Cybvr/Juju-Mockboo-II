@@ -29,19 +29,27 @@ export function MarketingHeader({ onAuthClick }: MarketingHeaderProps) {
   ];
   return (
     <header className="fixed top-0 w-full z-50 glass-effect border-b">
-      <div className="container mx-auto px-4 h-12 flex items-center justify-between max-w-6xl">
-        {/* Logo */}
-        <Link href="/" className="flex items-center">
-          <Image
-            src="/images/juju.png"
-            alt="Juju"
-            width={32}
-            height={32}
-            className="object-contain"
-          />
-        </Link>
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-8">
+      <div className="container mx-auto px-4 h-12 flex items-center justify-between max-w-5xl">
+        <div className="flex items-center space-x-8">
+          {/* Logo */}
+          <Link href="/" className="flex items-center">
+            <Image
+              src="/assets/images/juju/JUJUBLACK.png"
+              alt="Juju"
+              width={48}
+              height={48}
+              className="object-contain dark:hidden"
+            />
+            <Image
+              src="/assets/images/juju/JUJUWHITE.png"
+              alt="Juju"
+              width={48}
+              height={48}
+              className="object-contain hidden dark:block"
+            />
+          </Link>
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center space-x-8">
           <NavigationMenu>
             <NavigationMenuList>
               <NavigationMenuItem>
@@ -95,7 +103,7 @@ export function MarketingHeader({ onAuthClick }: MarketingHeaderProps) {
                   </div>
                 </NavigationMenuContent>
               </NavigationMenuItem>
-              
+
               <NavigationMenuItem>
                 <NavigationMenuTrigger className="bg-transparent hover:bg-accent/50">
                   Industries
@@ -226,7 +234,7 @@ export function MarketingHeader({ onAuthClick }: MarketingHeaderProps) {
                   </div>
                 </NavigationMenuContent>
               </NavigationMenuItem>
-              
+
             </NavigationMenuList>
           </NavigationMenu>
           {navItems.map((item) => (
@@ -239,6 +247,7 @@ export function MarketingHeader({ onAuthClick }: MarketingHeaderProps) {
             </Link>
           ))}
         </nav>
+        </div>
         {/* Desktop Auth Buttons */}
         <div className="hidden md:flex items-center space-x-4">
           {!loading && user ? (
@@ -251,8 +260,9 @@ export function MarketingHeader({ onAuthClick }: MarketingHeaderProps) {
               <ProfileDropdown />
             </div>
           ) : (
-            <Button
-              className="bg-primary text-white border-0"
+            <Button 
+              variant="ghost" 
+              className="bg-primary text-white hover:bg-primay/50 hover:text-white  border-0"
               onClick={onAuthClick}
             >
               Get Started
@@ -291,7 +301,7 @@ export function MarketingHeader({ onAuthClick }: MarketingHeaderProps) {
                   🎬 Juju Vids
                 </Link>
               </div>
-              
+
               <Link
                 href="/industries"
                 className="text-lg font-medium hover:text-primary transition-colors"
@@ -366,7 +376,7 @@ export function MarketingHeader({ onAuthClick }: MarketingHeaderProps) {
                   🎬 Production Teams
                 </Link>
               </div>
-              
+
               {navItems.map((item) => (
                 <Link
                   key={item.label}
