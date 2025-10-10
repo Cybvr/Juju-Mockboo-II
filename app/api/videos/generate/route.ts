@@ -5,16 +5,15 @@ import { storage } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 export async function POST(request: NextRequest) {
-  console.log('Video generation API called with Kling v2.1');
+  console.log('Video generation API called with Kling v1.6');
   try {
     const body = await request.json();
     console.log('Request body:', body);
     const {
       prompt,
-      first_frame_image,
-      last_frame_image,
       duration = 5,
-      mode = "standard",
+      cfg_scale = 0.5,
+      aspect_ratio = "16:9",
       negative_prompt = ""
     } = body;
 
@@ -23,43 +22,35 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Prompt is required' }, { status: 400 });
     }
 
-    if (!first_frame_image) {
-      console.log('Error: No start image provided');
-      return NextResponse.json({ error: 'Start image is required for Kling v2.1' }, { status: 400 });
-    }
-
     const apiToken = process.env.REPLICATE_API_TOKEN;
     if (!apiToken) {
       console.log('Error: Replicate API token not configured');
       return NextResponse.json({ error: 'Replicate API token not configured' }, { status: 500 });
     }
 
-    console.log('API token found, proceeding with Kling v2.1 generation');
+    console.log('API token found, proceeding with Kling v1.6 generation');
     const replicate = new Replicate({ auth: apiToken });
 
     const input = {
-      mode,
       prompt,
       duration,
-      start_image: first_frame_image,
-      negative_prompt,
-      ...(last_frame_image && { end_image: last_frame_image })
+      cfg_scale,
+      aspect_ratio,
+      negative_prompt
     };
 
-    console.log('Calling Kling v2.1 API with input:', input);
+    console.log('Calling Kling v1.6 API with input:', input);
 
-    const output = await replicate.run("kwaivgi/kling-v2.1", { input });
-    console.log('Kling v2.1 generation successful:', output);
+    const output = await replicate.run("kwaivgi/kling-v1.6-standard", { input });
+    console.log('Kling v1.6 generation successful:', output);
 
-    // Handle different output formats
+    // Handle Kling v1.6 output format
     let videoBlob: Blob;
     let videoUrl: string;
 
     if (typeof output === 'string') {
-      // Direct URL
       videoUrl = output;
     } else if (output && typeof output === 'object' && 'url' in output) {
-      // Object with url method or property
       videoUrl = typeof output.url === 'function' ? output.url() : output.url;
     } else {
       console.error('Unexpected output format:', output);
