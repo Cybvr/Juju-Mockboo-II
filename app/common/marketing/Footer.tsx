@@ -1,3 +1,4 @@
+
 'use client';
 import Image from 'next/image';
 export function MarketingFooter() {
@@ -22,6 +23,15 @@ export function MarketingFooter() {
                 <li><a href="/products/juju-vids" className="hover:text-foreground cursor-pointer">🎬 Juju Vids</a></li>
                 <li><a href="/dashboard/templates" className="hover:text-foreground cursor-pointer">Templates</a></li>
                 <li><a href="/tools" className="hover:text-foreground cursor-pointer">Tools</a></li>
+              </ul>
+            </div>
+            <div className="space-y-4">
+              <h3 className="font-normal text-lg">Industries</h3>
+              <ul className="flex flex-col items-center space-y-3 text-muted-foreground md:flex-row md:space-y-0 md:space-x-8">
+                <li><a href="/industries" className="hover:text-foreground cursor-pointer">All Industries</a></li>
+                <li><a href="/industries/ecommerce" className="hover:text-foreground cursor-pointer">E-commerce</a></li>
+                <li><a href="/industries/real-estate" className="hover:text-foreground cursor-pointer">Real Estate</a></li>
+                <li><a href="/industries/marketing" className="hover:text-foreground cursor-pointer">Marketing</a></li>
               </ul>
             </div>
             <div className="space-y-4">
