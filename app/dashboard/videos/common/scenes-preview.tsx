@@ -142,6 +142,84 @@ export function ScenesPreview({
     setActiveTool('select')
   }
 
+  // Load scene content when scene changes
+  useEffect(() => {
+    if (!fabricCanvasRef.current || !currentScene) return
+
+    const canvas = fabricCanvasRef.current
+
+    // Clear canvas
+    canvas.clear()
+
+    // Add media as Fabric objects instead of background
+    import('fabric').then((FabricModule) => {
+      const fabric = FabricModule
+
+      if (currentScene.type === 'image' && currentScene.imageUrl) {
+        // Add image as Fabric Image object
+        fabric.Image.fromURL(currentScene.imageUrl).then((img) => {
+          // Scale to fit canvas
+          const scaleX = canvas.width / img.width
+          const scaleY = canvas.height / img.height
+          const scale = Math.min(scaleX, scaleY)
+
+          img.set({
+            left: (canvas.width - img.width * scale) / 2,
+            top: (canvas.height - img.height * scale) / 2,
+            scaleX: scale,
+            scaleY: scale,
+            selectable: true,
+            moveable: true,
+            name: 'scene-media'
+          })
+
+          canvas.add(img)
+          canvas.sendToBack(img) // Keep it at back as base layer
+          canvas.renderAll()
+        })
+      } else if (currentScene.type === 'video' && currentScene.videoUrl) {
+        // For video, create a video element and add as Fabric object
+        const videoEl = document.createElement('video')
+        videoEl.src = currentScene.videoUrl
+        videoEl.crossOrigin = 'anonymous'
+        videoEl.muted = true
+        videoEl.loop = true
+
+        videoEl.onloadedmetadata = () => {
+          const videoObj = new fabric.Image(videoEl, {
+            left: (canvas.width - videoEl.videoWidth) / 2,
+            top: (canvas.height - videoEl.videoHeight) / 2,
+            scaleX: canvas.width / videoEl.videoWidth,
+            scaleY: canvas.height / videoEl.videoHeight,
+            selectable: true,
+            moveable: true,
+            name: 'scene-media'
+          })
+
+          canvas.add(videoObj)
+          canvas.sendToBack(videoObj) // Keep it at back as base layer
+          canvas.renderAll()
+
+          // Start video playback
+          videoEl.play()
+
+          // Update canvas on video frames
+          const updateCanvas = () => {
+            videoObj.set({ dirty: true })
+            canvas.renderAll()
+            if (!videoEl.paused) {
+              requestAnimationFrame(updateCanvas)
+            }
+          }
+          updateCanvas()
+        }
+      } else {
+        // Set neutral background for empty scenes
+        canvas.setBackgroundColor('#f0f0f0', canvas.renderAll.bind(canvas))
+      }
+    })
+  }, [currentScene])
+
   const addShape = (type: 'rect' | 'circle' | 'triangle') => {
     if (!fabricCanvasRef.current) return
 
@@ -150,33 +228,38 @@ export function ScenesPreview({
     switch (type) {
       case 'rect':
         shape = new Rect({
-          left: 860,
-          top: 440,
-          width: 200,
-          height: 200,
-          fill: '#ff0000',
-          opacity: 0.8
+          left: 960 - 50,
+          top: 540 - 25,
+          width: 100,
+          height: 50,
+          fill: '#3B82F6',
+          stroke: '#1D4ED8',
+          strokeWidth: 2
         })
         break
       case 'circle':
         shape = new Circle({
-          left: 860,
-          top: 440,
-          radius: 100,
-          fill: '#00ff00',
-          opacity: 0.8
+          left: 960 - 40,
+          top: 540 - 40,
+          radius: 40,
+          fill: '#EF4444',
+          stroke: '#DC2626',
+          strokeWidth: 2
         })
         break
       case 'triangle':
         shape = new Triangle({
-          left: 860,
-          top: 440,
-          width: 200,
-          height: 200,
-          fill: '#0000ff',
-          opacity: 0.8
+          left: 960 - 40,
+          top: 540 - 40,
+          width: 80,
+          height: 80,
+          fill: '#10B981',
+          stroke: '#059669',
+          strokeWidth: 2
         })
         break
+      default:
+        return
     }
 
     fabricCanvasRef.current.add(shape)
@@ -185,13 +268,50 @@ export function ScenesPreview({
     setActiveTool('select')
   }
 
+  // Helper to get the scene media object
+  const getSceneMediaObject = () => {
+    if (!fabricCanvasRef.current) return null
+    return fabricCanvasRef.current.getObjects().find((obj: any) => obj.name === 'scene-media')
+  }
+
+  // Helper to scale scene media
+  const scaleSceneMedia = (scaleX: number, scaleY: number) => {
+    const mediaObj = getSceneMediaObject()
+    if (mediaObj) {
+      mediaObj.set({ scaleX, scaleY })
+      fabricCanvasRef.current?.renderAll()
+    }
+  }
+
+  // Helper to crop scene media (by changing clip path)
+  const cropSceneMedia = (left: number, top: number, width: number, height: number) => {
+    const mediaObj = getSceneMediaObject()
+    if (mediaObj && fabricCanvasRef.current) {
+      import('fabric').then((FabricModule) => {
+        const fabric = FabricModule
+        const clipPath = new fabric.Rect({
+          left: left,
+          top: top,
+          width: width,
+          height: height,
+          absolutePositioned: true
+        })
+        mediaObj.set({ clipPath })
+        fabricCanvasRef.current?.renderAll()
+      })
+    }
+  }
+
   // Expose functions for parent component
   useEffect(() => {
     if (typeof window !== 'undefined') {
       (window as any).sceneEditor = {
         addText,
         addShape,
-        canvas: fabricCanvasRef.current
+        canvas: fabricCanvasRef.current,
+        getSceneMediaObject,
+        scaleSceneMedia,
+        cropSceneMedia
       }
     }
   }, [])
@@ -217,31 +337,6 @@ export function ScenesPreview({
             >
               {currentScene && (
                 <>
-                  {/* Video/Image Layer */}
-                  {currentScene.type === 'video' && currentScene.videoUrl ? (
-                    <video
-                      ref={videoRef}
-                      src={currentScene.videoUrl}
-                      className="absolute inset-0 w-full h-full object-contain"
-                      muted
-                      autoPlay={isPlaying}
-                      loop
-                    />
-                  ) : currentScene.imageUrl ? (
-                    <img
-                      src={currentScene.imageUrl}
-                      alt={currentScene.name}
-                      className="absolute inset-0 w-full h-full object-contain"
-                    />
-                  ) : (
-                    <div className="absolute inset-0 w-full h-full flex items-center justify-center text-white">
-                      <div className="text-center">
-                        <Play className="w-16 h-16 mx-auto mb-2" />
-                        <p>{currentScene.name}</p>
-                      </div>
-                    </div>
-                  )}
-
                   {/* Fabric.js Canvas Layer */}
                   <canvas 
                     ref={canvasRef}
