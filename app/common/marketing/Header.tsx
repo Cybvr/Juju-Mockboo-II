@@ -215,6 +215,71 @@ export function MarketingHeader({ onAuthClick }: MarketingHeaderProps) {
               </NavigationMenuItem>
               <NavigationMenuItem>
                 <NavigationMenuTrigger className="bg-transparent hover:bg-accent/50">
+                  Teams
+                </NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <div className="grid gap-3 p-6 w-[500px] lg:w-[600px] lg:grid-cols-2">
+                    <div className="row-span-3">
+                      <NavigationMenuLink asChild>
+                        <Link
+                          href="/teams"
+                          className="flex h-full w-full select-none flex-col justify-end rounded-md relative overflow-hidden p-6 no-underline outline-none focus:shadow-md bg-gradient-to-br from-blue-500/20 to-purple-500/20"
+                        >
+                          <div className="relative z-10 bg-black/50 p-4 rounded-md">
+                            <div className="mb-2 mt-4 text-lg font-medium text-white">
+                              👥 All Teams
+                            </div>
+                            <p className="text-sm leading-tight text-white/80">
+                              Discover solutions built for every team in your organization.
+                            </p>
+                          </div>
+                        </Link>
+                      </NavigationMenuLink>
+                    </div>
+                    <NavigationMenuLink asChild>
+                      <Link
+                        href="/teams/design"
+                        className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                      >
+                        <div className="text-sm font-medium leading-none">
+                          🎨 Design Teams
+                        </div>
+                        <p className="line-clamp-2 text-xs leading-snug text-muted-foreground">
+                          10x faster design iterations
+                        </p>
+                      </Link>
+                    </NavigationMenuLink>
+                    <NavigationMenuLink asChild>
+                      <Link
+                        href="/teams/marketing"
+                        className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                      >
+                        <div className="text-sm font-medium leading-none">
+                          📊 Marketing Teams
+                        </div>
+                        <p className="line-clamp-2 text-xs leading-snug text-muted-foreground">
+                          3x more campaign output
+                        </p>
+                      </Link>
+                    </NavigationMenuLink>
+                    <NavigationMenuLink asChild>
+                      <Link
+                        href="/teams/production"
+                        className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                      >
+                        <div className="text-sm font-medium leading-none">
+                          🎬 Production Teams
+                        </div>
+                        <p className="line-clamp-2 text-xs leading-snug text-muted-foreground">
+                          50% faster video production
+                        </p>
+                      </Link>
+                    </NavigationMenuLink>
+                  </div>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuTrigger className="bg-transparent hover:bg-accent/50">
                   Compare
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
@@ -372,6 +437,43 @@ export function MarketingHeader({ onAuthClick }: MarketingHeaderProps) {
                   onClick={() => setIsOpen(false)}
                 >
                   📊 Marketing
+                </Link>
+              </div>
+              <Link
+                href="/teams"
+                className="text-lg font-medium hover:text-primary transition-colors"
+                onClick={() => setIsOpen(false)}
+              >
+                Teams
+              </Link>
+              <div className="pl-4 space-y-2 border-l-2 border-muted">
+                <Link
+                  href="/teams"
+                  className="block text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+                  onClick={() => setIsOpen(false)}
+                >
+                  👥 All Teams
+                </Link>
+                <Link
+                  href="/teams/design"
+                  className="block text-sm text-muted-foreground hover:text-primary transition-colors"
+                  onClick={() => setIsOpen(false)}
+                >
+                  🎨 Design Teams
+                </Link>
+                <Link
+                  href="/teams/marketing"
+                  className="block text-sm text-muted-foreground hover:text-primary transition-colors"
+                  onClick={() => setIsOpen(false)}
+                >
+                  📊 Marketing Teams
+                </Link>
+                <Link
+                  href="/teams/production"
+                  className="block text-sm text-muted-foreground hover:text-primary transition-colors"
+                  onClick={() => setIsOpen(false)}
+                >
+                  🎬 Production Teams
                 </Link>
               </div>
               <Link

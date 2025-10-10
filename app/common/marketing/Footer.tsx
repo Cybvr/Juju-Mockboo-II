@@ -1,4 +1,3 @@
-
 'use client';
 import Image from 'next/image';
 export function MarketingFooter() {
@@ -50,6 +49,15 @@ export function MarketingFooter() {
                 <li className="hover:text-foreground cursor-pointer">Terms</li>
                 <li className="hover:text-foreground cursor-pointer">Security</li>
                 <li className="hover:text-foreground cursor-pointer">GDPR</li>
+              </ul>
+            </div>
+            {/* Add Teams section */}
+            <div className="space-y-4">
+              <h3 className="font-normal text-lg">Teams</h3>
+              <ul className="flex flex-col items-center space-y-3 text-muted-foreground md:flex-row md:space-y-0 md:space-x-8">
+                <li><a href="/teams/design" className="hover:text-foreground cursor-pointer">🎨 Design</a></li>
+                <li><a href="/teams/it" className="hover:text-foreground cursor-pointer">💻 IT</a></li>
+                <li><a href="/teams/production" className="hover:text-foreground cursor-pointer">🏭 Production</a></li>
               </ul>
             </div>
           </div>
