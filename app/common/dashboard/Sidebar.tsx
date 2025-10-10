@@ -97,10 +97,10 @@ export function Sidebar({ className, onNavigate }: SidebarProps) {
       onClick: createNewCanvas,
     },
     {
-      label: 'Scenes',
+      label: 'Videos',
       icon: Clapperboard,
-      href: '/dashboard/scenes',
-      active: pathname.startsWith('/dashboard/scenes'),
+      href: '/dashboard/videos',
+      active: pathname.startsWith('/dashboard/videos'),
     },
     {
       label: 'Storymaker',
