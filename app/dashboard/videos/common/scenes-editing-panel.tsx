@@ -23,6 +23,7 @@ export function ScenesEditingPanel({ onAddScene, selectedScene, onUpdateScene }:
   const [documents, setDocuments] = useState<Document[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'image' | 'video'>('all')
+  const [isUploading, setIsUploading] = useState(false); // Added to manage upload state
 
   useEffect(() => {
     const loadUserDocuments = async () => {
@@ -57,7 +58,7 @@ export function ScenesEditingPanel({ onAddScene, selectedScene, onUpdateScene }:
       imageUrl,
       videoUrl,
       type: document.type === 'video' ? 'video' : 'image',
-      duration: 3.0
+      duration: document.type === 'video' ? 8.0 : 5.0 // Set default duration based on type
     })
   }
 
@@ -74,7 +75,7 @@ export function ScenesEditingPanel({ onAddScene, selectedScene, onUpdateScene }:
           imageUrl: file.type.startsWith('image/') ? result : undefined,
           videoUrl: file.type.startsWith('video/') ? result : undefined,
           type: file.type.startsWith('video/') ? 'video' : 'image',
-          duration: 3.0
+          duration: file.type.startsWith('video/') ? 8.0 : 5.0 // Set default duration based on type
         })
       }
       reader.readAsDataURL(file)
@@ -84,6 +85,59 @@ export function ScenesEditingPanel({ onAddScene, selectedScene, onUpdateScene }:
 
     e.target.value = ""
   }
+
+  // Placeholder for uploadFileToStorage, as it's not provided in the original code
+  // In a real scenario, this would handle actual file uploads to a service like S3 or Firebase Storage
+  const uploadFileToStorage = async (file: File, folder: string): Promise<string> => {
+    console.log(`Uploading ${file.name} to ${folder}...`);
+    // Simulate upload delay and return a dummy URL
+    return new Promise(resolve => setTimeout(() => resolve(`https://example.com/${folder}/${file.name}`), 1500));
+  };
+
+  // Keeping these functions as placeholders to illustrate where the changes would go,
+  // but they are not used in the provided original code snippet.
+  // The provided <changes> snippet seems to be from a different context or older version.
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    setIsUploading(true)
+    try {
+      const imageUrl = await uploadFileToStorage(file, 'images')
+      onAddScene({
+        name: `Image ${Date.now()}`,
+        duration: 5, // Default 5 seconds
+        imageUrl,
+        type: 'image'
+      })
+    } catch (error) {
+      console.error('Error uploading image:', error)
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  const handleVideoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    setIsUploading(true)
+    try {
+      const videoUrl = await uploadFileToStorage(file, 'videos')
+      onAddScene({
+        name: `Video ${Date.now()}`,
+        duration: 8, // Default 8 seconds for videos
+        videoUrl,
+        imageUrl: videoUrl, // Use video as thumbnail
+        type: 'video'
+      })
+    } catch (error) {
+      console.error('Error uploading video:', error)
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
 
   return (
     <div className="h-full flex flex-col bg-card/30">
@@ -103,6 +157,7 @@ export function ScenesEditingPanel({ onAddScene, selectedScene, onUpdateScene }:
             size="sm"
             variant="outline"
             className="h-7 px-2 text-xs"
+            disabled={isUploading} // Disable button while uploading
           >
             <Upload className="w-3.5 h-3.5 mr-1.5" />
             Upload

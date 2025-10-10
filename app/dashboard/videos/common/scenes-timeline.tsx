@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { X, GripVertical, Play, Pause, SkipBack, SkipForward, ZoomIn, ZoomOut } from "lucide-react"
+import { X, GripVertical, Play, Pause, SkipBack, SkipForward, ZoomIn, ZoomOut, Clock } from "lucide-react"
 import { Scene } from "./scenes-video-editor"
 
 interface ScenesTimelineProps {
@@ -456,8 +456,29 @@ return (
                             )}
                           </div>
 
+                          {/* Duration Control */}
+                          <div className="absolute bottom-1 left-2 text-xs bg-black/70 text-white px-1 rounded">
+                            {scene.duration}s
+                          </div>
+
                           {/* Controls */}
-                          <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                            {scene.type === 'video' && (
+                              <Button
+                                size="sm"
+                                variant="secondary"
+                                className="h-5 w-5 p-0 bg-background/80 hover:bg-background"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  // Toggle duration between 5s and 10s
+                                  const newDuration = scene.duration === 5 ? 10 : 5
+                                  onUpdateScene(scene.id, { duration: newDuration })
+                                }}
+                                title="Change duration"
+                              >
+                                <Clock className="h-3 w-3" />
+                              </Button>
+                            )}
                             <Button
                               size="sm"
                               variant="secondary"

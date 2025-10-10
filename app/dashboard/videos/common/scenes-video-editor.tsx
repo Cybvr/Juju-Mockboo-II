@@ -345,11 +345,17 @@ export function ScenesVideoEditor({ projectId }: ScenesVideoEditorProps) {
           <div className="border-r border-border">
             <AIImagePanel 
               onAddToScene={(videoUrl) => {
-                // Add video to current scene
+                // Add video to current scene with proper duration
                 if (selectedSceneId) {
                   setScenes(prev => prev.map(scene => 
                     scene.id === selectedSceneId 
-                      ? { ...scene, videoUrl, type: "video" as const }
+                      ? { 
+                          ...scene, 
+                          videoUrl, 
+                          imageUrl: videoUrl, // Set imageUrl for timeline thumbnail
+                          type: "video" as const,
+                          duration: 8 // Set proper duration
+                        }
                       : scene
                   ))
                 }
