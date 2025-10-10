@@ -3,14 +3,21 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Sparkles, Loader2 } from "lucide-react"
+import { useAuthState } from "react-firebase-hooks/auth"
+import { auth } from "@/lib/firebase"
 
 export function AIImagePanel() {
+  const [user] = useAuthState(auth)
   const [prompt, setPrompt] = useState("")
   const [isGenerating, setIsGenerating] = useState(false)
   const [generatedImages, setGeneratedImages] = useState<string[]>([])
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return
+    if (!user) {
+      alert('Please sign in to generate images')
+      return
+    }
 
     setIsGenerating(true)
     try {
@@ -18,6 +25,7 @@ export function AIImagePanel() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'x-user-id': user.uid,
         },
         body: JSON.stringify({
           prompt: prompt,
