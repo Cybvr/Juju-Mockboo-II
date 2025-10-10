@@ -144,8 +144,8 @@ export function DocumentGallery({
     }
   })
 
-  // Filter to show canvas and video documents
-  const displayDocuments = flattenedDocuments.filter(item => item.type === "canvas" || item.type === "video");
+  // Filter to show canvas, video, and scenes documents
+  const displayDocuments = flattenedDocuments.filter(item => item.type === "canvas" || item.type === "video" || item.type === "scenes");
 
   const handleDeleteClick = (documentId: string) => {
     const flatDoc = flattenedDocuments.find(item => item.id === documentId)
@@ -292,7 +292,7 @@ export function DocumentGallery({
     const document = flatDoc.originalDoc
     if (document?.type === "canvas") {
       router.push(`/dashboard/canvas/${flatDoc.originalDocId}`)
-    } else if (document?.type === "video") {
+    } else if (document?.type === "video" || document?.type === "scenes") {
       router.push(`/dashboard/videos/${flatDoc.originalDocId}`)
     } else {
       router.push(`/m/${flatDoc.originalDocId}`)
