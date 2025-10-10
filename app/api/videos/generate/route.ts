@@ -17,6 +17,9 @@ export async function POST(request: NextRequest) {
       negative_prompt = ""
     } = body;
 
+    // Kling v1.6 only accepts 5 or 10 seconds
+    const validDuration = duration > 7 ? 10 : 5;
+
     if (!prompt) {
       console.log('Error: No prompt provided');
       return NextResponse.json({ error: 'Prompt is required' }, { status: 400 });
@@ -33,7 +36,7 @@ export async function POST(request: NextRequest) {
 
     const input = {
       prompt,
-      duration,
+      duration: validDuration,
       cfg_scale,
       aspect_ratio,
       negative_prompt
