@@ -342,10 +342,21 @@ export function ScenesVideoEditor({ projectId }: ScenesVideoEditorProps) {
 
           {/* AI Image Panel (conditional) */}
           {showAIImagePanel && (
-            <div className="border-r border-border">
-              <AIImagePanel />
-            </div>
-          )}
+          <div className="border-r border-border">
+            <AIImagePanel 
+              onAddToScene={(videoUrl) => {
+                // Add video to current scene
+                if (selectedSceneId) {
+                  setScenes(prev => prev.map(scene => 
+                    scene.id === selectedSceneId 
+                      ? { ...scene, videoUrl, type: "video" as const }
+                      : scene
+                  ))
+                }
+              }}
+            />
+          </div>
+        )}
 
           {/* Text Panel (conditional) */}
           {showTextPanel && (

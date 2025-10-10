@@ -6,7 +6,11 @@ import { Sparkles, Loader2 } from "lucide-react"
 import { useAuthState } from "react-firebase-hooks/auth"
 import { auth } from "@/lib/firebase"
 
-export function AIImagePanel() {
+interface AIImagePanelProps {
+  onAddToScene?: (videoUrl: string) => void
+}
+
+export function AIImagePanel({ onAddToScene }: AIImagePanelProps) {
   const [user] = useAuthState(auth)
   const [prompt, setPrompt] = useState("")
   const [isGenerating, setIsGenerating] = useState(false)
@@ -117,7 +121,11 @@ export function AIImagePanel() {
                 loop
               />
               <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <Button size="sm" variant="secondary">
+                <Button 
+                  size="sm" 
+                  variant="secondary"
+                  onClick={() => onAddToScene?.(image)}
+                >
                   Add to Scene
                 </Button>
               </div>
