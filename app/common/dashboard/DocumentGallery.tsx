@@ -144,8 +144,8 @@ export function DocumentGallery({
     }
   })
 
-  // Filter to show canvas, video, and scenes documents
-  const displayDocuments = flattenedDocuments.filter(item => item.type === "canvas" || item.type === "video" || item.type === "scenes");
+  // Filter to show canvas and video documents
+  const displayDocuments = flattenedDocuments.filter(item => item.type === "canvas" || item.type === "video");
 
   const handleDeleteClick = (documentId: string) => {
     const flatDoc = flattenedDocuments.find(item => item.id === documentId)
