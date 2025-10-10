@@ -21,19 +21,28 @@ export function AIImagePanel() {
         },
         body: JSON.stringify({
           prompt: prompt,
-          model: 'flux-schnell',
-          aspectRatio: '1:1'
+          mode: 'text',
+          settings: {
+            model: 'imagen-3.0-generate-002',
+            aspectRatio: '1:1',
+            outputs: '1'
+          }
         }),
       })
 
       const data = await response.json()
+      console.log('AI Image generation response:', data)
+      
       if (data.success && data.images && data.images.length > 0) {
         setGeneratedImages(prev => [...data.images, ...prev])
+        console.log('Generated images added:', data.images.length)
       } else {
         console.error('No images generated:', data)
+        alert('Failed to generate image. Please try again.')
       }
     } catch (error) {
       console.error('Error generating images:', error)
+      alert('Error generating image. Please check your connection and try again.')
     } finally {
       setIsGenerating(false)
     }
