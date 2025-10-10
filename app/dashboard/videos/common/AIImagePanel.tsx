@@ -21,7 +21,7 @@ export function AIImagePanel() {
 
     setIsGenerating(true)
     try {
-      const response = await fetch('/api/generate', {
+      const response = await fetch('/api/videos/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -29,24 +29,21 @@ export function AIImagePanel() {
         },
         body: JSON.stringify({
           prompt: prompt,
-          mode: 'text',
-          settings: {
-            model: 'imagen-3.0-generate-002',
-            aspectRatio: '1:1',
-            outputs: '1'
-          }
+          duration: 8,
+          mode: 'standard'
         }),
       })
 
       const data = await response.json()
-      console.log('AI Image generation response:', data)
+      console.log('AI Video generation response:', data)
       
-      if (data.success && data.images && data.images.length > 0) {
-        setGeneratedImages(prev => [...data.images, ...prev])
-        console.log('Generated images added:', data.images.length)
+      if (data.data && data.data.output && data.data.output.length > 0) {
+        const videoUrl = data.data.output[0].url
+        setGeneratedImages(prev => [videoUrl, ...prev])
+        console.log('Generated video added:', videoUrl)
       } else {
-        console.error('No images generated:', data)
-        alert('Failed to generate image. Please try again.')
+        console.error('No video generated:', data)
+        alert('Failed to generate video. Please try again.')
       }
     } catch (error) {
       console.error('Error generating images:', error)
@@ -112,10 +109,12 @@ export function AIImagePanel() {
               key={index}
               className="aspect-square rounded-lg overflow-hidden border border-border hover:border-primary transition-colors cursor-pointer group relative"
             >
-              <img
+              <video
                 src={image}
-                alt={`Generated ${index + 1}`}
                 className="w-full h-full object-cover"
+                controls
+                muted
+                loop
               />
               <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                 <Button size="sm" variant="secondary">
