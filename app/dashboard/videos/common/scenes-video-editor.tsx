@@ -14,6 +14,7 @@ import { ScenesLeftToolbar } from "./scenes-left-toolbar"
 import { VidsToolbar } from "./vids-toolbar"
 import { AIImagePanel } from "./AIImagePanel"
 import { TextPanel } from "./TextPanel"
+import { AudioPanel } from "./AudioPanel" // Assuming AudioPanel is in the same directory
 import { Film, Edit3, Clock } from "lucide-react"
 
 export interface Scene {
@@ -46,6 +47,7 @@ export function ScenesVideoEditor({ projectId }: ScenesVideoEditorProps) {
   const [showEditingPanel, setShowEditingPanel] = useState(false)
   const [showAIImagePanel, setShowAIImagePanel] = useState(false)
   const [showTextPanel, setShowTextPanel] = useState(false)
+  const [showAudioPanel, setShowAudioPanel] = useState(false) // State for Audio Panel
 
   useEffect(() => {
     const loadProject = async () => {
@@ -327,6 +329,8 @@ export function ScenesVideoEditor({ projectId }: ScenesVideoEditorProps) {
             onToggleAIImagePanel={() => setShowAIImagePanel(!showAIImagePanel)}
             showTextPanel={showTextPanel}
             onToggleTextPanel={() => setShowTextPanel(!showTextPanel)}
+            showAudioPanel={showAudioPanel}
+            onToggleAudioPanel={() => setShowAudioPanel(!showAudioPanel)}
           />
 
           {/* Editing Panel (conditional) */}
@@ -350,6 +354,13 @@ export function ScenesVideoEditor({ projectId }: ScenesVideoEditorProps) {
               onClose={() => setShowTextPanel(false)}
               onAddText={handleAddText}
             />
+          )}
+
+          {/* Audio Panel (conditional) */}
+          {showAudioPanel && (
+            <div className="border-r border-border">
+              <AudioPanel />
+            </div>
           )}
 
           {/* Center - Preview */}

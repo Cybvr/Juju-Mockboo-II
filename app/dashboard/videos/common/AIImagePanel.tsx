@@ -13,14 +13,30 @@ export function AIImagePanel() {
     if (!prompt.trim()) return
 
     setIsGenerating(true)
-    // Simulate AI generation delay
-    setTimeout(() => {
-      // For demo purposes, using placeholder images
-      // In production, this would call your AI image generation API
-      const newImage = `https://placehold.co/512x512/6366f1/white?text=${encodeURIComponent(prompt.slice(0, 20))}`
-      setGeneratedImages(prev => [newImage, ...prev])
+    try {
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt: prompt,
+          model: 'flux-schnell',
+          aspectRatio: '1:1'
+        }),
+      })
+
+      const data = await response.json()
+      if (data.success && data.images && data.images.length > 0) {
+        setGeneratedImages(prev => [...data.images, ...prev])
+      } else {
+        console.error('No images generated:', data)
+      }
+    } catch (error) {
+      console.error('Error generating images:', error)
+    } finally {
       setIsGenerating(false)
-    }, 2000)
+    }
   }
 
   return (

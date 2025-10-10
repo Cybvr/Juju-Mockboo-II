@@ -399,7 +399,16 @@ return (
                 onClick={handleTimelineClick}
               >
                 {/* Scenes Track */}
-                <div className="h-24 flex relative border-b border-border/30">
+                <div className="h-24 flex relative border-b border-border/30"></div>
+
+                {/* Audio Layers */}
+                <div className="h-16 border-b border-border/30 bg-muted/20">
+                  <div className="px-2 py-1 text-xs font-medium text-muted-foreground border-b border-border/20">
+                    Audio Track
+                  </div>
+                  <div className="h-10 relative bg-card/50 flex items-center px-2">
+                    <div className="text-xs text-muted-foreground">Drop audio files here or use Audio panel</div>
+                  </div>
                   {scenes.map((scene, index) => {
                     const isSelected = scene.id === selectedSceneId
                     const thumbnailUrl = scene.imageUrl || scene.videoUrl

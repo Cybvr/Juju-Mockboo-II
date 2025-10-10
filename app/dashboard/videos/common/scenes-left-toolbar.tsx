@@ -1,6 +1,6 @@
 "use client"
 import { Button } from "@/components/ui/button"
-import { FolderOpen, Image, Video, Layers, Settings, Type, LucideIcon } from "lucide-react"
+import { FolderOpen, Image, Video, Layers, Settings, Type, Volume2, LucideIcon } from "lucide-react"
 
 interface ScenesLeftToolbarProps {
   showEditingPanel: boolean
@@ -9,6 +9,8 @@ interface ScenesLeftToolbarProps {
   onToggleAIImagePanel: () => void
   showTextPanel: boolean
   onToggleTextPanel: () => void
+  showAudioPanel: boolean
+  onToggleAudioPanel: () => void
 }
 
 interface ToolbarButtonProps {
@@ -41,7 +43,9 @@ export function ScenesLeftToolbar({
   showAIImagePanel,
   onToggleAIImagePanel,
   showTextPanel,
-  onToggleTextPanel
+  onToggleTextPanel,
+  showAudioPanel,
+  onToggleAudioPanel
 }: ScenesLeftToolbarProps) {
   const handleEditClick = () => {
     if (showAIImagePanel) onToggleAIImagePanel()
@@ -58,7 +62,15 @@ export function ScenesLeftToolbar({
   const handleTextClick = () => {
     if (showEditingPanel) onToggleEditingPanel()
     if (showAIImagePanel) onToggleAIImagePanel()
+    if (showAudioPanel) onToggleAudioPanel()
     onToggleTextPanel()
+  }
+
+  const handleAudioClick = () => {
+    if (showEditingPanel) onToggleEditingPanel()
+    if (showAIImagePanel) onToggleAIImagePanel()
+    if (showTextPanel) onToggleTextPanel()
+    onToggleAudioPanel()
   }
 
   return (
@@ -80,6 +92,12 @@ export function ScenesLeftToolbar({
         label="Text" 
         isActive={showTextPanel}
         onClick={handleTextClick}
+      />
+      <ToolbarButton 
+        icon={Volume2} 
+        label="Audio" 
+        isActive={showAudioPanel}
+        onClick={handleAudioClick}
       />
       <ToolbarButton 
         icon={Video} 
