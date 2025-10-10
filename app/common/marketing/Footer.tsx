@@ -1,7 +1,5 @@
 'use client';
-
 import Image from 'next/image';
-
 export function MarketingFooter() {
   return (
     <footer className="border-t bg-muted/20">
@@ -11,11 +9,10 @@ export function MarketingFooter() {
             <Image
               src="/images/juju.png"
               alt="Juju Logo"
-              width={900} 
-              height={900} 
+              width={900}
+              height={900}
             />
           </div>
-
           {/* Navigation items below logo */}
           <div className="flex flex-wrap items-center justify-center gap-8 md:gap-16">
             <div className="space-y-4">
@@ -26,7 +23,6 @@ export function MarketingFooter() {
                 <li><a href="/dashboard/templates" className="hover:text-foreground cursor-pointer">Templates</a></li>
                 <li><a href="/tools" className="hover:text-foreground cursor-pointer">Tools</a></li>
               </ul>
-</old_str>
             </div>
             <div className="space-y-4">
               <h3 className="font-normal text-lg">Company</h3>
@@ -48,7 +44,6 @@ export function MarketingFooter() {
             </div>
           </div>
         </div>
-
         <div className="border-t py-4  items-center gap-6">
           <p className="text-muted-foreground mx-auto md:mx-0 text-center ">
             © 2025 Juju. All rights reserved.
