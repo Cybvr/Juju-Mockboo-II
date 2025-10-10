@@ -21,11 +21,12 @@ export function MarketingFooter() {
             <div className="space-y-4">
               <h3 className="font-normal text-lg">Products</h3>
               <ul className="flex flex-col items-center space-y-3 text-muted-foreground md:flex-row md:space-y-0 md:space-x-8">
-                <li className="hover:text-foreground cursor-pointer">🎨 Mixboard</li>
-                <li className="hover:text-foreground cursor-pointer">🎬 Juju Vids</li>
-                <li className="hover:text-foreground cursor-pointer">Templates</li>
-                <li className="hover:text-foreground cursor-pointer">Tools</li>
+                <li><a href="/products/mixboard" className="hover:text-foreground cursor-pointer">🎨 Mixboard</a></li>
+                <li><a href="/products/juju-vids" className="hover:text-foreground cursor-pointer">🎬 Juju Vids</a></li>
+                <li><a href="/dashboard/templates" className="hover:text-foreground cursor-pointer">Templates</a></li>
+                <li><a href="/tools" className="hover:text-foreground cursor-pointer">Tools</a></li>
               </ul>
+</old_str>
             </div>
             <div className="space-y-4">
               <h3 className="font-normal text-lg">Company</h3>

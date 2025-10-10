@@ -58,7 +58,7 @@ export function MarketingHeader({ onAuthClick }: MarketingHeaderProps) {
                   <div className="grid gap-3 p-6 w-[500px] lg:w-[600px] lg:grid-cols-2">
                     <NavigationMenuLink asChild>
                       <Link
-                        href="/dashboard/canvas"
+                        href="/products/mixboard"
                         className="flex h-full w-full select-none flex-col justify-end rounded-md relative overflow-hidden p-6 no-underline outline-none focus:shadow-md"
                       >
                         <Image
@@ -79,7 +79,7 @@ export function MarketingHeader({ onAuthClick }: MarketingHeaderProps) {
                     </NavigationMenuLink>
                     <NavigationMenuLink asChild>
                       <Link
-                        href="/dashboard/videos"
+                        href="/products/juju-vids"
                         className="flex h-full w-full select-none flex-col justify-end rounded-md relative overflow-hidden p-6 no-underline outline-none focus:shadow-md"
                       >
                         <Image
@@ -239,14 +239,14 @@ export function MarketingHeader({ onAuthClick }: MarketingHeaderProps) {
               </Link>
               <div className="pl-4 space-y-2 border-l-2 border-muted">
                 <Link
-                  href="/dashboard/canvas"
+                  href="/products/mixboard"
                   className="block text-sm text-muted-foreground hover:text-primary transition-colors"
                   onClick={() => setIsOpen(false)}
                 >
                   🎨 Mixboard
                 </Link>
                 <Link
-                  href="/dashboard/videos"
+                  href="/products/juju-vids"
                   className="block text-sm text-muted-foreground hover:text-primary transition-colors"
                   onClick={() => setIsOpen(false)}
                 >
