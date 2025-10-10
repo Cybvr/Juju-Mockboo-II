@@ -21,7 +21,6 @@ export function MarketingFooter() {
                 <li><a href="/products/mixboard" className="hover:text-foreground cursor-pointer">🎨 Mixboard</a></li>
                 <li><a href="/products/juju-vids" className="hover:text-foreground cursor-pointer">🎬 Juju Vids</a></li>
                 <li><a href="/dashboard/templates" className="hover:text-foreground cursor-pointer">Templates</a></li>
-                <li><a href="/tools" className="hover:text-foreground cursor-pointer">Tools</a></li>
               </ul>
             </div>
             <div className="space-y-4">
