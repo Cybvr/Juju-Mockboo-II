@@ -5,7 +5,7 @@ import { storage } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 export async function POST(request: NextRequest) {
-  console.log('Video generation API called with Kling v1.6');
+  console.log('Video generation API called with ByteDance SeeDance');
   try {
     const body = await request.json();
     console.log('Request body:', body);
@@ -31,23 +31,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Replicate API token not configured' }, { status: 500 });
     }
 
-    console.log('API token found, proceeding with Kling v1.6 generation');
+    console.log('API token found, proceeding with ByteDance SeeDance generation');
     const replicate = new Replicate({ auth: apiToken });
 
     const input = {
+      fps: 24,
       prompt,
       duration: validDuration,
-      cfg_scale,
+      resolution: "480p",
       aspect_ratio,
-      negative_prompt
+      camera_fixed: false
     };
 
-    console.log('Calling Kling v1.6 API with input:', input);
+    console.log('Calling ByteDance SeeDance API with input:', input);
 
-    const output = await replicate.run("kwaivgi/kling-v1.6-standard", { input });
-    console.log('Kling v1.6 generation successful:', output);
+    const output = await replicate.run("bytedance/seedance-1-lite", { input });
+    console.log('ByteDance SeeDance generation successful:', output);
 
-    // Handle Kling v1.6 output format
+    // Handle ByteDance SeeDance output format
     let videoBlob: Blob;
     let videoUrl: string;
 
