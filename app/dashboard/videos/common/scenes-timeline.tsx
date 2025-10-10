@@ -399,9 +399,89 @@ return (
                 onClick={handleTimelineClick}
               >
                 {/* Scenes Track */}
-                <div className="h-24 flex relative border-b border-border/30"></div>
+                <div className="h-24 flex relative border-b border-border/30">
+                  <div className="px-2 py-1 text-xs font-medium text-muted-foreground border-b border-border/20 absolute top-0 left-0 right-0 bg-background/80">
+                    Video Scenes
+                  </div>
+                  <div className="flex mt-6 h-16">
+                    {scenes.map((scene, index) => {
+                      const isSelected = scene.id === selectedSceneId
+                      const thumbnailUrl = scene.imageUrl || scene.videoUrl
+                      const startTime = getSceneStartTime(index)
+                      const totalDuration = getTotalDuration()
+                      const width = totalDuration > 0 ? (scene.duration / totalDuration) * 100 : 100 / scenes.length
+                      const minWidth = 100
 
-                {/* Audio Layers */}
+                      return (
+                        <div
+                          key={scene.id}
+                          className={`
+                            relative group cursor-pointer border-r border-border/40
+                            ${isSelected ? 'bg-primary/8 ring-1 ring-primary/20' : 'bg-card hover:bg-card/90'}
+                            transition-all duration-150 flex-shrink-0
+                          `}
+                          style={{
+                            width: `${width}%`,
+                            minWidth: `${minWidth}px`
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            onSelectScene(scene.id)
+                          }}
+                          draggable
+                          onDragStart={(e) => handleDragStart(e, index)}
+                          onDragOver={handleDragOver}
+                          onDrop={(e) => handleDrop(e, index)}
+                        >
+                          {/* Thumbnail */}
+                          <div className="h-12 mx-2 mt-1 rounded-sm overflow-hidden bg-muted/50 flex items-center justify-center border border-border/50">
+                            {thumbnailUrl ? (
+                              scene.type === 'video' ? (
+                                <video
+                                  src={thumbnailUrl}
+                                  className="w-full h-full object-cover"
+                                  muted
+                                />
+                              ) : (
+                                <img
+                                  src={thumbnailUrl}
+                                  alt={scene.name}
+                                  className="w-full h-full object-cover"
+                                />
+                              )
+                            ) : (
+                              <div className="text-xs text-muted-foreground text-center px-2">
+                                Scene {index + 1}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Controls */}
+                          <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              className="h-5 w-5 p-0 bg-background/80 hover:bg-background"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                onRemoveScene(scene.id)
+                              }}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+
+                          {/* Drag Handle */}
+                          <div className="absolute top-1 left-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <GripVertical className="h-3 w-3 text-muted-foreground/60" />
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {/* Audio Track */}
                 <div className="h-16 border-b border-border/30 bg-muted/20">
                   <div className="px-2 py-1 text-xs font-medium text-muted-foreground border-b border-border/20">
                     Audio Track
@@ -409,87 +489,8 @@ return (
                   <div className="h-10 relative bg-card/50 flex items-center px-2">
                     <div className="text-xs text-muted-foreground">Drop audio files here or use Audio panel</div>
                   </div>
-                  {scenes.map((scene, index) => {
-                    const isSelected = scene.id === selectedSceneId
-                    const thumbnailUrl = scene.imageUrl || scene.videoUrl
-                    const startTime = getSceneStartTime(index)
-                    const totalDuration = getTotalDuration()
-                    const width = totalDuration > 0 ? (scene.duration / totalDuration) * 100 : 100 / scenes.length
-                    const minWidth = 100
-
-                    return (
-                      <div
-                        key={scene.id}
-                        className={`
-                          relative group cursor-pointer border-r border-border/40
-                          ${isSelected ? 'bg-primary/8 ring-1 ring-primary/20' : 'bg-card hover:bg-card/90'}
-                          transition-all duration-150 flex-shrink-0
-                        `}
-                        style={{
-                          width: `${width}%`,
-                          minWidth: `${minWidth}px`
-                        }}
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          onSelectScene(scene.id)
-                        }}
-                        draggable
-                        onDragStart={(e) => handleDragStart(e, index)}
-                        onDragOver={handleDragOver}
-                        onDrop={(e) => handleDrop(e, index)}
-                      >
-                        {/* Thumbnail */}
-                        <div className="h-14 mx-2 mt-2 rounded-sm overflow-hidden bg-muted/50 flex items-center justify-center border border-border/50">
-                          {thumbnailUrl ? (
-                            scene.type === 'video' ? (
-                              <video
-                                src={thumbnailUrl}
-                                className="w-full h-full object-cover"
-                                muted
-                              />
-                            ) : (
-                              <img
-                                src={thumbnailUrl}
-                                alt={scene.name}
-                                className="w-full h-full object-cover"
-                              />
-                            )
-                          ) : (
-                            <div className="text-xs text-muted-foreground text-center px-2">
-                              Scene {index + 1}
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Scene Info */}
-                        <div className="px-2 pb-2 pt-1">
-                          <p className="text-xs font-medium truncate">{scene.name}</p>
-                          <p className="text-xs text-muted-foreground">{scene.duration.toFixed(1)}s</p>
-                        </div>
-
-                        {/* Controls */}
-                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button
-                            size="sm"
-                            variant="secondary"
-                            className="h-6 w-6 p-0 bg-background/80 hover:bg-background"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              onRemoveScene(scene.id)
-                            }}
-                          >
-                            <X className="h-3 w-3" />
-                          </Button>
-                        </div>
-
-                        {/* Drag Handle */}
-                        <div className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <GripVertical className="h-4 w-4 text-muted-foreground/60" />
-                        </div>
-                      </div>
-                    )
-                  })}
                 </div>
+                    
 
                 {/* Main Timeline Scrubber */}
                 <div
