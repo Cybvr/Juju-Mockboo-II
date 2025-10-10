@@ -21,20 +21,14 @@ export function AIImagePanel() {
 
     setIsGenerating(true)
     try {
-      const response = await fetch('/api/generate', {
+      const response = await fetch('/api/videos/images/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'x-user-id': user.uid,
         },
         body: JSON.stringify({
-          prompt: prompt,
-          mode: 'text',
-          settings: {
-            model: 'imagen-3.0-generate-002',
-            aspectRatio: '1:1',
-            outputs: '1'
-          }
+          prompt: prompt
         }),
       })
 
