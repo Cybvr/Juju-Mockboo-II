@@ -155,10 +155,28 @@ export function ScenesVideoEditor({ projectId }: ScenesVideoEditorProps) {
   }
 
   const handleAddText = (textType: 'title' | 'subtitle' | 'body') => {
-    // Add text element to the current scene's canvas
-    // This should work with the preview canvas, not create placeholder images
-    console.log(`Adding ${textType} text to scene editor`)
-    // TODO: Implement proper text editing on the canvas preview
+    const canvas = (window as any).sceneCanvas
+    if (!canvas) return
+
+    import('fabric').then((FabricModule) => {
+      const fontSize = textType === 'title' ? 72 : textType === 'subtitle' ? 48 : 32
+      const text = textType === 'title' ? 'Your Title' : textType === 'subtitle' ? 'Your Subtitle' : 'Your Text'
+      
+      const textObj = new FabricModule.Text(text, {
+        left: 1920 / 2,
+        top: 1080 / 2,
+        originX: 'center',
+        originY: 'center',
+        fontSize: fontSize,
+        fill: '#ffffff',
+        fontFamily: 'Arial',
+        fontWeight: textType === 'title' ? 'bold' : 'normal'
+      })
+
+      canvas.add(textObj)
+      canvas.setActiveObject(textObj)
+      canvas.renderAll()
+    })
   }
 
   const updateScene = (sceneId: string, updates: Partial<Scene>) => {
