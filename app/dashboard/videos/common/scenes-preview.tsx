@@ -55,16 +55,28 @@ export function ScenesPreview({
 
     // Calculate scene-relative time
     const sceneStartTime = scenes.slice(0, currentSceneIndex).reduce((sum, scene) => sum + scene.duration, 0)
-    const sceneTime = currentTime - sceneStartTime
+    const sceneTime = Math.max(0, Math.min(currentTime - sceneStartTime, displayScene.duration))
 
-    if (isPlaying) {
-      video.currentTime = Math.max(0, sceneTime)
+    // Set video time first
+    video.currentTime = sceneTime
+
+    if (isPlaying && sceneTime < displayScene.duration) {
       video.play().catch(console.error)
     } else {
       video.pause()
-      video.currentTime = Math.max(0, sceneTime)
     }
-  }, [isPlaying, displayScene, currentTime, currentSceneIndex, scenes])
+
+    // Listen for video time updates to sync back to timeline
+    const handleTimeUpdate = () => {
+      if (onTimeUpdate && !isPlaying) {
+        const newGlobalTime = sceneStartTime + video.currentTime
+        onTimeUpdate(newGlobalTime)
+      }
+    }
+
+    video.addEventListener('timeupdate', handleTimeUpdate)
+    return () => video.removeEventListener('timeupdate', handleTimeUpdate)
+  }, [isPlaying, displayScene, currentTime, currentSceneIndex, scenes, onTimeUpdate])
 
   const getMediaUrl = (scene: Scene) => {
     if (scene.type === 'video') {

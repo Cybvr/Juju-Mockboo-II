@@ -43,11 +43,11 @@ export function ScenesTimeline({
   // Auto-advance time when playing
   useEffect(() => {
     if (isPlaying && onTimeChange) {
-      const startTime = Date.now()
+      const startTime = performance.now()
       const initialTime = currentTime
 
       const updateTime = () => {
-        const elapsed = (Date.now() - startTime) / 1000
+        const elapsed = (performance.now() - startTime) / 1000
         const newTime = initialTime + elapsed
         const totalDuration = getTotalDuration()
 
@@ -68,7 +68,7 @@ export function ScenesTimeline({
         cancelAnimationFrame(animationFrameRef.current)
       }
     }
-  }, [isPlaying, onTimeChange, onPlayStateChange])
+  }, [isPlaying, currentTime, onTimeChange, onPlayStateChange])
 
   // Sync scroll between ruler and timeline
   useEffect(() => {
