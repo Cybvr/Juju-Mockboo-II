@@ -451,7 +451,7 @@ return (
                               )
                             ) : (
                               <div className="text-xs text-muted-foreground text-center px-2">
-                                Scene {index + 1}
+                                {scene.name.length > 30 ? `Scene ${index + 1}` : scene.name}
                               </div>
                             )}
                           </div>
