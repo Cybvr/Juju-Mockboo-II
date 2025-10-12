@@ -1,3 +1,4 @@
+
 "use client"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -19,39 +20,71 @@ export function AIImagePanel({ onAddToScene }: AIImagePanelProps) {
   const handleGenerate = async () => {
     if (!prompt.trim()) return
     if (!user) {
-      alert('Please sign in to generate images')
+      alert('Please sign in to generate videos')
       return
     }
 
     setIsGenerating(true)
     try {
-      const response = await fetch('/api/videos/generate', {
+      // Create video with Sora
+      const createResponse = await fetch('/api/videos/sora', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'x-user-id': user.uid,
         },
         body: JSON.stringify({
+          model: 'sora-2',
           prompt: prompt,
-          duration: 8,
-          mode: 'standard'
+          size: '1280x720',
+          seconds: '8'
         }),
       })
 
-      const data = await response.json()
-      console.log('AI Video generation response:', data)
+      const createData = await createResponse.json()
+      console.log('Sora video creation response:', createData)
       
-      if (data.data && data.data.output && data.data.output.length > 0) {
-        const videoUrl = data.data.output[0].url
-        setGeneratedImages(prev => [videoUrl, ...prev])
-        console.log('Generated video added:', videoUrl)
-      } else {
-        console.error('No video generated:', data)
-        alert('Failed to generate video. Please try again.')
+      if (!createData.id) {
+        throw new Error('No video ID returned from Sora API')
+      }
+
+      // Poll for completion
+      let video = createData
+      while (video.status === 'in_progress' || video.status === 'queued') {
+        await new Promise(resolve => setTimeout(resolve, 3000)) // Poll every 3 seconds
+        
+        const statusResponse = await fetch(`/api/videos/sora/${video.id}`, {
+          headers: {
+            'x-user-id': user.uid,
+          }
+        })
+        video = await statusResponse.json()
+        console.log('Video status:', video.status)
+      }
+
+      if (video.status === 'completed') {
+        // Download the video content
+        const downloadResponse = await fetch(`/api/videos/sora/${video.id}/content`, {
+          headers: {
+            'x-user-id': user.uid,
+          }
+        })
+        
+        if (downloadResponse.ok) {
+          const videoBlob = await downloadResponse.blob()
+          const videoUrl = URL.createObjectURL(videoBlob)
+          setGeneratedImages(prev => [videoUrl, ...prev])
+          console.log('Generated video added:', videoUrl)
+        } else {
+          throw new Error('Failed to download video content')
+        }
+      } else if (video.status === 'failed') {
+        const errorMessage = video.error?.message || 'Video generation failed'
+        throw new Error(errorMessage)
       }
     } catch (error) {
-      console.error('Error generating images:', error)
-      alert('Error generating image. Please check your connection and try again.')
+      console.error('Error generating video:', error)
+      alert(`Error generating video: ${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
       setIsGenerating(false)
     }
@@ -62,13 +95,13 @@ export function AIImagePanel({ onAddToScene }: AIImagePanelProps) {
       {/* Header */}
       <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2 mb-3">
-          <h2 className="font-semibold text-sm">AI Media Clip</h2>
+          <h2 className="font-semibold text-sm">AI Video with Sora 2</h2>
         </div>
 
         {/* Prompt Input */}
         <div className="flex flex-col gap-2">
           <Textarea
-            placeholder="Generate an 8-second video. Describe what you want the content to be."
+            placeholder="Generate an 8-second video with Sora 2. Describe your scene in detail."
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             disabled={isGenerating}
@@ -83,21 +116,22 @@ export function AIImagePanel({ onAddToScene }: AIImagePanelProps) {
             {isGenerating ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                Generating...
+                Generating with Sora...
               </>
             ) : (
-              "Generate"
+              "Generate with Sora 2"
             )}
           </Button>
         </div>
       </div>
 
-      {/* Generated Images Grid */}
+      {/* Generated Videos Grid */}
       <div className="flex-1 overflow-y-auto p-4">
         {isGenerating && generatedImages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
             <Loader2 className="w-8 h-8 animate-spin mb-2" />
-            <p className="text-sm">Generating your image...</p>
+            <p className="text-sm">Generating your video with Sora...</p>
+            <p className="text-xs mt-1">This may take several minutes</p>
           </div>
         )}
 
