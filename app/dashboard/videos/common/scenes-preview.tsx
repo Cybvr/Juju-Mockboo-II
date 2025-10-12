@@ -54,37 +54,57 @@ export function ScenesPreview({
   useEffect(() => {
     if (!canvasRef.current || fabricCanvasRef.current) return
 
-    const canvas = new Canvas(canvasRef.current, {
-      width: 1920,
-      height: 1080,
-      backgroundColor: 'transparent',
-      preserveObjectStacking: true,
-      selection: activeTool === 'select',
-    })
+    const initCanvas = async () => {
+      const canvas = new Canvas(canvasRef.current, {
+        width: 800,
+        height: 450,
+        backgroundColor: '#000000',
+        preserveObjectStacking: true,
+        selection: activeTool === 'select',
+      })
 
-    fabricCanvasRef.current = canvas
-
-    // Resize canvas to fit container
-    const resizeCanvas = () => {
-      if (!containerRef.current) return
-      const container = containerRef.current
-      const rect = container.getBoundingClientRect()
-
-      const scale = Math.min(rect.width / 1920, rect.height / 1080)
-      canvas.setZoom(scale)
-      canvas.setWidth(1920 * scale)
-      canvas.setHeight(1080 * scale)
+      fabricCanvasRef.current = canvas
       canvas.renderAll()
+
+      // Resize canvas to fit container
+      const resizeCanvas = () => {
+        if (!containerRef.current) return
+        const container = containerRef.current
+        const rect = container.getBoundingClientRect()
+
+        const maxWidth = rect.width - 40
+        const maxHeight = rect.height - 40
+        const aspectRatio = 16/9
+
+        let canvasWidth = maxWidth
+        let canvasHeight = maxWidth / aspectRatio
+
+        if (canvasHeight > maxHeight) {
+          canvasHeight = maxHeight
+          canvasWidth = maxHeight * aspectRatio
+        }
+
+        canvas.setDimensions({
+          width: canvasWidth,
+          height: canvasHeight
+        })
+        canvas.renderAll()
+      }
+
+      // Initial resize
+      setTimeout(resizeCanvas, 100)
+      window.addEventListener('resize', resizeCanvas)
+
+      return () => {
+        window.removeEventListener('resize', resizeCanvas)
+        if (canvas) {
+          canvas.dispose()
+        }
+        fabricCanvasRef.current = null
+      }
     }
 
-    resizeCanvas()
-    window.addEventListener('resize', resizeCanvas)
-
-    return () => {
-      window.removeEventListener('resize', resizeCanvas)
-      canvas.dispose()
-      fabricCanvasRef.current = null
-    }
+    initCanvas()
   }, [])
 
   // Update canvas selection mode based on active tool
@@ -151,73 +171,102 @@ export function ScenesPreview({
     // Clear canvas
     canvas.clear()
 
-    // Add media as Fabric objects instead of background
-    import('fabric').then((FabricModule) => {
-      const fabric = FabricModule
-
-      if (currentScene.type === 'image' && currentScene.imageUrl) {
-        // Add image as Fabric Image object
-        fabric.Image.fromURL(currentScene.imageUrl).then((img) => {
-          // Scale to fit canvas
-          const scaleX = canvas.width / img.width
-          const scaleY = canvas.height / img.height
-          const scale = Math.min(scaleX, scaleY)
+    if (currentScene.type === 'image' && currentScene.imageUrl) {
+      // Add image as Fabric Image object
+      import('fabric').then(async (FabricModule) => {
+        try {
+          const img = await FabricModule.FabricImage.fromURL(currentScene.imageUrl, {
+            crossOrigin: 'anonymous'
+          })
+          
+          // Scale to fit canvas while maintaining aspect ratio
+          const canvasAspect = canvas.width! / canvas.height!
+          const imageAspect = img.width! / img.height!
+          
+          let scale
+          if (imageAspect > canvasAspect) {
+            scale = canvas.width! / img.width!
+          } else {
+            scale = canvas.height! / img.height!
+          }
 
           img.set({
-            left: (canvas.width - img.width * scale) / 2,
-            top: (canvas.height - img.height * scale) / 2,
+            left: canvas.width! / 2,
+            top: canvas.height! / 2,
+            originX: 'center',
+            originY: 'center',
             scaleX: scale,
             scaleY: scale,
             selectable: true,
-            moveable: true,
             name: 'scene-media'
           })
 
           canvas.add(img)
-          canvas.sendToBack(img) // Keep it at back as base layer
           canvas.renderAll()
-        })
-      } else if (currentScene.type === 'video' && currentScene.videoUrl) {
-        // For video, create a video element and add as Fabric object
-        const videoEl = document.createElement('video')
-        videoEl.src = currentScene.videoUrl
-        videoEl.crossOrigin = 'anonymous'
-        videoEl.muted = true
-        videoEl.loop = true
-
-        videoEl.onloadedmetadata = () => {
-          const videoObj = new fabric.Image(videoEl, {
-            left: (canvas.width - videoEl.videoWidth) / 2,
-            top: (canvas.height - videoEl.videoHeight) / 2,
-            scaleX: canvas.width / videoEl.videoWidth,
-            scaleY: canvas.height / videoEl.videoHeight,
-            selectable: true,
-            moveable: true,
-            name: 'scene-media'
+        } catch (error) {
+          console.error('Failed to load image:', error)
+          // Show placeholder
+          const rect = new FabricModule.Rect({
+            left: canvas.width! / 2,
+            top: canvas.height! / 2,
+            originX: 'center',
+            originY: 'center',
+            width: canvas.width! * 0.8,
+            height: canvas.height! * 0.8,
+            fill: '#333333',
+            stroke: '#666666',
+            strokeWidth: 2
           })
-
-          canvas.add(videoObj)
-          canvas.sendToBack(videoObj) // Keep it at back as base layer
+          canvas.add(rect)
           canvas.renderAll()
-
-          // Start video playback
-          videoEl.play()
-
-          // Update canvas on video frames
-          const updateCanvas = () => {
-            videoObj.set({ dirty: true })
-            canvas.renderAll()
-            if (!videoEl.paused) {
-              requestAnimationFrame(updateCanvas)
-            }
-          }
-          updateCanvas()
         }
-      } else {
-        // Set neutral background for empty scenes
-        canvas.setBackgroundColor('#f0f0f0', canvas.renderAll.bind(canvas))
-      }
-    })
+      })
+    } else if (currentScene.type === 'video' && currentScene.videoUrl) {
+      // For videos, show a placeholder for now
+      import('fabric').then((FabricModule) => {
+        const rect = new FabricModule.Rect({
+          left: canvas.width! / 2,
+          top: canvas.height! / 2,
+          originX: 'center',
+          originY: 'center',
+          width: canvas.width! * 0.8,
+          height: canvas.height! * 0.8,
+          fill: '#1a1a1a',
+          stroke: '#444444',
+          strokeWidth: 2
+        })
+        
+        const text = new FabricModule.Text('VIDEO', {
+          left: canvas.width! / 2,
+          top: canvas.height! / 2,
+          originX: 'center',
+          originY: 'center',
+          fontSize: 24,
+          fill: '#ffffff',
+          fontFamily: 'Arial'
+        })
+        
+        canvas.add(rect, text)
+        canvas.renderAll()
+      })
+    } else {
+      // Empty scene - show placeholder
+      import('fabric').then((FabricModule) => {
+        const text = new FabricModule.Text('Empty Scene\nAdd media from the left panel', {
+          left: canvas.width! / 2,
+          top: canvas.height! / 2,
+          originX: 'center',
+          originY: 'center',
+          fontSize: 20,
+          fill: '#666666',
+          fontFamily: 'Arial',
+          textAlign: 'center'
+        })
+        
+        canvas.add(text)
+        canvas.renderAll()
+      })
+    }
   }, [currentScene])
 
   const addShape = (type: 'rect' | 'circle' | 'triangle') => {
