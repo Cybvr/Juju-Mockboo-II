@@ -133,7 +133,14 @@ export function ScenesTimeline({
   }
 
   const getTotalDuration = () => {
-    return scenes.reduce((sum, scene) => sum + scene.duration, 0)
+    // Use actual video durations when available, fall back to scene duration
+    return scenes.reduce((sum, scene) => {
+      if (scene.type === 'video' && scene.videoUrl) {
+        // For now use scene duration, but this should ideally get actual video duration
+        return sum + scene.duration
+      }
+      return sum + scene.duration
+    }, 0)
   }
 
   const getSceneStartTime = (sceneIndex: number) => {

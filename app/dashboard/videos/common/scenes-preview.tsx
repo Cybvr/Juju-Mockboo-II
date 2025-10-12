@@ -53,29 +53,43 @@ export function ScenesPreview({
     const video = videoRef.current
     if (!video || !displayScene || displayScene.type !== 'video') return
 
-    // Calculate scene-relative time
-    const sceneStartTime = scenes.slice(0, currentSceneIndex).reduce((sum, scene) => sum + scene.duration, 0)
-    const sceneTime = Math.max(0, Math.min(currentTime - sceneStartTime, displayScene.duration))
+    // Wait for video metadata to load to get actual duration
+    const handleLoadedMetadata = () => {
+      const actualVideoDuration = video.duration
+      const sceneStartTime = scenes.slice(0, currentSceneIndex).reduce((sum, scene) => sum + scene.duration, 0)
+      const sceneTime = Math.max(0, Math.min(currentTime - sceneStartTime, actualVideoDuration))
 
-    // Set video time first
-    video.currentTime = sceneTime
+      // Set video time
+      video.currentTime = sceneTime
 
-    if (isPlaying && sceneTime < displayScene.duration) {
-      video.play().catch(console.error)
-    } else {
-      video.pause()
+      if (isPlaying && sceneTime < actualVideoDuration) {
+        video.play().catch(console.error)
+      } else {
+        video.pause()
+      }
     }
 
-    // Listen for video time updates to sync back to timeline
+    // Listen for video time updates
     const handleTimeUpdate = () => {
-      if (onTimeUpdate && !isPlaying) {
+      if (onTimeUpdate && isPlaying) {
+        const sceneStartTime = scenes.slice(0, currentSceneIndex).reduce((sum, scene) => sum + scene.duration, 0)
         const newGlobalTime = sceneStartTime + video.currentTime
         onTimeUpdate(newGlobalTime)
       }
     }
 
+    video.addEventListener('loadedmetadata', handleLoadedMetadata)
     video.addEventListener('timeupdate', handleTimeUpdate)
-    return () => video.removeEventListener('timeupdate', handleTimeUpdate)
+
+    // If metadata already loaded
+    if (video.readyState >= 1) {
+      handleLoadedMetadata()
+    }
+
+    return () => {
+      video.removeEventListener('loadedmetadata', handleLoadedMetadata)
+      video.removeEventListener('timeupdate', handleTimeUpdate)
+    }
   }, [isPlaying, displayScene, currentTime, currentSceneIndex, scenes, onTimeUpdate])
 
   const getMediaUrl = (scene: Scene) => {
