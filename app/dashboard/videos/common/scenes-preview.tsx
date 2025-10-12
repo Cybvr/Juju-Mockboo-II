@@ -14,6 +14,7 @@ interface ScenesPreviewProps {
   isPlaying?: boolean;
   onPlayStateChange?: (playing: boolean) => void;
   onTimeUpdate?: (time: number) => void;
+  onUpdateScene?: (sceneId: string, updates: Partial<Scene>) => void;
 }
 
 export function ScenesPreview({
@@ -24,7 +25,8 @@ export function ScenesPreview({
   currentTime = 0,
   isPlaying = false,
   onPlayStateChange,
-  onTimeUpdate
+  onTimeUpdate,
+  onUpdateScene
 }: ScenesPreviewProps) {
   const [currentSceneIndex, setCurrentSceneIndex] = useState(0)
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -56,6 +58,12 @@ export function ScenesPreview({
     // Wait for video metadata to load to get actual duration
     const handleLoadedMetadata = () => {
       const actualVideoDuration = video.duration
+      
+      // Update scene duration if it doesn't match actual video duration
+      if (Math.abs(displayScene.duration - actualVideoDuration) > 0.1 && onUpdateScene) {
+        onUpdateScene(displayScene.id, { duration: actualVideoDuration })
+      }
+
       const sceneStartTime = scenes.slice(0, currentSceneIndex).reduce((sum, scene) => sum + scene.duration, 0)
       const sceneTime = Math.max(0, Math.min(currentTime - sceneStartTime, actualVideoDuration))
 

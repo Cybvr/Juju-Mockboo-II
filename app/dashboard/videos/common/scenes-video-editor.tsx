@@ -68,7 +68,16 @@ export function ScenesVideoEditor({ projectId }: ScenesVideoEditorProps) {
           setProjectTitle(document.title)
           setSavedProjectTitle(document.title)
           if (document.content?.scenes) {
-            setScenes(document.content.scenes)
+            // Ensure video durations are correctly loaded
+            const loadedScenes = document.content.scenes.map((scene: Scene) => {
+              if (scene.type === "video" && scene.videoUrl) {
+                // Here we would ideally fetch the video duration if not already present
+                // For now, we assume the duration stored is correct or a default is applied later
+                return { ...scene };
+              }
+              return scene;
+            });
+            setScenes(loadedScenes);
           }
         }
       } catch (error) {
@@ -440,6 +449,7 @@ export function ScenesVideoEditor({ projectId }: ScenesVideoEditorProps) {
               onSceneCrop={(sceneId, newDuration) => { // Added for cropping video lengths
                 updateScene(sceneId, { duration: newDuration });
               }}
+              onUpdateScene={updateScene} // Pass onUpdateScene to preview
             />
           </div>
 
@@ -465,6 +475,7 @@ export function ScenesVideoEditor({ projectId }: ScenesVideoEditorProps) {
               onSceneCrop={(sceneId, newDuration) => { // Added for cropping video lengths
                 updateScene(sceneId, { duration: newDuration });
               }}
+              onUpdateScene={updateScene} // Pass onUpdateScene to preview
             />
           )}
 
