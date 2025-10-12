@@ -152,6 +152,7 @@ export function ScenesVideoEditor({ projectId }: ScenesVideoEditorProps) {
     }
     setScenes((prev) => [...prev, newScene])
     setSelectedSceneId(newScene.id)
+    console.log('Added scene:', newScene) // Debug log
   }
 
   const handleAddText = (textType: 'title' | 'subtitle' | 'body') => {

@@ -52,13 +52,16 @@ export function ScenesEditingPanel({ onAddScene, selectedScene, onUpdateScene }:
   const handleAddFromMedia = (document: Document) => {
     const imageUrl = document.content?.imageUrls?.[0]
     const videoUrl = document.content?.videoUrls?.[0]
+    const mediaUrl = videoUrl || imageUrl
+    
+    console.log('Adding media:', { title: document.title, imageUrl, videoUrl, mediaUrl }) // Debug
 
     onAddScene({
       name: document.title,
-      imageUrl,
-      videoUrl,
+      imageUrl: mediaUrl,
+      videoUrl: document.type === 'video' ? mediaUrl : undefined,
       type: document.type === 'video' ? 'video' : 'image',
-      duration: document.type === 'video' ? 8.0 : 5.0 // Set default duration based on type
+      duration: document.type === 'video' ? 8.0 : 5.0
     })
   }
 

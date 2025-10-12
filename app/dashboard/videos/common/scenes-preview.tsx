@@ -1,9 +1,9 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { Play } from "lucide-react"
+import { Play, Pause } from "lucide-react"
 import { Scene } from "./scenes-video-editor"
-import { Canvas, FabricObject, Text, Rect, Circle, Triangle } from 'fabric'
+import { Button } from "@/components/ui/button"
 
 interface ScenesPreviewProps {
   scenes: Scene[];
@@ -27,8 +27,8 @@ export function ScenesPreview({
   onTimeUpdate
 }: ScenesPreviewProps) {
   const [currentSceneIndex, setCurrentSceneIndex] = useState(0)
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const fabricCanvasRef = useRef<Canvas | null>(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const imageRef = useRef<HTMLImageElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
   // Calculate which scene should be showing based on currentTime
@@ -43,178 +43,120 @@ export function ScenesPreview({
     }
   }, [currentTime, scenes])
 
-  const currentScene = scenes[currentSceneIndex] || scenes[0]
+  // Use selected scene if available, otherwise use current scene from timeline
+  const displayScene = selectedSceneId 
+    ? scenes.find(s => s.id === selectedSceneId) || scenes[currentSceneIndex]
+    : scenes[currentSceneIndex]
 
-  // Initialize Fabric.js canvas
+  // Handle video playback
   useEffect(() => {
-    if (!canvasRef.current || fabricCanvasRef.current) return
+    const video = videoRef.current
+    if (!video || !displayScene || displayScene.type !== 'video') return
 
-    const canvas = new Canvas(canvasRef.current, {
-      width: 1920,
-      height: 1080,
-      backgroundColor: '#000000',
-      preserveObjectStacking: true,
-      selection: true,
-    })
-
-    fabricCanvasRef.current = canvas
-
-    // Resize canvas to fit container
-    const resizeCanvas = () => {
-      if (!containerRef.current) return
-
-      const container = containerRef.current
-      const rect = container.getBoundingClientRect()
-      const aspectRatio = 16/9
-
-      let displayWidth = rect.width - 40
-      let displayHeight = displayWidth / aspectRatio
-
-      if (displayHeight > rect.height - 40) {
-        displayHeight = rect.height - 40
-        displayWidth = displayHeight * aspectRatio
-      }
-
-      canvas.setDimensions({
-        width: displayWidth,
-        height: displayHeight
-      }, { cssOnly: true })
-
-      canvas.setZoom(displayWidth / 1920)
-      canvas.renderAll()
+    if (isPlaying) {
+      video.play().catch(console.error)
+    } else {
+      video.pause()
     }
+  }, [isPlaying, displayScene])
 
-    // Initial resize
-    setTimeout(resizeCanvas, 100)
-    window.addEventListener('resize', resizeCanvas)
-
-    // Expose canvas globally for tools to use
-    if (typeof window !== 'undefined') {
-      (window as any).sceneCanvas = canvas
+  const getMediaUrl = (scene: Scene) => {
+    if (scene.type === 'video') {
+      return scene.videoUrl || scene.imageUrl
     }
+    return scene.imageUrl
+  }
 
-    return () => {
-      window.removeEventListener('resize', resizeCanvas)
-      if (canvas) {
-        canvas.dispose()
-      }
-      fabricCanvasRef.current = null
+  const handlePlayToggle = () => {
+    if (onPlayStateChange) {
+      onPlayStateChange(!isPlaying)
     }
-  }, [])
-
-  // Load scene content when scene changes
-  useEffect(() => {
-    if (!fabricCanvasRef.current || !currentScene) return
-
-    const canvas = fabricCanvasRef.current
-
-    // Clear existing scene media but keep added elements
-    const objects = canvas.getObjects()
-    objects.forEach(obj => {
-      if ((obj as any).name === 'scene-media') {
-        canvas.remove(obj)
-      }
-    })
-
-    if (currentScene.type === 'image' && currentScene.imageUrl) {
-      import('fabric').then(async (FabricModule) => {
-        try {
-          const img = await FabricModule.FabricImage.fromURL(currentScene.imageUrl, {
-            crossOrigin: 'anonymous'
-          })
-
-          // Scale to fit canvas
-          const canvasAspect = 1920 / 1080
-          const imageAspect = img.width! / img.height!
-
-          let scale
-          if (imageAspect > canvasAspect) {
-            scale = 1920 / img.width!
-          } else {
-            scale = 1080 / img.height!
-          }
-
-          img.set({
-            left: 1920 / 2,
-            top: 1080 / 2,
-            originX: 'center',
-            originY: 'center',
-            scaleX: scale,
-            scaleY: scale,
-            selectable: true,
-            name: 'scene-media'
-          })
-
-          canvas.add(img)
-          canvas.sendToBack(img)
-          canvas.renderAll()
-        } catch (error) {
-          console.error('Failed to load image:', error)
-        }
-      })
-    } else if (currentScene.type === 'video' && currentScene.videoUrl) {
-      import('fabric').then((FabricModule) => {
-        const rect = new FabricModule.Rect({
-          left: 1920 / 2,
-          top: 1080 / 2,
-          originX: 'center',
-          originY: 'center',
-          width: 1920 * 0.8,
-          height: 1080 * 0.8,
-          fill: '#1a1a1a',
-          stroke: '#444444',
-          strokeWidth: 4,
-          name: 'scene-media'
-        })
-
-        const text = new FabricModule.Text('VIDEO', {
-          left: 1920 / 2,
-          top: 1080 / 2,
-          originX: 'center',
-          originY: 'center',
-          fontSize: 48,
-          fill: '#ffffff',
-          fontFamily: 'Arial'
-        })
-
-        canvas.add(rect, text)
-        canvas.sendToBack(rect)
-        canvas.renderAll()
-      })
-    }
-  }, [currentScene])
+  }
 
   return (
-    <div className="h-full flex flex-col bg-background">
+    <div className="h-full flex flex-col bg-black">
       {/* Preview Area */}
-      <div className="flex-1 flex items-center justify-center p-4">
+      <div className="flex-1 relative">
         {scenes.length === 0 ? (
-          <div className="text-center text-muted-foreground">
-            <div className="w-64 h-36 bg-muted rounded-lg flex items-center justify-center mb-4">
-              <Play className="w-12 h-12" />
+          <div className="absolute inset-0 flex items-center justify-center text-white/60">
+            <div className="text-center">
+              <div className="w-32 h-18 bg-white/10 rounded-lg flex items-center justify-center mb-4 mx-auto">
+                <Play className="w-8 h-8" />
+              </div>
+              <p className="text-lg mb-2">No scenes added</p>
+              <p className="text-sm opacity-60">Add media from the library to start editing</p>
             </div>
-            <p className="text-lg mb-2">No scenes to preview</p>
-            <p className="text-sm">Add scenes from the media library to get started</p>
           </div>
-        ) : (
-          <div className="w-full h-full">
-            <div 
-              ref={containerRef}
-              className="relative bg-black rounded-lg overflow-hidden w-full h-full flex items-center justify-center"
-            >
-              <canvas 
-                ref={canvasRef}
-                className="border border-border/20"
+        ) : displayScene ? (
+          <div className="absolute inset-0">
+            {displayScene.type === 'video' && getMediaUrl(displayScene) ? (
+              <video
+                ref={videoRef}
+                src={getMediaUrl(displayScene)}
+                className="w-full h-full object-contain"
+                muted
+                loop
+                playsInline
+                onLoadedData={() => {
+                  // Video loaded successfully
+                }}
+                onError={(e) => {
+                  console.error('Video load error:', e)
+                }}
               />
+            ) : displayScene.type === 'image' && getMediaUrl(displayScene) ? (
+              <img
+                ref={imageRef}
+                src={getMediaUrl(displayScene)}
+                alt={displayScene.name}
+                className="w-full h-full object-contain"
+                onError={(e) => {
+                  console.error('Image load error:', e)
+                }}
+              />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center text-white/60">
+                <div className="text-center">
+                  <div className="w-32 h-18 bg-white/10 rounded-lg flex items-center justify-center mb-4 mx-auto">
+                    <Play className="w-8 h-8" />
+                  </div>
+                  <p className="text-lg mb-2">{displayScene.name}</p>
+                  <p className="text-sm opacity-60">Media not available</p>
+                </div>
+              </div>
+            )}
+            
+            {/* Play/Pause Overlay */}
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black/20">
+              <Button
+                variant="ghost"
+                size="lg"
+                onClick={handlePlayToggle}
+                className="w-16 h-16 rounded-full bg-white/20 hover:bg-white/30 text-white"
+              >
+                {isPlaying ? (
+                  <Pause className="w-8 h-8" />
+                ) : (
+                  <Play className="w-8 h-8" />
+                )}
+              </Button>
+            </div>
+
+            {/* Scene Info */}
+            <div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-sm rounded-lg px-3 py-2 text-white">
+              <p className="text-sm font-medium">{displayScene.name}</p>
+              <p className="text-xs opacity-60">
+                Scene {currentSceneIndex + 1} of {scenes.length} • {displayScene.duration}s
+              </p>
             </div>
           </div>
-        )}
+        ) : null}
       </div>
 
       {/* Error Message */}
       {error && (
-        <div className="p-4 border-t border-border">
-          <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-2 rounded">
+        <div className="p-4 border-t border-white/10">
+          <div className="bg-red-500/20 border border-red-500/30 text-red-300 px-4 py-2 rounded">
             {error}
           </div>
         </div>
