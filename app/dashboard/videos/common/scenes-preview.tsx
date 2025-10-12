@@ -48,17 +48,23 @@ export function ScenesPreview({
     ? scenes.find(s => s.id === selectedSceneId) || scenes[currentSceneIndex]
     : scenes[currentSceneIndex]
 
-  // Handle video playback
+  // Handle video playback and sync with timeline
   useEffect(() => {
     const video = videoRef.current
     if (!video || !displayScene || displayScene.type !== 'video') return
 
+    // Calculate scene-relative time
+    const sceneStartTime = scenes.slice(0, currentSceneIndex).reduce((sum, scene) => sum + scene.duration, 0)
+    const sceneTime = currentTime - sceneStartTime
+
     if (isPlaying) {
+      video.currentTime = Math.max(0, sceneTime)
       video.play().catch(console.error)
     } else {
       video.pause()
+      video.currentTime = Math.max(0, sceneTime)
     }
-  }, [isPlaying, displayScene])
+  }, [isPlaying, displayScene, currentTime, currentSceneIndex, scenes])
 
   const getMediaUrl = (scene: Scene) => {
     if (scene.type === 'video') {
@@ -93,11 +99,9 @@ export function ScenesPreview({
               <video
                 ref={videoRef}
                 src={getMediaUrl(displayScene)}
-                className="w-full h-full object-contain cursor-pointer"
+                className="w-full h-full object-contain"
                 muted
-                loop
                 playsInline
-                onClick={handlePlayToggle}
                 onLoadedData={() => {
                   // Video loaded successfully
                 }}
@@ -110,8 +114,7 @@ export function ScenesPreview({
                 ref={imageRef}
                 src={getMediaUrl(displayScene)}
                 alt="Scene media"
-                className="w-full h-full object-contain cursor-pointer"
-                onClick={handlePlayToggle}
+                className="w-full h-full object-contain"
                 onError={(e) => {
                   console.error('Image load error:', e)
                 }}
@@ -127,6 +130,20 @@ export function ScenesPreview({
                 </div>
               </div>
             )}
+
+            {/* Canvas overlay for object selection */}
+            <canvas
+              ref={containerRef}
+              className="absolute inset-0 w-full h-full cursor-pointer"
+              onClick={handlePlayToggle}
+              onKeyDown={(e) => {
+                if (e.key === 'Delete' || e.key === 'Backspace') {
+                  // Handle object deletion
+                  console.log('Delete key pressed')
+                }
+              }}
+              tabIndex={0}
+            />
             
             {/* Play/Pause Overlay */}
             <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black/20">
@@ -144,13 +161,7 @@ export function ScenesPreview({
               </Button>
             </div>
 
-            {/* Scene Info */}
-            <div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-sm rounded-lg px-3 py-2 text-white">
-              <p className="text-sm font-medium">Scene {currentSceneIndex + 1}</p>
-              <p className="text-xs opacity-60">
-                {currentSceneIndex + 1} of {scenes.length} • {displayScene.duration}s
-              </p>
-            </div>
+            
           </div>
         ) : null}
       </div>

@@ -52,7 +52,7 @@ export function ScenesTimeline({
         const totalDuration = getTotalDuration()
 
         if (newTime >= totalDuration) {
-          onTimeChange(totalDuration)
+          onTimeChange(0) // Reset to start
           if (onPlayStateChange) onPlayStateChange(false)
         } else {
           onTimeChange(newTime)
@@ -68,7 +68,7 @@ export function ScenesTimeline({
         cancelAnimationFrame(animationFrameRef.current)
       }
     }
-  }, [isPlaying])
+  }, [isPlaying, onTimeChange, onPlayStateChange])
 
   // Sync scroll between ruler and timeline
   useEffect(() => {
