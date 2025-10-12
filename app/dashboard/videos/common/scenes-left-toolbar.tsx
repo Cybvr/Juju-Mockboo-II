@@ -11,6 +11,9 @@ interface ScenesLeftToolbarProps {
   onToggleTextPanel: () => void
   showAudioPanel: boolean
   onToggleAudioPanel: () => void
+  // Added: prop for the new Videos panel
+  showVideosPanel: boolean
+  onToggleVideosPanel: () => void
 }
 
 interface ToolbarButtonProps {
@@ -37,32 +40,50 @@ function ToolbarButton({ icon: Icon, label, isActive = false, onClick }: Toolbar
   )
 }
 
-export function ScenesLeftToolbar({ 
-  showEditingPanel, 
+export function ScenesLeftToolbar({
+  showEditingPanel,
   onToggleEditingPanel,
   showAIImagePanel,
   onToggleAIImagePanel,
   showTextPanel,
   onToggleTextPanel,
   showAudioPanel,
-  onToggleAudioPanel
+  onToggleAudioPanel,
+  // Added: prop for the new Videos panel
+  showVideosPanel,
+  onToggleVideosPanel
 }: ScenesLeftToolbarProps) {
   const handleEditClick = () => {
     if (showAIImagePanel) onToggleAIImagePanel()
     if (showTextPanel) onToggleTextPanel()
+    // Added: close Videos panel if open
+    if (showVideosPanel) onToggleVideosPanel()
     onToggleEditingPanel()
   }
 
   const handleAstraClick = () => {
     if (showEditingPanel) onToggleEditingPanel()
     if (showTextPanel) onToggleTextPanel()
+    // Added: close Videos panel if open
+    if (showVideosPanel) onToggleVideosPanel()
     onToggleAIImagePanel()
+  }
+
+  // Added: handler for the new Videos button
+  const handleVideosClick = () => {
+    if (showEditingPanel) onToggleEditingPanel()
+    if (showAIImagePanel) onToggleAIImagePanel()
+    if (showTextPanel) onToggleTextPanel()
+    if (showAudioPanel) onToggleAudioPanel() // Added: close Audio panel if open
+    onToggleVideosPanel()
   }
 
   const handleTextClick = () => {
     if (showEditingPanel) onToggleEditingPanel()
     if (showAIImagePanel) onToggleAIImagePanel()
     if (showAudioPanel) onToggleAudioPanel()
+    // Added: close Videos panel if open
+    if (showVideosPanel) onToggleVideosPanel()
     onToggleTextPanel()
   }
 
@@ -70,48 +91,46 @@ export function ScenesLeftToolbar({
     if (showEditingPanel) onToggleEditingPanel()
     if (showAIImagePanel) onToggleAIImagePanel()
     if (showTextPanel) onToggleTextPanel()
+    // Added: close Videos panel if open
+    if (showVideosPanel) onToggleVideosPanel()
     onToggleAudioPanel()
   }
 
+  // Updated return statement as per the provided changes
   return (
-    <div className="w-12 border-r border-border bg-card/30 flex flex-col items-center py-3 gap-2">
-      <ToolbarButton 
-        icon={FolderOpen} 
-        label="Uploads" 
+    <div className="w-16 bg-card border-r border-border flex flex-col items-center py-4 gap-6">
+      <ToolbarButton
+        icon={FolderOpen}
+        label="Edit"
         isActive={showEditingPanel}
         onClick={handleEditClick}
       />
-      <ToolbarButton 
-        icon={Image} 
-        label="Astra" 
+      <ToolbarButton
+        icon={Image}
+        label="Astra"
         isActive={showAIImagePanel}
         onClick={handleAstraClick}
       />
-      <ToolbarButton 
-        icon={Type} 
-        label="Text" 
+      {/* New Videos button */}
+      <ToolbarButton
+        icon={Video}
+        label="Videos"
+        isActive={showVideosPanel}
+        onClick={handleVideosClick}
+      />
+      <ToolbarButton
+        icon={Type}
+        label="Text"
         isActive={showTextPanel}
         onClick={handleTextClick}
       />
-      <ToolbarButton 
-        icon={Volume2} 
-        label="Audio" 
+      <ToolbarButton
+        icon={Volume2}
+        label="Audio"
         isActive={showAudioPanel}
         onClick={handleAudioClick}
       />
-      <ToolbarButton 
-        icon={Video} 
-        label="Videos" 
-      />
-      <ToolbarButton 
-        icon={Layers} 
-        label="Layers" 
-      />
-      <div className="flex-1" />
-      <ToolbarButton 
-        icon={Settings} 
-        label="Settings" 
-      />
+      {/* Layers and Settings buttons removed as per user request */}
     </div>
   )
 }

@@ -48,6 +48,7 @@ export function ScenesVideoEditor({ projectId }: ScenesVideoEditorProps) {
   const [showAIImagePanel, setShowAIImagePanel] = useState(false)
   const [showTextPanel, setShowTextPanel] = useState(false)
   const [showAudioPanel, setShowAudioPanel] = useState(false) // State for Audio Panel
+  const [showVideosPanel, setShowVideosPanel] = useState(false) // State for Videos Panel
 
   useEffect(() => {
     const loadProject = async () => {
@@ -162,7 +163,7 @@ export function ScenesVideoEditor({ projectId }: ScenesVideoEditorProps) {
     import('fabric').then((FabricModule) => {
       const fontSize = textType === 'title' ? 72 : textType === 'subtitle' ? 48 : 32
       const text = textType === 'title' ? 'Your Title' : textType === 'subtitle' ? 'Your Subtitle' : 'Your Text'
-      
+
       const textObj = new FabricModule.Text(text, {
         left: 1920 / 2,
         top: 1080 / 2,
@@ -341,16 +342,18 @@ export function ScenesVideoEditor({ projectId }: ScenesVideoEditorProps) {
       <div className="flex-1 flex overflow-hidden">
         <div className="hidden md:flex flex-1 overflow-hidden">
           {/* Left Toolbar */}
-          <ScenesLeftToolbar 
-            showEditingPanel={showEditingPanel}
-            onToggleEditingPanel={() => setShowEditingPanel(!showEditingPanel)}
-            showAIImagePanel={showAIImagePanel}
-            onToggleAIImagePanel={() => setShowAIImagePanel(!showAIImagePanel)}
-            showTextPanel={showTextPanel}
-            onToggleTextPanel={() => setShowTextPanel(!showTextPanel)}
-            showAudioPanel={showAudioPanel}
-            onToggleAudioPanel={() => setShowAudioPanel(!showAudioPanel)}
-          />
+          <ScenesLeftToolbar
+              showEditingPanel={showEditingPanel}
+              onToggleEditingPanel={() => setShowEditingPanel(!showEditingPanel)}
+              showAIImagePanel={showAIImagePanel}
+              onToggleAIImagePanel={() => setShowAIImagePanel(!showAIImagePanel)}
+              showVideosPanel={showVideosPanel}
+              onToggleVideosPanel={() => setShowVideosPanel(!showVideosPanel)}
+              showTextPanel={showTextPanel}
+              onToggleTextPanel={() => setShowTextPanel(!showTextPanel)}
+              showAudioPanel={showAudioPanel}
+              onToggleAudioPanel={() => setShowAudioPanel(!showAudioPanel)}
+            />
 
           {/* Editing Panel (conditional) */}
           {showEditingPanel && (
@@ -362,18 +365,17 @@ export function ScenesVideoEditor({ projectId }: ScenesVideoEditorProps) {
           {/* AI Image Panel (conditional) */}
           {showAIImagePanel && (
           <div className="border-r border-border">
-            <AIImagePanel 
-              onAddToScene={(videoUrl) => {
-                // Add video to current scene with proper duration
+            <AIImagePanel
+              onAddToScene={(imageUrl) => { // Renamed videoUrl to imageUrl for consistency
+                // Add image to current scene with proper duration
                 if (selectedSceneId) {
-                  setScenes(prev => prev.map(scene => 
-                    scene.id === selectedSceneId 
-                      ? { 
-                          ...scene, 
-                          videoUrl, 
-                          imageUrl: videoUrl, // Set imageUrl for timeline thumbnail
-                          type: "video" as const,
-                          duration: 8 // Set proper duration
+                  setScenes(prev => prev.map(scene =>
+                    scene.id === selectedSceneId
+                      ? {
+                          ...scene,
+                          imageUrl,
+                          type: "image" as const,
+                          duration: 8 // Default duration, could be made configurable
                         }
                       : scene
                   ))
@@ -383,9 +385,33 @@ export function ScenesVideoEditor({ projectId }: ScenesVideoEditorProps) {
           </div>
         )}
 
+          {/* Videos Panel (conditional) */}
+          {showVideosPanel && (
+            <div className="border-r border-border">
+              <AIImagePanel // Duplicating AIImagePanel as requested
+                onAddToScene={(videoUrl) => {
+                  // Add video to current scene with proper duration
+                  if (selectedSceneId) {
+                    setScenes(prev => prev.map(scene =>
+                      scene.id === selectedSceneId
+                        ? {
+                            ...scene,
+                            videoUrl,
+                            imageUrl: videoUrl, // Set imageUrl for timeline thumbnail
+                            type: "video" as const,
+                            duration: 8 // Set proper duration
+                          }
+                        : scene
+                    ))
+                  }
+                }}
+              />
+            </div>
+          )}
+
           {/* Text Panel (conditional) */}
           {showTextPanel && (
-            <TextPanel 
+            <TextPanel
               isOpen={showTextPanel}
               onClose={() => setShowTextPanel(false)}
               onAddText={handleAddText}
@@ -410,11 +436,15 @@ export function ScenesVideoEditor({ projectId }: ScenesVideoEditorProps) {
               isPlaying={isPlaying}
               onPlayStateChange={setIsPlaying}
               onTimeUpdate={setCurrentTime}
+              onSceneSelect={setSelectedSceneId} // Added for selecting scenes from preview
+              onSceneCrop={(sceneId, newDuration) => { // Added for cropping video lengths
+                updateScene(sceneId, { duration: newDuration });
+              }}
             />
           </div>
 
           {/* Right - Properties */}
-          <VidsToolbar 
+          <VidsToolbar
             selectedScene={selectedScene}
             onUpdateScene={updateScene}
           />
@@ -431,6 +461,10 @@ export function ScenesVideoEditor({ projectId }: ScenesVideoEditorProps) {
               isPlaying={isPlaying}
               onPlayStateChange={setIsPlaying}
               onTimeUpdate={setCurrentTime}
+              onSceneSelect={setSelectedSceneId} // Added for selecting scenes from preview
+              onSceneCrop={(sceneId, newDuration) => { // Added for cropping video lengths
+                updateScene(sceneId, { duration: newDuration });
+              }}
             />
           )}
 

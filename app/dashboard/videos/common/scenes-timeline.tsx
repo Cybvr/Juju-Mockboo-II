@@ -457,7 +457,17 @@ return (
                           </div>
 
                           {/* Duration Control */}
-                          <div className="absolute bottom-1 left-2 text-xs bg-black/70 text-white px-1 rounded">
+                          <div 
+                            className="absolute bottom-1 left-2 text-xs bg-black/70 text-white px-1 rounded cursor-pointer hover:bg-black/90"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              const newDuration = prompt(`Set duration for ${scene.name} (seconds):`, scene.duration.toString())
+                              if (newDuration && !isNaN(Number(newDuration))) {
+                                onUpdateScene(scene.id, { duration: Number(newDuration) })
+                              }
+                            }}
+                            title="Click to edit duration"
+                          >
                             {scene.duration}s
                           </div>
 

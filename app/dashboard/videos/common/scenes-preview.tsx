@@ -93,10 +93,11 @@ export function ScenesPreview({
               <video
                 ref={videoRef}
                 src={getMediaUrl(displayScene)}
-                className="w-full h-full object-contain"
+                className="w-full h-full object-contain cursor-pointer"
                 muted
                 loop
                 playsInline
+                onClick={handlePlayToggle}
                 onLoadedData={() => {
                   // Video loaded successfully
                 }}
@@ -108,8 +109,9 @@ export function ScenesPreview({
               <img
                 ref={imageRef}
                 src={getMediaUrl(displayScene)}
-                alt={displayScene.name}
-                className="w-full h-full object-contain"
+                alt="Scene media"
+                className="w-full h-full object-contain cursor-pointer"
+                onClick={handlePlayToggle}
                 onError={(e) => {
                   console.error('Image load error:', e)
                 }}
@@ -144,9 +146,9 @@ export function ScenesPreview({
 
             {/* Scene Info */}
             <div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-sm rounded-lg px-3 py-2 text-white">
-              <p className="text-sm font-medium">{displayScene.name}</p>
+              <p className="text-sm font-medium">Scene {currentSceneIndex + 1}</p>
               <p className="text-xs opacity-60">
-                Scene {currentSceneIndex + 1} of {scenes.length} • {displayScene.duration}s
+                {currentSceneIndex + 1} of {scenes.length} • {displayScene.duration}s
               </p>
             </div>
           </div>
