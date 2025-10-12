@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { X, GripVertical, Play, Pause, SkipBack, SkipForward, ZoomIn, ZoomOut, Clock } from "lucide-react"
+import { X, GripVertical, Play, Pause, SkipBack, SkipForward, ZoomIn, ZoomOut } from "lucide-react"
 import { Scene } from "./scenes-video-editor"
 
 interface ScenesTimelineProps {
@@ -491,23 +491,6 @@ return (
 
                           {/* Controls */}
                           <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-                            {scene.type === 'video' && (
-                              <Button
-                                size="sm"
-                                variant="secondary"
-                                className="h-5 w-5 p-0 bg-background/80 hover:bg-background"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  const newDuration = prompt(`Set duration for ${scene.name} (seconds):`, scene.duration.toString())
-                                  if (newDuration && !isNaN(Number(newDuration)) && Number(newDuration) > 0) {
-                                    onUpdateScene(scene.id, { duration: Number(newDuration) })
-                                  }
-                                }}
-                                title="Change duration"
-                              >
-                                <Clock className="h-3 w-3" />
-                              </Button>
-                            )}
                             <Button
                               size="sm"
                               variant="secondary"
