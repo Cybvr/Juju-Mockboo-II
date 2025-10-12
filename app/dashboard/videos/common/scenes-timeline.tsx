@@ -52,7 +52,7 @@ export function ScenesTimeline({
         const totalDuration = getTotalDuration()
 
         if (newTime >= totalDuration) {
-          onTimeChange(0) // Reset to start
+          onTimeChange(totalDuration)
           if (onPlayStateChange) onPlayStateChange(false)
         } else {
           onTimeChange(newTime)
@@ -421,7 +421,7 @@ return (
                             transition-all duration-150 flex-shrink-0
                           `}
                           style={{
-                            width: `${width}%`,
+                            width: `${Math.max((scene.duration / totalDuration) * 100, minWidth / getTimelineWidth() * 100)}%`,
                             minWidth: `${minWidth}px`
                           }}
                           onClick={(e) => {
@@ -471,6 +471,24 @@ return (
                             {scene.duration}s
                           </div>
 
+                          {/* Crop handles */}
+                          <div
+                            className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500/60 cursor-w-resize opacity-0 group-hover:opacity-100 transition-opacity"
+                            onMouseDown={(e) => {
+                              e.stopPropagation()
+                              console.log('Start crop from left')
+                            }}
+                            title="Crop start"
+                          />
+                          <div
+                            className="absolute right-0 top-0 bottom-0 w-1 bg-blue-500/60 cursor-e-resize opacity-0 group-hover:opacity-100 transition-opacity"
+                            onMouseDown={(e) => {
+                              e.stopPropagation()
+                              console.log('Crop from right')
+                            }}
+                            title="Crop end"
+                          />
+
                           {/* Controls */}
                           <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
                             {scene.type === 'video' && (
@@ -480,9 +498,10 @@ return (
                                 className="h-5 w-5 p-0 bg-background/80 hover:bg-background"
                                 onClick={(e) => {
                                   e.stopPropagation()
-                                  // Toggle duration between 5s and 10s
-                                  const newDuration = scene.duration === 5 ? 10 : 5
-                                  onUpdateScene(scene.id, { duration: newDuration })
+                                  const newDuration = prompt(`Set duration for ${scene.name} (seconds):`, scene.duration.toString())
+                                  if (newDuration && !isNaN(Number(newDuration)) && Number(newDuration) > 0) {
+                                    onUpdateScene(scene.id, { duration: Number(newDuration) })
+                                  }
                                 }}
                                 title="Change duration"
                               >

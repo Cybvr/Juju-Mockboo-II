@@ -134,19 +134,40 @@ export function ScenesPreview({
             {/* Canvas overlay for object selection */}
             <canvas
               ref={containerRef}
-              className="absolute inset-0 w-full h-full cursor-pointer"
-              onClick={handlePlayToggle}
+              className="absolute inset-0 w-full h-full cursor-crosshair"
+              width={1920}
+              height={1080}
+              onMouseDown={(e) => {
+                const canvas = containerRef.current
+                if (!canvas) return
+                
+                const rect = canvas.getBoundingClientRect()
+                const scaleX = canvas.width / rect.width
+                const scaleY = canvas.height / rect.height
+                
+                const x = (e.clientX - rect.left) * scaleX
+                const y = (e.clientY - rect.top) * scaleY
+                
+                // Simple object selection (you can expand this)
+                console.log('Canvas clicked at:', x, y)
+              }}
               onKeyDown={(e) => {
                 if (e.key === 'Delete' || e.key === 'Backspace') {
-                  // Handle object deletion
-                  console.log('Delete key pressed')
+                  console.log('Delete selected object')
                 }
               }}
               tabIndex={0}
             />
             
             {/* Play/Pause Overlay */}
-            <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black/20">
+            <div 
+              className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black/20 pointer-events-none"
+              onClick={(e) => {
+                e.stopPropagation()
+                handlePlayToggle()
+              }}
+              style={{ pointerEvents: 'auto' }}
+            >
               <Button
                 variant="ghost"
                 size="lg"
