@@ -1,30 +1,78 @@
-'use client';
-import { useState, useEffect } from 'react';
-import { DashboardHeader } from '@/app/common/dashboard/Header';
-import { DocumentGallery } from '@/app/common/dashboard/DocumentGallery';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
 
-export default function Dashboard() {
-  const router = useRouter();
-  const { user } = useAuth();
-  const { toast } = useToast();
+"use client"
+
+import { useState, useEffect } from "react"
+import { useAuthState } from "react-firebase-hooks/auth"
+import { auth } from "@/lib/firebase"
+import { DocumentGallery } from "./common/DocumentGallery"
+import { Header } from "./common/Header"
+import { Sidebar } from "./common/Sidebar"
+import { useRouter } from "next/navigation"
+import { Button } from "@/components/ui/button"
+import { FileText, Palette, Video } from "lucide-react"
+
+export default function DashboardPage() {
+  const [user, loading] = useAuthState(auth)
+  const [activeView, setActiveView] = useState("documents")
+  const router = useRouter()
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/")
+    }
+  }, [user, loading, router])
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return null
+  }
 
   return (
-    <div className="h-screen flex flex-col relative mx-auto max-w-4xl">
-      <div className="lg:hidden">
-        <DashboardHeader />
-      </div>
-      {/* Scrollable content area */}
-      <div className="flex-1 overflow-auto pb-32 lg:pb-0">
-        <div className="container mx-auto max-w-5xl px-4 py-6">
-          {/* Documents Section */}
-          <div>
-            <DocumentGallery />
-          </div>
-        </div>
+    <div className="flex h-screen bg-background overflow-hidden">
+      <Sidebar activeView={activeView} onViewChange={setActiveView} />
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Header />
+        <main className="flex-1 overflow-y-auto p-6">
+          {activeView === "documents" && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <Button
+                  onClick={() => router.push("/dashboard/canvas/new")}
+                  className="h-24 flex flex-col items-center justify-center space-y-2 bg-primary text-primary-foreground hover:bg-primary/90"
+                >
+                  <Palette className="h-6 w-6" />
+                  <span>Create Canvas</span>
+                </Button>
+                
+                <Button
+                  onClick={() => router.push("/dashboard/videos")}
+                  className="h-24 flex flex-col items-center justify-center space-y-2 bg-blue-600 text-white hover:bg-blue-700"
+                >
+                  <Video className="h-6 w-6" />
+                  <span>Create Video</span>
+                </Button>
+
+                <Button
+                  onClick={() => router.push("/dashboard/templates")}
+                  className="h-24 flex flex-col items-center justify-center space-y-2 bg-green-600 text-white hover:bg-green-700"
+                >
+                  <FileText className="h-6 w-6" />
+                  <span>Browse Templates</span>
+                </Button>
+              </div>
+              
+              <DocumentGallery />
+            </div>
+          )}
+        </main>
       </div>
     </div>
-  );
+  )
 }

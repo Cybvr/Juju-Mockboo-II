@@ -103,12 +103,6 @@ export function Sidebar({ className, onNavigate }: SidebarProps) {
       active: pathname.startsWith('/dashboard/videos'),
     },
     {
-      label: 'Storymaker',
-      icon: Drama,
-      href: '/dashboard/storymaker',
-      active: pathname.startsWith('/dashboard/storymaker'),
-    },
-    {
       label: 'Settings',
       icon: Settings,
       href: '/dashboard/account',
