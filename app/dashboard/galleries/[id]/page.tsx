@@ -87,19 +87,15 @@ export default function GalleryPage({ params }: GalleryPageProps) {
 
     setGenerating(true);
     try {
-      const response = await fetch('/api/generate', {
+      const response = await fetch('/api/galleries/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-user-id': user.uid,
         },
         body: JSON.stringify({
-          mode: 'text',
           prompt: `${gallery.prompt ? gallery.prompt + ', ' : ''}${prompt}`,
-          settings: {
-            outputs: '4',
-            aspectRatio: aspectRatio
-          }
+          aspectRatio: aspectRatio,
+          outputs: 4
         }),
       });
 
