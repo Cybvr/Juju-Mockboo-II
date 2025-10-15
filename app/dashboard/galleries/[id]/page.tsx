@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Sparkles, Download, Trash2, Grid, List } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { ArrowLeft, Sparkles, Download, Trash2, Grid, List, X, ChevronLeft, ChevronRight, Check, Pencil } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { galleryService } from '@/services/galleryService';
 import type { Gallery } from '@/types/gallery';
@@ -25,6 +26,9 @@ export default function GalleryPage({ params }: GalleryPageProps) {
   const [generating, setGenerating] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [prompt, setPrompt] = useState('');
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [editedTitle, setEditedTitle] = useState('');
 
   useEffect(() => {
     if (user) {
@@ -40,6 +44,7 @@ export default function GalleryPage({ params }: GalleryPageProps) {
       if (galleryData && galleryData.userId === user.uid) {
         setGallery(galleryData);
         setPrompt(galleryData.prompt || '');
+        setEditedTitle(galleryData.title);
       } else {
         toast.error('Gallery not found');
         router.push('/dashboard/galleries');
@@ -80,7 +85,7 @@ export default function GalleryPage({ params }: GalleryPageProps) {
       }
 
       const data = await response.json();
-      
+
       if (data.images && data.images.length > 0) {
         const updatedImages = [...(gallery.images || []), ...data.images];
 
@@ -125,6 +130,7 @@ export default function GalleryPage({ params }: GalleryPageProps) {
         updatedAt: Date.now()
       });
 
+      setSelectedImageIndex(null);
       toast.success('Image deleted successfully');
     } catch (error) {
       console.error('Failed to delete image:', error);
@@ -144,11 +150,61 @@ export default function GalleryPage({ params }: GalleryPageProps) {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
+      toast.success('Image downloaded');
     } catch (error) {
       console.error('Failed to download image:', error);
       toast.error('Failed to download image');
     }
   };
+
+  const handleSaveTitle = async () => {
+    if (!gallery || !editedTitle.trim()) return;
+
+    try {
+      await galleryService.updateGallery(gallery.id, { 
+        title: editedTitle.trim() 
+      });
+
+      setGallery({
+        ...gallery,
+        title: editedTitle.trim(),
+        updatedAt: Date.now()
+      });
+
+      setIsEditingTitle(false);
+      toast.success('Title updated');
+    } catch (error) {
+      console.error('Failed to update title:', error);
+      toast.error('Failed to update title');
+    }
+  };
+
+  const navigateImage = (direction: 'prev' | 'next') => {
+    if (selectedImageIndex === null || !gallery) return;
+
+    if (direction === 'prev') {
+      setSelectedImageIndex(selectedImageIndex > 0 ? selectedImageIndex - 1 : gallery.images.length - 1);
+    } else {
+      setSelectedImageIndex(selectedImageIndex < gallery.images.length - 1 ? selectedImageIndex + 1 : 0);
+    }
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (selectedImageIndex === null) return;
+
+      if (e.key === 'ArrowLeft') {
+        navigateImage('prev');
+      } else if (e.key === 'ArrowRight') {
+        navigateImage('next');
+      } else if (e.key === 'Escape') {
+        setSelectedImageIndex(null);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedImageIndex, gallery]);
 
   if (loading) {
     return (
@@ -179,7 +235,49 @@ export default function GalleryPage({ params }: GalleryPageProps) {
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold">{gallery.title}</h1>
+            {isEditingTitle ? (
+              <div className="flex items-center gap-2">
+                <Input
+                  value={editedTitle}
+                  onChange={(e) => setEditedTitle(e.target.value)}
+                  className="text-sm h-8"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleSaveTitle();
+                    if (e.key === 'Escape') {
+                      setIsEditingTitle(false);
+                      setEditedTitle(gallery.title);
+                    }
+                  }}
+                  autoFocus
+                />
+                <Button size="icon" variant="ghost" className="h-8 w-8" onClick={handleSaveTitle}>
+                  <Check className="w-4 h-4" />
+                </Button>
+                <Button 
+                  size="icon" 
+                  variant="ghost" 
+                  className="h-8 w-8" 
+                  onClick={() => {
+                    setIsEditingTitle(false);
+                    setEditedTitle(gallery.title);
+                  }}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <h1 className="text-sm font-semibold">{gallery.title}</h1>
+                <Button 
+                  size="icon" 
+                  variant="ghost" 
+                  className="h-6 w-6" 
+                  onClick={() => setIsEditingTitle(true)}
+                >
+                  <Pencil className="w-3 h-3" />
+                </Button>
+              </div>
+            )}
             <div className="flex items-center gap-2 mt-1">
               <Badge variant="secondary">{gallery.type}</Badge>
               <span className="text-sm text-muted-foreground">
@@ -207,8 +305,6 @@ export default function GalleryPage({ params }: GalleryPageProps) {
         </div>
       </div>
 
-      
-
       {gallery.images.length === 0 ? (
         <div className="text-center py-20">
           <p className="text-muted-foreground">No images yet. Generate some above!</p>
@@ -220,7 +316,11 @@ export default function GalleryPage({ params }: GalleryPageProps) {
             : 'grid-cols-1'
         }`}>
           {gallery.images.map((imageUrl, index) => (
-            <Card key={index} className="group overflow-hidden">
+            <Card 
+              key={index} 
+              className="group overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary transition-all"
+              onClick={() => setSelectedImageIndex(index)}
+            >
               <CardContent className="p-0">
                 <div className="relative aspect-square">
                   <img
@@ -228,26 +328,85 @@ export default function GalleryPage({ params }: GalleryPageProps) {
                     alt={`Generated image ${index + 1}`}
                     className="w-full h-full object-cover"
                   />
-                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                    <Button
-                      size="icon"
-                      variant="secondary"
-                      onClick={() => handleDownload(imageUrl, index)}
-                    >
-                      <Download className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="destructive"
-                      onClick={() => handleDeleteImage(index)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
                 </div>
               </CardContent>
             </Card>
           ))}
+        </div>
+      )}
+
+      {/* Image Modal */}
+      {selectedImageIndex !== null && gallery.images[selectedImageIndex] && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
+          onClick={() => setSelectedImageIndex(null)}
+        >
+          <Button
+            size="icon"
+            variant="ghost"
+            className="absolute top-4 right-4 text-white hover:bg-white/20"
+            onClick={() => setSelectedImageIndex(null)}
+          >
+            <X className="w-6 h-6" />
+          </Button>
+
+          <Button
+            size="icon"
+            variant="ghost"
+            className="absolute left-4 text-white hover:bg-white/20"
+            onClick={(e) => {
+              e.stopPropagation();
+              navigateImage('prev');
+            }}
+          >
+            <ChevronLeft className="w-8 h-8" />
+          </Button>
+
+          <Button
+            size="icon"
+            variant="ghost"
+            className="absolute right-4 text-white hover:bg-white/20"
+            onClick={(e) => {
+              e.stopPropagation();
+              navigateImage('next');
+            }}
+          >
+            <ChevronRight className="w-8 h-8" />
+          </Button>
+
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-3">
+            <Button
+              variant="secondary"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDownload(gallery.images[selectedImageIndex], selectedImageIndex);
+              }}
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Download
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDeleteImage(selectedImageIndex);
+              }}
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete
+            </Button>
+          </div>
+
+          <img
+            src={gallery.images[selectedImageIndex]}
+            alt={`Image ${selectedImageIndex + 1}`}
+            className="max-h-[85vh] max-w-[85vw] object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+
+          <div className="absolute top-4 left-4 text-white text-sm">
+            {selectedImageIndex + 1} / {gallery.images.length}
+          </div>
         </div>
       )}
     </div>
