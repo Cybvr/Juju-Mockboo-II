@@ -290,6 +290,24 @@ export default function PublicGalleryPage({ params }: PublicGalleryPageProps) {
           </div>
         </div>
       )}
+
+      {/* Juju Branding */}
+      <div className="mt-16 py-8 border-t text-center">
+        <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+          <span>Created with</span>
+          <img
+            src="/assets/images/juju/JUJUBLACK.png"
+            alt="Juju"
+            className="h-6 w-6 dark:hidden"
+          />
+          <img
+            src="/assets/images/juju/JUJUWHITE.png"
+            alt="Juju"
+            className="h-6 w-6 hidden dark:block"
+          />
+          <span className="font-semibold">Juju</span>
+        </div>
+      </div>
     </div>
   );
 }
