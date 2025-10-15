@@ -206,9 +206,8 @@ export const CreationHub: React.FC<CreationHubProps> = ({ project, templates, on
                     Choose a starting point for your new film project.
                 </p>
 
-                <div className="w-full flex flex-row flex-1 space-x-4 bg-green-500"
-
-                    <MethodButton method="generate" icon={Sparkles} title="Generate with AI" description="Start with an idea and let AI write the first draft of your script." />
+                <div className="w-full flex flex-row flex-1 space-x-4 bg-green-500">
+                    <MethodButton method="generate" icon={Sparkles} title="Generate with AI" description="Start with an idea and let AI write the first draft of your script." /></div>
                     <MethodButton method="paste" icon={FileText} title="Paste in a script" description="Already have a script? Paste it here to begin production." />
                     <MethodButton method="template" icon={Palette} title="Remix a template" description="Start from a pre-built structure like a commercial or a short film." />
                 </div>
