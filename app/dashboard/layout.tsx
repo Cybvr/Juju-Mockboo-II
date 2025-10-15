@@ -16,6 +16,8 @@ export default function DashboardLayout({
   // Check if current page should hide sidebar
   const shouldHideSidebar = pathname?.includes('/dashboard/images') || 
     pathname?.includes('/dashboard/canvas') ||
+
+    pathname?.includes('/dashboard/stories') ||
     pathname?.includes('/dashboard/videos') ||
     pathname?.match(/\/dashboard\/storymaker\/[^\/]+$/)
 

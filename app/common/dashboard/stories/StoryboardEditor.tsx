@@ -1,5 +1,4 @@
-
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useRef, useEffect } from 'react';
 import type { FilmProject, StoryboardScene } from '@/types/storytypes';
 import { Camera, Trash2, RotateCcw, Sparkles, Plus } from 'lucide-react';
 import { generateSingleImage } from '@/services/filmService';
@@ -20,11 +19,19 @@ const SceneCard: React.FC<{
     onUpdateScene: (updatedScene: StoryboardScene) => void;
     onDeleteScene: (sceneId: string) => void;
 }> = ({ scene, project, onUpdateScene, onDeleteScene }) => {
-    
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+    useEffect(() => {
+        if (textareaRef.current) {
+            textareaRef.current.style.height = 'auto';
+            textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
+        }
+    }, [scene.prompt]);
+
     const handleGenerateImage = useCallback(async () => {
         const character = project.characters.find(c => c.id === scene.characterId);
         const location = project.locations.find(l => l.id === scene.locationId);
-        
+
         let builtPrompt = scene.prompt || "A cinematic scene.";
 
         if (character) {
@@ -33,10 +40,8 @@ const SceneCard: React.FC<{
         if (location) {
             builtPrompt = `${builtPrompt} The setting is ${location.name}. Description of location: ${location.description}.`;
         }
-        
+
         if (character?.imageUrl) {
-            // This part is a placeholder for future functionality where an image can be passed to the model.
-            // For now, we rely on the detailed text prompt.
             console.log("Character image available, but not yet used in generation.", character.imageUrl);
         }
 
@@ -49,9 +54,15 @@ const SceneCard: React.FC<{
             onUpdateScene({ ...scene, generating: false, imageUrl: 'error' });
         }
     }, [scene, project, onUpdateScene]);
-    
+
     const handleFieldChange = (field: keyof StoryboardScene, value: string | null) => {
         onUpdateScene({ ...scene, [field]: value });
+    };
+
+    const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        handleFieldChange('prompt', e.target.value);
+        e.target.style.height = 'auto';
+        e.target.style.height = e.target.scrollHeight + 'px';
     };
 
     return (
@@ -69,7 +80,7 @@ const SceneCard: React.FC<{
                             <Camera className="w-12 h-12 text-muted-foreground" />
                         )}
                     </div>
-                    
+
                     <div className="flex-grow flex flex-col gap-4">
                         <div className="flex justify-between items-center">
                             <Badge variant="outline" className="text-sm font-semibold">
@@ -84,7 +95,7 @@ const SceneCard: React.FC<{
                                 <Trash2 className="w-4 h-4"/>
                             </Button>
                         </div>
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                             <Select 
                                 value={scene.characterId || undefined} 
@@ -99,7 +110,7 @@ const SceneCard: React.FC<{
                                     ))}
                                 </SelectContent>
                             </Select>
-                            
+
                             <Select 
                                 value={scene.locationId || undefined} 
                                 onValueChange={(value) => handleFieldChange('locationId', value || null)}
@@ -113,7 +124,7 @@ const SceneCard: React.FC<{
                                     ))}
                                 </SelectContent>
                             </Select>
-                            
+
                             <Select 
                                 value={scene.soundId || undefined} 
                                 onValueChange={(value) => handleFieldChange('soundId', value || null)}
@@ -132,13 +143,14 @@ const SceneCard: React.FC<{
                         </div>
 
                         <Textarea
+                            ref={textareaRef}
                             value={scene.prompt}
-                            onChange={(e) => handleFieldChange('prompt', e.target.value)}
+                            onChange={handleTextareaChange}
                             placeholder="Action prompt: e.g., 'looks out the window at the rain...'"
-                            className="flex-grow resize-none"
-                            rows={3}
+                            className="flex-grow resize-none overflow-hidden min-h-[60px]"
+                            rows={2}
                         />
-                        
+
                         <div className="flex justify-end items-center gap-2">
                             <Button 
                                 variant="ghost" 
@@ -165,7 +177,7 @@ const SceneCard: React.FC<{
 };
 
 export const StoryboardEditor: React.FC<StoryboardEditorProps> = ({ project, onUpdateProject }) => {
-    
+
     const handleUpdateScene = (updatedScene: StoryboardScene) => {
         const newStoryboard = project.storyboard.map(s => s.id === updatedScene.id ? updatedScene : s);
         onUpdateProject({ ...project, storyboard: newStoryboard });
