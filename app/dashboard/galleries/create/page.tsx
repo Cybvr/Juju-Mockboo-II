@@ -115,7 +115,7 @@ export default function CreateGalleryPage() {
             title: title.trim(),
             description: prompt.trim(),
             type: galleryType,
-            prompt: imagePrompt,
+            prompt: prompt.trim(),
             images: [],
             isPublic: false,
             tags: [galleryType.toLowerCase().replace(/\s+/g, '-')]
@@ -129,7 +129,7 @@ export default function CreateGalleryPage() {
           title: title.trim(),
           description: prompt.trim(),
           type: galleryType,
-          prompt: imagePrompt,
+          prompt: prompt.trim(),
           images: [],
           isPublic: false,
           tags: [galleryType.toLowerCase().replace(/\s+/g, '-')]

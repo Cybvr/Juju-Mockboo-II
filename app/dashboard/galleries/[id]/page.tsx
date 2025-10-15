@@ -65,35 +65,44 @@ export default function GalleryPage({ params }: GalleryPageProps) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'x-user-id': user.uid,
         },
         body: JSON.stringify({
-          prompt: prompt,
-          outputs: 4
+          prompt: prompt.trim(),
+          outputs: 4,
+          aspectRatio: "1:1"
         }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to generate images');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to generate images');
       }
 
       const data = await response.json();
-      const updatedImages = [...gallery.images, ...data.images];
+      
+      if (data.images && data.images.length > 0) {
+        const updatedImages = [...(gallery.images || []), ...data.images];
 
-      await galleryService.updateGallery(gallery.id, { 
-        images: updatedImages 
-      });
+        await galleryService.updateGallery(gallery.id, { 
+          images: updatedImages,
+          prompt: prompt.trim()
+        });
 
-      setGallery({
-        ...gallery,
-        images: updatedImages,
-        updatedAt: Date.now()
-      });
+        setGallery({
+          ...gallery,
+          images: updatedImages,
+          prompt: prompt.trim(),
+          updatedAt: Date.now()
+        });
 
-      setPrompt('');
-      toast.success(`Generated ${data.images.length} images successfully`);
+        toast.success(`Generated ${data.images.length} images successfully`);
+      } else {
+        throw new Error('No images were generated');
+      }
     } catch (error) {
       console.error('Failed to generate images:', error);
-      toast.error('Failed to generate images');
+      toast.error(error instanceof Error ? error.message : 'Failed to generate images');
     } finally {
       setGenerating(false);
     }
