@@ -123,11 +123,7 @@ export const ProjectDashboard: React.FC<ProjectDashboardProps> = ({
                                 }
                             }}
                             onDuplicate={() => onDuplicateProject(project.id)}
-                            onDelete={() => {
-                                if (window.confirm(`Are you sure you want to delete "${project.title}"? This action cannot be undone.`)) {
-                                    onDeleteProject(project.id);
-                                }
-                            }}
+                            onDelete={() => onDeleteProject(project.id)}
                         />
                     ))}
                 </div>
