@@ -70,20 +70,23 @@ service cloud.firestore {
     }
     // Stories collection
     match /stories/{storyId} {
-      // Read: owner, public stories, or shared stories
-      allow read: if request.auth != null && 
-        (resource == null ||
-         resource.data.userId == request.auth.uid ||
-         resource.data.isPublic == true ||
-         resource.data.shared == true);
+      // Read: allow for public stories or owner or shared stories
+      allow read: if resource != null && 
+        (resource.data.isPublic == true ||
+         (request.auth != null && resource.data.userId == request.auth.uid) ||
+         (request.auth != null && resource.data.shared == true));
 
       // Create: authenticated users can create their own stories
       allow create: if request.auth != null && 
-        request.resource.data.userId == request.auth.uid;
+        request.auth.uid == request.resource.data.userId;
         
-      // Update/Delete: only the owner can modify their stories
-      allow update, delete: if request.auth != null && 
-        resource.data.userId == request.auth.uid;
+      // Update: only the owner can modify their stories
+      allow update: if request.auth != null && 
+        request.auth.uid == resource.data.userId;
+        
+      // Delete: only the owner can delete their stories
+      allow delete: if request.auth != null && 
+        request.auth.uid == resource.data.userId;
     }
     // Credit transactions collection
     match /creditTransactions/{transactionId} {
