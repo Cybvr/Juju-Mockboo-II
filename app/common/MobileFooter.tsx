@@ -85,14 +85,11 @@ export function MobileFooter() {
         <div className="flex items-center justify-around">
           {navItems.map((item) => (
             item.onClick ? (
-              <button
-                key={item.label}
-                onClick={item.onClick}
-                className="relative"
-              >
+              <div key={item.label} className="relative">
                 <Button
                   variant="ghost"
                   size="icon"
+                  onClick={item.onClick}
                   className={cn(
                     "flex flex-col h-12 w-12 p-1 hover:bg-muted/50",
                     item.active && "text-primary bg-primary/10"
@@ -108,7 +105,7 @@ export function MobileFooter() {
                     </div>
                   )}
                 </Button>
-              </button>
+              </div>
             ) : (
               <Link key={item.label} href={item.href} className="relative">
                 <Button
