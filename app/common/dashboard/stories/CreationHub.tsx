@@ -199,16 +199,15 @@ export const CreationHub: React.FC<CreationHubProps> = ({ project, templates, on
                     <ArrowLeft className="w-4 h-4" />
                     All Projects
                 </Button>
-
-                <Sparkles className="w-16 h-16 text-primary mb-4" />
-                <h1 className="text-4xl md:text-5xl font-bold text-center mb-4">
+                <h1 className="text-xl font-normal text-center mb-">
                     How would you like to get started?
                 </h1>
-                <p className="text-center text-lg text-muted-foreground mb-8">
+                <p className="text-center text-sm text-muted-foreground mb-4">
                     Choose a starting point for your new film project.
                 </p>
 
-                <div className="w-full space-y-4">
+                <div className="w-full flex flex-row flex-1 space-x-4 bg-green-500"
+
                     <MethodButton method="generate" icon={Sparkles} title="Generate with AI" description="Start with an idea and let AI write the first draft of your script." />
                     <MethodButton method="paste" icon={FileText} title="Paste in a script" description="Already have a script? Paste it here to begin production." />
                     <MethodButton method="template" icon={Palette} title="Remix a template" description="Start from a pre-built structure like a commercial or a short film." />
