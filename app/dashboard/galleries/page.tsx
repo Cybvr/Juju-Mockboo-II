@@ -165,7 +165,7 @@ export default function GalleriesPage() {
   }
 
   return (
-    <main className="min-h-screen w-full bg-background transition-colors duration-300">
+    <main className="min-h-screen w-full  transition-colors duration-300">
       <div className="w-full max-w-6xl mx-auto py-8 px-4">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-md font-bold text-foreground">Galleries</h1>

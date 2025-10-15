@@ -1,69 +1,115 @@
 "use client"
-import React, { useState } from 'react';
-import { useAuthState } from 'react-firebase-hooks/auth';
-import { auth } from '@/lib/firebase';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { galleryService } from '@/services/galleryService';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { toast } from 'sonner';
+import type React from "react"
+import { useState, useRef, type DragEvent } from "react"
+import { useAuthState } from 'react-firebase-hooks/auth'
+import { auth } from '@/lib/firebase'
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { X, Paperclip, ArrowUp } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
+import { galleryService } from '@/services/galleryService'
 
-const galleryTypes = [
-  'Fashion Collection',
-  'Film Storyboards',
-  'Interior Views',
-  'Product Shots',
-  'Architectural Renders',
-  'Food Photography',
-  'Brand Identity',
-  'Custom'
-];
+const galleryPrompts = {
+  "Fashion Collection": "Create a set of avant-garde streetwear images with deconstructed silhouettes and bold colors",
+  "Film Storyboards": "Create a set of vintage film noir detective scenes with dramatic shadows and fog",
+  "Interior Views": "Create a set of minimalist Scandinavian kitchen images with natural light and wooden textures",
+  "Product Shots": "Create a set of premium wireless earbuds on marble surface with dramatic lighting",
+  "Architectural Renders": "Create a set of modern glass pavilion images nestled in forest with sustainable design",
+  "Food Photography": "Create a set of rustic Italian pasta dish images with fresh herbs and natural lighting",
+  "Brand Identity": "Create a moodboard of my boxing gear company's videography",
+}
 
 export default function CreateGalleryPage() {
-  const [user] = useAuthState(auth);
-  const router = useRouter();
-  const [title, setTitle] = useState('');
-  const [type, setType] = useState('');
-  const [customType, setCustomType] = useState('');
-  const [prompt, setPrompt] = useState('');
-  const [referenceImage, setReferenceImage] = useState<File | null>(null);
-  const [isCreating, setIsCreating] = useState(false);
+  const [user] = useAuthState(auth)
+  const router = useRouter()
+  const [title, setTitle] = useState("")
+  const [type, setType] = useState("")
+  const [customType, setCustomType] = useState("")
+  const [prompt, setPrompt] = useState("")
+  const [referenceImage, setReferenceImage] = useState<File | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [isDragging, setIsDragging] = useState(false)
+  const [isCreating, setIsCreating] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleFileSelect = (file: File) => {
+    if (file && file.type.startsWith("image/")) {
+      setReferenceImage(file)
+      const url = URL.createObjectURL(file)
+      setPreviewUrl(url)
+    } else {
+      toast.error("Please select a valid image file")
+    }
+  }
+
+  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) handleFileSelect(file)
+  }
+
+  const handleDrop = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    setIsDragging(false)
+    const file = e.dataTransfer.files[0]
+    if (file) handleFileSelect(file)
+  }
+
+  const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    setIsDragging(true)
+  }
+
+  const handleDragLeave = () => {
+    setIsDragging(false)
+  }
+
+  const removeImage = () => {
+    setReferenceImage(null)
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl)
+      setPreviewUrl(null)
+    }
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""
+    }
+  }
+
+  const handleTypeChange = (value: string) => {
+    setType(value)
+    if (value !== "Custom" && galleryPrompts[value]) {
+      setPrompt(galleryPrompts[value])
+    }
+  }
 
   const handleCreate = async () => {
-    if (!user) return;
+    if (!user) return
     if (!title.trim()) {
-      toast.error('Gallery title is required');
-      return;
+      toast.error('Gallery title is required')
+      return
     }
     if (!prompt.trim()) {
-      toast.error('Prompt is required');
-      return;
+      toast.error('Prompt is required')
+      return
     }
-    const galleryType = type === 'Custom' ? customType : type;
+    const galleryType = type === 'Custom' ? customType : type
     if (!galleryType) {
-      toast.error('Gallery type is required');
-      return;
+      toast.error('Gallery type is required')
+      return
     }
-    setIsCreating(true);
+    setIsCreating(true)
     try {
-      let imagePrompt = prompt.trim();
-      
+      let imagePrompt = prompt.trim()
+
       // If reference image is provided, convert to base64 and include in prompt
       if (referenceImage) {
-        const reader = new FileReader();
+        const reader = new FileReader()
         reader.onload = async (e) => {
-          const base64 = e.target?.result as string;
-          imagePrompt = `${prompt.trim()} (Reference image style: ${base64})`;
-          
+          const base64 = e.target?.result as string
+          imagePrompt = `${prompt.trim()} (Reference image style: ${base64})`
+
           // Create gallery with reference image
           const galleryId = await galleryService.createGallery(user.uid, {
             title: title.trim(),
@@ -73,10 +119,10 @@ export default function CreateGalleryPage() {
             images: [],
             isPublic: false,
             tags: [galleryType.toLowerCase().replace(/\s+/g, '-')]
-          });
-          router.push(`/dashboard/galleries/${galleryId}`);
-        };
-        reader.readAsDataURL(referenceImage);
+          })
+          router.push(`/dashboard/galleries/${galleryId}`)
+        }
+        reader.readAsDataURL(referenceImage)
       } else {
         // Create gallery without reference image
         const galleryId = await galleryService.createGallery(user.uid, {
@@ -87,84 +133,121 @@ export default function CreateGalleryPage() {
           images: [],
           isPublic: false,
           tags: [galleryType.toLowerCase().replace(/\s+/g, '-')]
-        });
-        router.push(`/dashboard/galleries/${galleryId}`);
+        })
+        router.push(`/dashboard/galleries/${galleryId}`)
       }
     } catch (error) {
-      console.error('Failed to create gallery:', error);
-      toast.error('Failed to create gallery');
+      console.error('Failed to create gallery:', error)
+      toast.error('Failed to create gallery')
     } finally {
-      setIsCreating(false);
+      setIsCreating(false)
     }
-  };
+  }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-md">
-      <Button
-        variant="ghost"
-        onClick={() => router.back()}
-        className="mb-4 gap-2"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Back
-      </Button>
-      <div className="text-center mb-6">
-        <h1 className="text-2xl font-bold">Create New Gallery</h1>
-      </div>
-      <div className="space-y-4">
-        <Input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Enter title"
-        />
-        <Select value={type} onValueChange={setType}>
-          <SelectTrigger>
-            <SelectValue placeholder="Choose type" />
-          </SelectTrigger>
-          <SelectContent>
-            {galleryTypes.map(galleryType => (
-              <SelectItem key={galleryType} value={galleryType}>
-                {galleryType}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {type === 'Custom' && (
-          <Input
-            value={customType}
-            onChange={(e) => setCustomType(e.target.value)}
-            placeholder="Enter custom type"
-          />
-        )}
-        <Textarea
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          placeholder="Describe what you want to generate..."
-          rows={3}
-          className="resize-none"
-        />
-        
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">Reference Image (Optional)</label>
-          <Input
-            type="file"
-            accept="image/*"
-            onChange={(e) => setReferenceImage(e.target.files?.[0] || null)}
-            className="cursor-pointer"
-          />
-          {referenceImage && (
-            <p className="text-xs text-gray-500">Selected: {referenceImage.name}</p>
-          )}
+    <div className="min-h-screen ">
+      <div className="container mx-auto px-4 py-8 max-w-3xl items-center text-center">
+        <div className="mb-8">
+          <h1 className="text-xl font-semibold text-center text-foreground mb-2">What would you like to make?</h1>
         </div>
-        
-        <Button
-          onClick={handleCreate}
-          className="w-full"
-          disabled={isCreating}
-        >
-          {isCreating ? 'Creating...' : 'Create Gallery'}
-        </Button>
+
+        <div className="space-y-4">
+          <div className="relative">
+            <Input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Gallery title"
+              className="h-12 text-base border-border bg-background focus-visible:ring-1 focus-visible:ring-ring"
+            />
+          </div>
+
+          {type === "Custom" && (
+            <div className="relative">
+              <Input
+                value={customType}
+                onChange={(e) => setCustomType(e.target.value)}
+                placeholder="Custom gallery type"
+                className="h-12 text-base border-border bg-background focus-visible:ring-1 focus-visible:ring-ring"
+              />
+            </div>
+          )}
+
+          <div className="relative rounded-2xl border border-border bg-background shadow-sm focus-within:shadow-md transition-shadow">
+            {referenceImage && previewUrl && (
+              <div className="flex items-center gap-3 p-3 border-b border-border">
+                <div className="relative w-12 h-12 rounded-md overflow-hidden flex-shrink-0 bg-muted">
+                  <img src={previewUrl || "/placeholder.svg"} alt="Preview" className="w-full h-full object-cover" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">{referenceImage.name}</p>
+                  <p className="text-xs text-muted-foreground">{(referenceImage.size / 1024).toFixed(1)} KB</p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={removeImage}
+                  className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive flex-shrink-0"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            )}
+
+            <div className="relative">
+              <div className="absolute bottom-3 left-3 flex items-center gap-2 z-10">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="h-8 w-8 p-0 hover:bg-muted rounded-lg"
+                  type="button"
+                >
+                  <Paperclip className="w-4 h-4 text-muted-foreground" />
+                </Button>
+
+                <Select value={type} onValueChange={handleTypeChange}>
+                  <SelectTrigger size="sm" className="w-fit h-8 text-sm">
+                    <SelectValue placeholder="Gallery type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.keys(galleryPrompts).map((t) => (
+                      <SelectItem key={t} value={t}>
+                        {t}
+                      </SelectItem>
+                    ))}
+                    <SelectItem value="Custom">Custom</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <Textarea
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                placeholder="Describe your vision..."
+                rows={4}
+                className="resize-none text-base border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[120px] pl-3 pr-14 pb-12"
+              />
+
+              <div className="absolute bottom-3 right-3 flex items-center gap-2">
+                <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileInput} className="hidden" />
+
+                <Button
+                  onClick={handleCreate}
+                  size="sm"
+                  className="h-8 w-8 p-0 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-50"
+                  disabled={isCreating || !prompt.trim()}
+                >
+                  {isCreating ? (
+                    <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                  ) : (
+                    <ArrowUp className="w-4 h-4" />
+                  )}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-  );
+  )
 }

@@ -244,7 +244,7 @@ const App: React.FC = () => {
 
   if (loading) {
     return (
-      <main className="min-h-screen w-full bg-background transition-colors duration-300 flex items-center justify-center">
+      <main className="min-h-screen w-full  transition-colors duration-300 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-foreground mx-auto mb-4"></div>
           <p className="text-foreground">Loading your stories...</p>
@@ -254,7 +254,7 @@ const App: React.FC = () => {
   }
 
   return (
-    <main className="min-h-screen w-full bg-background transition-colors duration-300">
+    <main className="min-h-screen w-full transition-colors duration-300">
       {renderContent()}
       
       <AlertDialog open={!!deleteProjectId} onOpenChange={(open) => {
