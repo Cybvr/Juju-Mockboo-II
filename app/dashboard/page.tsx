@@ -5,7 +5,7 @@ import { auth } from "@/lib/firebase"
 import { DocumentGallery } from "@/app/common/dashboard/DocumentGallery"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { FileText, Palette, Video } from "lucide-react"
+import { Clapperboard, Palette, Video } from "lucide-react"
 
 export default function DashboardPage() {
   const [user, loading] = useAuthState(auth)
@@ -17,6 +17,29 @@ export default function DashboardPage() {
       router.push("/")
     }
   }, [user, loading, router])
+
+  const createNewCanvas = async () => {
+    if (!user) return;
+    try {
+      const { documentService } = await import('@/services/documentService');
+      const canvasDocument = await documentService.createDocument(user.uid, {
+        title: 'New Canvas',
+        content: {
+          elements: [],
+          version: '1.0',
+        },
+        tags: ['canvas'],
+        type: 'canvas' as const,
+        isPublic: false,
+        starred: false,
+        shared: false,
+        category: 'UGC' as const,
+      });
+      router.push(`/dashboard/canvas/${canvasDocument}`);
+    } catch (error) {
+      console.error('Error creating new canvas:', error);
+    }
+  };
 
   if (loading) {
     return (
@@ -32,34 +55,32 @@ export default function DashboardPage() {
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      <main className="flex-1 overflow-y-auto p-6">
+      <main className="flex-1 overflow-y-auto p-3 lg:p-6">
         {activeView === "documents" && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="space-y-2">
+            <div className="grid grid-cols-3 gap-4 mb-2 md:gap-6">
               <Button
-                onClick={() => router.push("/dashboard/canvas/new")}
-                className="h-24 flex flex-col items-center justify-center space-y-2 bg-primary text-primary-foreground hover:bg-primary/90"
+                onClick={createNewCanvas}
+                className="h-24 flex flex-col items-center justify-center space-y-2 bg-card text-card-foreground hover:bg-card/90 border"
               >
                 <Palette className="h-6 w-6" />
-                <span>Create Canvas</span>
+                <span>Canvas</span>
               </Button>
-
               <Button
                 onClick={() => router.push("/dashboard/videos")}
-                className="h-24 flex flex-col items-center justify-center space-y-2 bg-blue-600 text-white hover:bg-blue-700"
+                className="h-24 flex flex-col items-center justify-center space-y-2 bg-card text-card-foreground hover:bg-card/90 border"
               >
                 <Video className="h-6 w-6" />
-                <span>Create Video</span>
+                <span>Video</span>
               </Button>
               <Button
-                onClick={() => router.push("/dashboard/templates")}
-                className="h-24 flex flex-col items-center justify-center space-y-2 bg-green-600 text-white hover:bg-green-700"
+                onClick={() => router.push("/dashboard/stories")}
+                className="h-24 flex flex-col items-center justify-center space-y-2 bg-card text-card-foreground hover:bg-card/90 border"
               >
-                <FileText className="h-6 w-6" />
-                <span>Browse Templates</span>
+                <Clapperboard className="h-6 w-6" />
+                <span>Stories</span>
               </Button>
             </div>
-
             <DocumentGallery />
           </div>
         )}

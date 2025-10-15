@@ -101,13 +101,10 @@ export const ProjectDashboard: React.FC<ProjectDashboardProps> = ({
     return (
         <div className="w-full max-w-6xl mx-auto py-8 px-4">
             <div className="flex justify-between items-center mb-8">
-                <h1 className="text-xl font-bold text-foreground">
-                    Your Film Projects
+                <h1 className="text-md font-bold text-foreground">Stories
                 </h1>
                 <Button onClick={onCreateProject} className="gap-2">
-                    <Plus className="w-5 h-5" />
-                    New Project
-                </Button>
+                    <Plus className="w-5 h-5" />           New        </Button>
             </div>
             {projects.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
