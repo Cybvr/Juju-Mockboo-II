@@ -70,7 +70,6 @@ export default function CreateGalleryPage() {
         tags: [galleryType.toLowerCase().replace(/\s+/g, '-')]
       });
 
-      toast.success('Gallery created successfully!');
       router.push(`/dashboard/galleries/${galleryId}`);
     } catch (error) {
       console.error('Failed to create gallery:', error);
