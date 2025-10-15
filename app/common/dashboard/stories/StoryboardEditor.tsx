@@ -1,7 +1,13 @@
+
 import React, { useCallback, useState } from 'react';
 import type { FilmProject, StoryboardScene } from '@/types/storytypes';
 import { Camera, Trash2, RotateCcw, Sparkles, Plus } from 'lucide-react';
 import { generateSingleImage } from '@/services/filmService';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
 
 interface StoryboardEditorProps {
     project: FilmProject;
@@ -49,60 +55,115 @@ const SceneCard: React.FC<{
     };
 
     return (
-        <div className="bg-muted/50 rounded-2xl p-4 flex flex-col md:flex-row gap-4">
-            <div className="aspect-video md:w-1/3 bg-muted rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center">
-                 {scene.generating ? (
-                    <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-                ) : scene.imageUrl === 'error' ? (
-                     <p className="text-destructive">Error</p>
-                ) : scene.imageUrl ? (
-                    <img src={scene.imageUrl} alt={`Scene ${scene.scene_number}`} className="w-full h-full object-cover" />
-                ) : (
-                    <Camera className="w-12 h-12 text-muted-foreground" />
-                )}
-            </div>
-            <div className="flex-grow flex flex-col gap-2">
-                <div className="flex justify-between items-center">
-                    <h3 className="font-bold text-foreground">Scene {scene.scene_number}</h3>
-                    <div className="flex items-center gap-1">
-                        <button onClick={() => onDeleteScene(scene.id)} className="p-2 rounded-full text-destructive hover:bg-destructive/10 transition-colors"><Trash2 className="w-5 h-5"/></button>
+        <Card className="mb-4">
+            <CardContent className="p-4">
+                <div className="flex flex-col md:flex-row gap-4">
+                    <div className="aspect-video md:w-1/3 bg-muted rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center">
+                         {scene.generating ? (
+                            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                        ) : scene.imageUrl === 'error' ? (
+                             <p className="text-destructive">Error</p>
+                        ) : scene.imageUrl ? (
+                            <img src={scene.imageUrl} alt={`Scene ${scene.scene_number}`} className="w-full h-full object-cover" />
+                        ) : (
+                            <Camera className="w-12 h-12 text-muted-foreground" />
+                        )}
+                    </div>
+                    
+                    <div className="flex-grow flex flex-col gap-4">
+                        <div className="flex justify-between items-center">
+                            <Badge variant="outline" className="text-sm font-semibold">
+                                Scene {scene.scene_number}
+                            </Badge>
+                            <Button 
+                                variant="ghost" 
+                                size="icon"
+                                onClick={() => onDeleteScene(scene.id)} 
+                                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                            >
+                                <Trash2 className="w-4 h-4"/>
+                            </Button>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <Select 
+                                value={scene.characterId || ''} 
+                                onValueChange={(value) => handleFieldChange('characterId', value || null)}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select Character" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="">No Character</SelectItem>
+                                    {project.characters.map(c => (
+                                        <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            
+                            <Select 
+                                value={scene.locationId || ''} 
+                                onValueChange={(value) => handleFieldChange('locationId', value || null)}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select Location" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="">No Location</SelectItem>
+                                    {project.locations.map(l => (
+                                        <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            
+                            <Select 
+                                value={scene.soundId || ''} 
+                                onValueChange={(value) => handleFieldChange('soundId', value || null)}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select Sound" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="">No Sound</SelectItem>
+                                    {project.sound_design.map(s => (
+                                        <SelectItem key={s.id} value={s.id}>
+                                            {s.scene_match}: {s.description.substring(0, 20)}...
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <Textarea
+                            value={scene.prompt}
+                            onChange={(e) => handleFieldChange('prompt', e.target.value)}
+                            placeholder="Action prompt: e.g., 'looks out the window at the rain...'"
+                            className="flex-grow resize-none"
+                            rows={3}
+                        />
+                        
+                        <div className="flex justify-end items-center gap-2">
+                            <Button 
+                                variant="ghost" 
+                                size="icon"
+                                className="hover:bg-muted"
+                                title="Regenerate"
+                            >
+                                <RotateCcw className="w-4 h-4"/>
+                            </Button>
+                            <Button 
+                                onClick={handleGenerateImage}
+                                disabled={scene.generating}
+                                className="flex items-center gap-2"
+                            >
+                                 <Sparkles className="w-4 h-4" />
+                                 Generate
+                            </Button>
+                        </div>
                     </div>
                 </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                    <select value={scene.characterId || ''} onChange={e => handleFieldChange('characterId', e.target.value || null)} className="w-full p-2 text-sm bg-muted border border-transparent rounded-lg focus:ring-2 focus:ring-primary focus:outline-none">
-                        <option value="">No Character</option>
-                        {project.characters.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                    </select>
-                    <select value={scene.locationId || ''} onChange={e => handleFieldChange('locationId', e.target.value || null)} className="w-full p-2 text-sm bg-muted border border-transparent rounded-lg focus:ring-2 focus:ring-primary focus:outline-none">
-                        <option value="">No Location</option>
-                        {project.locations.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
-                    </select>
-                    <select value={scene.soundId || ''} onChange={e => handleFieldChange('soundId', e.target.value || null)} className="w-full p-2 text-sm bg-muted border border-transparent rounded-lg focus:ring-2 focus:ring-primary focus:outline-none">
-                        <option value="">No Sound</option>
-                        {project.sound_design.map(s => <option key={s.id} value={s.id}>{s.scene_match}: {s.description.substring(0, 20)}...</option>)}
-                    </select>
-                </div>
-
-                <textarea
-                    value={scene.prompt}
-                    onChange={(e) => handleFieldChange('prompt', e.target.value)}
-                    placeholder="Action prompt: e.g., 'looks out the window at the rain...'"
-                    className="w-full flex-grow text-sm p-2 bg-transparent text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary resize-none"
-                    rows={2}
-                />
-                <div className="flex justify-end items-center gap-2">
-                    <button className="p-2 rounded-full hover:bg-muted transition-colors" title="Regenerate"><RotateCcw className="w-4 h-4"/></button>
-                    <button 
-                        onClick={handleGenerateImage}
-                        disabled={scene.generating}
-                        className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-primary-foreground bg-primary rounded-full hover:bg-primary/90 disabled:bg-primary/50 transition-colors">
-                         <Sparkles className="w-4 h-4" />
-                         Generate
-                    </button>
-                </div>
-            </div>
-        </div>
+            </CardContent>
+        </Card>
     );
 };
 
@@ -137,7 +198,7 @@ export const StoryboardEditor: React.FC<StoryboardEditorProps> = ({ project, onU
 
     return (
         <div className="h-full flex flex-col">
-            <div className="flex-grow overflow-y-auto pr-2 space-y-4">
+            <div className="flex-grow overflow-y-auto pr-2">
                 {project.storyboard.length > 0 ? (
                     project.storyboard.sort((a,b) => a.scene_number - b.scene_number).map(scene => (
                         <SceneCard key={scene.id} scene={scene} project={project} onUpdateScene={handleUpdateScene} onDeleteScene={handleDeleteScene} />
@@ -151,10 +212,14 @@ export const StoryboardEditor: React.FC<StoryboardEditorProps> = ({ project, onU
                 )}
             </div>
             <div className="flex-shrink-0 pt-4">
-                <button onClick={handleAddScene} className="w-full flex items-center justify-center gap-2 py-3 font-semibold text-foreground bg-muted rounded-full hover:bg-muted/80 transition-colors">
+                <Button 
+                    onClick={handleAddScene} 
+                    variant="outline"
+                    className="w-full flex items-center justify-center gap-2 py-3"
+                >
                     <Plus className="w-5 h-5" />
                     Add Scene
-                </button>
+                </Button>
             </div>
         </div>
     );
