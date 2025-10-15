@@ -60,16 +60,16 @@ export function MobileFooter() {
       onClick: createNewCanvas
     },
     {
+      label: 'Galleries',
+      icon: <Clapperboard className="h-5 w-5" />,
+      href: '/dashboard/galleries',
+      active: pathname.startsWith('/dashboard/galleries')
+    },
+    {
       label: 'Videos',
       icon: <Video className="h-5 w-5" />,
       href: '/dashboard/videos',
       active: pathname.startsWith('/dashboard/videos')
-    },
-    {
-      label: 'Stories',
-      icon: <Clapperboard className="h-5 w-5" />,
-      href: '/dashboard/stories',
-      active: pathname.startsWith('/dashboard/stories')
     },
     {
       label: 'Profile',
