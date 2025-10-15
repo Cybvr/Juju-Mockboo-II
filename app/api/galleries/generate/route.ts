@@ -16,7 +16,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate outputs count (Imagen allows 1-4)
     const numOutputs = Math.min(Math.max(parseInt(outputs.toString()), 1), 4);
 
     const response = await genAI.models.generateImages({
@@ -29,6 +28,7 @@ export async function POST(request: NextRequest) {
     });
 
     const generatedImages: string[] = [];
+
     if (response.generatedImages) {
       for (const generatedImage of response.generatedImages) {
         if (generatedImage.image?.imageBytes) {
@@ -43,15 +43,10 @@ export async function POST(request: NextRequest) {
       throw new Error('No images were generated');
     }
 
+    // Return simple array of URLs only - let the client create the objects
     return NextResponse.json({
       success: true,
-      images: generatedImages.map((url, index) => ({
-        id: `${Date.now()}_${index}`,
-        url: url,
-        prompt: prompt,
-        createdAt: Date.now(),
-        aspectRatio: aspectRatio
-      })),
+      images: generatedImages,
       count: generatedImages.length
     });
 

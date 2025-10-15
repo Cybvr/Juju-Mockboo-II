@@ -1,4 +1,3 @@
-
 "use client"
 import React, { useState, useEffect, use } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
@@ -52,7 +51,6 @@ export default function GalleryPage({ params }: GalleryPageProps) {
   }, [user, id]);
 
   useEffect(() => {
-    // Auto-generate if gallery is empty and has a prompt
     if (gallery && gallery.images.length === 0 && gallery.prompt && !generating) {
       handleGenerate();
     }
@@ -104,18 +102,21 @@ export default function GalleryPage({ params }: GalleryPageProps) {
       }
 
       const data = await response.json();
+
+      // Create image objects with plain data (Firebase-friendly)
+      const timestamp = Date.now();
       const newImages: GalleryImage[] = data.images.map((url: string, index: number) => ({
-        id: `${Date.now()}_${index}`,
+        id: `${timestamp}_${index}`,
         url: url,
         prompt: prompt,
-        createdAt: Date.now(),
+        createdAt: timestamp,
         aspectRatio: aspectRatio
       }));
 
       const updatedGallery = {
         ...gallery,
         images: [...gallery.images, ...newImages],
-        updatedAt: Date.now()
+        updatedAt: timestamp
       };
 
       await galleryService.updateGallery(gallery.id, updatedGallery);
@@ -192,7 +193,6 @@ export default function GalleryPage({ params }: GalleryPageProps) {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => router.push('/dashboard/galleries')}>
@@ -227,12 +227,10 @@ export default function GalleryPage({ params }: GalleryPageProps) {
         </div>
       </div>
 
-      {/* Generation Panel */}
       <Card className="mb-8">
         <CardContent className="p-6">
           {gallery.prompt && (
             <div className="mb-4 p-3 bg-muted rounded-lg">
-              
               <p className="text-sm">{gallery.prompt}</p>
             </div>
           )}
@@ -279,7 +277,6 @@ export default function GalleryPage({ params }: GalleryPageProps) {
         </CardContent>
       </Card>
 
-      {/* Images Grid */}
       {gallery.images.length === 0 ? (
         <div className="text-center py-20">
           <Grid className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
