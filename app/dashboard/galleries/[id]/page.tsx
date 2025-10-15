@@ -7,11 +7,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Sparkles, Download, Trash2, Grid, List, X, ChevronLeft, ChevronRight, Check, Pencil } from 'lucide-react';
+import { ArrowLeft, Sparkles, Download, Trash2, Grid, List, X, ChevronLeft, ChevronRight, Check, Pencil, Share2, Copy } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { galleryService } from '@/services/galleryService';
 import type { Gallery } from '@/types/gallery';
 import { toast } from 'sonner';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface GalleryPageProps {
   params: Promise<{ id: string }>;
@@ -29,6 +30,8 @@ export default function GalleryPage({ params }: GalleryPageProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editedTitle, setEditedTitle] = useState('');
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [galleryAccessLevel, setGalleryAccessLevel] = useState<'private' | 'public'>('private');
 
   useEffect(() => {
     if (user) {
@@ -179,6 +182,34 @@ export default function GalleryPage({ params }: GalleryPageProps) {
     }
   };
 
+  const handleShareAccess = async (accessLevel: 'private' | 'public') => {
+    if (!gallery) return;
+
+    try {
+      await galleryService.updateGallery(gallery.id, { 
+        isPublic: accessLevel === 'public'
+      });
+
+      setGallery({
+        ...gallery,
+        isPublic: accessLevel === 'public',
+        updatedAt: Date.now()
+      });
+
+      setGalleryAccessLevel(accessLevel);
+      toast.success(accessLevel === 'public' ? 'Gallery is now public' : 'Gallery is now private');
+    } catch (error) {
+      console.error('Failed to update gallery access:', error);
+      toast.error('Failed to update gallery access');
+    }
+  };
+
+  const handleCopyLink = () => {
+    const shareUrl = `${window.location.origin}/m/gallery/${gallery?.id}`;
+    navigator.clipboard.writeText(shareUrl);
+    toast.success('Link copied to clipboard');
+  };
+
   const navigateImage = (direction: 'prev' | 'next') => {
     if (selectedImageIndex === null || !gallery) return;
 
@@ -284,6 +315,14 @@ export default function GalleryPage({ params }: GalleryPageProps) {
 
         <div className="flex items-center gap-2">
           <Button
+            variant="outline"
+            onClick={() => setIsShareModalOpen(true)}
+            className="flex items-center gap-2"
+          >
+            <Share2 className="w-4 h-4" />
+            Share
+          </Button>
+          <Button
             variant={viewMode === 'grid' ? 'default' : 'outline'}
             size="icon"
             onClick={() => setViewMode('grid')}
@@ -337,91 +376,195 @@ export default function GalleryPage({ params }: GalleryPageProps) {
         </div>
       )}
 
-      {/* Image Modal */}
+      {/* Pinterest-style Image Modal */}
       {selectedImageIndex !== null && gallery.images[selectedImageIndex] && (
         <div 
-          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
+          className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
           onClick={() => setSelectedImageIndex(null)}
         >
-          <Button
-            size="icon"
-            variant="ghost"
-            className="absolute top-4 right-4 text-white hover:bg-white/20"
-            onClick={() => setSelectedImageIndex(null)}
-          >
-            <X className="w-6 h-6" />
-          </Button>
-
-          <Button
-            size="icon"
-            variant="ghost"
-            className="absolute left-4 text-white hover:bg-white/20"
-            onClick={(e) => {
-              e.stopPropagation();
-              navigateImage('prev');
-            }}
-          >
-            <ChevronLeft className="w-8 h-8" />
-          </Button>
-
-          <Button
-            size="icon"
-            variant="ghost"
-            className="absolute right-4 text-white hover:bg-white/20"
-            onClick={(e) => {
-              e.stopPropagation();
-              navigateImage('next');
-            }}
-          >
-            <ChevronRight className="w-8 h-8" />
-          </Button>
-
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-3">
-            <Button
-              variant="secondary"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDownload(gallery.images[selectedImageIndex], selectedImageIndex);
-              }}
-            >
-              <Download className="w-4 h-4 mr-2" />
-              Download
-            </Button>
-            <Button
-              variant="secondary"
-              onClick={(e) => {
-                e.stopPropagation();
-                // TODO: Generate more like this using current image as reference
-                console.log('Generate more like this:', gallery.images[selectedImageIndex]);
-              }}
-            >
-              <Sparkles className="w-4 h-4 mr-2" />
-              More Like This
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDeleteImage(selectedImageIndex);
-              }}
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              Delete
-            </Button>
-          </div>
-
-          <img
-            src={gallery.images[selectedImageIndex]}
-            alt={`Image ${selectedImageIndex + 1}`}
-            className="max-h-[85vh] max-w-[85vw] object-contain"
+          <div 
+            className="bg-white rounded-2xl shadow-2xl max-w-7xl w-full max-h-[90vh] flex overflow-hidden"
             onClick={(e) => e.stopPropagation()}
-          />
+          >
+            {/* Image Section */}
+            <div className="flex-1 flex items-center justify-center bg-gray-50 relative">
+              <Button
+                size="icon"
+                variant="ghost"
+                className="absolute top-4 left-4 z-10 hover:bg-black/10"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigateImage('prev');
+                }}
+                disabled={gallery.images.length <= 1}
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </Button>
+              
+              <Button
+                size="icon"
+                variant="ghost"
+                className="absolute top-4 right-4 z-10 hover:bg-black/10"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigateImage('next');
+                }}
+                disabled={gallery.images.length <= 1}
+              >
+                <ChevronRight className="w-6 h-6" />
+              </Button>
 
-          <div className="absolute top-4 left-4 text-white text-sm">
-            {selectedImageIndex + 1} / {gallery.images.length}
+              <img
+                src={gallery.images[selectedImageIndex]}
+                alt={`Image ${selectedImageIndex + 1}`}
+                className="max-w-full max-h-full object-contain"
+              />
+              
+              <div className="absolute bottom-4 left-4 bg-black/70 text-white px-2 py-1 rounded text-sm">
+                {selectedImageIndex + 1} / {gallery.images.length}
+              </div>
+            </div>
+
+            {/* Info Panel */}
+            <div className="w-96 bg-white flex flex-col">
+              {/* Header */}
+              <div className="p-6 border-b">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-semibold">{gallery.title}</h3>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={() => setSelectedImageIndex(null)}
+                  >
+                    <X className="w-5 h-5" />
+                  </Button>
+                </div>
+                <Badge variant="secondary" className="mt-2">{gallery.type}</Badge>
+              </div>
+
+              {/* Prompt */}
+              {prompt && (
+                <div className="p-6 border-b">
+                  <h4 className="text-sm font-medium text-muted-foreground mb-2">Prompt</h4>
+                  <p className="text-sm leading-relaxed">{prompt}</p>
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="p-6 space-y-3">
+                <Button
+                  className="w-full justify-start"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDownload(gallery.images[selectedImageIndex], selectedImageIndex);
+                  }}
+                >
+                  <Download className="w-4 h-4 mr-3" />
+                  Download
+                </Button>
+
+                <Button
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // TODO: Generate more like this using current image as reference
+                    console.log('Generate more like this:', gallery.images[selectedImageIndex]);
+                  }}
+                >
+                  <Sparkles className="w-4 h-4 mr-3" />
+                  More Like This
+                </Button>
+
+                <Button
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const imageUrl = gallery.images[selectedImageIndex];
+                    navigator.clipboard.writeText(imageUrl);
+                    toast.success('Image URL copied');
+                  }}
+                >
+                  <Copy className="w-4 h-4 mr-3" />
+                  Copy Image URL
+                </Button>
+
+                <Button
+                  variant="destructive"
+                  className="w-full justify-start"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteImage(selectedImageIndex);
+                  }}
+                >
+                  <Trash2 className="w-4 h-4 mr-3" />
+                  Delete
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       )}
+
+      {/* Share Modal */}
+      <Dialog open={isShareModalOpen} onOpenChange={setIsShareModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Share Gallery</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <p className="font-medium">Private</p>
+                  <p className="text-sm text-muted-foreground">Only you can access</p>
+                </div>
+                <Button
+                  variant={galleryAccessLevel === 'private' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => handleShareAccess('private')}
+                >
+                  {galleryAccessLevel === 'private' ? 'Current' : 'Set Private'}
+                </Button>
+              </div>
+
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <p className="font-medium">Public</p>
+                  <p className="text-sm text-muted-foreground">Anyone with link can view</p>
+                </div>
+                <Button
+                  variant={galleryAccessLevel === 'public' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => handleShareAccess('public')}
+                >
+                  {galleryAccessLevel === 'public' ? 'Current' : 'Make Public'}
+                </Button>
+              </div>
+            </div>
+
+            {galleryAccessLevel === 'public' && (
+              <div className="space-y-2">
+                <div className="flex gap-2">
+                  <Input
+                    readOnly
+                    value={`${window.location.origin}/m/gallery/${gallery?.id}`}
+                    className="flex-1"
+                  />
+                  <Button onClick={handleCopyLink} size="icon">
+                    <Copy className="w-4 h-4" />
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Public link - anyone can view this gallery
+                </p>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
