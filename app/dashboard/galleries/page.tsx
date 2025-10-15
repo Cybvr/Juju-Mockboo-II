@@ -32,7 +32,7 @@ const GalleryCard: React.FC<{
   onClick: () => void;
   onDelete: () => void;
 }> = ({ gallery, onClick, onDelete }) => {
-  const firstImage = gallery.images?.[0]?.url;
+  const firstImage = gallery.images?.[0];
   const lastUpdated = new Date(gallery.updatedAt).toLocaleDateString();
 
   return (
