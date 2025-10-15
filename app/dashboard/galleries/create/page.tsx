@@ -1,4 +1,3 @@
-
 "use client"
 import React, { useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
@@ -41,7 +40,7 @@ export default function CreateGalleryPage() {
 
   const handleCreate = async () => {
     if (!user) return;
-    
+
     if (!title.trim()) {
       toast.error('Gallery title is required');
       return;
