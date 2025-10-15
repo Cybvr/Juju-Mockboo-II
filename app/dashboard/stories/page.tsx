@@ -143,7 +143,7 @@ const App: React.FC = () => {
   }, []);
 
   const handleSelectProject = (id: string) => {
-    setActiveProjectId(id);
+    window.location.href = `/dashboard/stories/${id}`;
   };
 
   const handleBackToDashboard = () => {
