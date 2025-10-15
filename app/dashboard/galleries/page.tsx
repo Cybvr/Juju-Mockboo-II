@@ -45,14 +45,7 @@ export default function GalleriesPage() {
   const [galleries, setGalleries] = useState<Gallery[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [newGallery, setNewGallery] = useState({
-    title: '',
-    description: '',
-    type: '',
-    customType: '',
-    prompt: ''
-  });
+  
 
   useEffect(() => {
     if (user) {
@@ -74,39 +67,7 @@ export default function GalleriesPage() {
     }
   };
 
-  const handleCreateGallery = async () => {
-    if (!user) return;
-    if (!newGallery.title.trim()) {
-      toast.error('Gallery title is required');
-      return;
-    }
-
-    const galleryType = newGallery.type === 'Custom' ? newGallery.customType : newGallery.type;
-    if (!galleryType) {
-      toast.error('Gallery type is required');
-      return;
-    }
-
-    try {
-      const galleryId = await galleryService.createGallery(user.uid, {
-        title: newGallery.title.trim(),
-        description: newGallery.description.trim(),
-        type: galleryType,
-        prompt: newGallery.prompt.trim(),
-        images: [],
-        isPublic: false,
-        tags: [galleryType.toLowerCase().replace(/\s+/g, '-')]
-      });
-
-      setNewGallery({ title: '', description: '', type: '', customType: '', prompt: '' });
-      setIsCreateModalOpen(false);
-      toast.success('Gallery created successfully');
-      router.push(`/dashboard/galleries/${galleryId}`);
-    } catch (error) {
-      console.error('Failed to create gallery:', error);
-      toast.error('Failed to create gallery');
-    }
-  };
+  
 
   const handleDeleteGallery = async (galleryId: string) => {
     if (!confirm('Are you sure you want to delete this gallery?')) return;
@@ -142,81 +103,10 @@ export default function GalleriesPage() {
           
         </div>
         
-        <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-          <DialogTrigger asChild>
-            <Button className="gap-2">
-              <Plus className="w-4 h-4" />
-              New Gallery
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>Create New Gallery</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm font-medium">Title</label>
-                <Input
-                  value={newGallery.title}
-                  onChange={(e) => setNewGallery({ ...newGallery, title: e.target.value })}
-                  placeholder="Enter gallery title..."
-                />
-              </div>
-              
-              <div>
-                <label className="text-sm font-medium">Type</label>
-                <Select
-                  value={newGallery.type}
-                  onValueChange={(value) => setNewGallery({ ...newGallery, type: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select gallery type..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {galleryTypes.map(type => (
-                      <SelectItem key={type} value={type}>{type}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {newGallery.type === 'Custom' && (
-                <div>
-                  <label className="text-sm font-medium">Custom Type</label>
-                  <Input
-                    value={newGallery.customType}
-                    onChange={(e) => setNewGallery({ ...newGallery, customType: e.target.value })}
-                    placeholder="Enter custom type..."
-                  />
-                </div>
-              )}
-              
-              <div>
-                <label className="text-sm font-medium">Description</label>
-                <Textarea
-                  value={newGallery.description}
-                  onChange={(e) => setNewGallery({ ...newGallery, description: e.target.value })}
-                  placeholder="Describe your gallery..."
-                  rows={3}
-                />
-              </div>
-
-              <div>
-                <label className="text-sm font-medium">Base Prompt (Optional)</label>
-                <Textarea
-                  value={newGallery.prompt}
-                  onChange={(e) => setNewGallery({ ...newGallery, prompt: e.target.value })}
-                  placeholder="Base prompt for generating images..."
-                  rows={2}
-                />
-              </div>
-              
-              <Button onClick={handleCreateGallery} className="w-full">
-                Create Gallery
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <Button onClick={() => router.push('/dashboard/galleries/create')} className="gap-2">
+          <Plus className="w-4 h-4" />
+          New Gallery
+        </Button>
       </div>
 
       <div className="mb-6">
@@ -237,7 +127,7 @@ export default function GalleriesPage() {
           <p className="text-muted-foreground mb-4">
             Create your first gallery to start organizing your generated images
           </p>
-          <Button onClick={() => setIsCreateModalOpen(true)} className="gap-2">
+          <Button onClick={() => router.push('/dashboard/galleries/create')} className="gap-2">
             <Plus className="w-4 h-4" />
             Create Gallery
           </Button>

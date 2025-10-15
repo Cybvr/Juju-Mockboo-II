@@ -90,7 +90,7 @@ export default function GalleryPage({ params }: GalleryPageProps) {
           mode: 'text',
           prompt: `${gallery.prompt ? gallery.prompt + ', ' : ''}${prompt}`,
           settings: {
-            outputs: '8',
+            outputs: '4',
             aspectRatio: aspectRatio
           }
         }),
