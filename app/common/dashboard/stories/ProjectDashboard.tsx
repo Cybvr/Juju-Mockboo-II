@@ -79,7 +79,7 @@ const ProjectCard: React.FC<{
                         </div>
                     </div>
                     <p className="text-sm text-muted-foreground line-clamp-2">
-                        {project.prompt || project.script.substring(0, 100) || 'No content yet...'}
+                        {project.prompt || (project.script && project.script.substring(0, 100)) || 'No content yet...'}
                     </p>
                 </div>
                 <p className="text-xs text-muted-foreground mt-2">
