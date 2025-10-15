@@ -43,7 +43,6 @@ export async function POST(request: NextRequest) {
       throw new Error('No images were generated');
     }
 
-    // Just return the generated images - no Firebase mess
     return NextResponse.json({
       success: true,
       images: generatedImages.map((url, index) => ({

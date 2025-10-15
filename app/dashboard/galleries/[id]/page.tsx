@@ -232,7 +232,7 @@ export default function GalleryPage({ params }: GalleryPageProps) {
         <CardContent className="p-6">
           {gallery.prompt && (
             <div className="mb-4 p-3 bg-muted rounded-lg">
-              <p className="text-sm text-muted-foreground mb-1">Base Prompt:</p>
+              
               <p className="text-sm">{gallery.prompt}</p>
             </div>
           )}

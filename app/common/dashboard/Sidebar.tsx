@@ -108,6 +108,13 @@ export function Sidebar({ className, onNavigate }: SidebarProps) {
       href: '/dashboard/stories',
       active: pathname.startsWith('/dashboard/stories'),
     },
+
+    {
+      label: 'Galleries',
+      icon: Clapperboard,
+      href: '/dashboard/galleries',
+      active: pathname.startsWith('/dashboard/galleries'),
+    },
     {
       label: 'Settings',
       icon: Settings,
