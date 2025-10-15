@@ -1,3 +1,4 @@
+
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
 import { galleryService } from '@/services/galleryService';
@@ -10,11 +11,6 @@ const genAI = new GoogleGenAI({
 export async function POST(request: NextRequest) {
   try {
     const { galleryId, prompt, aspectRatio = '1:1', outputs = 4 } = await request.json();
-
-    const userId = request.headers.get('x-user-id');
-    if (!userId) {
-      return NextResponse.json({ error: 'User ID required' }, { status: 401 });
-    }
 
     if (!galleryId || !prompt) {
       return NextResponse.json(
@@ -52,7 +48,7 @@ export async function POST(request: NextRequest) {
 
     // Get current gallery
     const gallery = await galleryService.getGalleryById(galleryId);
-    if (!gallery || gallery.userId !== userId) {
+    if (!gallery) {
       return NextResponse.json({ error: 'Gallery not found' }, { status: 404 });
     }
 
