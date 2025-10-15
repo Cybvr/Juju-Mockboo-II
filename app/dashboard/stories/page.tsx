@@ -257,29 +257,29 @@ const App: React.FC = () => {
     <main className="min-h-screen w-full bg-background transition-colors duration-300">
       {renderContent()}
       
-      <AlertDialog open={!!deleteProjectId} onOpenChange={(open) => {
-        if (!open) setDeleteProjectId(null);
-      }}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Story</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this story? This action cannot be undone and will permanently remove all content.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setDeleteProjectId(null)}>
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmDeleteProject}
-              className="bg-destructive hover:bg-destructive/90"
-            >
-              Delete Story
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {deleteProjectId && (
+        <AlertDialog open={true} onOpenChange={() => setDeleteProjectId(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Story</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete this story? This action cannot be undone and will permanently remove all content.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setDeleteProjectId(null)}>
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={confirmDeleteProject}
+                className="bg-destructive hover:bg-destructive/90"
+              >
+                Delete Story
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
     </main>
   );
 };
