@@ -266,12 +266,17 @@ export default function GalleryPage({ params }: GalleryPageProps) {
                 </Button>
               </div>
             ) : (
-              <h1 
-                className="text-sm font-semibold cursor-pointer hover:bg-muted px-2 py-1 rounded"
-                onClick={() => setIsEditingTitle(true)}
-              >
-                {gallery.title}
-              </h1>
+              <div className="flex items-center gap-2">
+                <h1 className="text-sm font-semibold">{gallery.title}</h1>
+                <Button 
+                  size="icon" 
+                  variant="ghost" 
+                  className="h-6 w-6" 
+                  onClick={() => setIsEditingTitle(true)}
+                >
+                  <Pencil className="w-3 h-3" />
+                </Button>
+              </div>
             )}
             <div className="flex items-center gap-2 mt-1">
               <Badge variant="secondary">{gallery.type}</Badge>
@@ -296,37 +301,6 @@ export default function GalleryPage({ params }: GalleryPageProps) {
             onClick={() => setViewMode('list')}
           >
             <List className="w-4 h-4" />
-          </Button>
-        </div>
-      </div>
-
-      <div className="mb-8 space-y-4">
-        <div className="flex items-center gap-4">
-          <div className="flex-1">
-            <Textarea
-              placeholder="Enter prompt to generate more images..."
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              className="resize-none"
-              rows={2}
-            />
-          </div>
-          <Button 
-            onClick={handleGenerate}
-            disabled={generating || !prompt.trim()}
-            className="px-6"
-          >
-            {generating ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
-                Generating...
-              </>
-            ) : (
-              <>
-                <Sparkles className="w-4 h-4 mr-2" />
-                Generate More
-              </>
-            )}
           </Button>
         </div>
       </div>
