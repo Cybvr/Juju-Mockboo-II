@@ -1,5 +1,6 @@
 "use client"
 import { Sidebar } from "@/app/common/dashboard/Sidebar"
+import { MobileFooter } from "@/app/common/MobileFooter"
 import { useAuthState } from "react-firebase-hooks/auth"
 import { auth } from "@/lib/firebase"
 import { useEffect, useState } from "react"
@@ -39,6 +40,7 @@ export default function DashboardLayout({
           children
         )}
       </main>
+      {!shouldHideSidebar && <MobileFooter />}
     </div>
   )
 }
