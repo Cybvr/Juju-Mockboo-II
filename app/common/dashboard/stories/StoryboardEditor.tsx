@@ -87,14 +87,13 @@ const SceneCard: React.FC<{
                         
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                             <Select 
-                                value={scene.characterId || ''} 
+                                value={scene.characterId || undefined} 
                                 onValueChange={(value) => handleFieldChange('characterId', value || null)}
                             >
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select Character" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="">No Character</SelectItem>
                                     {project.characters.map(c => (
                                         <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                                     ))}
@@ -102,14 +101,13 @@ const SceneCard: React.FC<{
                             </Select>
                             
                             <Select 
-                                value={scene.locationId || ''} 
+                                value={scene.locationId || undefined} 
                                 onValueChange={(value) => handleFieldChange('locationId', value || null)}
                             >
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select Location" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="">No Location</SelectItem>
                                     {project.locations.map(l => (
                                         <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>
                                     ))}
@@ -117,14 +115,13 @@ const SceneCard: React.FC<{
                             </Select>
                             
                             <Select 
-                                value={scene.soundId || ''} 
+                                value={scene.soundId || undefined} 
                                 onValueChange={(value) => handleFieldChange('soundId', value || null)}
                             >
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select Sound" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="">No Sound</SelectItem>
                                     {project.sound_design.map(s => (
                                         <SelectItem key={s.id} value={s.id}>
                                             {s.scene_match}: {s.description.substring(0, 20)}...
