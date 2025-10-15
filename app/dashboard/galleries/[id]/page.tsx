@@ -51,6 +51,13 @@ export default function GalleryPage({ params }: GalleryPageProps) {
     }
   }, [user, id]);
 
+  useEffect(() => {
+    // Auto-generate if gallery is empty and has a prompt
+    if (gallery && gallery.images.length === 0 && gallery.prompt && !generating) {
+      handleGenerate();
+    }
+  }, [gallery]);
+
   const loadGallery = async () => {
     if (!user) return;
     try {

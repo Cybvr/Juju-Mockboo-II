@@ -106,14 +106,17 @@ export class GalleryService {
   async updateGallery(id: string, updates: Partial<Gallery>): Promise<void> {
     try {
       const galleryRef = doc(db, GALLERIES_COLLECTION, id);
+      
+      // Clean update data to prevent nested entity errors
+      const cleanUpdates = JSON.parse(JSON.stringify(updates));
+      delete cleanUpdates.id;
+      delete cleanUpdates.createdAt;
+      delete cleanUpdates.userId;
+      
       const updateData = {
-        ...updates,
+        ...cleanUpdates,
         updatedAt: Timestamp.now(),
       };
-      
-      // Remove id, createdAt from updates if they exist
-      delete updateData.id;
-      delete updateData.createdAt;
       
       await updateDoc(galleryRef, updateData);
     } catch (error) {
