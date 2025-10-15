@@ -38,13 +38,13 @@ export async function POST(request: NextRequest) {
           // Convert base64 to blob
           const imageData = generatedImage.image.imageBytes;
           const blob = new Blob([Buffer.from(imageData, 'base64')], { type: 'image/png' });
-          
+
           // Upload to Firebase Storage
           const filename = `gallery_${Date.now()}_${i}.png`;
           const storageRef = ref(storage, `galleries/${filename}`);
           await uploadBytes(storageRef, blob);
           const downloadURL = await getDownloadURL(storageRef);
-          
+
           generatedImages.push(downloadURL);
         }
       }
