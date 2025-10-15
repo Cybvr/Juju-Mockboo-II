@@ -1,12 +1,8 @@
-
 "use client"
-
 import { useState, useEffect } from "react"
 import { useAuthState } from "react-firebase-hooks/auth"
 import { auth } from "@/lib/firebase"
-import { DocumentGallery } from "./common/DocumentGallery"
-import { Header } from "./common/Header"
-import { Sidebar } from "./common/Sidebar"
+import { DocumentGallery } from "@/app/common/dashboard/DocumentGallery"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { FileText, Palette, Video } from "lucide-react"
@@ -35,44 +31,39 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden">
-      <Sidebar activeView={activeView} onViewChange={setActiveView} />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header />
-        <main className="flex-1 overflow-y-auto p-6">
-          {activeView === "documents" && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <Button
-                  onClick={() => router.push("/dashboard/canvas/new")}
-                  className="h-24 flex flex-col items-center justify-center space-y-2 bg-primary text-primary-foreground hover:bg-primary/90"
-                >
-                  <Palette className="h-6 w-6" />
-                  <span>Create Canvas</span>
-                </Button>
-                
-                <Button
-                  onClick={() => router.push("/dashboard/videos")}
-                  className="h-24 flex flex-col items-center justify-center space-y-2 bg-blue-600 text-white hover:bg-blue-700"
-                >
-                  <Video className="h-6 w-6" />
-                  <span>Create Video</span>
-                </Button>
+    <div className="flex-1 flex flex-col overflow-hidden">
+      <main className="flex-1 overflow-y-auto p-6">
+        {activeView === "documents" && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <Button
+                onClick={() => router.push("/dashboard/canvas/new")}
+                className="h-24 flex flex-col items-center justify-center space-y-2 bg-primary text-primary-foreground hover:bg-primary/90"
+              >
+                <Palette className="h-6 w-6" />
+                <span>Create Canvas</span>
+              </Button>
 
-                <Button
-                  onClick={() => router.push("/dashboard/templates")}
-                  className="h-24 flex flex-col items-center justify-center space-y-2 bg-green-600 text-white hover:bg-green-700"
-                >
-                  <FileText className="h-6 w-6" />
-                  <span>Browse Templates</span>
-                </Button>
-              </div>
-              
-              <DocumentGallery />
+              <Button
+                onClick={() => router.push("/dashboard/videos")}
+                className="h-24 flex flex-col items-center justify-center space-y-2 bg-blue-600 text-white hover:bg-blue-700"
+              >
+                <Video className="h-6 w-6" />
+                <span>Create Video</span>
+              </Button>
+              <Button
+                onClick={() => router.push("/dashboard/templates")}
+                className="h-24 flex flex-col items-center justify-center space-y-2 bg-green-600 text-white hover:bg-green-700"
+              >
+                <FileText className="h-6 w-6" />
+                <span>Browse Templates</span>
+              </Button>
             </div>
-          )}
-        </main>
-      </div>
+
+            <DocumentGallery />
+          </div>
+        )}
+      </main>
     </div>
   )
 }

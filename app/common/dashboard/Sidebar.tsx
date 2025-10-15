@@ -103,12 +103,19 @@ export function Sidebar({ className, onNavigate }: SidebarProps) {
       active: pathname.startsWith('/dashboard/videos'),
     },
     {
+      label: 'Stories',
+      icon: Clapperboard,
+      href: '/dashboard/stories',
+      active: pathname.startsWith('/dashboard/stories'),
+    },
+    {
       label: 'Settings',
       icon: Settings,
       href: '/dashboard/account',
       active: pathname.startsWith('/dashboard/account'),
     },
   ];
+
 
   const showLabels = true;
 

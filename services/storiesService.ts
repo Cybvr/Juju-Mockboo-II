@@ -1,316 +1,240 @@
-import { db } from '@/lib/firebase';
-import { collection, doc, setDoc, getDoc, getDocs, query, where, orderBy, updateDoc, deleteDoc, Timestamp, arrayUnion, arrayRemove } from 'firebase/firestore';
-import { ProjectConfig, Scene, Character, Location, Sound } from '@/app/dashboard/storymaker/common/storymaker-context';
-import { Template } from '@/data/storymakerTemplatesData';
 
-export interface StoryDocument {
-  id: string;
-  userId: string;
-  title: string;
-  description: string;
-  thumbnail?: string;
-  projectConfig: ProjectConfig;
-  scenes: Scene[];
-  characters: Character[];
-  locations: Location[];
-  sounds: Sound[];
-  selectedTemplate?: Template;
-  createdAt: Date;
-  updatedAt: Date;
-  isPublic: boolean;
-  shared: boolean;
-  tags: string[];
-  category: 'story' | 'commercial' | 'ugc' | 'entertainment';
+import { 
+  collection, 
+  doc, 
+  getDocs, 
+  getDoc, 
+  addDoc, 
+  updateDoc, 
+  deleteDoc, 
+  query, 
+  orderBy, 
+  where,
+  Timestamp 
+} from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import type { FilmProject } from '@/types/storytypes';
+
+const STORIES_COLLECTION = 'stories';
+
+export interface FirebaseFilmProject extends Omit<FilmProject, 'createdAt' | 'updatedAt'> {
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
 }
 
-export class StoriesService {
-  private collectionName = 'stories';
-
-  async createStory(userId: string, data: Partial<StoryDocument>): Promise<string> {
-    console.log('Creating new story for user:', userId);
-    const docRef = doc(collection(db, this.collectionName));
-    const newStory = {
-      id: docRef.id,
-      userId,
-      title: data.title || 'Untitled Story',
-      description: data.description || '',
-      thumbnail: data.thumbnail || '',
-      projectConfig: data.projectConfig || {},
-      scenes: data.scenes || [],
-      characters: data.characters || [],
-      locations: data.locations || [],
-      sounds: data.sounds || [],
-      selectedTemplate: data.selectedTemplate || null,
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
-      isPublic: data.isPublic || false,
-      shared: data.shared || false,
-      tags: data.tags || ['story'],
-      category: data.category || 'story',
-    };
-    await setDoc(docRef, newStory);
-    console.log('Story created with ID:', docRef.id);
-    return docRef.id;
-  }
-
-  async getStory(storyId: string): Promise<StoryDocument | null> {
-    console.log('Fetching story with ID:', storyId);
-    const docRef = doc(db, this.collectionName, storyId);
-    const docSnap = await getDoc(docRef);
-
-    if (docSnap.exists()) {
-      const data = docSnap.data();
-      const story = {
+/**
+ * Get all stories from Firebase
+ */
+export const getAllStories = async (): Promise<FilmProject[]> => {
+  try {
+    const storiesRef = collection(db, STORIES_COLLECTION);
+    const q = query(storiesRef, orderBy('updatedAt', 'desc'));
+    const querySnapshot = await getDocs(q);
+    
+    const stories: FilmProject[] = [];
+    querySnapshot.forEach((doc) => {
+      const data = doc.data() as FirebaseFilmProject;
+      stories.push({
         ...data,
-        createdAt: data.createdAt.toDate(),
-        updatedAt: data.updatedAt.toDate()
-      } as StoryDocument;
-      console.log('Found story:', storyId);
-      return story;
+        id: doc.id,
+        createdAt: data.createdAt.toMillis(),
+        updatedAt: data.updatedAt.toMillis(),
+      });
+    });
+    
+    return stories;
+  } catch (error) {
+    console.error('Error fetching stories:', error);
+    throw new Error('Failed to fetch stories from Firebase');
+  }
+};
+
+/**
+ * Get a single story by ID
+ */
+export const getStoryById = async (id: string): Promise<FilmProject | null> => {
+  try {
+    const storyRef = doc(db, STORIES_COLLECTION, id);
+    const docSnap = await getDoc(storyRef);
+    
+    if (docSnap.exists()) {
+      const data = docSnap.data() as FirebaseFilmProject;
+      return {
+        ...data,
+        id: docSnap.id,
+        createdAt: data.createdAt.toMillis(),
+        updatedAt: data.updatedAt.toMillis(),
+      };
     }
-    console.log('No story found with ID:', storyId);
+    
     return null;
+  } catch (error) {
+    console.error('Error fetching story:', error);
+    throw new Error('Failed to fetch story from Firebase');
   }
+};
 
-  async getUserStories(userId: string): Promise<StoryDocument[]> {
-    console.log('Fetching stories for user:', userId);
-    const q = query(
-      collection(db, this.collectionName),
-      where('userId', '==', userId),
-      orderBy('updatedAt', 'desc')
-    );
-    const snapshot = await getDocs(q);
-    const stories = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-      createdAt: doc.data().createdAt.toDate(),
-      updatedAt: doc.data().updatedAt.toDate()
-    } as StoryDocument));
-    console.log('Found', stories.length, 'stories for user:', userId);
-    return stories;
+/**
+ * Create a new story
+ */
+export const createStory = async (story: Omit<FilmProject, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> => {
+  try {
+    const now = Timestamp.now();
+    const storyData: Omit<FirebaseFilmProject, 'id'> = {
+      ...story,
+      createdAt: now,
+      updatedAt: now,
+    };
+    
+    const docRef = await addDoc(collection(db, STORIES_COLLECTION), storyData);
+    return docRef.id;
+  } catch (error) {
+    console.error('Error creating story:', error);
+    throw new Error('Failed to create story in Firebase');
   }
+};
 
-  async getPublicStories(limit: number = 20): Promise<StoryDocument[]> {
-    console.log('getPublicStories method called with limit:', limit);
-    const q = query(
-      collection(db, this.collectionName),
-      where('isPublic', '==', true),
-      orderBy('updatedAt', 'desc')
-    );
-    const snapshot = await getDocs(q);
-    const stories = snapshot.docs.slice(0, limit).map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-      createdAt: doc.data().createdAt.toDate(),
-      updatedAt: doc.data().updatedAt.toDate()
-    } as StoryDocument));
-    console.log('getPublicStories returned', stories.length, 'stories');
-    return stories;
-  }
-
-  async getAllStories(): Promise<StoryDocument[]> {
-    console.log('getAllStories method called');
-    const q = query(collection(db, this.collectionName), orderBy('updatedAt', 'desc'));
-    const snapshot = await getDocs(q);
-    const stories = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-      createdAt: doc.data().createdAt.toDate(),
-      updatedAt: doc.data().updatedAt.toDate()
-    } as StoryDocument));
-    console.log('getAllStories returned', stories.length, 'stories');
-    return stories;
-  }
-
-  async updateStory(storyId: string, updates: Partial<StoryDocument>): Promise<void> {
-    console.log('Updating story:', storyId, 'with updates:', updates);
-    const docRef = doc(db, this.collectionName, storyId);
+/**
+ * Update an existing story
+ */
+export const updateStory = async (id: string, updates: Partial<FilmProject>): Promise<void> => {
+  try {
+    const storyRef = doc(db, STORIES_COLLECTION, id);
     const updateData = {
       ...updates,
-      updatedAt: Timestamp.now()
+      updatedAt: Timestamp.now(),
     };
+    
+    // Remove id, createdAt from updates if they exist
     delete updateData.id;
     delete updateData.createdAt;
-
-    await updateDoc(docRef, updateData);
-    console.log('Story updated successfully:', storyId);
+    
+    await updateDoc(storyRef, updateData);
+  } catch (error) {
+    console.error('Error updating story:', error);
+    throw new Error('Failed to update story in Firebase');
   }
+};
 
-  async updateProjectConfig(storyId: string, projectConfig: ProjectConfig): Promise<void> {
-    console.log('Updating project config for story:', storyId);
-    const docRef = doc(db, this.collectionName, storyId);
-    await updateDoc(docRef, {
-      projectConfig,
-      updatedAt: Timestamp.now()
+/**
+ * Delete a story
+ */
+export const deleteStory = async (id: string): Promise<void> => {
+  try {
+    const storyRef = doc(db, STORIES_COLLECTION, id);
+    await deleteDoc(storyRef);
+  } catch (error) {
+    console.error('Error deleting story:', error);
+    throw new Error('Failed to delete story from Firebase');
+  }
+};
+
+/**
+ * Get stories by title search
+ */
+export const searchStoriesByTitle = async (searchTerm: string): Promise<FilmProject[]> => {
+  try {
+    const storiesRef = collection(db, STORIES_COLLECTION);
+    const q = query(
+      storiesRef, 
+      where('title', '>=', searchTerm),
+      where('title', '<=', searchTerm + '\uf8ff'),
+      orderBy('title'),
+      orderBy('updatedAt', 'desc')
+    );
+    
+    const querySnapshot = await getDocs(q);
+    const stories: FilmProject[] = [];
+    
+    querySnapshot.forEach((doc) => {
+      const data = doc.data() as FirebaseFilmProject;
+      stories.push({
+        ...data,
+        id: doc.id,
+        createdAt: data.createdAt.toMillis(),
+        updatedAt: data.updatedAt.toMillis(),
+      });
     });
-    console.log('Project config updated for story:', storyId);
+    
+    return stories;
+  } catch (error) {
+    console.error('Error searching stories:', error);
+    throw new Error('Failed to search stories in Firebase');
   }
+};
 
-  async updateScenes(storyId: string, scenes: Scene[]): Promise<void> {
-    console.log('Updating scenes for story:', storyId);
-    const docRef = doc(db, this.collectionName, storyId);
-    await updateDoc(docRef, {
-      scenes,
-      updatedAt: Timestamp.now()
-    });
-    console.log('Scenes updated for story:', storyId);
-  }
-
-  async addScene(storyId: string, scene: Scene): Promise<void> {
-    console.log('Adding scene to story:', storyId);
-    const docRef = doc(db, this.collectionName, storyId);
-    await updateDoc(docRef, {
-      scenes: arrayUnion(scene),
-      updatedAt: Timestamp.now()
-    });
-    console.log('Scene added to story:', storyId);
-  }
-
-  async removeScene(storyId: string, scene: Scene): Promise<void> {
-    console.log('Removing scene from story:', storyId);
-    const docRef = doc(db, this.collectionName, storyId);
-    await updateDoc(docRef, {
-      scenes: arrayRemove(scene),
-      updatedAt: Timestamp.now()
-    });
-    console.log('Scene removed from story:', storyId);
-  }
-
-  async updateCharacters(storyId: string, characters: Character[]): Promise<void> {
-    console.log('Updating characters for story:', storyId);
-    const docRef = doc(db, this.collectionName, storyId);
-    await updateDoc(docRef, {
-      characters,
-      updatedAt: Timestamp.now()
-    });
-    console.log('Characters updated for story:', storyId);
-  }
-
-  async updateLocations(storyId: string, locations: Location[]): Promise<void> {
-    console.log('Updating locations for story:', storyId);
-    const docRef = doc(db, this.collectionName, storyId);
-    await updateDoc(docRef, {
-      locations,
-      updatedAt: Timestamp.now()
-    });
-    console.log('Locations updated for story:', storyId);
-  }
-
-  async updateSounds(storyId: string, sounds: Sound[]): Promise<void> {
-    console.log('Updating sounds for story:', storyId);
-    const docRef = doc(db, this.collectionName, storyId);
-    await updateDoc(docRef, {
-      sounds,
-      updatedAt: Timestamp.now()
-    });
-    console.log('Sounds updated for story:', storyId);
-  }
-
-  async setTemplate(storyId: string, template: Template): Promise<void> {
-    console.log('Setting template for story:', storyId);
-    const docRef = doc(db, this.collectionName, storyId);
-    await updateDoc(docRef, {
-      selectedTemplate: template,
-      updatedAt: Timestamp.now()
-    });
-    console.log('Template set for story:', storyId);
-  }
-
-  async deleteStory(storyId: string): Promise<void> {
-    console.log('Deleting story:', storyId);
-    const docRef = doc(db, this.collectionName, storyId);
-    await deleteDoc(docRef);
-    console.log('Story deleted successfully:', storyId);
-  }
-
-  async duplicateStory(storyId: string, userId: string, newTitle?: string): Promise<string> {
-    console.log('Duplicating story:', storyId, 'for user:', userId);
-    const originalStory = await this.getStory(storyId);
+/**
+ * Duplicate/clone a story
+ */
+export const duplicateStory = async (originalId: string, newTitle?: string): Promise<string> => {
+  try {
+    const originalStory = await getStoryById(originalId);
     if (!originalStory) {
-      console.error('Story not found for duplication:', storyId);
-      throw new Error('Story not found');
+      throw new Error('Original story not found');
     }
+    
     const duplicatedStory = {
       ...originalStory,
       title: newTitle || `${originalStory.title} (Copy)`,
-      isPublic: false,
-      shared: false
+      isTemplate: false,
     };
-    const newStoryId = await this.createStory(userId, duplicatedStory);
-    console.log('Story duplicated successfully. Original ID:', storyId, 'New ID:', newStoryId);
-    return newStoryId;
+    
+    // Remove id, createdAt, updatedAt for the new story
+    delete duplicatedStory.id;
+    delete duplicatedStory.createdAt;
+    delete duplicatedStory.updatedAt;
+    
+    return await createStory(duplicatedStory);
+  } catch (error) {
+    console.error('Error duplicating story:', error);
+    throw new Error('Failed to duplicate story in Firebase');
   }
+};
 
-  async shareStory(storyId: string, isShared: boolean): Promise<void> {
-    console.log('Sharing story:', storyId, 'with isShared:', isShared);
-    const docRef = doc(db, this.collectionName, storyId);
-    await updateDoc(docRef, {
-      shared: isShared,
-      updatedAt: Timestamp.now()
-    });
-    console.log('Story share status updated:', storyId);
-  }
-
-  async publishStory(storyId: string, isPublic: boolean): Promise<void> {
-    console.log('Publishing story:', storyId, 'with isPublic:', isPublic);
-    const docRef = doc(db, this.collectionName, storyId);
-    await updateDoc(docRef, {
-      isPublic,
-      updatedAt: Timestamp.now()
-    });
-    console.log('Story publish status updated:', storyId);
-  }
-
-  async addTag(storyId: string, tag: string): Promise<void> {
-    console.log('Adding tag to story:', storyId, 'Tag:', tag);
-    const docRef = doc(db, this.collectionName, storyId);
-    await updateDoc(docRef, {
-      tags: arrayUnion(tag),
-      updatedAt: Timestamp.now()
-    });
-    console.log('Tag added to story:', storyId);
-  }
-
-  async removeTag(storyId: string, tag: string): Promise<void> {
-    console.log('Removing tag from story:', storyId, 'Tag:', tag);
-    const docRef = doc(db, this.collectionName, storyId);
-    await updateDoc(docRef, {
-      tags: arrayRemove(tag),
-      updatedAt: Timestamp.now()
-    });
-    console.log('Tag removed from story:', storyId);
-  }
-
-  async searchStories(userId: string, searchTerm: string): Promise<StoryDocument[]> {
-    console.log('Searching stories for user:', userId, 'with term:', searchTerm);
-    const userStories = await this.getUserStories(userId);
-    const results = userStories.filter(story =>
-      story.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      story.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      story.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
-    console.log('Search returned', results.length, 'results');
-    return results;
-  }
-
-  async getStoriesByCategory(category: string, isPublic: boolean = false): Promise<StoryDocument[]> {
-    console.log('Fetching stories by category:', category, 'isPublic:', isPublic);
+/**
+ * Get template stories (stories marked as templates)
+ */
+export const getTemplateStories = async (): Promise<FilmProject[]> => {
+  try {
+    const storiesRef = collection(db, STORIES_COLLECTION);
     const q = query(
-      collection(db, this.collectionName),
-      where('category', '==', category),
-      where('isPublic', '==', isPublic),
-      orderBy('updatedAt', 'desc')
+      storiesRef, 
+      where('isTemplate', '==', true),
+      orderBy('createdAt', 'desc')
     );
-    const snapshot = await getDocs(q);
-    const stories = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-      createdAt: doc.data().createdAt.toDate(),
-      updatedAt: doc.data().updatedAt.toDate()
-    } as StoryDocument));
-    console.log('Found', stories.length, 'stories in category:', category);
-    return stories;
+    
+    const querySnapshot = await getDocs(q);
+    const templates: FilmProject[] = [];
+    
+    querySnapshot.forEach((doc) => {
+      const data = doc.data() as FirebaseFilmProject;
+      templates.push({
+        ...data,
+        id: doc.id,
+        createdAt: data.createdAt.toMillis(),
+        updatedAt: data.updatedAt.toMillis(),
+      });
+    });
+    
+    return templates;
+  } catch (error) {
+    console.error('Error fetching template stories:', error);
+    throw new Error('Failed to fetch template stories from Firebase');
   }
-}
+};
 
-export const storiesService = new StoriesService();
+/**
+ * Batch operations for better performance
+ */
+export const batchUpdateStories = async (updates: Array<{ id: string; data: Partial<FilmProject> }>): Promise<void> => {
+  try {
+    // For simplicity, we'll do sequential updates
+    // In a production app, you might want to use Firebase batch operations
+    for (const update of updates) {
+      await updateStory(update.id, update.data);
+    }
+  } catch (error) {
+    console.error('Error batch updating stories:', error);
+    throw new Error('Failed to batch update stories in Firebase');
+  }
+};
