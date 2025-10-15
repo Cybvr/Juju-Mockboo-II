@@ -257,7 +257,9 @@ const App: React.FC = () => {
     <main className="min-h-screen w-full bg-background transition-colors duration-300">
       {renderContent()}
       
-      <AlertDialog open={!!deleteProjectId} onOpenChange={() => setDeleteProjectId(null)}>
+      <AlertDialog open={!!deleteProjectId} onOpenChange={(open) => {
+        if (!open) setDeleteProjectId(null);
+      }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Story</AlertDialogTitle>
@@ -266,7 +268,9 @@ const App: React.FC = () => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel onClick={() => setDeleteProjectId(null)}>
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDeleteProject}
               className="bg-destructive hover:bg-destructive/90"
