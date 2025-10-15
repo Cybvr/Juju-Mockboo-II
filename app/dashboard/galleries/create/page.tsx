@@ -84,10 +84,9 @@ export default function CreateGalleryPage() {
   }
 
   const generateTitle = (galleryType: string, prompt: string): string => {
-    // Take first few words of prompt and combine with type
     const promptWords = prompt.trim().split(' ').slice(0, 4).join(' ')
     const cleanType = galleryType.replace(/\s+/g, ' ')
-    return `${cleanType}: ${promptWords}`.substring(0, 80) // Limit to 80 chars
+    return `${cleanType}: ${promptWords}`.substring(0, 80)
   }
 
   const handleCreate = async () => {
@@ -106,14 +105,12 @@ export default function CreateGalleryPage() {
       const autoTitle = generateTitle(galleryType, prompt)
       let imagePrompt = prompt.trim()
 
-      // If reference image is provided, convert to base64 and include in prompt
       if (referenceImage) {
         const reader = new FileReader()
         reader.onload = async (e) => {
           const base64 = e.target?.result as string
           imagePrompt = `${prompt.trim()} (Reference image style: ${base64})`
 
-          // Create gallery with reference image
           const galleryId = await galleryService.createGallery(user.uid, {
             title: autoTitle,
             description: prompt.trim(),
@@ -124,7 +121,6 @@ export default function CreateGalleryPage() {
             tags: [galleryType.toLowerCase().replace(/\s+/g, '-')]
           })
 
-          // Auto-generate images immediately
           const response = await fetch('/api/galleries/generate', {
             method: 'POST',
             headers: {
@@ -151,7 +147,6 @@ export default function CreateGalleryPage() {
         }
         reader.readAsDataURL(referenceImage)
       } else {
-        // Create gallery without reference image
         const galleryId = await galleryService.createGallery(user.uid, {
           title: autoTitle,
           description: prompt.trim(),
@@ -162,7 +157,6 @@ export default function CreateGalleryPage() {
           tags: [galleryType.toLowerCase().replace(/\s+/g, '-')]
         })
 
-        // Auto-generate images immediately
         const response = await fetch('/api/galleries/generate', {
           method: 'POST',
           headers: {
@@ -196,8 +190,8 @@ export default function CreateGalleryPage() {
   }
 
   return (
-    <div className="min-h-screen ">
-      <div className="container mx-auto px-4 py-8 max-w-3xl items-center text-center">
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="container mx-auto px-4 max-w-3xl">
         <div className="mb-8">
           <h1 className="text-xl font-semibold text-center text-foreground mb-2">What would you like to make?</h1>
         </div>
