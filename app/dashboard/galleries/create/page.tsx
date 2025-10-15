@@ -70,47 +70,8 @@ export default function CreateGalleryPage() {
         tags: [galleryType.toLowerCase().replace(/\s+/g, '-')]
       });
 
-      // Auto-generate first batch of images
-      const response = await fetch('/api/generate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-user-id': user.uid,
-        },
-        body: JSON.stringify({
-          mode: 'text',
-          prompt: prompt.trim(),
-          settings: {
-            outputs: '4',
-            aspectRatio: '1:1'
-          }
-        }),
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-
-        // Convert generated images to gallery format
-        const galleryImages = result.images.map((url: string, index: number) => ({
-          id: `${Date.now()}_${index}`,
-          url: url,
-          prompt: prompt.trim(),
-          createdAt: Date.now(),
-          aspectRatio: '1:1'
-        }));
-
-        // Update gallery with generated images
-        await galleryService.updateGallery(galleryId, {
-          images: galleryImages,
-          updatedAt: Date.now()
-        });
-
-        toast.success(`Generated ${result.count} images successfully!`);
-        router.push(`/dashboard/galleries/${galleryId}`);
-      } else {
-        const error = await response.json();
-        toast.error(error.error || 'Failed to generate images');
-      }
+      toast.success('Gallery created successfully!');
+      router.push(`/dashboard/galleries/${galleryId}`);
     } catch (error) {
       console.error('Failed to create gallery:', error);
       toast.error('Failed to create gallery');
