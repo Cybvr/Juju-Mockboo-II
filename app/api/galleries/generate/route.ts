@@ -1,8 +1,5 @@
-
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
-import { galleryService } from '@/services/galleryService';
-import type { GalleryImage } from '@/types/gallery';
 
 const genAI = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY || ''
@@ -10,11 +7,11 @@ const genAI = new GoogleGenAI({
 
 export async function POST(request: NextRequest) {
   try {
-    const { galleryId, prompt, aspectRatio = '1:1', outputs = 4 } = await request.json();
+    const { prompt, aspectRatio = '1:1', outputs = 4 } = await request.json();
 
-    if (!galleryId || !prompt) {
+    if (!prompt) {
       return NextResponse.json(
-        { error: 'Gallery ID and prompt are required' },
+        { error: 'Prompt is required' },
         { status: 400 }
       );
     }
@@ -46,34 +43,17 @@ export async function POST(request: NextRequest) {
       throw new Error('No images were generated');
     }
 
-    // Get current gallery (simplified - no user validation)
-    const gallery = await galleryService.getGalleryById(galleryId);
-    if (!gallery) {
-      return NextResponse.json({ error: 'Gallery not found' }, { status: 404 });
-    }
-
-    // Create new gallery images
-    const newImages: GalleryImage[] = generatedImages.map((url, index) => ({
-      id: `${Date.now()}_${index}`,
-      url: url,
-      prompt: prompt,
-      createdAt: Date.now(),
-      aspectRatio: aspectRatio
-    }));
-
-    // Update gallery with new images
-    const updatedGallery = {
-      ...gallery,
-      images: [...gallery.images, ...newImages],
-      updatedAt: Date.now()
-    };
-
-    await galleryService.updateGallery(galleryId, updatedGallery);
-
+    // Just return the generated images - no Firebase mess
     return NextResponse.json({
       success: true,
-      images: newImages,
-      count: newImages.length
+      images: generatedImages.map((url, index) => ({
+        id: `${Date.now()}_${index}`,
+        url: url,
+        prompt: prompt,
+        createdAt: Date.now(),
+        aspectRatio: aspectRatio
+      })),
+      count: generatedImages.length
     });
 
   } catch (error) {

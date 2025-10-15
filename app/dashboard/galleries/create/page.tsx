@@ -84,12 +84,21 @@ export default function CreateGalleryPage() {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to generate initial images');
-      }
+      if (response.ok) {
+        const result = await response.json();
 
-      toast.success('Gallery created and generating images...');
-      router.push(`/dashboard/galleries/${galleryId}`);
+        // Update gallery with generated images
+        await galleryService.updateGallery(galleryId, {
+          images: result.images,
+          updatedAt: Date.now()
+        });
+
+        toast.success(`Generated ${result.count} images successfully!`);
+        router.push(`/dashboard/galleries/${galleryId}`);
+      } else {
+        const error = await response.json();
+        toast.error(error.error || 'Failed to generate images');
+      }
     } catch (error) {
       console.error('Failed to create gallery:', error);
       toast.error('Failed to create gallery');
@@ -173,9 +182,9 @@ export default function CreateGalleryPage() {
             />
           </div>
 
-          <Button 
-            onClick={handleCreate} 
-            className="w-full gap-2" 
+          <Button
+            onClick={handleCreate}
+            className="w-full gap-2"
             disabled={isCreating}
           >
             {isCreating ? (
