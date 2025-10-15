@@ -22,7 +22,7 @@ interface FilmEditorProps {
     onToggleTheme: () => void;
 }
 
-type ActiveTab = 'script' | 'storyboard' | 'assets' | 'video' | 'stitch';
+type ActiveTab = 'script' | 'storyboard' | 'assets' | 'video' | 'stitch' | 'settings';
 
 const ShareProjectContent: React.FC<{project: FilmProject}> = ({ project }) => {
     const [shareLink, setShareLink] = useState('Generating link...');
@@ -90,10 +90,9 @@ const ShareProjectContent: React.FC<{project: FilmProject}> = ({ project }) => {
 
 
 const ProfileDropdown: React.FC<{
-    onOpenSettings: () => void;
     onToggleTheme: () => void;
     theme: 'light' | 'dark';
-}> = ({ onOpenSettings, onToggleTheme, theme }) => {
+}> = ({ onToggleTheme, theme }) => {
 
     return (
         <DropdownMenu>
@@ -103,10 +102,6 @@ const ProfileDropdown: React.FC<{
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuItem onClick={onOpenSettings}>
-                    <Settings className="w-4 h-4 mr-2" />
-                    Project Settings
-                </DropdownMenuItem>
                 <DropdownMenuItem onClick={onToggleTheme}>
                     {theme === 'dark' ? <Sun className="w-4 h-4 mr-2" /> : <Moon className="w-4 h-4 mr-2" />}
                     Switch to {theme === 'dark' ? 'Light' : 'Dark'} Mode
@@ -128,7 +123,7 @@ export const FilmEditor: React.FC<FilmEditorProps> = ({ project, onUpdateProject
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [analysisError, setAnalysisError] = useState<string | null>(null);
     
-    const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+    
     const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
     useEffect(() => {
@@ -218,6 +213,8 @@ export const FilmEditor: React.FC<FilmEditorProps> = ({ project, onUpdateProject
                 return <VideoStudio project={project} onUpdateProject={onUpdateProject} />;
              case 'stitch':
                 return <StitchEditor project={project} onUpdateProject={onUpdateProject} />;
+            case 'settings':
+                return <ProjectSettings settings={project.settings} onUpdate={(newSettings) => onUpdateProject({...project, settings: newSettings})} />;
             default:
                 return null;
         }
@@ -243,7 +240,6 @@ export const FilmEditor: React.FC<FilmEditorProps> = ({ project, onUpdateProject
                         Share
                     </Button>
                     <ProfileDropdown
-                        onOpenSettings={() => setIsSettingsModalOpen(true)}
                         onToggleTheme={onToggleTheme}
                         theme={theme}
                     />
@@ -260,15 +256,14 @@ export const FilmEditor: React.FC<FilmEditorProps> = ({ project, onUpdateProject
                     <TabButton tabName="assets" label="Assets" icon={<User className="w-5 h-5" />} />
                     <TabButton tabName="video" label="Video" icon={<Film className="w-5 h-5" />} />
                     <TabButton tabName="stitch" label="Stitch" icon={<GripVertical className="w-5 h-5" />} />
+                    <TabButton tabName="settings" label="Settings" icon={<Settings className="w-5 h-5" />} />
                 </nav>
                 <main className="flex-grow h-full overflow-y-auto">
                     {renderActiveTab()}
                 </main>
             </div>
             
-            <Modal isOpen={isSettingsModalOpen} onClose={() => setIsSettingsModalOpen(false)} title="Project Settings">
-                <ProjectSettings settings={project.settings} onUpdate={(newSettings) => onUpdateProject({...project, settings: newSettings})} />
-            </Modal>
+            
             <Modal isOpen={isShareModalOpen} onClose={() => setIsShareModalOpen(false)} title="Share Project">
                <ShareProjectContent project={project} />
             </Modal>
