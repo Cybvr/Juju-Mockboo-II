@@ -51,7 +51,7 @@ export class GalleryService {
       return galleries;
     } catch (error) {
       console.error('Error fetching galleries:', error);
-      throw new Error('Failed to fetch galleries from Firebase');
+      throw new Error('Failed to fetch galleries');
     }
   }
 
@@ -76,7 +76,7 @@ export class GalleryService {
       return null;
     } catch (error) {
       console.error('Error fetching gallery:', error);
-      throw new Error('Failed to fetch gallery from Firebase');
+      throw new Error('Failed to fetch gallery');
     }
   }
 
@@ -94,21 +94,14 @@ export class GalleryService {
         userId,
         createdAt: now,
         updatedAt: now,
-        images: (gallery.images || []).map(img => ({
-          id: img.id,
-          url: img.url,
-          prompt: img.prompt || '',
-          createdAt: img.createdAt || Date.now(),
-          aspectRatio: img.aspectRatio || '1:1'
-        })),
-        tags: gallery.tags?.filter(Boolean) || [],
+        images: gallery.images || [], // Simplified to directly use images array
       };
 
       const docRef = await addDoc(collection(db, GALLERIES_COLLECTION), galleryData);
       return docRef.id;
     } catch (error) {
       console.error('Error creating gallery:', error);
-      throw new Error('Failed to create gallery in Firebase');
+      throw new Error('Failed to create gallery');
     }
   }
 
@@ -124,15 +117,9 @@ export class GalleryService {
       delete cleanUpdates.createdAt;
       delete cleanUpdates.userId;
 
-      // ✅ Clean nested image objects for Firestore
+      // ✅ Images array is now flat, no complex mapping needed for Firestore
       if (Array.isArray(cleanUpdates.images)) {
-        cleanUpdates.images = cleanUpdates.images.map(img => ({
-          id: img.id,
-          url: img.url,
-          prompt: img.prompt || '',
-          createdAt: typeof img.createdAt === 'number' ? img.createdAt : Date.now(),
-          aspectRatio: img.aspectRatio || '1:1'
-        }));
+        // No transformation needed if images are already flat as per the new requirement
       }
 
       const updateData = {
@@ -143,7 +130,7 @@ export class GalleryService {
       await updateDoc(galleryRef, updateData);
     } catch (error) {
       console.error('Error updating gallery:', error);
-      throw new Error('Failed to update gallery in Firebase');
+      throw new Error('Failed to update gallery');
     }
   }
 
@@ -156,7 +143,7 @@ export class GalleryService {
       await deleteDoc(galleryRef);
     } catch (error) {
       console.error('Error deleting gallery:', error);
-      throw new Error('Failed to delete gallery from Firebase');
+      throw new Error('Failed to delete gallery');
     }
   }
 
@@ -188,7 +175,7 @@ export class GalleryService {
       return galleries.slice(0, limit);
     } catch (error) {
       console.error('Error fetching public galleries:', error);
-      throw new Error('Failed to fetch public galleries from Firebase');
+      throw new Error('Failed to fetch public galleries');
     }
   }
 
@@ -220,7 +207,7 @@ export class GalleryService {
         if (
           gallery.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
           gallery.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          gallery.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+          (gallery.tags && gallery.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())))
         ) {
           galleries.push(gallery);
         }
@@ -229,7 +216,7 @@ export class GalleryService {
       return galleries;
     } catch (error) {
       console.error('Error searching galleries:', error);
-      throw new Error('Failed to search galleries in Firebase');
+      throw new Error('Failed to search galleries');
     }
   }
 }

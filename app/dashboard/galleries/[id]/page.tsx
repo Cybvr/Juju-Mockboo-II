@@ -4,33 +4,17 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Sparkles, Download, Trash2, Plus, Grid, List, Eye } from 'lucide-react';
+import { ArrowLeft, Sparkles, Download, Trash2, Grid, List } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { galleryService } from '@/services/galleryService';
-import type { Gallery, GalleryImage } from '@/types/gallery';
+import type { Gallery } from '@/types/gallery';
 import { toast } from 'sonner';
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 
 interface GalleryPageProps {
   params: Promise<{ id: string }>;
 }
-
-const aspectRatios = [
-  { label: '1:1 (Square)', value: '1:1' },
-  { label: '16:9 (Landscape)', value: '16:9' },
-  { label: '9:16 (Portrait)', value: '9:16' },
-  { label: '4:3 (Standard)', value: '4:3' },
-  { label: '3:4 (Portrait)', value: '3:4' }
-];
 
 export default function GalleryPage({ params }: GalleryPageProps) {
   const { id } = use(params);
@@ -41,20 +25,12 @@ export default function GalleryPage({ params }: GalleryPageProps) {
   const [generating, setGenerating] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [prompt, setPrompt] = useState('');
-  const [aspectRatio, setAspectRatio] = useState('1:1');
-  const [selectedImages, setSelectedImages] = useState<string[]>([]);
 
   useEffect(() => {
     if (user) {
       loadGallery();
     }
   }, [user, id]);
-
-  useEffect(() => {
-    if (gallery && gallery.images.length === 0 && gallery.prompt && !generating) {
-      handleGenerate();
-    }
-  }, [gallery]);
 
   const loadGallery = async () => {
     if (!user) return;
@@ -91,8 +67,7 @@ export default function GalleryPage({ params }: GalleryPageProps) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          prompt: `${gallery.prompt ? gallery.prompt + ', ' : ''}${prompt}`,
-          aspectRatio: aspectRatio,
+          prompt: prompt,
           outputs: 4
         }),
       });
@@ -102,17 +77,7 @@ export default function GalleryPage({ params }: GalleryPageProps) {
       }
 
       const data = await response.json();
-
-      const timestamp = Date.now();
-      const newImages: GalleryImage[] = data.images.map((url: string, index: number) => ({
-        id: `${timestamp}_${index}`,
-        url: url,
-        prompt: prompt,
-        createdAt: timestamp,
-        aspectRatio: aspectRatio
-      }));
-
-      const updatedImages = [...gallery.images, ...newImages];
+      const updatedImages = [...gallery.images, ...data.images];
 
       await galleryService.updateGallery(gallery.id, { 
         images: updatedImages 
@@ -121,11 +86,11 @@ export default function GalleryPage({ params }: GalleryPageProps) {
       setGallery({
         ...gallery,
         images: updatedImages,
-        updatedAt: timestamp
+        updatedAt: Date.now()
       });
 
       setPrompt('');
-      toast.success(`Generated ${newImages.length} images successfully`);
+      toast.success(`Generated ${data.images.length} images successfully`);
     } catch (error) {
       console.error('Failed to generate images:', error);
       toast.error('Failed to generate images');
@@ -134,12 +99,12 @@ export default function GalleryPage({ params }: GalleryPageProps) {
     }
   };
 
-  const handleDeleteImage = async (imageId: string) => {
+  const handleDeleteImage = async (imageIndex: number) => {
     if (!gallery) return;
     if (!confirm('Are you sure you want to delete this image?')) return;
 
     try {
-      const updatedImages = gallery.images.filter(img => img.id !== imageId);
+      const updatedImages = gallery.images.filter((_, index) => index !== imageIndex);
 
       await galleryService.updateGallery(gallery.id, { 
         images: updatedImages 
@@ -158,14 +123,14 @@ export default function GalleryPage({ params }: GalleryPageProps) {
     }
   };
 
-  const handleDownload = async (imageUrl: string, imageId: string) => {
+  const handleDownload = async (imageUrl: string, index: number) => {
     try {
       const response = await fetch(imageUrl);
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `gallery_${gallery?.title}_${imageId}.png`;
+      link.download = `gallery_${gallery?.title}_${index}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -235,31 +200,14 @@ export default function GalleryPage({ params }: GalleryPageProps) {
 
       <div className="mb-8 p-6 border rounded-lg">
         <div className="space-y-4">
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <label className="text-sm font-medium mb-2 block">Prompt</label>
-              <Textarea
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                placeholder={`Add specific details for your ${gallery.type.toLowerCase()}...`}
-                rows={3}
-              />
-            </div>
-            <div className="w-48">
-              <label className="text-sm font-medium mb-2 block">Aspect Ratio</label>
-              <Select value={aspectRatio} onValueChange={setAspectRatio}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {aspectRatios.map(ratio => (
-                    <SelectItem key={ratio.value} value={ratio.value}>
-                      {ratio.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          <div>
+            <label className="text-sm font-medium mb-2 block">Prompt</label>
+            <Textarea
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              placeholder={`Add details for your ${gallery.type.toLowerCase()}...`}
+              rows={3}
+            />
           </div>
           <Button 
             onClick={handleGenerate} 
@@ -278,6 +226,7 @@ export default function GalleryPage({ params }: GalleryPageProps) {
 
       {gallery.images.length === 0 ? (
         <div className="text-center py-20">
+          <p className="text-muted-foreground">No images yet. Generate some above!</p>
         </div>
       ) : (
         <div className={`grid gap-4 ${
@@ -285,41 +234,32 @@ export default function GalleryPage({ params }: GalleryPageProps) {
             ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4' 
             : 'grid-cols-1'
         }`}>
-          {gallery.images.map((image) => (
-            <Card key={image.id} className="group overflow-hidden">
+          {gallery.images.map((imageUrl, index) => (
+            <Card key={index} className="group overflow-hidden">
               <CardContent className="p-0">
                 <div className="relative aspect-square">
                   <img
-                    src={image.url}
-                    alt={image.prompt}
+                    src={imageUrl}
+                    alt={`Generated image ${index + 1}`}
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                     <Button
                       size="icon"
                       variant="secondary"
-                      onClick={() => handleDownload(image.url, image.id)}
+                      onClick={() => handleDownload(imageUrl, index)}
                     >
                       <Download className="w-4 h-4" />
                     </Button>
                     <Button
                       size="icon"
                       variant="destructive"
-                      onClick={() => handleDeleteImage(image.id)}
+                      onClick={() => handleDeleteImage(index)}
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
                 </div>
-                {viewMode === 'list' && (
-                  <div className="p-4">
-                    <p className="text-sm mb-2">{image.prompt}</p>
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span>{image.aspectRatio}</span>
-                      <span>{new Date(image.createdAt).toLocaleDateString()}</span>
-                    </div>
-                  </div>
-                )}
               </CardContent>
             </Card>
           ))}
