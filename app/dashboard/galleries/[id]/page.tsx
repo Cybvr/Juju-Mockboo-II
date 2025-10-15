@@ -383,11 +383,11 @@ export default function GalleryPage({ params }: GalleryPageProps) {
           onClick={() => setSelectedImageIndex(null)}
         >
           <div 
-            className="bg-white rounded-2xl shadow-2xl max-w-7xl w-full max-h-[90vh] flex overflow-hidden"
+            className="bg-card rounded-2xl shadow-2xl max-w-7xl w-full max-h-[90vh] flex overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Image Section */}
-            <div className="flex-1 flex items-center justify-center bg-gray-50 relative">
+            <div className="flex-1 flex items-center justify-center bg-card relative">
               <Button
                 size="icon"
                 variant="ghost"
@@ -426,7 +426,7 @@ export default function GalleryPage({ params }: GalleryPageProps) {
             </div>
 
             {/* Info Panel */}
-            <div className="w-96 bg-white flex flex-col">
+            <div className="w-96 bg-card flex flex-col">
               {/* Header */}
               <div className="p-6 border-b">
                 <div className="flex items-center justify-between">
