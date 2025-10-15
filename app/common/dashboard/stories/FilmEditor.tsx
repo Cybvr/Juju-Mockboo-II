@@ -1,10 +1,10 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import type { FilmProject } from '@/types/storytypes';
-import { ArrowLeft, Share2, User, Settings, Sun, Moon, LogOut, FileText, Camera, GripVertical, Film } from 'lucide-react';
+import { ArrowLeft, Share2, FileText, Camera, GripVertical, Film } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { ProfileDropdown } from '@/app/common/dashboard/ProfileDropdown';
 import { StoryboardEditor } from './StoryboardEditor';
 import { AssetManager } from './AssetManager';
 import { ProjectSettings } from './ProjectSettings';
@@ -89,32 +89,7 @@ const ShareProjectContent: React.FC<{project: FilmProject}> = ({ project }) => {
 };
 
 
-const ProfileDropdown: React.FC<{
-    onToggleTheme: () => void;
-    theme: 'light' | 'dark';
-}> = ({ onToggleTheme, theme }) => {
 
-    return (
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="w-10 h-10 rounded-full">
-                    <User className="w-6 h-6" />
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuItem onClick={onToggleTheme}>
-                    {theme === 'dark' ? <Sun className="w-4 h-4 mr-2" /> : <Moon className="w-4 h-4 mr-2" />}
-                    Switch to {theme === 'dark' ? 'Light' : 'Dark'} Mode
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => alert('Logout is not yet implemented.')} className="text-destructive">
-                    <LogOut className="w-4 h-4 mr-2" />
-                    Logout
-                </DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
-    );
-};
 
 export const FilmEditor: React.FC<FilmEditorProps> = ({ project, onUpdateProject, onBackToDashboard, theme, onToggleTheme }) => {
     const [activeTab, setActiveTab] = useState<ActiveTab>('script');
@@ -239,10 +214,7 @@ export const FilmEditor: React.FC<FilmEditorProps> = ({ project, onUpdateProject
                         <Share2 className="w-5 h-5" />
                         Share
                     </Button>
-                    <ProfileDropdown
-                        onToggleTheme={onToggleTheme}
-                        theme={theme}
-                    />
+                    <ProfileDropdown />
                 </div>
             </header>
             
