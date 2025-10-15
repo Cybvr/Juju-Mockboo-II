@@ -1,4 +1,4 @@
-
+// @/types/gallery.ts
 export interface GalleryImage {
   id: string;
   url: string;

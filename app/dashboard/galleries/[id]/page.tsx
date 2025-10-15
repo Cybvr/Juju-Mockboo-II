@@ -19,7 +19,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Timestamp } from 'firebase/firestore'; // Import Timestamp
 
 interface GalleryPageProps {
   params: Promise<{ id: string }>;
@@ -104,25 +103,27 @@ export default function GalleryPage({ params }: GalleryPageProps) {
 
       const data = await response.json();
 
-      // Create image objects with plain data (Firebase-friendly)
       const timestamp = Date.now();
       const newImages: GalleryImage[] = data.images.map((url: string, index: number) => ({
         id: `${timestamp}_${index}`,
         url: url,
         prompt: prompt,
-        createdAt: timestamp,  // ✓ Plain number
+        createdAt: timestamp,
         aspectRatio: aspectRatio
       }));
 
-      const updatedGallery = {
-        ...gallery,
-        images: [...gallery.images, ...newImages],
-        updatedAt: timestamp // Use timestamp for consistency
-      };
+      const updatedImages = [...gallery.images, ...newImages];
 
-      // Use galleryService.updateGallery with only necessary updates
-      await galleryService.updateGallery(gallery.id, { images: updatedGallery.images, updatedAt: Timestamp.now() });
-      setGallery(updatedGallery);
+      await galleryService.updateGallery(gallery.id, { 
+        images: updatedImages 
+      });
+
+      setGallery({
+        ...gallery,
+        images: updatedImages,
+        updatedAt: timestamp
+      });
+
       setPrompt('');
       toast.success(`Generated ${newImages.length} images successfully`);
     } catch (error) {
@@ -139,14 +140,17 @@ export default function GalleryPage({ params }: GalleryPageProps) {
 
     try {
       const updatedImages = gallery.images.filter(img => img.id !== imageId);
-      const updatedGallery = {
+
+      await galleryService.updateGallery(gallery.id, { 
+        images: updatedImages 
+      });
+
+      setGallery({
         ...gallery,
         images: updatedImages,
         updatedAt: Date.now()
-      };
+      });
 
-      await galleryService.updateGallery(gallery.id, updatedGallery);
-      setGallery(updatedGallery);
       toast.success('Image deleted successfully');
     } catch (error) {
       console.error('Failed to delete image:', error);
@@ -229,61 +233,51 @@ export default function GalleryPage({ params }: GalleryPageProps) {
         </div>
       </div>
 
-      <Card className="mb-8">
-        <CardContent className="p-6">
-          {gallery.prompt && (
-            <div className="mb-4 p-3 bg-muted rounded-lg">
-              <p className="text-sm">{gallery.prompt}</p>
+      <div className="mb-8 p-6 border rounded-lg">
+        <div className="space-y-4">
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <label className="text-sm font-medium mb-2 block">Prompt</label>
+              <Textarea
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                placeholder={`Add specific details for your ${gallery.type.toLowerCase()}...`}
+                rows={3}
+              />
             </div>
-          )}
-          <div className="space-y-4">
-            <div className="flex gap-4">
-              <div className="flex-1">
-                <label className="text-sm font-medium mb-2 block">Your Prompt</label>
-                <Textarea
-                  value={prompt}
-                  onChange={(e) => setPrompt(e.target.value)}
-                  placeholder={`Add specific details for your ${gallery.type.toLowerCase()}...`}
-                  rows={3}
-                />
-              </div>
-              <div className="w-48">
-                <label className="text-sm font-medium mb-2 block">Aspect Ratio</label>
-                <Select value={aspectRatio} onValueChange={setAspectRatio}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {aspectRatios.map(ratio => (
-                      <SelectItem key={ratio.value} value={ratio.value}>
-                        {ratio.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+            <div className="w-48">
+              <label className="text-sm font-medium mb-2 block">Aspect Ratio</label>
+              <Select value={aspectRatio} onValueChange={setAspectRatio}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {aspectRatios.map(ratio => (
+                    <SelectItem key={ratio.value} value={ratio.value}>
+                      {ratio.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-            <Button 
-              onClick={handleGenerate} 
-              disabled={generating || !prompt.trim()}
-              className="gap-2"
-            >
-              {generating ? (
-                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <Sparkles className="w-4 h-4" />
-              )}
-              {generating ? 'Generating 4 Images...' : 'Generate 4 Images'}
-            </Button>
           </div>
-        </CardContent>
-      </Card>
+          <Button 
+            onClick={handleGenerate} 
+            disabled={generating || !prompt.trim()}
+            className="gap-2"
+          >
+            {generating ? (
+              <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Sparkles className="w-4 h-4" />
+            )}
+            {generating ? 'Generating 4 Images...' : 'Generate 4 Images'}
+          </Button>
+        </div>
+      </div>
 
       {gallery.images.length === 0 ? (
         <div className="text-center py-20">
-          <Grid className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-          <h3 className="text-xl font-semibold mb-2">No images yet</h3>
-          <p className="text-muted-foreground">Generate your first set of images above</p>
         </div>
       ) : (
         <div className={`grid gap-4 ${
