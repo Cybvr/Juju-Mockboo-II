@@ -6,6 +6,16 @@ import { FilmEditor } from '@/app/common/dashboard/stories/FilmEditor';
 import { CreationHub } from '@/app/common/dashboard/stories/CreationHub';
 import { templates } from '@/data/filmTemplates';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
   getAllStories,
   createStory,
   updateStory,
@@ -20,6 +30,7 @@ const App: React.FC = () => {
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
   const [theme, setTheme] = useState<Theme>('light');
   const [loading, setLoading] = useState(true);
+  const [deleteProjectId, setDeleteProjectId] = useState<string | null>(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -139,15 +150,23 @@ const App: React.FC = () => {
     setActiveProjectId(null);
   };
 
-  const handleDeleteProject = async (id: string) => {
+  const handleDeleteProject = (id: string) => {
+    setDeleteProjectId(id);
+  };
+
+  const confirmDeleteProject = async () => {
+    if (!deleteProjectId) return;
+    
     try {
-      await deleteStory(id);
-      setProjects(prevProjects => prevProjects.filter(p => p.id !== id));
-      if (activeProjectId === id) {
-          setActiveProjectId(null);
+      await deleteStory(deleteProjectId);
+      setProjects(prevProjects => prevProjects.filter(p => p.id !== deleteProjectId));
+      if (activeProjectId === deleteProjectId) {
+        setActiveProjectId(null);
       }
     } catch (error) {
       console.error('Failed to delete project:', error);
+    } finally {
+      setDeleteProjectId(null);
     }
   };
 
@@ -237,6 +256,26 @@ const App: React.FC = () => {
   return (
     <main className="min-h-screen w-full bg-background transition-colors duration-300">
       {renderContent()}
+      
+      <AlertDialog open={!!deleteProjectId} onOpenChange={() => setDeleteProjectId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Story</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this story? This action cannot be undone and will permanently remove all content.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteProject}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              Delete Story
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </main>
   );
 };
