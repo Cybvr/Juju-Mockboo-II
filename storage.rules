@@ -90,7 +90,8 @@ service firebase.storage {
 
     // Gallery images - public read, server write
     match /galleries/{fileName} {
-      allow read, write: if true; // Allow server-side uploads from API
+      allow read: if true; // Gallery images are publicly readable
+      allow write: if true; // Allow server-side uploads from API
     }
 
     // Deny all other access
