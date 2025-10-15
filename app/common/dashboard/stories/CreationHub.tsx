@@ -1,11 +1,10 @@
-
 import React, { useState, useCallback } from 'react';
 import type { FilmProject, Template } from '@/types/storytypes';
 import { Sparkles, FileText, Palette, ArrowLeft, Dices, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
-import { generateScript } from '@/services/filmService';
+import { generateScript, analyzeScript } from '@/services/filmService'; // Import analyzeScript
 import { TemplateBrowser } from './TemplateBrowser';
 
 interface CreationHubProps {
@@ -26,42 +25,113 @@ export const CreationHub: React.FC<CreationHubProps> = ({ project, templates, on
     const [prompt, setPrompt] = useState('');
     const [script, setScript] = useState('');
     const [activeMethod, setActiveMethod] = useState<'generate' | 'paste' | 'template' | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(false); // This state is not used in the new logic, but keeping it for now
+    const [isGeneratingScript, setIsGeneratingScript] = useState(false); // New state for AI script generation
+    const [isAnalyzingScript, setIsAnalyzingScript] = useState(false); // New state for script analysis
     const [error, setError] = useState<string | null>(null);
     const [isTemplateBrowserOpen, setIsTemplateBrowserOpen] = useState(false);
 
+    // Updated handleGenerateScript to use the new state and logic
     const handleGenerateScript = useCallback(async () => {
         if (!prompt.trim()) {
             setError("Please enter a film idea.");
             return;
         }
-        setIsLoading(true);
+        setIsGeneratingScript(true);
         setError(null);
         try {
             const generatedScript = await generateScript(prompt);
+            // Update project with the generated script and prompt
             onUpdateProject({ ...project, script: generatedScript, prompt, updatedAt: Date.now() });
         } catch (err: any) {
             setError(err.message || 'An unknown error occurred.');
         } finally {
-            setIsLoading(false);
+            setIsGeneratingScript(false);
         }
     }, [prompt, onUpdateProject, project]);
 
-    const handlePasteScript = () => {
+    // Updated handlePasteScript to use the new state and logic
+    const handlePasteScript = useCallback(() => {
         if (!script.trim()) {
             setError("Please paste your script.");
             return;
         }
         setError(null);
+        // Update project with the pasted script
         onUpdateProject({ ...project, script, updatedAt: Date.now() });
-    };
-    
-    const handleInspireMe = () => {
+    }, [script, onUpdateProject, project]);
+
+    // New function to handle script analysis
+    const handleAnalyzeScript = useCallback(async () => {
+        if (!script.trim()) {
+            setError("Please paste your script.");
+            return;
+        }
+        setIsAnalyzingScript(true);
+        setError(null);
+        try {
+            const analyzed = await analyzeScript(script);
+
+            // Convert analyzed data to project format
+            const storyboard = analyzed.storyboard.map((scene, index) => ({
+                id: `scene_${Date.now()}_${index}`,
+                scene_number: scene.scene_number,
+                prompt: scene.prompt,
+                imageUrl: null,
+                generating: false,
+                videoUrl: null,
+                videoGenerating: false,
+                characterId: null,
+                locationId: null,
+                soundId: null,
+            }));
+
+            const characters = analyzed.characters.map((char, index) => ({
+                id: `char_${Date.now()}_${index}`,
+                name: char.name,
+                description: char.description,
+                imageUrl: null,
+                generatingImage: false,
+            }));
+
+            const locations = analyzed.locations.map((loc, index) => ({
+                id: `loc_${Date.now()}_${index}`,
+                name: loc.name,
+                description: loc.description,
+                imageUrl: null,
+                generatingImage: false,
+            }));
+
+            const sound_design = analyzed.sound_design.map((sound, index) => ({
+                id: `sound_${Date.now()}_${index}`,
+                scene_match: sound.scene_match,
+                description: sound.description,
+            }));
+
+            const updatedProject = {
+                ...project,
+                script: script, // Keep the original script in the project
+                storyboard,
+                characters,
+                locations,
+                sound_design,
+                updatedAt: Date.now(),
+            };
+            onUpdateProject(updatedProject);
+        } catch (err: any) {
+            setError(err.message || 'An unknown error occurred during analysis.');
+        } finally {
+            setIsAnalyzingScript(false);
+        }
+    }, [script, onUpdateProject, project]);
+
+
+    const handleInspireMe = useCallback(() => {
         const randomIndex = Math.floor(Math.random() * samplePrompts.length);
         setPrompt(samplePrompts[randomIndex]);
-    };
+    }, []);
 
-    const handleSelectTemplate = (template: Template) => {
+    const handleSelectTemplate = useCallback((template: Template) => {
         const remixedProject: FilmProject = {
             ...template,
             id: project.id,
@@ -72,13 +142,14 @@ export const CreationHub: React.FC<CreationHubProps> = ({ project, templates, on
         };
         onUpdateProject(remixedProject);
         setIsTemplateBrowserOpen(false);
-    };
+    }, [project, onUpdateProject]);
 
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-           handleGenerateScript();
+           // This would trigger script generation if it were attached to the textarea,
+           // but it's currently attached to a button. For consistency, let's keep it on the button.
         }
-    }
+    }, []);
 
     const MethodButton: React.FC<{
         method: 'generate' | 'paste' | 'template';
@@ -95,6 +166,8 @@ export const CreationHub: React.FC<CreationHubProps> = ({ project, templates, on
                     setIsTemplateBrowserOpen(true);
                 } else {
                     setActiveMethod(method);
+                    // Clear errors when switching methods
+                    setError(null);
                 }
             }}
         >
@@ -126,7 +199,7 @@ export const CreationHub: React.FC<CreationHubProps> = ({ project, templates, on
                     <ArrowLeft className="w-4 h-4" />
                     All Projects
                 </Button>
-                
+
                 <Sparkles className="w-16 h-16 text-primary mb-4" />
                 <h1 className="text-4xl md:text-5xl font-bold text-center mb-4">
                     How would you like to get started?
@@ -147,7 +220,7 @@ export const CreationHub: React.FC<CreationHubProps> = ({ project, templates, on
                             <Textarea 
                                 value={prompt} 
                                 onChange={(e) => setPrompt(e.target.value)} 
-                                onKeyDown={handleKeyDown} 
+                                // onKeyDown={handleKeyDown} // Removed as generate is now on button
                                 placeholder="e.g., A detective in a neon-lit 1940s city discovers a conspiracy..." 
                                 className="min-h-28 pr-16"
                             />
@@ -155,9 +228,9 @@ export const CreationHub: React.FC<CreationHubProps> = ({ project, templates, on
                                 onClick={handleGenerateScript} 
                                 className="absolute top-1/2 right-4 -translate-y-1/2"
                                 size="icon"
-                                disabled={!prompt.trim() || isLoading}
+                                disabled={!prompt.trim() || isGeneratingScript} // Use new loading state
                             >
-                                {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                                {isGeneratingScript ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
                             </Button>
                         </div>
                         <div className="flex justify-center">
@@ -177,11 +250,12 @@ export const CreationHub: React.FC<CreationHubProps> = ({ project, templates, on
                             className="min-h-48 font-mono text-sm"
                         />
                         <Button 
-                            onClick={handlePasteScript}
+                            onClick={handleAnalyzeScript} // Use the new analyze script function
                             className="w-full"
-                            disabled={!script.trim()}
+                            disabled={!script.trim() || isAnalyzingScript} // Use new loading state
                         >
-                            Continue with Script
+                            {isAnalyzingScript ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <FileText className="w-4 h-4 mr-2" />}
+                            {isAnalyzingScript ? 'Analyzing...' : 'Analyze Script'}
                         </Button>
                     </div>
                 )}
