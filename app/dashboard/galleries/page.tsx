@@ -138,8 +138,8 @@ export default function GalleriesPage() {
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold">My Galleries</h1>
-          <p className="text-muted-foreground">Create and manage your image collections</p>
+          <h1 className="text-xl font-bold">My Galleries</h1>
+          
         </div>
         
         <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
@@ -233,8 +233,7 @@ export default function GalleriesPage() {
 
       {filteredGalleries.length === 0 ? (
         <div className="text-center py-20">
-          <Grid className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-          <h2 className="text-2xl font-semibold mb-2">No galleries yet</h2>
+          <h2 className="text-xl font-semibold mb-2">No galleries yet</h2>
           <p className="text-muted-foreground mb-4">
             Create your first gallery to start organizing your generated images
           </p>
