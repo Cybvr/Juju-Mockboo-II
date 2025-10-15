@@ -25,7 +25,6 @@ const galleryPrompts = {
 export default function CreateGalleryPage() {
   const [user] = useAuthState(auth)
   const router = useRouter()
-  const [title, setTitle] = useState("")
   const [type, setType] = useState("")
   const [customType, setCustomType] = useState("")
   const [prompt, setPrompt] = useState("")
@@ -84,12 +83,15 @@ export default function CreateGalleryPage() {
     }
   }
 
+  const generateTitle = (galleryType: string, prompt: string): string => {
+    // Take first few words of prompt and combine with type
+    const promptWords = prompt.trim().split(' ').slice(0, 4).join(' ')
+    const cleanType = galleryType.replace(/\s+/g, ' ')
+    return `${cleanType}: ${promptWords}`.substring(0, 80) // Limit to 80 chars
+  }
+
   const handleCreate = async () => {
     if (!user) return
-    if (!title.trim()) {
-      toast.error('Gallery title is required')
-      return
-    }
     if (!prompt.trim()) {
       toast.error('Prompt is required')
       return
@@ -101,6 +103,7 @@ export default function CreateGalleryPage() {
     }
     setIsCreating(true)
     try {
+      const autoTitle = generateTitle(galleryType, prompt)
       let imagePrompt = prompt.trim()
 
       // If reference image is provided, convert to base64 and include in prompt
@@ -112,7 +115,7 @@ export default function CreateGalleryPage() {
 
           // Create gallery with reference image
           const galleryId = await galleryService.createGallery(user.uid, {
-            title: title.trim(),
+            title: autoTitle,
             description: prompt.trim(),
             type: galleryType,
             prompt: prompt.trim(),
@@ -126,7 +129,7 @@ export default function CreateGalleryPage() {
       } else {
         // Create gallery without reference image
         const galleryId = await galleryService.createGallery(user.uid, {
-          title: title.trim(),
+          title: autoTitle,
           description: prompt.trim(),
           type: galleryType,
           prompt: prompt.trim(),
@@ -152,15 +155,6 @@ export default function CreateGalleryPage() {
         </div>
 
         <div className="space-y-4">
-          <div className="relative">
-            <Input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Gallery title"
-              className="h-12 text-base border-border bg-background focus-visible:ring-1 focus-visible:ring-ring"
-            />
-          </div>
-
           {type === "Custom" && (
             <div className="relative">
               <Input
@@ -235,7 +229,7 @@ export default function CreateGalleryPage() {
                   onClick={handleCreate}
                   size="sm"
                   className="h-8 w-8 p-0 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-50"
-                  disabled={isCreating || !prompt.trim()}
+                  disabled={isCreating || !prompt.trim() || (type === 'Custom' && !customType.trim())}
                 >
                   {isCreating ? (
                     <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
