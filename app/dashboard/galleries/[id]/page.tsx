@@ -207,31 +207,7 @@ export default function GalleryPage({ params }: GalleryPageProps) {
         </div>
       </div>
 
-      <div className="mb-8 p-6 border rounded-lg">
-        <div className="space-y-4">
-          <div>
-            <label className="text-sm font-medium mb-2 block">Prompt</label>
-            <Textarea
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              placeholder={`Add details for your ${gallery.type.toLowerCase()}...`}
-              rows={3}
-            />
-          </div>
-          <Button 
-            onClick={handleGenerate} 
-            disabled={generating || !prompt.trim()}
-            className="gap-2"
-          >
-            {generating ? (
-              <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <Sparkles className="w-4 h-4" />
-            )}
-            {generating ? 'Generating 4 Images...' : 'Generate 4 Images'}
-          </Button>
-        </div>
-      </div>
+      
 
       {gallery.images.length === 0 ? (
         <div className="text-center py-20">

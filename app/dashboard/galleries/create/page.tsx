@@ -123,6 +123,30 @@ export default function CreateGalleryPage() {
             isPublic: false,
             tags: [galleryType.toLowerCase().replace(/\s+/g, '-')]
           })
+
+          // Auto-generate images immediately
+          const response = await fetch('/api/galleries/generate', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-user-id': user.uid,
+            },
+            body: JSON.stringify({
+              prompt: imagePrompt,
+              outputs: 4,
+              aspectRatio: "1:1"
+            }),
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            if (data.images && data.images.length > 0) {
+              await galleryService.updateGallery(galleryId, { 
+                images: data.images
+              });
+            }
+          }
+
           router.push(`/dashboard/galleries/${galleryId}`)
         }
         reader.readAsDataURL(referenceImage)
@@ -137,6 +161,30 @@ export default function CreateGalleryPage() {
           isPublic: false,
           tags: [galleryType.toLowerCase().replace(/\s+/g, '-')]
         })
+
+        // Auto-generate images immediately
+        const response = await fetch('/api/galleries/generate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-user-id': user.uid,
+          },
+          body: JSON.stringify({
+            prompt: imagePrompt,
+            outputs: 4,
+            aspectRatio: "1:1"
+          }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.images && data.images.length > 0) {
+            await galleryService.updateGallery(galleryId, { 
+              images: data.images
+            });
+          }
+        }
+
         router.push(`/dashboard/galleries/${galleryId}`)
       }
     } catch (error) {
