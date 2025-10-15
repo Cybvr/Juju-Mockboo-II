@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
+import { storage } from '@/lib/firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 const genAI = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY || ''
@@ -30,11 +32,20 @@ export async function POST(request: NextRequest) {
     const generatedImages: string[] = [];
 
     if (response.generatedImages) {
-      for (const generatedImage of response.generatedImages) {
+      for (let i = 0; i < response.generatedImages.length; i++) {
+        const generatedImage = response.generatedImages[i];
         if (generatedImage.image?.imageBytes) {
+          // Convert base64 to blob
           const imageData = generatedImage.image.imageBytes;
-          const dataUrl = `data:image/png;base64,${imageData}`;
-          generatedImages.push(dataUrl);
+          const blob = new Blob([Buffer.from(imageData, 'base64')], { type: 'image/png' });
+          
+          // Upload to Firebase Storage
+          const filename = `gallery_${Date.now()}_${i}.png`;
+          const storageRef = ref(storage, `galleries/${filename}`);
+          await uploadBytes(storageRef, blob);
+          const downloadURL = await getDownloadURL(storageRef);
+          
+          generatedImages.push(downloadURL);
         }
       }
     }
@@ -43,7 +54,6 @@ export async function POST(request: NextRequest) {
       throw new Error('No images were generated');
     }
 
-    // Return simple array of URLs only - let the client create the objects
     return NextResponse.json({
       success: true,
       images: generatedImages,
