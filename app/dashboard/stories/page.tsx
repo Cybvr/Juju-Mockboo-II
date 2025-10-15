@@ -257,7 +257,9 @@ const App: React.FC = () => {
     <main className="min-h-screen w-full bg-background transition-colors duration-300">
       {renderContent()}
       
-      <AlertDialog open={!!deleteProjectId} onOpenChange={() => setDeleteProjectId(null)}>
+      <AlertDialog open={!!deleteProjectId} onOpenChange={(open) => {
+        if (!open) setDeleteProjectId(null);
+      }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Story</AlertDialogTitle>
