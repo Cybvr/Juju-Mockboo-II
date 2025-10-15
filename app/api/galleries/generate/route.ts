@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
       throw new Error('No images were generated');
     }
 
-    // Get current gallery
+    // Get current gallery (simplified - no user validation)
     const gallery = await galleryService.getGalleryById(galleryId);
     if (!gallery) {
       return NextResponse.json({ error: 'Gallery not found' }, { status: 404 });

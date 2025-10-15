@@ -75,10 +75,9 @@ export default function CreateGalleryPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-user-id': user.uid,
         },
         body: JSON.stringify({
-          galleryId,
+          galleryId: galleryId,
           prompt: prompt.trim(),
           aspectRatio: '1:1',
           outputs: 4
