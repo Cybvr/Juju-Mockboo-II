@@ -234,7 +234,6 @@ export default function GalleryPage({ params }: GalleryPageProps) {
       {/* Generation Panel */}
       <Card className="mb-8">
         <CardContent className="p-6">
-          <h3 className="text-lg font-semibold mb-4">Generate New Images</h3>
           {gallery.prompt && (
             <div className="mb-4 p-3 bg-muted rounded-lg">
               <p className="text-sm text-muted-foreground mb-1">Base Prompt:</p>
