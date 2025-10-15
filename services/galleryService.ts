@@ -107,11 +107,22 @@ export class GalleryService {
     try {
       const galleryRef = doc(db, GALLERIES_COLLECTION, id);
       
-      // Clean update data to prevent nested entity errors
-      const cleanUpdates = JSON.parse(JSON.stringify(updates));
+      // Flatten nested objects for Firebase
+      const cleanUpdates = { ...updates };
       delete cleanUpdates.id;
       delete cleanUpdates.createdAt;
       delete cleanUpdates.userId;
+      
+      // Convert images array to simple object
+      if (cleanUpdates.images) {
+        cleanUpdates.images = cleanUpdates.images.map(img => ({
+          id: img.id,
+          url: img.url,
+          prompt: img.prompt,
+          createdAt: img.createdAt,
+          aspectRatio: img.aspectRatio
+        }));
+      }
       
       const updateData = {
         ...cleanUpdates,
