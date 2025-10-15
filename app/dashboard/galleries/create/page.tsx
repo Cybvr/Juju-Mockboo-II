@@ -35,6 +35,7 @@ export default function CreateGalleryPage() {
   const [type, setType] = useState('');
   const [customType, setCustomType] = useState('');
   const [prompt, setPrompt] = useState('');
+  const [referenceImage, setReferenceImage] = useState<File | null>(null);
   const [isCreating, setIsCreating] = useState(false);
 
   const handleCreate = async () => {
@@ -54,17 +55,41 @@ export default function CreateGalleryPage() {
     }
     setIsCreating(true);
     try {
-      // Create gallery
-      const galleryId = await galleryService.createGallery(user.uid, {
-        title: title.trim(),
-        description: prompt.trim(),
-        type: galleryType,
-        prompt: prompt.trim(),
-        images: [],
-        isPublic: false,
-        tags: [galleryType.toLowerCase().replace(/\s+/g, '-')]
-      });
-      router.push(`/dashboard/galleries/${galleryId}`);
+      let imagePrompt = prompt.trim();
+      
+      // If reference image is provided, convert to base64 and include in prompt
+      if (referenceImage) {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          const base64 = e.target?.result as string;
+          imagePrompt = `${prompt.trim()} (Reference image style: ${base64})`;
+          
+          // Create gallery with reference image
+          const galleryId = await galleryService.createGallery(user.uid, {
+            title: title.trim(),
+            description: prompt.trim(),
+            type: galleryType,
+            prompt: imagePrompt,
+            images: [],
+            isPublic: false,
+            tags: [galleryType.toLowerCase().replace(/\s+/g, '-')]
+          });
+          router.push(`/dashboard/galleries/${galleryId}`);
+        };
+        reader.readAsDataURL(referenceImage);
+      } else {
+        // Create gallery without reference image
+        const galleryId = await galleryService.createGallery(user.uid, {
+          title: title.trim(),
+          description: prompt.trim(),
+          type: galleryType,
+          prompt: imagePrompt,
+          images: [],
+          isPublic: false,
+          tags: [galleryType.toLowerCase().replace(/\s+/g, '-')]
+        });
+        router.push(`/dashboard/galleries/${galleryId}`);
+      }
     } catch (error) {
       console.error('Failed to create gallery:', error);
       toast.error('Failed to create gallery');
@@ -118,6 +143,20 @@ export default function CreateGalleryPage() {
           rows={3}
           className="resize-none"
         />
+        
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-gray-700">Reference Image (Optional)</label>
+          <Input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setReferenceImage(e.target.files?.[0] || null)}
+            className="cursor-pointer"
+          />
+          {referenceImage && (
+            <p className="text-xs text-gray-500">Selected: {referenceImage.name}</p>
+          )}
+        </div>
+        
         <Button
           onClick={handleCreate}
           className="w-full"
