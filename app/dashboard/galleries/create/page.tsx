@@ -71,25 +71,37 @@ export default function CreateGalleryPage() {
       });
 
       // Auto-generate first batch of images
-      const response = await fetch('/api/galleries/generate', {
+      const response = await fetch('/api/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'x-user-id': user.uid,
         },
         body: JSON.stringify({
-          galleryId: galleryId,
+          mode: 'text',
           prompt: prompt.trim(),
-          aspectRatio: '1:1',
-          outputs: 4
+          settings: {
+            outputs: '4',
+            aspectRatio: '1:1'
+          }
         }),
       });
 
       if (response.ok) {
         const result = await response.json();
 
+        // Convert generated images to gallery format
+        const galleryImages = result.images.map((url: string, index: number) => ({
+          id: `${Date.now()}_${index}`,
+          url: url,
+          prompt: prompt.trim(),
+          createdAt: Date.now(),
+          aspectRatio: '1:1'
+        }));
+
         // Update gallery with generated images
         await galleryService.updateGallery(galleryId, {
-          images: result.images,
+          images: galleryImages,
           updatedAt: Date.now()
         });
 

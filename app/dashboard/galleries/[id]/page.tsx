@@ -271,7 +271,7 @@ export default function GalleryPage({ params }: GalleryPageProps) {
               ) : (
                 <Sparkles className="w-4 h-4" />
               )}
-              {generating ? 'Generating 8 Images...' : 'Generate 8 Images'}
+              {generating ? 'Generating 4 Images...' : 'Generate 4 Images'}
             </Button>
           </div>
         </CardContent>
