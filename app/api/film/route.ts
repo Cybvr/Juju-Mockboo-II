@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
         }
         
         const response: GenerateContentResponse = await ai.models.generateContent({
-          model: 'gemini-2.5-pro',
+          model: 'gemini-2.0-flash',
           contents: `Based on the following idea, write a short film script. The script should be formatted correctly with scene headings, character names, and dialogue. Idea: "${prompt}"`,
           config: {
             systemInstruction: "You are an expert screenwriter. Your task is to generate a well-structured and creative short film script based on the user's prompt. Ensure standard screenplay format (scene headings, character dialogue, parentheticals, action lines)."
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
         }
 
         const analysisResponse = await ai.models.generateContent({
-          model: 'gemini-2.5-flash',
+          model: 'gemini-2.0-flash',
           contents: `Analyze the following film script and extract the requested information in JSON format.
           
           For the storyboard, create a detailed visual prompt for each distinct scene or major action beat. The prompt should be descriptive and suitable for an image generation model.
