@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import type { FilmProject } from '@/types/storytypes';
-import { ArrowLeft, Share2, FileText, Camera, GripVertical, Film } from 'lucide-react';
+import { ArrowLeft, Share2, FileText, Camera, GripVertical, Film,User,Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
