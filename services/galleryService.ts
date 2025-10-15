@@ -113,16 +113,7 @@ export class GalleryService {
       delete cleanUpdates.createdAt;
       delete cleanUpdates.userId;
       
-      // Convert images array to simple object
-      if (cleanUpdates.images) {
-        cleanUpdates.images = cleanUpdates.images.map(img => ({
-          id: img.id,
-          url: img.url,
-          prompt: img.prompt,
-          createdAt: img.createdAt,
-          aspectRatio: img.aspectRatio
-        }));
-      }
+      
       
       const updateData = {
         ...cleanUpdates,

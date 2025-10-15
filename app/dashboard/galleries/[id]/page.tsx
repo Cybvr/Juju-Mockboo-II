@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Timestamp } from 'firebase/firestore'; // Import Timestamp
 
 interface GalleryPageProps {
   params: Promise<{ id: string }>;
@@ -109,17 +110,18 @@ export default function GalleryPage({ params }: GalleryPageProps) {
         id: `${timestamp}_${index}`,
         url: url,
         prompt: prompt,
-        createdAt: timestamp,
+        createdAt: timestamp,  // ✓ Plain number
         aspectRatio: aspectRatio
       }));
 
       const updatedGallery = {
         ...gallery,
         images: [...gallery.images, ...newImages],
-        updatedAt: timestamp
+        updatedAt: timestamp // Use timestamp for consistency
       };
 
-      await galleryService.updateGallery(gallery.id, updatedGallery);
+      // Use galleryService.updateGallery with only necessary updates
+      await galleryService.updateGallery(gallery.id, { images: updatedGallery.images, updatedAt: Timestamp.now() });
       setGallery(updatedGallery);
       setPrompt('');
       toast.success(`Generated ${newImages.length} images successfully`);
