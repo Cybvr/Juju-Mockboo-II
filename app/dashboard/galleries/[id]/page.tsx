@@ -300,36 +300,12 @@ export default function GalleryPage({ params }: GalleryPageProps) {
         </div>
       </div>
 
-      <div className="mb-8 space-y-4">
-        <div className="flex items-center gap-4">
-          <div className="flex-1">
-            <Textarea
-              placeholder="Enter prompt to generate more images..."
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              className="resize-none"
-              rows={2}
-            />
-          </div>
-          <Button 
-            onClick={handleGenerate}
-            disabled={generating || !prompt.trim()}
-            className="px-6"
-          >
-            {generating ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
-                Generating...
-              </>
-            ) : (
-              <>
-                <Sparkles className="w-4 h-4 mr-2" />
-                Generate More
-              </>
-            )}
-          </Button>
+      {prompt && (
+        <div className="mb-6 p-4 bg-muted/30 rounded-lg border">
+          <p className="text-sm text-muted-foreground mb-1">Original prompt:</p>
+          <p className="text-sm">{prompt}</p>
         </div>
-      </div>
+      )}
 
       {gallery.images.length === 0 ? (
         <div className="text-center py-20">
@@ -410,6 +386,17 @@ export default function GalleryPage({ params }: GalleryPageProps) {
             >
               <Download className="w-4 h-4 mr-2" />
               Download
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={(e) => {
+                e.stopPropagation();
+                // TODO: Generate more like this using current image as reference
+                console.log('Generate more like this:', gallery.images[selectedImageIndex]);
+              }}
+            >
+              <Sparkles className="w-4 h-4 mr-2" />
+              More Like This
             </Button>
             <Button
               variant="destructive"
