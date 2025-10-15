@@ -2,13 +2,13 @@
 import { GoogleGenAI, GenerateContentResponse, Type } from "@google/genai";
 import type { FilmProject, StoryboardScene, Character, Location, SoundDesign } from '@/types/storytypes';
 
-if (!process.env.NEXT_PUBLIC_API_KEY) {
+if (!process.env.GEMINI_API_KEY) {
     // This is a placeholder check; in a real app, this should be handled more robustly.
-    // For this project, we assume NEXT_PUBLIC_API_KEY is always available.
-    console.warn("NEXT_PUBLIC_API_KEY environment variable is not set. API calls will fail.");
+    // For this project, we assume GEMINI_API_KEY is always available.
+    console.warn("GEMINI_API_KEY environment variable is not set. API calls will fail.");
 }
 
-const ai = new GoogleGenAI({ apiKey: process.env.NEXT_PUBLIC_API_KEY });
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 /**
  * Generates a film script from a given prompt.
@@ -189,7 +189,7 @@ export const generateVideo = async (prompt: string, base64Image: string): Promis
         
         if (operation.response?.generatedVideos?.[0]?.video?.uri) {
             const downloadLink = operation.response.generatedVideos[0].video.uri;
-            const videoResponse = await fetch(`${downloadLink}&key=${process.env.NEXT_PUBLIC_API_KEY}`);
+            const videoResponse = await fetch(`${downloadLink}&key=${process.env.GEMINI_API_KEY}`);
             if (!videoResponse.ok) {
                 throw new Error(`Failed to fetch video: ${videoResponse.statusText}`);
             }
