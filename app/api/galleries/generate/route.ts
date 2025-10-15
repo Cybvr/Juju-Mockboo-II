@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
 
     const response = await genAI.models.generateImages({
       model: "imagen-3.0-generate-002",
-      prompt: prompt,
+      prompt: `Create a single individual image: ${prompt}. Generate one distinct image, not a collage or gallery layout.`,
       config: {
         numberOfImages: numOutputs,
         aspectRatio: aspectRatio,
