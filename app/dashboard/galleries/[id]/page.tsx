@@ -413,6 +413,17 @@ export default function GalleryPage({ params }: GalleryPageProps) {
                     alt={`Generated image ${index + 1}`}
                     className="w-full h-full object-cover"
                   />
+                  <Button
+                    size="icon"
+                    variant="destructive"
+                    className="absolute top-2 right-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteImage(index);
+                    }}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
                 </div>
               </CardContent>
             </Card>
