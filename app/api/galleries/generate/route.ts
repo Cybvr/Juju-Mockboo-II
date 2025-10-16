@@ -9,7 +9,7 @@ const genAI = new GoogleGenAI({
 
 export async function POST(request: NextRequest) {
   try {
-    const { prompt, aspectRatio = '1:1', outputs = 4 } = await request.json();
+    const { prompt, previousPrompt, aspectRatio = '1:1', outputs = 4 } = await request.json();
 
     if (!prompt) {
       return NextResponse.json({ error: 'Prompt is required' }, { status: 400 });
@@ -17,9 +17,14 @@ export async function POST(request: NextRequest) {
 
     const numOutputs = Math.min(Math.max(parseInt(outputs.toString()), 1), 4);
 
+    // Build on previous context if available
+    const basePrompt = previousPrompt 
+      ? `Building on this original concept: "${previousPrompt}"\n\nNow explore: ${prompt}`
+      : prompt;
+
     // Force single composition, distinct theme each time
     const scenePrompts = Array.from({ length: numOutputs }, (_, i) =>
-      `Create a single, standalone image based on this case: ${prompt}. 
+      `Create a single, standalone image based on this case: ${basePrompt}. 
       This should depict one clear and cohesive scene or concept — not a collage, split image, or multiple frames. 
       Make it visually distinct and creatively different from the others. Scene variation ${i + 1}.`
     );

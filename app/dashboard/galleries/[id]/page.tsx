@@ -77,6 +77,7 @@ export default function GalleryPage({ params }: GalleryPageProps) {
         },
         body: JSON.stringify({
           prompt: prompt.trim(),
+          previousPrompt: gallery.prompt,
           outputs: 4,
           aspectRatio: "1:1"
         }),
