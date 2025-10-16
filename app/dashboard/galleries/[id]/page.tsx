@@ -336,12 +336,6 @@ export default function GalleryPage({ params }: GalleryPageProps) {
         </div>
       </div>
 
-      {prompt && (
-        <div className="mb-6 p-4 bg-muted/30 rounded-lg border">
-          <p className="text-sm text-muted-foreground mb-1">Original prompt:</p>
-          <p className="text-sm">{prompt}</p>
-        </div>
-      )}
 
       {gallery.images.length === 0 ? (
         <div className="text-center py-20">
