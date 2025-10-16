@@ -108,11 +108,7 @@ export default function CreateGalleryPage() {
       toast.error('Prompt is required')
       return
     }
-    const galleryType = type === 'Custom' ? customType : type
-    if (!galleryType) {
-      toast.error('Gallery type is required')
-      return
-    }
+    const galleryType = type === 'Custom' ? customType : (type || 'AI Gallery')
     setIsCreating(true)
     try {
       const autoTitle = generateTitle(galleryType, prompt)
@@ -284,7 +280,7 @@ export default function CreateGalleryPage() {
                   onClick={handleCreate}
                   size="sm"
                   className="h-8 w-8 p-0 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-50"
-                  disabled={isCreating || !prompt.trim() || (type === 'Custom' && !customType.trim())}
+                  disabled={isCreating || !prompt.trim()}
                 >
                   {isCreating ? (
                     <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
