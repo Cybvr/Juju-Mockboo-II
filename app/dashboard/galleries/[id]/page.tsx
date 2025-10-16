@@ -373,6 +373,41 @@ export default function GalleryPage({ params }: GalleryPageProps) {
         </div>
       )}
 
+      {/* Prompt editing section at bottom */}
+      <div className="mt-12 border-t pt-8">
+        <div className="max-w-4xl mx-auto">
+          <h3 className="text-lg font-semibold mb-4">Edit & Generate More</h3>
+          <div className="flex gap-4">
+            <Textarea
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              placeholder="Describe what you want to create..."
+              className="flex-1 min-h-[100px] resize-none"
+            />
+            <Button
+              onClick={handleGenerate}
+              disabled={generating || !prompt.trim()}
+              className="px-8"
+            >
+              {generating ? (
+                <div className="flex items-center gap-2">
+                  <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
+                  Generating...
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4" />
+                  Generate
+                </div>
+              )}
+            </Button>
+          </div>
+          <p className="text-sm text-muted-foreground mt-2">
+            Edit your prompt and generate 4 more images for this gallery
+          </p>
+        </div>
+      </div>
+
       {/* Pinterest-style Image Modal - Mobile Optimized */}
       {selectedImageIndex !== null && gallery.images[selectedImageIndex] && (
         <div 
