@@ -56,29 +56,31 @@ const GalleryCard: React.FC<{
             <h3 className="font-bold text-lg text-foreground group-hover:text-primary transition-colors truncate pr-2">
               {gallery.title}
             </h3>
-            <div className="relative flex-shrink-0">
+            <div className="relative flex-shrink-0 flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => { e.stopPropagation(); onDelete(); }}
+                className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/10 hover:text-destructive"
+                title="Delete Gallery"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={(e) => e.stopPropagation()}
-                    className="h-8 w-8"
+                    className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
                   >
-                    <MoreVertical className="w-4 h-4" />
+                    <MoreVertical className="w-3.5 h-3.5" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onClick(); }}>
                     <Eye className="w-4 h-4 mr-2" />
                     View Gallery
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={(e) => { e.stopPropagation(); onDelete(); }}
-                    className="text-destructive"
-                  >
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Delete
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

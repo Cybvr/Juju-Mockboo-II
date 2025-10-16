@@ -20,6 +20,19 @@ const galleryPrompts = {
   "Architectural Renders": "Create a set of modern glass pavilion images nestled in forest with sustainable design",
   "Food Photography": "Create a set of rustic Italian pasta dish images with fresh herbs and natural lighting",
   "Brand Identity": "Create a moodboard of my boxing gear company's videography",
+  "Portrait Photography": "Create a set of professional headshots with dramatic studio lighting and neutral backgrounds",
+  "Landscape Photography": "Create a set of breathtaking mountain sunrise images with misty valleys and golden light",
+  "Abstract Art": "Create a set of vibrant abstract compositions with flowing organic shapes and bold color gradients",
+  "Automotive Photography": "Create a set of luxury sports car images with dynamic angles and dramatic lighting",
+  "Travel Photography": "Create a set of exotic destination images showcasing local culture and stunning scenery",
+  "Wedding Photography": "Create a set of romantic wedding ceremony images with soft natural lighting",
+  "Corporate Photography": "Create a set of professional business environment images with modern office settings",
+  "Real Estate Photography": "Create a set of luxurious home interior images with perfect staging and lighting",
+  "Event Photography": "Create a set of celebration party images with vibrant colors and joyful moments",
+  "Nature Photography": "Create a set of wildlife and forest images with natural lighting and rich details",
+  "Street Photography": "Create a set of urban lifestyle images capturing authentic city moments",
+  "Macro Photography": "Create a set of extreme close-up images revealing intricate details and textures",
+  "Fine Art Photography": "Create a set of artistic conceptual images with creative composition and mood"
 }
 
 export default function CreateGalleryPage() {
