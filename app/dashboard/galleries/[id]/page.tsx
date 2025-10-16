@@ -60,6 +60,58 @@ export default function GalleryPage({ params }: GalleryPageProps) {
     }
   };
 
+  const handleMoreLikeThis = async () => {
+    if (!user || !gallery) return;
+
+    setGenerating(true);
+    try {
+      const response = await fetch('/api/galleries/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': user.uid,
+        },
+        body: JSON.stringify({
+          mode: 'moreLikeThis',
+          referencePrompt: gallery.prompt,
+          outputs: 4,
+          aspectRatio: "1:1"
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to generate images');
+      }
+
+      const data = await response.json();
+
+      if (data.images && data.images.length > 0) {
+        const updatedImages = [...(gallery.images || []), ...data.images];
+
+        await galleryService.updateGallery(gallery.id, { 
+          images: updatedImages
+        });
+
+        setGallery({
+          ...gallery,
+          images: updatedImages,
+          updatedAt: Date.now()
+        });
+
+        setSelectedImageIndex(null);
+        toast.success(`Generated ${data.images.length} similar images`);
+      } else {
+        throw new Error('No images were generated');
+      }
+    } catch (error) {
+      console.error('Failed to generate similar images:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to generate similar images');
+    } finally {
+      setGenerating(false);
+    }
+  };
+
   const handleGenerate = async () => {
     if (!user || !gallery) return;
     if (!prompt.trim()) {
@@ -508,7 +560,7 @@ export default function GalleryPage({ params }: GalleryPageProps) {
                   className="w-full justify-start"
                   onClick={(e) => {
                     e.stopPropagation();
-                    console.log('Generate more like this:', gallery.images[selectedImageIndex]);
+                    handleMoreLikeThis();
                   }}
                 >
                   <Sparkles className="w-4 h-4 mr-3" />

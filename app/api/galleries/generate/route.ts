@@ -9,18 +9,23 @@ const genAI = new GoogleGenAI({
 
 export async function POST(request: NextRequest) {
   try {
-    const { prompt, previousPrompt, aspectRatio = '1:1', outputs = 4 } = await request.json();
+    const { prompt, previousPrompt, aspectRatio = '1:1', outputs = 4, mode, referencePrompt } = await request.json();
 
-    if (!prompt) {
+    if (!prompt && mode !== 'moreLikeThis') {
       return NextResponse.json({ error: 'Prompt is required' }, { status: 400 });
     }
 
     const numOutputs = Math.min(Math.max(parseInt(outputs.toString()), 1), 4);
 
-    // Build on previous context if available
-    const basePrompt = previousPrompt 
-      ? `Building on this original concept: "${previousPrompt}"\n\nNow explore: ${prompt}`
-      : prompt;
+    let basePrompt = prompt;
+
+    // "More like this" mode – generate variations of an existing concept
+    if (mode === 'moreLikeThis' && referencePrompt) {
+      basePrompt = `Generate a fresh creative variation inspired by this concept: "${referencePrompt}". 
+      Maintain the same core idea, tone, and visual direction, but reinterpret it uniquely with new details and perspectives.`;
+    } else if (previousPrompt) {
+      basePrompt = `Building on this original concept: "${previousPrompt}"\n\nNow explore: ${prompt}`;
+    }
 
     // Force single composition, distinct theme each time
     const scenePrompts = Array.from({ length: numOutputs }, (_, i) =>
