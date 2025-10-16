@@ -12,41 +12,44 @@ export async function POST(request: NextRequest) {
     const { prompt, aspectRatio = '1:1', outputs = 4 } = await request.json();
 
     if (!prompt) {
-      return NextResponse.json(
-        { error: 'Prompt is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Prompt is required' }, { status: 400 });
     }
 
     const numOutputs = Math.min(Math.max(parseInt(outputs.toString()), 1), 4);
 
-    const response = await genAI.models.generateImages({
-      model: "imagen-3.0-generate-002",
-      prompt: `Create a single individual image: ${prompt}. Generate one distinct image, not a collage or gallery layout.`,
-      config: {
-        numberOfImages: numOutputs,
-        aspectRatio: aspectRatio,
-      },
-    });
+    // Force single composition, distinct theme each time
+    const scenePrompts = Array.from({ length: numOutputs }, (_, i) =>
+      `Create a single, standalone image based on this case: ${prompt}. 
+      This should depict one clear and cohesive scene or concept — not a collage, split image, or multiple frames. 
+      Make it visually distinct and creatively different from the others. Scene variation ${i + 1}.`
+    );
+
+    // Run all image generations in parallel
+    const responses = await Promise.all(
+      scenePrompts.map(p =>
+        genAI.models.generateImages({
+          model: "imagen-3.0-generate-002",
+          prompt: p,
+          config: { aspectRatio }
+        })
+      )
+    );
 
     const generatedImages: string[] = [];
 
-    if (response.generatedImages) {
-      for (let i = 0; i < response.generatedImages.length; i++) {
-        const generatedImage = response.generatedImages[i];
-        if (generatedImage.image?.imageBytes) {
-          // Convert base64 to blob
-          const imageData = generatedImage.image.imageBytes;
-          const blob = new Blob([Buffer.from(imageData, 'base64')], { type: 'image/png' });
+    // Process each response and upload to Firebase
+    for (let r = 0; r < responses.length; r++) {
+      const response = responses[r];
+      if (response.generatedImages && response.generatedImages[0]?.image?.imageBytes) {
+        const imageData = response.generatedImages[0].image.imageBytes;
+        const blob = new Blob([Buffer.from(imageData, 'base64')], { type: 'image/png' });
 
-          // Upload to Firebase Storage
-          const filename = `gallery_${Date.now()}_${i}.png`;
-          const storageRef = ref(storage, `galleries/${filename}`);
-          await uploadBytes(storageRef, blob);
-          const downloadURL = await getDownloadURL(storageRef);
+        const filename = `gallery_${Date.now()}_${r}.png`;
+        const storageRef = ref(storage, `galleries/${filename}`);
+        await uploadBytes(storageRef, blob);
+        const downloadURL = await getDownloadURL(storageRef);
 
-          generatedImages.push(downloadURL);
-        }
+        generatedImages.push(downloadURL);
       }
     }
 
