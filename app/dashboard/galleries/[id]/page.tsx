@@ -304,12 +304,7 @@ export default function GalleryPage({ params }: GalleryPageProps) {
                 {gallery.title}
               </h1>
             )}
-            <div className="flex items-center gap-2 mt-1">
-              <Badge variant="secondary">{gallery.type}</Badge>
-              <span className="text-sm text-muted-foreground">
-                {gallery.images.length} images
-              </span>
-            </div>
+
           </div>
         </div>
 
@@ -320,12 +315,13 @@ export default function GalleryPage({ params }: GalleryPageProps) {
             className="flex items-center gap-2"
           >
             <Share2 className="w-4 h-4" />
-            Share
+            <span className="hidden sm:inline">Share</span>
           </Button>
           <Button
             variant={viewMode === 'grid' ? 'default' : 'outline'}
             size="icon"
             onClick={() => setViewMode('grid')}
+            className="hidden md:flex"
           >
             <Grid className="w-4 h-4" />
           </Button>
@@ -333,6 +329,7 @@ export default function GalleryPage({ params }: GalleryPageProps) {
             variant={viewMode === 'list' ? 'default' : 'outline'}
             size="icon"
             onClick={() => setViewMode('list')}
+            className="hidden md:flex"
           >
             <List className="w-4 h-4" />
           </Button>
@@ -353,7 +350,7 @@ export default function GalleryPage({ params }: GalleryPageProps) {
       ) : (
         <div className={`grid gap-4 ${
           viewMode === 'grid' 
-            ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4' 
+            ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4' 
             : 'grid-cols-1'
         }`}>
           {gallery.images.map((imageUrl, index) => (
@@ -376,22 +373,22 @@ export default function GalleryPage({ params }: GalleryPageProps) {
         </div>
       )}
 
-      {/* Pinterest-style Image Modal */}
+      {/* Pinterest-style Image Modal - Mobile Optimized */}
       {selectedImageIndex !== null && gallery.images[selectedImageIndex] && (
         <div 
-          className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
           onClick={() => setSelectedImageIndex(null)}
         >
           <div 
-            className="bg-card rounded-2xl shadow-2xl max-w-7xl w-full max-h-[90vh] flex overflow-hidden"
+            className="bg-background w-full h-full md:rounded-2xl md:shadow-2xl md:max-w-7xl md:w-auto md:max-h-[90vh] flex flex-col md:flex-row overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Image Section */}
-            <div className="flex-1 flex items-center justify-center bg-card relative">
+            <div className="flex-1 flex items-center justify-center bg-background relative min-h-0 p-4 md:p-0">
               <Button
                 size="icon"
                 variant="ghost"
-                className="absolute top-4 left-4 z-10 hover:bg-black/10"
+                className="absolute top-4 left-4 z-10 bg-black/50 hover:bg-black/70 text-white"
                 onClick={(e) => {
                   e.stopPropagation();
                   navigateImage('prev');
@@ -400,11 +397,23 @@ export default function GalleryPage({ params }: GalleryPageProps) {
               >
                 <ChevronLeft className="w-6 h-6" />
               </Button>
-              
+
               <Button
                 size="icon"
                 variant="ghost"
-                className="absolute top-4 right-4 z-10 hover:bg-black/10"
+                className="absolute top-4 right-4 z-10 bg-black/50 hover:bg-black/70 text-white md:hidden"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedImageIndex(null);
+                }}
+              >
+                <X className="w-6 h-6" />
+              </Button>
+
+              <Button
+                size="icon"
+                variant="ghost"
+                className="absolute top-4 right-16 z-10 bg-black/50 hover:bg-black/70 text-white"
                 onClick={(e) => {
                   e.stopPropagation();
                   navigateImage('next');
@@ -419,14 +428,14 @@ export default function GalleryPage({ params }: GalleryPageProps) {
                 alt={`Image ${selectedImageIndex + 1}`}
                 className="max-w-full max-h-full object-contain"
               />
-              
-              <div className="absolute bottom-4 left-4 bg-black/70 text-white px-2 py-1 rounded text-sm">
+
+              <div className="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-1.5 rounded text-sm">
                 {selectedImageIndex + 1} / {gallery.images.length}
               </div>
             </div>
 
             {/* Info Panel */}
-            <div className="w-96 bg-card flex flex-col">
+            <div className="w-full md:w-96 bg-background flex flex-col border-t md:border-t-0 md:border-l max-h-[40vh] md:max-h-full overflow-y-auto">
               {/* Header */}
               <div className="p-6 border-b">
                 <div className="flex items-center justify-between">
@@ -434,6 +443,7 @@ export default function GalleryPage({ params }: GalleryPageProps) {
                   <Button
                     size="icon"
                     variant="ghost"
+                    className="hidden md:flex"
                     onClick={() => setSelectedImageIndex(null)}
                   >
                     <X className="w-5 h-5" />
@@ -468,7 +478,6 @@ export default function GalleryPage({ params }: GalleryPageProps) {
                   className="w-full justify-start"
                   onClick={(e) => {
                     e.stopPropagation();
-                    // TODO: Generate more like this using current image as reference
                     console.log('Generate more like this:', gallery.images[selectedImageIndex]);
                   }}
                 >
@@ -513,7 +522,7 @@ export default function GalleryPage({ params }: GalleryPageProps) {
           <DialogHeader>
             <DialogTitle>Share Gallery</DialogTitle>
           </DialogHeader>
-          
+
           <div className="space-y-4">
             <div className="space-y-3">
               <div className="flex items-center justify-between p-3 border rounded-lg">

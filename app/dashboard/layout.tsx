@@ -17,7 +17,10 @@ export default function DashboardLayout({
   // Check if current page should hide sidebar
   const shouldHideSidebar = pathname?.includes('/dashboard/images') || 
     pathname?.includes('/dashboard/canvas') ||
-    pathname?.includes('/dashboard/videos') ||
+    pathname?.includes('/dashboard/videos') ||  
+    pathname?.match(/\/dashboard\/galleries\/[^\/]+$/)
+
+     ||  
     pathname?.match(/\/dashboard\/stories\/[^\/]+$/)
 
   // Always render the same structure to avoid hydration mismatch
