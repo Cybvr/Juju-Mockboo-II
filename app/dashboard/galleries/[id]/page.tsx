@@ -373,40 +373,40 @@ export default function GalleryPage({ params }: GalleryPageProps) {
         </div>
       )}
 
-      {/* Prompt editing section at bottom */}
-      <div className="mt-12 border-t pt-8">
-        <div className="max-w-4xl mx-auto">
-          <h3 className="text-lg font-semibold mb-4">Edit & Generate More</h3>
-          <div className="flex gap-4">
-            <Textarea
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              placeholder="Describe what you want to create..."
-              className="flex-1 min-h-[100px] resize-none"
-            />
-            <Button
-              onClick={handleGenerate}
-              disabled={generating || !prompt.trim()}
-              className="px-8"
-            >
-              {generating ? (
-                <div className="flex items-center gap-2">
-                  <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
-                  Generating...
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4" />
-                  Generate
-                </div>
-              )}
-            </Button>
+      {/* Sticky Prompt Box at Bottom */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-background border-t p-4">
+        <div className="max-w-3xl mx-auto">
+          <div className="relative rounded-2xl border border-border bg-background shadow-sm focus-within:shadow-md transition-shadow">
+            <div className="relative">
+              <Textarea
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                placeholder="Edit your prompt and generate 4 more images..."
+                rows={3}
+                className="resize-none text-base border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[100px] pl-3 pr-14 pb-12"
+              />
+              
+              <div className="absolute bottom-3 right-3 flex items-center gap-2">
+                <Button
+                  onClick={handleGenerate}
+                  size="sm"
+                  className="h-8 w-8 p-0 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-50"
+                  disabled={generating || !prompt.trim()}
+                >
+                  {generating ? (
+                    <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                  ) : (
+                    <Sparkles className="w-4 h-4" />
+                  )}
+                </Button>
+              </div>
+            </div>
           </div>
-          <p className="text-sm text-muted-foreground mt-2">
-            Edit your prompt and generate 4 more images for this gallery
-          </p>
         </div>
       </div>
+
+      {/* Add bottom padding to prevent content overlap */}
+      <div className="h-40"></div>
 
       {/* Pinterest-style Image Modal - Mobile Optimized */}
       {selectedImageIndex !== null && gallery.images[selectedImageIndex] && (
