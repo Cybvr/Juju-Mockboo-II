@@ -27,11 +27,13 @@ export async function POST(request: NextRequest) {
       basePrompt = `Building on this original concept: "${previousPrompt}"\n\nNow explore: ${prompt}`;
     }
 
-    // Force single composition, distinct theme each time
-    const scenePrompts = Array.from({ length: numOutputs }, (_, i) =>
-      `Create a single, standalone image based on this case: ${basePrompt}. 
-      This should depict one clear and cohesive scene or concept — not a collage, split image, or multiple frames. 
-      Make it visually distinct and creatively different from the others. Scene variation ${i + 1}.`
+    // Let AI figure out meaningful variations based on the prompt
+    const scenePrompts = Array.from({ length: numOutputs }, (_, i) => 
+      `${basePrompt}
+
+This is image ${i + 1} of ${numOutputs} total images requested. Analyze what the user is asking for and generate meaningfully different interpretations. Think: what would make sense as distinct variations of this request? Create ONE single unified image that explores this concept differently from the other ${numOutputs - 1} variations.
+
+Ensure each output is substantially different in a way that's relevant to the user's intent.`
     );
 
     // Run all image generations in parallel
