@@ -40,7 +40,7 @@ Ensure each output is substantially different in a way that's relevant to the us
     const responses = await Promise.all(
       scenePrompts.map(p =>
         genAI.models.generateImages({
-          model: "imagen-3.0-generate-002",
+          model: "imagen-4.0-generate-001",
           prompt: p,
           config: { aspectRatio }
         })
