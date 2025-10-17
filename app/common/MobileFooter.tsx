@@ -1,14 +1,14 @@
 
 'use client';
 import { Button } from '@/components/ui/button';
-import { 
-  IoFilm,
-  IoHome, 
-  IoBrush, 
-  IoImages,
-  IoVideocam,
-  IoPerson
-} from 'react-icons/io5';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faHome,
+  faPaintBrush,
+  faImages,
+  faVideo,
+  faUser
+} from '@fortawesome/free-solid-svg-icons';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuthState } from 'react-firebase-hooks/auth';
@@ -50,32 +50,32 @@ export function MobileFooter() {
   const navItems = [
     {
       label: 'Home',
-      icon: <IoHome className="h-5 w-5" />,
+      icon: <FontAwesomeIcon icon={faHome} className="h-5 w-5" />,
       href: '/dashboard',
       active: pathname === '/dashboard'
     },
     {
       label: 'Canvas',
-      icon: <IoBrush className="h-5 w-5" />,
+      icon: <FontAwesomeIcon icon={faPaintBrush} className="h-5 w-5" />,
       href: '#',
       active: pathname.startsWith('/dashboard/canvas'),
       onClick: createNewCanvas
     },
     {
       label: 'Galleries',
-      icon: <IoImages className="h-5 w-5" />,
+      icon: <FontAwesomeIcon icon={faImages} className="h-5 w-5" />,
       href: '/dashboard/galleries',
       active: pathname.startsWith('/dashboard/galleries')
     },
     {
       label: 'Videos',
-      icon: <IoVideocam className="h-5 w-5" />,
+      icon: <FontAwesomeIcon icon={faVideo} className="h-5 w-5" />,
       href: '/dashboard/videos',
       active: pathname.startsWith('/dashboard/videos')
     },
     {
       label: 'Profile',
-      icon: <IoPerson className="h-5 w-5" />,
+      icon: <FontAwesomeIcon icon={faUser} className="h-5 w-5" />,
       href: '/dashboard/profile',
       active: pathname === '/dashboard/profile'
     }

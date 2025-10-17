@@ -7,13 +7,14 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  IoHome,
-  IoFilm,
-  IoImages,
-  IoVideocam,
-  IoSettings,
-} from 'react-icons/io5';
+  faHome,
+  faVideo,
+  faImages,
+  faFilm,
+  faCog,
+} from '@fortawesome/free-solid-svg-icons';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -64,31 +65,31 @@ export function Sidebar({ className, onNavigate }: SidebarProps) {
   const navItems = [
     {
       label: 'Home',
-      icon: IoHome,
+      icon: faHome,
       href: '/dashboard',
       active: pathname === '/dashboard',
     },
     {
       label: 'Videos',
-      icon: IoVideocam,
+      icon: faVideo,
       href: '/dashboard/videos',
       active: pathname.startsWith('/dashboard/videos'),
     },
     {
       label: 'Stories',
-      icon: IoFilm,
+      icon: faFilm,
       href: '/dashboard/stories',
       active: pathname.startsWith('/dashboard/stories'),
     },
     {
       label: 'Galleries',
-      icon: IoImages,
+      icon: faImages,
       href: '/dashboard/galleries',
       active: pathname.startsWith('/dashboard/galleries'),
     },
     {
       label: 'Settings',
-      icon: IoSettings,
+      icon: faCog,
       href: '/dashboard/account',
       active: pathname.startsWith('/dashboard/account'),
     },
@@ -128,7 +129,6 @@ export function Sidebar({ className, onNavigate }: SidebarProps) {
           <div className="flex-1 flex items-center justify-center w-full">
             <nav className=" w-full flex flex-col items-center">
               {navItems.map((item) => {
-                const Icon = item.icon;
                 return (
                   <Tooltip key={item.href}>
                     <TooltipTrigger asChild>
@@ -141,7 +141,7 @@ export function Sidebar({ className, onNavigate }: SidebarProps) {
                             item.active && 'text-primary bg-background-50'
                           )}
                         >
-                          <Icon className="h-6 w-6" />
+                          <FontAwesomeIcon icon={item.icon} className="h-6 w-6" />
                         </Button>
                       </Link>
                     </TooltipTrigger>
