@@ -1,16 +1,17 @@
 "use client"
-import React, { useState, useEffect, useRef, type DragEvent } from 'react';
-import { useAuthState } from 'react-firebase-hooks/auth';
-import { auth } from '@/lib/firebase';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Grid, Search, MoreVertical, Trash2, Eye, X, Paperclip, ArrowUp } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { galleryService } from '@/services/galleryService';
-import type { Gallery } from '@/types/gallery';
+import type React from "react"
+import { useState, useEffect, useRef, type DragEvent } from "react"
+import { useAuthState } from "react-firebase-hooks/auth"
+import { auth } from "@/lib/firebase"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Grid, MoreVertical, Trash2, Eye, X, Paperclip, ArrowUp } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { galleryService } from "@/services/galleryService"
+import type { Gallery } from "@/types/gallery"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,15 +21,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { toast } from 'sonner';
+} from "@/components/ui/alert-dialog"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { toast } from "sonner"
 const galleryPrompts = {
   "Fashion Collection": "Create a set of avant-garde streetwear images with deconstructed silhouettes and bold colors",
   "Film Storyboards": "Create a set of vintage film noir detective scenes with dramatic shadows and fog",
@@ -37,132 +32,122 @@ const galleryPrompts = {
   "Architectural Renders": "Create a set of modern glass pavilion images nestled in forest with sustainable design",
   "Food Photography": "Create a set of rustic Italian pasta dish images with fresh herbs and natural lighting",
   "Brand Identity": "Create a moodboard of my boxing gear company's videography",
-  "Portrait Photography": "Create a set of professional headshots with dramatic studio lighting and neutral backgrounds",
-  "Landscape Photography": "Create a set of breathtaking mountain sunrise images with misty valleys and golden light",
-  "Abstract Art": "Create a set of vibrant abstract compositions with flowing organic shapes and bold color gradients",
-  "Automotive Photography": "Create a set of luxury sports car images with dynamic angles and dramatic lighting",
-  "Travel Photography": "Create a set of exotic destination images showcasing local culture and stunning scenery",
-  "Wedding Photography": "Create a set of romantic wedding ceremony images with soft natural lighting",
-  "Corporate Photography": "Create a set of professional business environment images with modern office settings",
-  "Real Estate Photography": "Create a set of luxurious home interior images with perfect staging and lighting",
-  "Event Photography": "Create a set of celebration party images with vibrant colors and joyful moments",
-  "Nature Photography": "Create a set of wildlife and forest images with natural lighting and rich details",
-  "Street Photography": "Create a set of urban lifestyle images capturing authentic city moments",
-  "Macro Photography": "Create a set of extreme close-up images revealing intricate details and textures",
-  "Fine Art Photography": "Create a set of artistic conceptual images with creative composition and mood"
+  "Portrait Photography":
+    "Create a set of professional headshots with dramatic studio lighting and neutral backgrounds",
 }
 const GalleryCard: React.FC<{
-  gallery: Gallery;
-  onClick: () => void;
-  onDelete: () => void;
+  gallery: Gallery
+  onClick: () => void
+  onDelete: () => void
 }> = ({ gallery, onClick, onDelete }) => {
-  const firstImage = gallery.images?.[0];
+  const firstImage = gallery.images?.[0]
   return (
-    <Card
+    <div
       onClick={onClick}
-      className="group cursor-pointer hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col"
+      className="group cursor-pointer transition-all duration-300 overflow-hidden flex flex-col"
     >
       <div className="relative aspect-video bg-muted">
         {firstImage ? (
-          <img src={firstImage} alt={gallery.title} className="w-full h-full object-cover" />
+          <img src={firstImage || "/placeholder.svg"} alt={gallery.title} className="w-full h-full object-cover" />
         ) : (
           <div className="flex items-center justify-center h-full">
             <Grid className="w-12 h-12 text-muted-foreground" />
           </div>
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-      </div>
-      <CardContent className="p-4 flex-grow flex flex-col justify-between">
-        <div>
-          <div className="flex justify-between items-start mb-2">
-            <h3 className="font-bold text-lg text-foreground group-hover:text-primary transition-colors truncate pr-2">
-              {gallery.title}
-            </h3>
-            <div className="relative flex-shrink-0 flex items-center gap-1">
+
+        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={(e) => { e.stopPropagation(); onDelete(); }}
-                className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/10 hover:text-destructive"
-                title="Delete Gallery"
+                onClick={(e) => e.stopPropagation()}
+                className="h-8 w-8 bg-black/50 hover:bg-black/70 backdrop-blur-sm"
               >
-                <Trash2 className="w-3.5 h-3.5" />
+                <MoreVertical className="w-4 h-4 text-white" />
               </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={(e) => e.stopPropagation()}
-                    className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <MoreVertical className="w-3.5 h-3.5" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onClick(); }}>
-                    <Eye className="w-4 h-4 mr-2" />
-                    View Gallery
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onClick()
+                }}
+              >
+                <Eye className="w-4 h-4 mr-2" />
+                View Gallery
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onDelete()
+                }}
+                className="text-destructive focus:text-destructive"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete Gallery
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
+      </div>
+      <CardContent className="p-4 flex-grow flex flex-col justify-between">
+        {/* Title removed as requested */}
       </CardContent>
-    </Card>
-  );
-};
+    </div>
+  )
+}
 export default function GalleriesPage() {
-  const [user] = useAuthState(auth);
-  const router = useRouter();
-  const [galleries, setGalleries] = useState<Gallery[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [deleteGalleryId, setDeleteGalleryId] = useState<string | null>(null);
+  const [user] = useAuthState(auth)
+  const router = useRouter()
+  const [galleries, setGalleries] = useState<Gallery[]>([])
+  const [loading, setLoading] = useState(true)
+  const [searchTerm, setSearchTerm] = useState("")
+  const [deleteGalleryId, setDeleteGalleryId] = useState<string | null>(null)
   // Create gallery form state
-  const [type, setType] = useState("");
-  const [customType, setCustomType] = useState("");
-  const [prompt, setPrompt] = useState("");
-  const [referenceImage, setReferenceImage] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [type, setType] = useState("")
+  const [customType, setCustomType] = useState("")
+  const [prompt, setPrompt] = useState("")
+  const [referenceImage, setReferenceImage] = useState<File | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [isDragging, setIsDragging] = useState(false)
+  const [isCreating, setIsCreating] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   useEffect(() => {
     if (user) {
-      loadGalleries();
+      loadGalleries()
     }
-  }, [user]);
+  }, [user])
   const loadGalleries = async () => {
-    if (!user) return;
+    if (!user) return
     try {
-      setLoading(true);
-      const userGalleries = await galleryService.getUserGalleries(user.uid);
-      setGalleries(userGalleries);
+      setLoading(true)
+      const userGalleries = await galleryService.getUserGalleries(user.uid)
+      setGalleries(userGalleries)
     } catch (error) {
-      console.error('Failed to load galleries:', error);
-      toast.error('Failed to load galleries');
+      console.error("Failed to load galleries:", error)
+      toast.error("Failed to load galleries")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
   const handleDeleteGallery = (galleryId: string) => {
-    setDeleteGalleryId(galleryId);
-  };
+    setDeleteGalleryId(galleryId)
+  }
   const confirmDeleteGallery = async () => {
-    if (!deleteGalleryId) return;
+    if (!deleteGalleryId) return
     try {
-      await galleryService.deleteGallery(deleteGalleryId);
-      setGalleries(prevGalleries => prevGalleries.filter(g => g.id !== deleteGalleryId));
-      toast.success('Gallery deleted successfully');
+      await galleryService.deleteGallery(deleteGalleryId)
+      setGalleries((prevGalleries) => prevGalleries.filter((g) => g.id !== deleteGalleryId))
+      toast.success("Gallery deleted successfully")
     } catch (error) {
-      console.error('Failed to delete gallery:', error);
-      toast.error('Failed to delete gallery');
+      console.error("Failed to delete gallery:", error)
+      toast.error("Failed to delete gallery")
     } finally {
-      setDeleteGalleryId(null);
+      setDeleteGalleryId(null)
     }
-  };
+  }
   const handleFileSelect = (file: File) => {
     if (file && file.type.startsWith("image/")) {
       setReferenceImage(file)
@@ -206,17 +191,17 @@ export default function GalleriesPage() {
     }
   }
   const generateTitle = (galleryType: string, prompt: string): string => {
-    const promptWords = prompt.trim().split(' ').slice(0, 4).join(' ')
-    const cleanType = galleryType.replace(/\s+/g, ' ')
+    const promptWords = prompt.trim().split(" ").slice(0, 4).join(" ")
+    const cleanType = galleryType.replace(/\s+/g, " ")
     return `${cleanType}: ${promptWords}`.substring(0, 80)
   }
   const handleCreate = async () => {
     if (!user) return
     if (!prompt.trim()) {
-      toast.error('Prompt is required')
+      toast.error("Prompt is required")
       return
     }
-    const galleryType = type === 'Custom' ? customType : (type || 'AI Gallery')
+    const galleryType = type === "Custom" ? customType : type || "AI Gallery"
     setIsCreating(true)
     try {
       const autoTitle = generateTitle(galleryType, prompt)
@@ -233,26 +218,26 @@ export default function GalleriesPage() {
             prompt: prompt.trim(),
             images: [],
             isPublic: false,
-            tags: [galleryType.toLowerCase().replace(/\s+/g, '-')]
+            tags: [galleryType.toLowerCase().replace(/\s+/g, "-")],
           })
-          const response = await fetch('/api/galleries/generate', {
-            method: 'POST',
+          const response = await fetch("/api/galleries/generate", {
+            method: "POST",
             headers: {
-              'Content-Type': 'application/json',
-              'x-user-id': user.uid,
+              "Content-Type": "application/json",
+              "x-user-id": user.uid,
             },
             body: JSON.stringify({
               prompt: imagePrompt,
               outputs: 4,
-              aspectRatio: "1:1"
+              aspectRatio: "1:1",
             }),
-          });
+          })
           if (response.ok) {
-            const data = await response.json();
+            const data = await response.json()
             if (data.images && data.images.length > 0) {
               await galleryService.updateGallery(galleryId, {
-                images: data.images
-              });
+                images: data.images,
+              })
             }
           }
           resetCreateForm()
@@ -268,26 +253,26 @@ export default function GalleriesPage() {
           prompt: prompt.trim(),
           images: [],
           isPublic: false,
-          tags: [galleryType.toLowerCase().replace(/\s+/g, '-')]
+          tags: [galleryType.toLowerCase().replace(/\s+/g, "-")],
         })
-        const response = await fetch('/api/galleries/generate', {
-          method: 'POST',
+        const response = await fetch("/api/galleries/generate", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
-            'x-user-id': user.uid,
+            "Content-Type": "application/json",
+            "x-user-id": user.uid,
           },
           body: JSON.stringify({
             prompt: imagePrompt,
             outputs: 4,
-            aspectRatio: "1:1"
+            aspectRatio: "1:1",
           }),
-        });
+        })
         if (response.ok) {
-          const data = await response.json();
+          const data = await response.json()
           if (data.images && data.images.length > 0) {
             await galleryService.updateGallery(galleryId, {
-              images: data.images
-            });
+              images: data.images,
+            })
           }
         }
         resetCreateForm()
@@ -295,8 +280,8 @@ export default function GalleriesPage() {
         router.push(`/dashboard/galleries/${galleryId}`)
       }
     } catch (error) {
-      console.error('Failed to create gallery:', error)
-      toast.error('Failed to create gallery')
+      console.error("Failed to create gallery:", error)
+      toast.error("Failed to create gallery")
     } finally {
       setIsCreating(false)
     }
@@ -314,10 +299,11 @@ export default function GalleriesPage() {
       fileInputRef.current.value = ""
     }
   }
-  const filteredGalleries = galleries.filter(gallery =>
-    gallery.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    gallery.type.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredGalleries = galleries.filter(
+    (gallery) =>
+      gallery.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      gallery.type.toLowerCase().includes(searchTerm.toLowerCase()),
+  )
   if (loading) {
     return (
       <main className="min-h-screen w-full bg-background transition-colors duration-300 flex items-center justify-center">
@@ -326,7 +312,7 @@ export default function GalleriesPage() {
           <p className="text-foreground">Loading your galleries...</p>
         </div>
       </main>
-    );
+    )
   }
   return (
     <main className="min-h-screen w-full transition-colors duration-300">
@@ -334,19 +320,7 @@ export default function GalleriesPage() {
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-md font-bold text-foreground">Galleries</h1>
         </div>
-        {galleries.length > 0 && (
-          <div className="mb-6">
-            <div className="relative">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search galleries..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-          </div>
-        )}
+        {galleries.length > 0 && <div className="mb-6"></div>}
         {filteredGalleries.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredGalleries.map((gallery) => (
@@ -361,35 +335,27 @@ export default function GalleriesPage() {
         ) : galleries.length === 0 ? (
           <div className="text-center py-20 border-2 border-dashed border-border rounded-2xl">
             <Grid className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-            <h2 className="text-2xl font-semibold text-foreground">
-              No galleries yet
-            </h2>
-            <p className="text-muted-foreground mt-2">
-              Click "New" to create your first gallery.
-            </p>
+            <h2 className="text-2xl font-semibold text-foreground">No galleries yet</h2>
+            <p className="text-muted-foreground mt-2">Click "New" to create your first gallery.</p>
           </div>
         ) : (
           <div className="text-center py-20 border-2 border-dashed border-border rounded-2xl">
             <Grid className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-            <h2 className="text-2xl font-semibold text-foreground">
-              No galleries found
-            </h2>
-            <p className="text-muted-foreground mt-2">
-              Try adjusting your search terms.
-            </p>
+            <h2 className="text-2xl font-semibold text-foreground">No galleries found</h2>
+            <p className="text-muted-foreground mt-2">Try adjusting your search terms.</p>
           </div>
         )}
       </div>
       {/* Sticky Create Gallery Prompt Box */}
-      <div className="sticky bottom-0 bg-background border-t p-4 mt-8">
-        <div className="max-w-6xl mx-auto">
+      <div className="sticky bottom-0 p-4 mt-8 mx-auto ">
+        <div className="max-w-3xl mx-auto">
           {type === "Custom" && (
             <div className="mb-4">
               <Input
                 value={customType}
                 onChange={(e) => setCustomType(e.target.value)}
                 placeholder="Custom gallery type"
-                className="h-10 text-sm border-border bg-background focus-visible:ring-1 focus-visible:ring-ring"
+                className="h-10 text-sm border-border bg-background focus-visible:ring-1 focus-visible:ring-ring "
               />
             </div>
           )}
@@ -464,29 +430,28 @@ export default function GalleriesPage() {
           </div>
         </div>
       </div>
-      <AlertDialog open={!!deleteGalleryId} onOpenChange={(open) => {
-        if (!open) setDeleteGalleryId(null);
-      }}>
+      <AlertDialog
+        open={!!deleteGalleryId}
+        onOpenChange={(open) => {
+          if (!open) setDeleteGalleryId(null)
+        }}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Gallery</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this gallery? This action cannot be undone and will permanently remove all images and content.
+              Are you sure you want to delete this gallery? This action cannot be undone and will permanently remove all
+              images and content.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setDeleteGalleryId(null)}>
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmDeleteGallery}
-              className="bg-destructive hover:bg-destructive/90"
-            >
+            <AlertDialogCancel onClick={() => setDeleteGalleryId(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteGallery} className="bg-destructive hover:bg-destructive/90">
               Delete Gallery
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     </main>
-  );
+  )
 }
