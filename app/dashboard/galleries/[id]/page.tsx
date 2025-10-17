@@ -524,11 +524,19 @@ export default function GalleryPage({ params }: GalleryPageProps) {
             >
               <CardContent className="p-0">
                 <div className="relative aspect-square">
-                  <img
-                    src={imageUrl}
-                    alt={`Generated image ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
+                  {imageUrl.includes('video/') ? (
+                    <video
+                      src={imageUrl}
+                      className="w-full h-full object-cover"
+                      controls
+                    />
+                  ) : (
+                    <img
+                      src={imageUrl}
+                      alt={`Generated image ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  )}
                   <Button
                     size="icon"
                     variant="destructive"
@@ -558,12 +566,22 @@ export default function GalleryPage({ params }: GalleryPageProps) {
             <Textarea
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              placeholder="Edit your prompt and generate 4 more images..."
+              placeholder="Edit your prompt and generate 4 more images or videos..."
               rows={3}
               className="resize-none text-base border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[100px] pl-3 pr-14 pb-12"
             />
 
             <div className="absolute bottom-3 right-3 flex items-center gap-2">
+              {/* Toggle for Image/Video Generation */}
+              <Button
+                onClick={() => { /* Handle toggle logic here */ }}
+                size="sm"
+                className="h-8 w-8 p-0 rounded-lg bg-secondary text-secondary-foreground"
+              >
+                {/* Icon for image or video generation */}
+                {/* For example, use Sparkles for images and a video icon for videos */}
+                <Sparkles className="w-4 h-4" /> 
+              </Button>
               <Button
                 onClick={handleGenerate}
                 size="sm"
