@@ -21,6 +21,7 @@ export default function PublicGalleryPage({ params }: PublicGalleryPageProps) {
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
   useEffect(() => {
     loadGallery();
@@ -72,6 +73,67 @@ export default function PublicGalleryPage({ params }: PublicGalleryPageProps) {
     } else {
       setSelectedImageIndex(selectedImageIndex < gallery.images.length - 1 ? selectedImageIndex + 1 : 0);
     }
+  };
+
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', index.toString());
+    
+    // Create a drag preview
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = 100;
+    canvas.height = 100;
+    
+    if (ctx) {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+      ctx.fillRect(0, 0, 100, 100);
+      ctx.fillStyle = '#3b82f6';
+      ctx.font = '12px Inter';
+      ctx.textAlign = 'center';
+      ctx.fillText(`Image ${index + 1}`, 50, 50);
+    }
+    
+    e.dataTransfer.setDragImage(canvas, 50, 50);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault();
+    
+    if (draggedIndex !== null && draggedIndex !== dropIndex && gallery) {
+      const newImages = [...gallery.images];
+      const draggedImage = newImages[draggedIndex];
+      
+      // Remove dragged image
+      newImages.splice(draggedIndex, 1);
+      
+      // Insert at new position
+      const actualDropIndex = draggedIndex < dropIndex ? dropIndex - 1 : dropIndex;
+      newImages.splice(actualDropIndex, 0, draggedImage);
+      
+      setGallery({
+        ...gallery,
+        images: newImages
+      });
+      
+      toast.success('Image reordered');
+    }
+    
+    setDraggedIndex(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
   };
 
   useEffect(() => {
@@ -167,9 +229,19 @@ export default function PublicGalleryPage({ params }: PublicGalleryPageProps) {
         }`}>
           {gallery.images.map((imageUrl, index) => (
             <Card 
-              key={index} 
-              className="group overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary transition-all"
-              onClick={() => setSelectedImageIndex(index)}
+              key={`${imageUrl}-${index}`}
+              draggable
+              onDragStart={(e) => handleDragStart(e, index)}
+              onDragOver={handleDragOver}
+              onDragEnter={handleDragEnter}
+              onDrop={(e) => handleDrop(e, index)}
+              onDragEnd={handleDragEnd}
+              className={`group overflow-hidden cursor-grab active:cursor-grabbing hover:ring-2 hover:ring-primary transition-all ${
+                draggedIndex === index ? 'opacity-50 scale-95' : ''
+              } ${
+                draggedIndex !== null && draggedIndex !== index ? 'ring-2 ring-blue-200 bg-blue-50/50' : ''
+              }`}
+              onClick={() => draggedIndex === null && setSelectedImageIndex(index)}
             >
               <CardContent className="p-0">
                 <div className="relative aspect-square">
@@ -177,7 +249,22 @@ export default function PublicGalleryPage({ params }: PublicGalleryPageProps) {
                     src={imageUrl}
                     alt={`Generated image ${index + 1}`}
                     className="w-full h-full object-cover"
+                    draggable={false}
                   />
+                  
+                  {/* Drag indicator */}
+                  <div className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/60 text-white px-2 py-1 rounded text-xs">
+                    Drag to reorder
+                  </div>
+                  
+                  {/* Drop zone indicator */}
+                  {draggedIndex !== null && draggedIndex !== index && (
+                    <div className="absolute inset-0 border-2 border-dashed border-blue-400 bg-blue-100/20 flex items-center justify-center">
+                      <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-sm">
+                        Drop here
+                      </div>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
