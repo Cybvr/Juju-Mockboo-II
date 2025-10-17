@@ -1,4 +1,3 @@
-
 "use client"
 import React, { useState, useEffect, useRef, type DragEvent } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
@@ -30,7 +29,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-
 const galleryPrompts = {
   "Fashion Collection": "Create a set of avant-garde streetwear images with deconstructed silhouettes and bold colors",
   "Film Storyboards": "Create a set of vintage film noir detective scenes with dramatic shadows and fog",
@@ -53,15 +51,12 @@ const galleryPrompts = {
   "Macro Photography": "Create a set of extreme close-up images revealing intricate details and textures",
   "Fine Art Photography": "Create a set of artistic conceptual images with creative composition and mood"
 }
-
 const GalleryCard: React.FC<{
   gallery: Gallery;
   onClick: () => void;
   onDelete: () => void;
 }> = ({ gallery, onClick, onDelete }) => {
   const firstImage = gallery.images?.[0];
-  const lastUpdated = new Date(gallery.updatedAt).toLocaleDateString();
-
   return (
     <Card
       onClick={onClick}
@@ -113,23 +108,11 @@ const GalleryCard: React.FC<{
               </DropdownMenu>
             </div>
           </div>
-          <p className="text-sm text-muted-foreground line-clamp-2">
-            {gallery.description || 'No description'}
-          </p>
-        </div>
-        <div className="flex items-center justify-between mt-2">
-          <p className="text-xs text-muted-foreground">
-            {gallery.images.length} images
-          </p>
-          <p className="text-xs text-muted-foreground">
-            Updated: {lastUpdated}
-          </p>
         </div>
       </CardContent>
     </Card>
   );
 };
-
 export default function GalleriesPage() {
   const [user] = useAuthState(auth);
   const router = useRouter();
@@ -137,7 +120,6 @@ export default function GalleriesPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [deleteGalleryId, setDeleteGalleryId] = useState<string | null>(null);
-
   // Create gallery form state
   const [type, setType] = useState("");
   const [customType, setCustomType] = useState("");
@@ -147,13 +129,11 @@ export default function GalleriesPage() {
   const [isDragging, setIsDragging] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
   useEffect(() => {
     if (user) {
       loadGalleries();
     }
   }, [user]);
-
   const loadGalleries = async () => {
     if (!user) return;
     try {
@@ -167,14 +147,11 @@ export default function GalleriesPage() {
       setLoading(false);
     }
   };
-
   const handleDeleteGallery = (galleryId: string) => {
     setDeleteGalleryId(galleryId);
   };
-
   const confirmDeleteGallery = async () => {
     if (!deleteGalleryId) return;
-
     try {
       await galleryService.deleteGallery(deleteGalleryId);
       setGalleries(prevGalleries => prevGalleries.filter(g => g.id !== deleteGalleryId));
@@ -186,7 +163,6 @@ export default function GalleriesPage() {
       setDeleteGalleryId(null);
     }
   };
-
   const handleFileSelect = (file: File) => {
     if (file && file.type.startsWith("image/")) {
       setReferenceImage(file)
@@ -196,28 +172,23 @@ export default function GalleriesPage() {
       toast.error("Please select a valid image file")
     }
   }
-
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) handleFileSelect(file)
   }
-
   const handleDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault()
     setIsDragging(false)
     const file = e.dataTransfer.files[0]
     if (file) handleFileSelect(file)
   }
-
   const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault()
     setIsDragging(true)
   }
-
   const handleDragLeave = () => {
     setIsDragging(false)
   }
-
   const removeImage = () => {
     setReferenceImage(null)
     if (previewUrl) {
@@ -228,20 +199,17 @@ export default function GalleriesPage() {
       fileInputRef.current.value = ""
     }
   }
-
   const handleTypeChange = (value: string) => {
     setType(value)
     if (value !== "Custom" && galleryPrompts[value]) {
       setPrompt(galleryPrompts[value])
     }
   }
-
   const generateTitle = (galleryType: string, prompt: string): string => {
     const promptWords = prompt.trim().split(' ').slice(0, 4).join(' ')
     const cleanType = galleryType.replace(/\s+/g, ' ')
     return `${cleanType}: ${promptWords}`.substring(0, 80)
   }
-
   const handleCreate = async () => {
     if (!user) return
     if (!prompt.trim()) {
@@ -253,13 +221,11 @@ export default function GalleriesPage() {
     try {
       const autoTitle = generateTitle(galleryType, prompt)
       let imagePrompt = prompt.trim()
-
       if (referenceImage) {
         const reader = new FileReader()
         reader.onload = async (e) => {
           const base64 = e.target?.result as string
           imagePrompt = `${prompt.trim()} (Reference image style: ${base64})`
-
           const galleryId = await galleryService.createGallery(user.uid, {
             title: autoTitle,
             description: prompt.trim(),
@@ -269,7 +235,6 @@ export default function GalleriesPage() {
             isPublic: false,
             tags: [galleryType.toLowerCase().replace(/\s+/g, '-')]
           })
-
           const response = await fetch('/api/galleries/generate', {
             method: 'POST',
             headers: {
@@ -282,16 +247,14 @@ export default function GalleriesPage() {
               aspectRatio: "1:1"
             }),
           });
-
           if (response.ok) {
             const data = await response.json();
             if (data.images && data.images.length > 0) {
-              await galleryService.updateGallery(galleryId, { 
+              await galleryService.updateGallery(galleryId, {
                 images: data.images
               });
             }
           }
-
           resetCreateForm()
           loadGalleries()
           router.push(`/dashboard/galleries/${galleryId}`)
@@ -307,7 +270,6 @@ export default function GalleriesPage() {
           isPublic: false,
           tags: [galleryType.toLowerCase().replace(/\s+/g, '-')]
         })
-
         const response = await fetch('/api/galleries/generate', {
           method: 'POST',
           headers: {
@@ -320,16 +282,14 @@ export default function GalleriesPage() {
             aspectRatio: "1:1"
           }),
         });
-
         if (response.ok) {
           const data = await response.json();
           if (data.images && data.images.length > 0) {
-            await galleryService.updateGallery(galleryId, { 
+            await galleryService.updateGallery(galleryId, {
               images: data.images
             });
           }
         }
-
         resetCreateForm()
         loadGalleries()
         router.push(`/dashboard/galleries/${galleryId}`)
@@ -341,7 +301,6 @@ export default function GalleriesPage() {
       setIsCreating(false)
     }
   }
-
   const resetCreateForm = () => {
     setType("")
     setCustomType("")
@@ -355,12 +314,10 @@ export default function GalleriesPage() {
       fileInputRef.current.value = ""
     }
   }
-
   const filteredGalleries = galleries.filter(gallery =>
     gallery.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     gallery.type.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
   if (loading) {
     return (
       <main className="min-h-screen w-full bg-background transition-colors duration-300 flex items-center justify-center">
@@ -371,14 +328,12 @@ export default function GalleriesPage() {
       </main>
     );
   }
-
   return (
     <main className="min-h-screen w-full transition-colors duration-300">
       <div className="w-full max-w-6xl mx-auto py-8 px-4 pb-40">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-md font-bold text-foreground">Galleries</h1>
         </div>
-
         {galleries.length > 0 && (
           <div className="mb-6">
             <div className="relative">
@@ -392,7 +347,6 @@ export default function GalleriesPage() {
             </div>
           </div>
         )}
-
         {filteredGalleries.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredGalleries.map((gallery) => (
@@ -426,7 +380,6 @@ export default function GalleriesPage() {
           </div>
         )}
       </div>
-
       {/* Sticky Create Gallery Prompt Box */}
       <div className="fixed bottom-0 left-0 right-0 z-40 bg-background border-t p-4">
         <div className="max-w-6xl mx-auto">
@@ -440,7 +393,6 @@ export default function GalleriesPage() {
               />
             </div>
           )}
-
           <div className="relative rounded-2xl border border-border bg-background shadow-sm focus-within:shadow-md transition-shadow">
             {referenceImage && previewUrl && (
               <div className="flex items-center gap-3 p-3 border-b border-border">
@@ -461,7 +413,6 @@ export default function GalleriesPage() {
                 </Button>
               </div>
             )}
-
             <div className="relative">
               <div className="absolute bottom-3 left-3 flex items-center gap-2 z-10">
                 <Button
@@ -473,7 +424,6 @@ export default function GalleriesPage() {
                 >
                   <Paperclip className="w-4 h-4 text-muted-foreground" />
                 </Button>
-
                 <Select value={type} onValueChange={handleTypeChange}>
                   <SelectTrigger size="sm" className="w-fit h-8 text-sm">
                     <SelectValue placeholder="Gallery type" />
@@ -485,10 +435,9 @@ export default function GalleriesPage() {
                       </SelectItem>
                     ))}
                     <SelectItem value="Custom">Custom</SelectItem>
-                  </Select>
+                  </SelectContent>
                 </Select>
               </div>
-
               <Textarea
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
@@ -496,10 +445,8 @@ export default function GalleriesPage() {
                 rows={3}
                 className="resize-none text-base border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[100px] pl-3 pr-14 pb-12"
               />
-
               <div className="absolute bottom-3 right-3 flex items-center gap-2">
                 <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileInput} className="hidden" />
-
                 <Button
                   onClick={handleCreate}
                   size="sm"
@@ -517,7 +464,6 @@ export default function GalleriesPage() {
           </div>
         </div>
       </div>
-
       <AlertDialog open={!!deleteGalleryId} onOpenChange={(open) => {
         if (!open) setDeleteGalleryId(null);
       }}>
