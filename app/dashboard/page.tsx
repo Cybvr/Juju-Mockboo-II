@@ -5,7 +5,7 @@ import { auth } from "@/lib/firebase"
 import { DocumentGallery } from "@/app/common/dashboard/DocumentGallery"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Clapperboard, Palette, Video } from "lucide-react"
+import { IoFilm, IoBrush, IoVideocam } from "react-icons/io5"
 
 export default function DashboardPage() {
   const [user, loading] = useAuthState(auth)
@@ -63,21 +63,21 @@ export default function DashboardPage() {
                 onClick={createNewCanvas}
                 className="h-24 flex flex-col items-center justify-center space-y-2 bg-card text-card-foreground hover:bg-card/90 border"
               >
-                <Palette className="h-6 w-6" />
+                <IoBrush className="h-6 w-6" />
                 <span>Canvas</span>
               </Button>
               <Button
                 onClick={() => router.push("/dashboard/videos")}
                 className="h-24 flex flex-col items-center justify-center space-y-2 bg-card text-card-foreground hover:bg-card/90 border"
               >
-                <Video className="h-6 w-6" />
+                <IoVideocam className="h-6 w-6" />
                 <span>Video</span>
               </Button>
               <Button
                 onClick={() => router.push("/dashboard/stories")}
                 className="h-24 flex flex-col items-center justify-center space-y-2 bg-card text-card-foreground hover:bg-card/90 border"
               >
-                <Clapperboard className="h-6 w-6" />
+                <IoFilm className="h-6 w-6" />
                 <span>Stories</span>
               </Button>
             </div>

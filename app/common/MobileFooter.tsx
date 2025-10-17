@@ -1,12 +1,14 @@
+
 'use client';
 import { Button } from '@/components/ui/button';
 import { 
-  Clapperboard,
-  Home, 
-  Palette, GalleryVerticalEnd,
-  Video,
-  User
-} from 'lucide-react';
+  IoFilm,
+  IoHome, 
+  IoBrush, 
+  IoImages,
+  IoVideocam,
+  IoPerson
+} from 'react-icons/io5';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuthState } from 'react-firebase-hooks/auth';
@@ -48,32 +50,32 @@ export function MobileFooter() {
   const navItems = [
     {
       label: 'Home',
-      icon: <Home className="h-5 w-5" />,
+      icon: <IoHome className="h-5 w-5" />,
       href: '/dashboard',
       active: pathname === '/dashboard'
     },
     {
       label: 'Canvas',
-      icon: <Palette className="h-5 w-5" />,
+      icon: <IoBrush className="h-5 w-5" />,
       href: '#',
       active: pathname.startsWith('/dashboard/canvas'),
       onClick: createNewCanvas
     },
     {
       label: 'Galleries',
-      icon: <GalleryVerticalEnd className="h-5 w-5" />,
+      icon: <IoImages className="h-5 w-5" />,
       href: '/dashboard/galleries',
       active: pathname.startsWith('/dashboard/galleries')
     },
     {
       label: 'Videos',
-      icon: <Video className="h-5 w-5" />,
+      icon: <IoVideocam className="h-5 w-5" />,
       href: '/dashboard/videos',
       active: pathname.startsWith('/dashboard/videos')
     },
     {
       label: 'Profile',
-      icon: <User className="h-5 w-5" />,
+      icon: <IoPerson className="h-5 w-5" />,
       href: '/dashboard/profile',
       active: pathname === '/dashboard/profile'
     }
