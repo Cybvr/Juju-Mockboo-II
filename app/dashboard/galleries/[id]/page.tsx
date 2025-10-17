@@ -616,24 +616,18 @@ export default function GalleryPage({ params }: GalleryPageProps) {
               className="resize-none text-base border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[100px] pl-3 pr-14 pb-12"
             />
 
-            <div className="absolute bottom-3 right-3 flex items-center gap-2">
-              {/* Toggle for Image/Video Generation */}
+            <div className="absolute bottom-3 left-3 flex items-center">
               <Button
                 onClick={() => setGenerationMode(generationMode === 'image' ? 'video' : 'image')}
                 size="sm"
-                className={`h-8 w-8 p-0 rounded-lg transition-colors ${
-                  generationMode === 'image' 
-                    ? 'bg-blue-100 text-blue-600 hover:bg-blue-200' 
-                    : 'bg-purple-100 text-purple-600 hover:bg-purple-200'
-                }`}
-                title={`Switch to ${generationMode === 'image' ? 'video' : 'image'} generation`}
+                variant="outline"
+                className="h-8 px-3 text-xs font-medium"
               >
-                {generationMode === 'image' ? (
-                  <Sparkles className="w-4 h-4" />
-                ) : (
-                  <Video className="w-4 h-4" />
-                )}
+                {generationMode === 'image' ? 'Image' : 'Video'}
               </Button>
+            </div>
+
+            <div className="absolute bottom-3 right-3 flex items-center gap-2">
               <Button
                 onClick={handleGenerate}
                 size="sm"
