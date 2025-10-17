@@ -13,6 +13,8 @@ import { galleryService } from '@/services/galleryService';
 import type { Gallery } from '@/types/gallery';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { storage } from '@/lib/firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 interface GalleryPageProps {
   params: Promise<{ id: string }>;
@@ -279,36 +281,19 @@ export default function GalleryPage({ params }: GalleryPageProps) {
         return;
       }
 
+      // Upload files directly to Firebase Storage
       const uploadPromises = validFiles.map(async (file) => {
-        const reader = new FileReader();
-        return new Promise<string>((resolve) => {
-          reader.onload = (e) => {
-            resolve(e.target?.result as string);
-          };
-          reader.readAsDataURL(file);
-        });
+        const timestamp = Date.now();
+        const fileName = `${timestamp}-${file.name}`;
+        const filePath = `users/${user.uid}/images/${fileName}`;
+        
+        const storageRef = ref(storage, filePath);
+        await uploadBytes(storageRef, file);
+        return await getDownloadURL(storageRef);
       });
 
-      const fileDataUrls = await Promise.all(uploadPromises);
-      
-      // Upload to Firebase Storage
-      const response = await fetch('/api/images/save', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-user-id': user.uid,
-        },
-        body: JSON.stringify({
-          images: fileDataUrls,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to upload files');
-      }
-
-      const data = await response.json();
-      const newImages = [...(gallery.images || []), ...data.imageUrls];
+      const uploadedUrls = await Promise.all(uploadPromises);
+      const newImages = [...(gallery.images || []), ...uploadedUrls];
 
       await galleryService.updateGallery(gallery.id, { 
         images: newImages
