@@ -1,11 +1,11 @@
 
 import { NextRequest, NextResponse } from 'next/server';
-import OpenAI from 'openai';
+import Replicate from "replicate";
 import { storage } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
+const replicate = new Replicate({
+  auth: process.env.REPLICATE_API_TOKEN,
 });
 
 export async function POST(request: NextRequest) {
@@ -30,44 +30,71 @@ export async function POST(request: NextRequest) {
 
     const generatedVideos: string[] = [];
 
-    // Generate videos with Sora
+    // Generate videos with ByteDance SeeDance
     for (let i = 0; i < numOutputs; i++) {
       const videoPrompt = `${basePrompt}
 
-This is video ${i + 1} of ${numOutputs} total videos requested. Create a cinematic ${seconds}-second video that explores this concept with dynamic motion and engaging visuals.`;
+This is video ${i + 1} of ${numOutputs} total videos requested. Create a cinematic video that explores this concept with dynamic motion and engaging visuals.`;
 
       try {
-        // Create video with Sora
-        const video = await openai.videos.create({
-          model: 'sora-2',
+        const input = {
+          fps: 24,
           prompt: videoPrompt,
-          size: '1280x720',
-          seconds: seconds.toString()
-        });
+          duration: seconds > 7 ? 10 : 5,
+          resolution: "1080p",
+          aspect_ratio: "16:9",
+          camera_fixed: false
+        };
 
-        // Poll for completion
-        let videoStatus = video;
-        while (videoStatus.status === 'in_progress' || videoStatus.status === 'queued') {
-          await new Promise(resolve => setTimeout(resolve, 5000)); // Poll every 5 seconds
-          videoStatus = await openai.videos.retrieve(video.id);
+        console.log('Calling ByteDance SeeDance API with input:', input);
+        const output = await replicate.run("bytedance/seedance-1-pro", { input });
+        console.log('ByteDance SeeDance generation successful:', output);
+
+        // Handle ByteDance SeeDance output format
+        let videoUrl: string;
+
+        if (typeof output === 'string') {
+          videoUrl = output;
+        } else if (output && typeof output === 'object' && 'url' in output) {
+          videoUrl = typeof output.url === 'function' ? output.url() : output.url;
+        } else {
+          console.error('Unexpected output format:', output);
+          throw new Error('Unexpected API response format');
         }
 
-        if (videoStatus.status === 'completed') {
-          // Download the video content
-          const videoContent = await openai.videos.downloadContent(video.id);
-          const videoBlob = new Blob([await videoContent.arrayBuffer()], { type: 'video/mp4' });
+        console.log('Extracted video URL:', videoUrl);
 
-          // Upload to Firebase Storage
-          const filename = `gallery_video_${Date.now()}_${i}.mp4`;
-          const storageRef = ref(storage, `galleries/videos/${filename}`);
-          await uploadBytes(storageRef, videoBlob);
-          const downloadURL = await getDownloadURL(storageRef);
+        // Convert URL object to string if needed
+        const videoUrlString = videoUrl instanceof URL ? videoUrl.href : String(videoUrl);
 
-          generatedVideos.push(downloadURL);
-        } else if (videoStatus.status === 'failed') {
-          console.error('Video generation failed:', videoStatus.error);
-          throw new Error(videoStatus.error?.message || 'Video generation failed');
+        if (!videoUrlString || !videoUrlString.startsWith('http')) {
+          console.error('Invalid video URL format:', videoUrlString);
+          throw new Error('Invalid video URL received from API');
         }
+
+        // Download video from Replicate
+        console.log('Downloading video from URL:', videoUrlString);
+        const videoResponse = await fetch(videoUrlString);
+        if (!videoResponse.ok) {
+          console.error('Failed to download video:', videoResponse.status);
+          throw new Error('Failed to download generated video');
+        }
+        const videoBlob = await videoResponse.blob();
+        console.log('Video downloaded, size:', videoBlob.size, 'bytes');
+
+        // Upload to Firebase Storage
+        const timestamp = Date.now();
+        const fileName = `gallery_video_${timestamp}_${i}.mp4`;
+        const videoPath = `galleries/videos/${fileName}`;
+        console.log('Uploading to Firebase Storage:', videoPath);
+        const videoRef = ref(storage, videoPath);
+        await uploadBytes(videoRef, videoBlob);
+
+        // Get Firebase download URL
+        const firebaseVideoUrl = await getDownloadURL(videoRef);
+        console.log('Video uploaded to Firebase:', firebaseVideoUrl);
+
+        generatedVideos.push(firebaseVideoUrl);
       } catch (error) {
         console.error(`Error generating video ${i + 1}:`, error);
         // Continue with other videos even if one fails
