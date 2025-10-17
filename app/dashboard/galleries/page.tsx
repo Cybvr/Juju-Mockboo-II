@@ -137,7 +137,6 @@ export default function GalleriesPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [deleteGalleryId, setDeleteGalleryId] = useState<string | null>(null);
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
 
   // Create gallery form state
   const [type, setType] = useState("");
@@ -293,7 +292,6 @@ export default function GalleriesPage() {
             }
           }
 
-          setShowCreateDialog(false)
           resetCreateForm()
           loadGalleries()
           router.push(`/dashboard/galleries/${galleryId}`)
@@ -332,7 +330,6 @@ export default function GalleriesPage() {
           }
         }
 
-        setShowCreateDialog(false)
         resetCreateForm()
         loadGalleries()
         router.push(`/dashboard/galleries/${galleryId}`)
@@ -377,13 +374,9 @@ export default function GalleriesPage() {
 
   return (
     <main className="min-h-screen w-full transition-colors duration-300">
-      <div className="w-full max-w-6xl mx-auto py-8 px-4">
+      <div className="w-full max-w-6xl mx-auto py-8 px-4 pb-40">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-md font-bold text-foreground">Galleries</h1>
-          <Button onClick={() => setShowCreateDialog(true)} className="gap-2">
-            <Plus className="w-5 h-5" />
-            New
-          </Button>
         </div>
 
         {galleries.length > 0 && (
@@ -434,101 +427,96 @@ export default function GalleriesPage() {
         )}
       </div>
 
-      {/* Create Gallery Dialog */}
-      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-        <DialogContent className="sm:max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Create New Gallery</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            {type === "Custom" && (
-              <div className="relative">
-                <Input
-                  value={customType}
-                  onChange={(e) => setCustomType(e.target.value)}
-                  placeholder="Custom gallery type"
-                  className="h-12 text-base border-border bg-background focus-visible:ring-1 focus-visible:ring-ring"
-                />
+      {/* Sticky Create Gallery Prompt Box */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-background border-t p-4">
+        <div className="max-w-6xl mx-auto">
+          {type === "Custom" && (
+            <div className="mb-4">
+              <Input
+                value={customType}
+                onChange={(e) => setCustomType(e.target.value)}
+                placeholder="Custom gallery type"
+                className="h-10 text-sm border-border bg-background focus-visible:ring-1 focus-visible:ring-ring"
+              />
+            </div>
+          )}
+
+          <div className="relative rounded-2xl border border-border bg-background shadow-sm focus-within:shadow-md transition-shadow">
+            {referenceImage && previewUrl && (
+              <div className="flex items-center gap-3 p-3 border-b border-border">
+                <div className="relative w-12 h-12 rounded-md overflow-hidden flex-shrink-0 bg-muted">
+                  <img src={previewUrl || "/placeholder.svg"} alt="Preview" className="w-full h-full object-cover" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">{referenceImage.name}</p>
+                  <p className="text-xs text-muted-foreground">{(referenceImage.size / 1024).toFixed(1)} KB</p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={removeImage}
+                  className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive flex-shrink-0"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
               </div>
             )}
 
-            <div className="relative rounded-2xl border border-border bg-background shadow-sm focus-within:shadow-md transition-shadow">
-              {referenceImage && previewUrl && (
-                <div className="flex items-center gap-3 p-3 border-b border-border">
-                  <div className="relative w-12 h-12 rounded-md overflow-hidden flex-shrink-0 bg-muted">
-                    <img src={previewUrl || "/placeholder.svg"} alt="Preview" className="w-full h-full object-cover" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{referenceImage.name}</p>
-                    <p className="text-xs text-muted-foreground">{(referenceImage.size / 1024).toFixed(1)} KB</p>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={removeImage}
-                    className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive flex-shrink-0"
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
-                </div>
-              )}
+            <div className="relative">
+              <div className="absolute bottom-3 left-3 flex items-center gap-2 z-10">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="h-8 w-8 p-0 hover:bg-muted rounded-lg"
+                  type="button"
+                >
+                  <Paperclip className="w-4 h-4 text-muted-foreground" />
+                </Button>
 
-              <div className="relative">
-                <div className="absolute bottom-3 left-3 flex items-center gap-2 z-10">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="h-8 w-8 p-0 hover:bg-muted rounded-lg"
-                    type="button"
-                  >
-                    <Paperclip className="w-4 h-4 text-muted-foreground" />
-                  </Button>
-
-                  <Select value={type} onValueChange={handleTypeChange}>
-                    <SelectTrigger size="sm" className="w-fit h-8 text-sm">
-                      <SelectValue placeholder="Gallery type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Object.keys(galleryPrompts).map((t) => (
-                        <SelectItem key={t} value={t}>
-                          {t}
-                        </SelectItem>
-                      ))}
-                      <SelectItem value="Custom">Custom</SelectItem>
-                    </SelectContent>
+                <Select value={type} onValueChange={handleTypeChange}>
+                  <SelectTrigger size="sm" className="w-fit h-8 text-sm">
+                    <SelectValue placeholder="Gallery type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.keys(galleryPrompts).map((t) => (
+                      <SelectItem key={t} value={t}>
+                        {t}
+                      </SelectItem>
+                    ))}
+                    <SelectItem value="Custom">Custom</SelectItem>
                   </Select>
-                </div>
+                </Select>
+              </div>
 
-                <Textarea
-                  value={prompt}
-                  onChange={(e) => setPrompt(e.target.value)}
-                  placeholder="Describe your vision..."
-                  rows={4}
-                  className="resize-none text-base border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[120px] pl-3 pr-14 pb-12"
-                />
+              <Textarea
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                placeholder="Describe your gallery vision and press create..."
+                rows={3}
+                className="resize-none text-base border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[100px] pl-3 pr-14 pb-12"
+              />
 
-                <div className="absolute bottom-3 right-3 flex items-center gap-2">
-                  <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileInput} className="hidden" />
+              <div className="absolute bottom-3 right-3 flex items-center gap-2">
+                <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileInput} className="hidden" />
 
-                  <Button
-                    onClick={handleCreate}
-                    size="sm"
-                    className="h-8 w-8 p-0 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-50"
-                    disabled={isCreating || !prompt.trim()}
-                  >
-                    {isCreating ? (
-                      <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                    ) : (
-                      <ArrowUp className="w-4 h-4" />
-                    )}
-                  </Button>
-                </div>
+                <Button
+                  onClick={handleCreate}
+                  size="sm"
+                  className="h-8 w-8 p-0 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-50"
+                  disabled={isCreating || !prompt.trim()}
+                >
+                  {isCreating ? (
+                    <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                  ) : (
+                    <ArrowUp className="w-4 h-4" />
+                  )}
+                </Button>
               </div>
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+      </div>
 
       <AlertDialog open={!!deleteGalleryId} onOpenChange={(open) => {
         if (!open) setDeleteGalleryId(null);
