@@ -12,6 +12,7 @@ import { Grid, MoreVertical, Trash2, Eye, X, Paperclip, ArrowUp } from "lucide-r
 import { useRouter } from "next/navigation"
 import { galleryService } from "@/services/galleryService"
 import type { Gallery } from "@/types/gallery"
+import { OptimizedImage } from "@/components/OptimizedImage"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -48,7 +49,13 @@ const GalleryCard: React.FC<{
     >
       <div className="relative aspect-video bg-muted">
         {firstImage ? (
-          <img src={firstImage || "/placeholder.svg"} alt={gallery.title} className="w-full h-full object-cover" />
+          <OptimizedImage 
+            src={firstImage} 
+            alt={gallery.title} 
+            className="w-full h-full object-cover" 
+            fill 
+            priority={false}
+          />
         ) : (
           <div className="flex items-center justify-center h-full">
             <Grid className="w-12 h-12 text-muted-foreground" />
