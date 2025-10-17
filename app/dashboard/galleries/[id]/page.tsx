@@ -38,6 +38,11 @@ export default function GalleryPage({ params }: GalleryPageProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [generationMode, setGenerationMode] = useState<'image' | 'video'>('image');
+  const [videoSettings, setVideoSettings] = useState({
+    duration: 5,
+    resolution: "1080p",
+    aspectRatio: "16:9"
+  });
 
   useEffect(() => {
     if (user) {
@@ -179,8 +184,10 @@ export default function GalleryPage({ params }: GalleryPageProps) {
           body: JSON.stringify({
             prompt: prompt.trim(),
             previousPrompt: gallery.prompt,
-            seconds: 8,
-            outputs: 2
+            seconds: videoSettings.duration,
+            outputs: 2,
+            resolution: videoSettings.resolution,
+            aspectRatio: videoSettings.aspectRatio
           }),
         });
 
@@ -616,7 +623,7 @@ export default function GalleryPage({ params }: GalleryPageProps) {
               className="resize-none text-base border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[100px] pl-3 pr-14 pb-12"
             />
 
-            <div className="absolute bottom-3 left-3 flex items-center">
+            <div className="absolute bottom-3 left-3 flex items-center gap-2">
               <Button
                 onClick={() => setGenerationMode(generationMode === 'image' ? 'video' : 'image')}
                 size="sm"
@@ -625,6 +632,38 @@ export default function GalleryPage({ params }: GalleryPageProps) {
               >
                 {generationMode === 'image' ? 'Image' : 'Video'}
               </Button>
+              
+              {generationMode === 'video' && (
+                <>
+                  <select
+                    value={videoSettings.duration}
+                    onChange={(e) => setVideoSettings({...videoSettings, duration: parseInt(e.target.value)})}
+                    className="h-8 px-2 text-xs border border-border rounded bg-background"
+                  >
+                    <option value={5}>5s</option>
+                    <option value={10}>10s</option>
+                  </select>
+                  
+                  <select
+                    value={videoSettings.resolution}
+                    onChange={(e) => setVideoSettings({...videoSettings, resolution: e.target.value})}
+                    className="h-8 px-2 text-xs border border-border rounded bg-background"
+                  >
+                    <option value="480p">480p</option>
+                    <option value="1080p">1080p</option>
+                  </select>
+                  
+                  <select
+                    value={videoSettings.aspectRatio}
+                    onChange={(e) => setVideoSettings({...videoSettings, aspectRatio: e.target.value})}
+                    className="h-8 px-2 text-xs border border-border rounded bg-background"
+                  >
+                    <option value="16:9">16:9</option>
+                    <option value="9:16">9:16</option>
+                    <option value="1:1">1:1</option>
+                  </select>
+                </>
+              )}
             </div>
 
             <div className="absolute bottom-3 right-3 flex items-center gap-2">
