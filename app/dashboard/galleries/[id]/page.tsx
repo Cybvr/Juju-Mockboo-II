@@ -15,7 +15,7 @@ import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { storage } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { ImageModal } from '@/components/ImageModal';
+import { ImageModal } from '@/app/common/dashboard/ImageModal';
 
 interface GalleryPageProps {
   params: Promise<{ id: string }>;
