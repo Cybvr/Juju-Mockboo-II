@@ -576,7 +576,7 @@ export default function GalleryPage({ params }: GalleryPageProps) {
             >
               <CardContent className="p-0">
                 <div className="relative aspect-square">
-                  {imageUrl.includes('video/') ? (
+                  {imageUrl.includes('.mp4') || imageUrl.includes('video') ? (
                     <video
                       src={imageUrl}
                       className="w-full h-full object-cover"
