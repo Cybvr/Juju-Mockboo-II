@@ -26,19 +26,20 @@ const extractImageColors = async (imageUrl: string): Promise<string[]> => {
     const img = new Image();
 
     img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+
+      if (!ctx) {
+        console.log('❌ No canvas context available');
+        resolve([]);
+        return;
+      }
+
+      canvas.width = Math.min(img.width, 200);
+      canvas.height = Math.min(img.height, 200);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
       try {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-
-        if (!ctx) {
-          resolve(['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8']);
-          return;
-        }
-
-        canvas.width = Math.min(img.width, 200);
-        canvas.height = Math.min(img.height, 200);
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const pixels = imageData.data;
         const colorMap = new Map<string, number>();
@@ -51,12 +52,9 @@ const extractImageColors = async (imageUrl: string): Promise<string[]> => {
           const alpha = pixels[i + 3];
 
           if (alpha > 100) {
-            // Round colors to reduce variation
-            const roundedR = Math.round(r / 32) * 32;
-            const roundedG = Math.round(g / 32) * 32;
-            const roundedB = Math.round(b / 32) * 32;
-            const color = `rgb(${roundedR}, ${roundedG}, ${roundedB})`;
-            colorMap.set(color, (colorMap.get(color) || 0) + 1);
+            // Convert to hex
+            const hex = `#${Math.round(r / 32) * 32 < 16 ? '0' : ''}${(Math.round(r / 32) * 32).toString(16)}${Math.round(g / 32) * 32 < 16 ? '0' : ''}${(Math.round(g / 32) * 32).toString(16)}${Math.round(b / 32) * 32 < 16 ? '0' : ''}${(Math.round(b / 32) * 32).toString(16)}`;
+            colorMap.set(hex, (colorMap.get(hex) || 0) + 1);
           }
         }
 
@@ -65,30 +63,23 @@ const extractImageColors = async (imageUrl: string): Promise<string[]> => {
           .slice(0, 6)
           .map(([color]) => color);
 
-        const finalColors = sortedColors.length > 0 ? sortedColors : ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#DDA0DD'];
-        
-        console.log('🎨 COLOR EXTRACTION DEBUG:');
-        console.log('Image URL:', imageUrl);
-        console.log('Canvas size:', canvas.width, 'x', canvas.height);
-        console.log('Total pixels sampled:', pixels.length / 4);
-        console.log('Color map size:', colorMap.size);
-        console.log('Extracted colors:', finalColors);
-        console.log('Using fallback colors?', sortedColors.length === 0);
-        
-        resolve(finalColors);
+        console.log('🎨 Extracted', sortedColors.length, 'colors:', sortedColors);
+        resolve(sortedColors);
       } catch (error) {
-        // Fallback colors if extraction fails
-        resolve(['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#DDA0DD']);
+        console.log('❌ CORS error - canvas tainted');
+        resolve([]);
       }
     };
 
     img.onerror = () => {
-      // Fallback colors if image fails to load
-      resolve(['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#DDA0DD']);
+      console.log('❌ Image failed to load');
+      resolve([]);
     };
 
+    // Use image proxy for CORS issues
+    const proxyUrl = `/api/image-proxy?url=${encodeURIComponent(imageUrl)}`;
     img.crossOrigin = 'anonymous';
-    img.src = imageUrl;
+    img.src = proxyUrl;
   });
 };
 
