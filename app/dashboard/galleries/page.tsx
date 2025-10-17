@@ -321,144 +321,148 @@ export default function GalleriesPage() {
       </main>
     )
   }
-  return (
-    <main className="min-h-screen w-full transition-colors duration-300">
-      <div className="w-full max-w-4xl mx-auto py-8 px-4 pb-40">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-md font-bold text-foreground">Galleries</h1>
-        </div>
-        {galleries.length > 0 && <div className="mb-6"></div>}
-        {filteredGalleries.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredGalleries.map((gallery) => (
+return (
+  <main className="min-h-screen w-full transition-colors duration-300">
+    <div className="w-full max-w-4xl mx-auto py-8 px-4 pb-40">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-md font-bold text-foreground">Galleries</h1>
+      </div>
+
+      {galleries.length > 0 && <div className="mb-6"></div>}
+
+      {filteredGalleries.length > 0 ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          {filteredGalleries.map((gallery) => (
+            <div key={gallery.id} className="aspect-[9/16]">
               <GalleryCard
-                key={gallery.id}
                 gallery={gallery}
                 onClick={() => router.push(`/dashboard/galleries/${gallery.id}`)}
                 onDelete={() => handleDeleteGallery(gallery.id)}
               />
-            ))}
-          </div>
-        ) : galleries.length === 0 ? (
-          <div className="text-center py-20 border-2 border-dashed border-border rounded-2xl">
-            <Grid className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-            <h2 className="text-2xl font-semibold text-foreground">No galleries yet</h2>
-            <p className="text-muted-foreground mt-2">Click "New" to create your first gallery.</p>
-          </div>
-        ) : (
-          <div className="text-center py-20 border-2 border-dashed border-border rounded-2xl">
-            <Grid className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-            <h2 className="text-2xl font-semibold text-foreground">No galleries found</h2>
-            <p className="text-muted-foreground mt-2">Try adjusting your search terms.</p>
+            </div>
+          ))}
+        </div>
+      ) : galleries.length === 0 ? (
+        <div className="text-center py-20 border-2 border-dashed border-border rounded-2xl">
+          <Grid className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+          <h2 className="text-2xl font-semibold text-foreground">No galleries yet</h2>
+          <p className="text-muted-foreground mt-2">Click "New" to create your first gallery.</p>
+        </div>
+      ) : (
+        <div className="text-center py-20 border-2 border-dashed border-border rounded-2xl">
+          <Grid className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+          <h2 className="text-2xl font-semibold text-foreground">No galleries found</h2>
+          <p className="text-muted-foreground mt-2">Try adjusting your search terms.</p>
+        </div>
+      )}
+    </div>
+
+    {/* Sticky Create Gallery Prompt Box */}
+    <div className="sticky bottom-0 p-4 mt-8 mx-auto">
+      <div className="max-w-3xl mx-auto">
+        {type === "Custom" && (
+          <div className="mb-4">
+            <Input
+              value={customType}
+              onChange={(e) => setCustomType(e.target.value)}
+              placeholder="Custom gallery type"
+              className="h-10 text-sm border-border bg-background focus-visible:ring-1 focus-visible:ring-ring"
+            />
           </div>
         )}
-      </div>
-      {/* Sticky Create Gallery Prompt Box */}
-      <div className="sticky bottom-0 p-4 mt-8 mx-auto ">
-        <div className="max-w-3xl mx-auto">
-          {type === "Custom" && (
-            <div className="mb-4">
-              <Input
-                value={customType}
-                onChange={(e) => setCustomType(e.target.value)}
-                placeholder="Custom gallery type"
-                className="h-10 text-sm border-border bg-background focus-visible:ring-1 focus-visible:ring-ring "
-              />
+        <div className="relative rounded-2xl border border-border bg-background shadow-sm focus-within:shadow-md transition-shadow">
+          {referenceImage && previewUrl && (
+            <div className="flex items-center gap-3 p-3 border-b border-border">
+              <div className="relative w-12 h-12 rounded-md overflow-hidden flex-shrink-0 bg-muted">
+                <img src={previewUrl || "/placeholder.svg"} alt="Preview" className="w-full h-full object-cover" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground truncate">{referenceImage.name}</p>
+                <p className="text-xs text-muted-foreground">{(referenceImage.size / 1024).toFixed(1)} KB</p>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={removeImage}
+                className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive flex-shrink-0"
+              >
+                <X className="w-4 h-4" />
+              </Button>
             </div>
           )}
-          <div className="relative rounded-2xl border border-border bg-background shadow-sm focus-within:shadow-md transition-shadow">
-            {referenceImage && previewUrl && (
-              <div className="flex items-center gap-3 p-3 border-b border-border">
-                <div className="relative w-12 h-12 rounded-md overflow-hidden flex-shrink-0 bg-muted">
-                  <img src={previewUrl || "/placeholder.svg"} alt="Preview" className="w-full h-full object-cover" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">{referenceImage.name}</p>
-                  <p className="text-xs text-muted-foreground">{(referenceImage.size / 1024).toFixed(1)} KB</p>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={removeImage}
-                  className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive flex-shrink-0"
-                >
-                  <X className="w-4 h-4" />
-                </Button>
-              </div>
-            )}
-            <div className="relative">
-              <div className="absolute bottom-3 left-3 flex items-center gap-2 z-10">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="h-8 w-8 p-0 hover:bg-muted rounded-lg"
-                  type="button"
-                >
-                  <Paperclip className="w-4 h-4 text-muted-foreground" />
-                </Button>
-                <Select value={type} onValueChange={handleTypeChange}>
-                  <SelectTrigger size="sm" className="w-fit h-8 text-sm">
-                    <SelectValue placeholder="Gallery type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.keys(galleryPrompts).map((t) => (
-                      <SelectItem key={t} value={t}>
-                        {t}
-                      </SelectItem>
-                    ))}
-                    <SelectItem value="Custom">Custom</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <Textarea
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                placeholder="Describe your gallery vision and press create..."
-                rows={3}
-                className="resize-none text-base border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[100px] pl-3 pr-14 pb-12"
-              />
-              <div className="absolute bottom-3 right-3 flex items-center gap-2">
-                <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileInput} className="hidden" />
-                <Button
-                  onClick={handleCreate}
-                  size="sm"
-                  className="h-8 w-8 p-0 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-50"
-                  disabled={isCreating || !prompt.trim()}
-                >
-                  {isCreating ? (
-                    <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                  ) : (
-                    <ArrowUp className="w-4 h-4" />
-                  )}
-                </Button>
-              </div>
+          <div className="relative">
+            <div className="absolute bottom-3 left-3 flex items-center gap-2 z-10">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                className="h-8 w-8 p-0 hover:bg-muted rounded-lg"
+                type="button"
+              >
+                <Paperclip className="w-4 h-4 text-muted-foreground" />
+              </Button>
+              <Select value={type} onValueChange={handleTypeChange}>
+                <SelectTrigger size="sm" className="w-fit h-8 text-sm">
+                  <SelectValue placeholder="Gallery type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.keys(galleryPrompts).map((t) => (
+                    <SelectItem key={t} value={t}>
+                      {t}
+                    </SelectItem>
+                  ))}
+                  <SelectItem value="Custom">Custom</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Textarea
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              placeholder="Describe your gallery vision and press create..."
+              rows={3}
+              className="resize-none text-base border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[100px] pl-3 pr-14 pb-12"
+            />
+            <div className="absolute bottom-3 right-3 flex items-center gap-2">
+              <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileInput} className="hidden" />
+              <Button
+                onClick={handleCreate}
+                size="sm"
+                className="h-8 w-8 p-0 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-50"
+                disabled={isCreating || !prompt.trim()}
+              >
+                {isCreating ? (
+                  <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                ) : (
+                  <ArrowUp className="w-4 h-4" />
+                )}
+              </Button>
             </div>
           </div>
         </div>
       </div>
-      <AlertDialog
-        open={!!deleteGalleryId}
-        onOpenChange={(open) => {
-          if (!open) setDeleteGalleryId(null)
-        }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Gallery</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this gallery? This action cannot be undone and will permanently remove all
-              images and content.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setDeleteGalleryId(null)}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDeleteGallery} className="bg-destructive hover:bg-destructive/90">
-              Delete Gallery
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </main>
-  )
-}
+    </div>
+
+    <AlertDialog
+      open={!!deleteGalleryId}
+      onOpenChange={(open) => {
+        if (!open) setDeleteGalleryId(null)
+      }}
+    >
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete Gallery</AlertDialogTitle>
+          <AlertDialogDescription>
+            Are you sure you want to delete this gallery? This action cannot be undone and will permanently remove all
+            images and content.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={() => setDeleteGalleryId(null)}>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={confirmDeleteGallery} className="bg-destructive hover:bg-destructive/90">
+            Delete Gallery
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  </main>
+)}

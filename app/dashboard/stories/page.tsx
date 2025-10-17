@@ -254,7 +254,7 @@ const App: React.FC = () => {
   }
 
   return (
-    <main className="min-h-screen w-full transition-colors duration-300">
+    <main className="min-h-screen w-full transition-colors duration-300 mx-auto max-w-4xl">
       {renderContent()}
       
       <AlertDialog open={!!deleteProjectId} onOpenChange={(open) => {

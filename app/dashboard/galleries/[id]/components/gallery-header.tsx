@@ -92,7 +92,7 @@ export function GalleryHeader({
               </>
             )}
           </div>
-          <Badge variant="secondary">{gallery.type}</Badge>
+        
         </div>
       </div>
 
