@@ -1,4 +1,3 @@
-
 "use client"
 import React, { useState, useEffect, use, useMemo, useCallback, lazy, Suspense } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
@@ -18,6 +17,8 @@ import { storage } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useDragDrop } from './hooks/use-drag-drop';
 import { GalleryPromptBox } from './components/gallery-prompt-box';
+import { GalleryHeader } from './components/gallery-header'; // Assuming GalleryHeader is in this path
+import { GalleryShareModal } from './components/gallery-share-modal'; // Assuming GalleryShareModal is in this path
 
 // Lazy load heavy components
 const ImageModal = lazy(() => import('@/app/common/dashboard/ImageModal').then(module => ({ default: module.ImageModal })));
@@ -168,7 +169,7 @@ export default function GalleryPage({ params }: GalleryPageProps) {
 
       for (let i = 0; i < validFiles.length; i += batchSize) {
         const batch = validFiles.slice(i, i + batchSize);
-        
+
         const batchPromises = batch.map(async (file) => {
           const timestamp = Date.now();
           const fileName = `${timestamp}-${Math.random().toString(36).substr(2, 9)}-${file.name}`;
@@ -213,7 +214,7 @@ export default function GalleryPage({ params }: GalleryPageProps) {
   // Load gallery data
   useEffect(() => {
     if (!user) return;
-    
+
     const loadGallery = async () => {
       try {
         setLoading(true);
@@ -222,6 +223,7 @@ export default function GalleryPage({ params }: GalleryPageProps) {
           setGallery(galleryData);
           setPrompt(galleryData.prompt || '');
           setEditedTitle(galleryData.title);
+          setGalleryAccessLevel(galleryData.isPublic ? 'public' : 'private');
         } else {
           toast.error('Gallery not found');
           router.push('/dashboard/galleries');
@@ -411,17 +413,17 @@ export default function GalleryPage({ params }: GalleryPageProps) {
     }
   };
 
-  const handleSaveTitle = async () => {
-    if (!gallery || !editedTitle.trim()) return;
+  const handleTitleUpdate = async (newTitle: string) => {
+    if (!gallery || !newTitle.trim()) return;
 
     try {
       await galleryService.updateGallery(gallery.id, { 
-        title: editedTitle.trim() 
+        title: newTitle.trim() 
       });
 
       setGallery(prev => prev ? {
         ...prev,
-        title: editedTitle.trim(),
+        title: newTitle.trim(),
         updatedAt: Date.now()
       } : null);
 
@@ -520,99 +522,16 @@ export default function GalleryPage({ params }: GalleryPageProps) {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => router.push('/dashboard/galleries')}>
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <div>
-            {isEditingTitle ? (
-              <div className="flex items-center gap-2">
-                <Input
-                  value={editedTitle}
-                  onChange={(e) => setEditedTitle(e.target.value)}
-                  className="text-sm h-8"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') handleSaveTitle();
-                    if (e.key === 'Escape') {
-                      setIsEditingTitle(false);
-                      setEditedTitle(gallery.title);
-                    }
-                  }}
-                  autoFocus
-                />
-                <Button size="icon" variant="ghost" className="h-8 w-8" onClick={handleSaveTitle}>
-                  <Check className="w-4 h-4" />
-                </Button>
-                <Button 
-                  size="icon" 
-                  variant="ghost" 
-                  className="h-8 w-8" 
-                  onClick={() => {
-                    setIsEditingTitle(false);
-                    setEditedTitle(gallery.title);
-                  }}
-                >
-                  <X className="w-4 h-4" />
-                </Button>
-              </div>
-            ) : (
-              <h1 
-                className="text-sm font-semibold cursor-pointer hover:bg-muted px-2 py-1 rounded"
-                onClick={() => setIsEditingTitle(true)}
-              >
-                {gallery.title}
-              </h1>
-            )}
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <input
-            type="file"
-            accept="image/*,video/*"
-            multiple
-            onChange={handleFileInputChange}
-            className="hidden"
-            id="file-upload"
-          />
-          <Button
-            variant="outline"
-            onClick={() => document.getElementById('file-upload')?.click()}
-            className="flex items-center gap-2"
-            disabled={uploading}
-          >
-            <Upload className="w-4 h-4" />
-            <span className="hidden sm:inline">
-              {uploading ? 'Uploading...' : 'Upload'}
-            </span>
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => setIsShareModalOpen(true)}
-            className="flex items-center gap-2"
-          >
-            <Share2 className="w-4 h-4" />
-            <span className="hidden sm:inline">Share</span>
-          </Button>
-          <Button
-            variant={viewMode === 'grid' ? 'default' : 'outline'}
-            size="icon"
-            onClick={() => setViewMode('grid')}
-            className="hidden md:flex"
-          >
-            <Grid className="w-4 h-4" />
-          </Button>
-          <Button
-            variant={viewMode === 'list' ? 'default' : 'outline'}
-            size="icon"
-            onClick={() => setViewMode('list')}
-            className="hidden md:flex"
-          >
-            <List className="w-4 h-4" />
-          </Button>
-        </div>
-      </div>
+      {/* Header */}
+      <GalleryHeader
+        gallery={gallery}
+        viewMode={viewMode}
+        setViewMode={setViewMode}
+        uploading={uploading}
+        onFileInputChange={handleFileInputChange}
+        onShareClick={() => setIsShareModalOpen(true)}
+        onTitleUpdate={handleTitleUpdate}
+      />
 
       <div
         onDrop={dragHandlers.onDrop}
@@ -691,63 +610,14 @@ export default function GalleryPage({ params }: GalleryPageProps) {
       </Suspense>
 
       {/* Share Modal */}
-      <Dialog open={isShareModalOpen} onOpenChange={setIsShareModalOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Share Gallery</DialogTitle>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 border rounded-lg">
-                <div>
-                  <p className="font-medium">Private</p>
-                  <p className="text-sm text-muted-foreground">Only you can access</p>
-                </div>
-                <Button
-                  variant={galleryAccessLevel === 'private' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => handleShareAccess('private')}
-                >
-                  {galleryAccessLevel === 'private' ? 'Current' : 'Set Private'}
-                </Button>
-              </div>
-
-              <div className="flex items-center justify-between p-3 border rounded-lg">
-                <div>
-                  <p className="font-medium">Public</p>
-                  <p className="text-sm text-muted-foreground">Anyone with link can view</p>
-                </div>
-                <Button
-                  variant={galleryAccessLevel === 'public' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => handleShareAccess('public')}
-                >
-                  {galleryAccessLevel === 'public' ? 'Current' : 'Make Public'}
-                </Button>
-              </div>
-            </div>
-
-            {galleryAccessLevel === 'public' && (
-              <div className="space-y-2">
-                <div className="flex gap-2">
-                  <Input
-                    readOnly
-                    value={`${window.location.origin}/m/gallery/${gallery?.id}`}
-                    className="flex-1"
-                  />
-                  <Button onClick={handleCopyLink} size="icon">
-                    <Copy className="w-4 h-4" />
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Public link - anyone can view this gallery
-                </p>
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+      <GalleryShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        gallery={gallery}
+        galleryAccessLevel={galleryAccessLevel}
+        onAccessLevelChange={handleShareAccess}
+        onCopyLink={handleCopyLink}
+      />
     </div>
   );
 }
