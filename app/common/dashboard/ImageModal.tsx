@@ -30,7 +30,6 @@ const extractImageColors = async (imageUrl: string): Promise<string[]> => {
       const ctx = canvas.getContext('2d');
 
       if (!ctx) {
-        console.log('❌ No canvas context available');
         resolve([]);
         return;
       }
@@ -63,23 +62,18 @@ const extractImageColors = async (imageUrl: string): Promise<string[]> => {
           .slice(0, 6)
           .map(([color]) => color);
 
-        console.log('🎨 Extracted', sortedColors.length, 'colors:', sortedColors);
         resolve(sortedColors);
       } catch (error) {
-        console.log('❌ CORS error - canvas tainted');
         resolve([]);
       }
     };
 
     img.onerror = () => {
-      console.log('❌ Image failed to load');
       resolve([]);
     };
 
-    // Use image proxy for CORS issues
-    const proxyUrl = `/api/image-proxy?url=${encodeURIComponent(imageUrl)}`;
     img.crossOrigin = 'anonymous';
-    img.src = proxyUrl;
+    img.src = `/api/image-proxy?url=${encodeURIComponent(imageUrl)}`;
   });
 };
 
@@ -98,9 +92,7 @@ export const ImageModal: React.FC<ImageModalProps> = ({
 
   useEffect(() => {
     if (isOpen && images[selectedIndex]) {
-      console.log('🚀 Starting color extraction for image:', images[selectedIndex]);
       extractImageColors(images[selectedIndex]).then((colors) => {
-        console.log('✅ Color extraction complete, setting colors:', colors);
         setImageColors(colors);
       });
     }
@@ -199,28 +191,27 @@ export const ImageModal: React.FC<ImageModalProps> = ({
               <h4 className="text-sm font-medium text-muted-foreground mb-2">Prompt</h4>
               <p className="text-sm leading-relaxed">{gallery.prompt}</p>
 
-              {/* Color Palette under prompt */}
-              <div className="mt-4 p-4 bg-muted/30 rounded-lg border-2 border-yellow-400">
-                <h4 className="text-sm font-medium text-foreground mb-3 font-bold">🎨 Color Palette (DEBUG)</h4>
-                <div className="flex gap-3 flex-wrap">
-                  {imageColors.map((color, index) => (
-                    <div key={index} className="flex flex-col items-center gap-1">
-                      <button
-                        className="w-12 h-12 rounded-lg border-4 border-black hover:scale-110 transition-transform cursor-pointer shadow-lg"
-                        style={{ backgroundColor: color }}
-                        onClick={() => handleCopyColor(color)}
-                        title={`Click to copy ${color}`}
-                      />
-                      <span className="text-xs font-mono text-foreground bg-background px-1 py-0.5 rounded border">
-                        {color}
-                      </span>
-                    </div>
-                  ))}
+              {/* Color Palette */}
+              {imageColors.length > 0 && (
+                <div className="mt-4 p-4 bg-muted/30 rounded-lg">
+                  <h4 className="text-sm font-medium text-foreground mb-3">🎨 Color Palette</h4>
+                  <div className="flex gap-3 flex-wrap">
+                    {imageColors.map((color, index) => (
+                      <div key={index} className="flex flex-col items-center gap-1">
+                        <button
+                          className="w-12 h-12 rounded-lg border-2 hover:scale-110 transition-transform cursor-pointer shadow-md"
+                          style={{ backgroundColor: color }}
+                          onClick={() => handleCopyColor(color)}
+                          title={`Click to copy ${color}`}
+                        />
+                        <span className="text-xs font-mono text-muted-foreground">
+                          {color}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="mt-2 text-xs text-muted-foreground">
-                  Total colors extracted: {imageColors.length}
-                </div>
-              </div>
+              )}
             </div>
           )}
 
