@@ -1,6 +1,8 @@
 
 'use client';
 import { Button } from '@/components/ui/button';
+import { GoHomeFill } from "react-icons/go";
+
 import { 
   IoFilm,
   IoHome, 
@@ -9,6 +11,10 @@ import {
   IoVideocam,
   IoPerson
 } from 'react-icons/io5';
+import { PiPaletteBold } from "react-icons/pi";
+
+import { IoAlbumsOutline } from "react-icons/io5";
+import { PiVideoBold } from "react-icons/pi";
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuthState } from 'react-firebase-hooks/auth';
@@ -50,26 +56,26 @@ export function MobileFooter() {
   const navItems = [
     {
       label: 'Home',
-      icon: <IoHome className="h-5 w-5" />,
+      icon: <GoHomeFill className="h-5 w-5" />,
       href: '/dashboard',
       active: pathname === '/dashboard'
     },
     {
       label: 'Canvas',
-      icon: <IoBrush className="h-5 w-5" />,
+      icon: <PiPaletteBold className="h-5 w-5" />,
       href: '#',
       active: pathname.startsWith('/dashboard/canvas'),
       onClick: createNewCanvas
     },
     {
       label: 'Galleries',
-      icon: <IoImages className="h-5 w-5" />,
+      icon: <IoAlbumsOutline className="h-5 w-5" />,
       href: '/dashboard/galleries',
       active: pathname.startsWith('/dashboard/galleries')
     },
     {
       label: 'Videos',
-      icon: <IoVideocam className="h-5 w-5" />,
+      icon: <PiVideoBold className="h-5 w-5" />,
       href: '/dashboard/videos',
       active: pathname.startsWith('/dashboard/videos')
     },
