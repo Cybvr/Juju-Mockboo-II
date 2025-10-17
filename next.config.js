@@ -8,11 +8,19 @@ const nextConfig = {
   },
   devIndicators: false,
   poweredByHeader: false,
+  output: 'standalone',
   experimental: {
     optimizeCss: false,
   },
+  trailingSlash: false,
+  generateEtags: false,
   images: {
-    domains: ['firebasestorage.googleapis.com'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'firebasestorage.googleapis.com',
+      },
+    ],
     formats: ['image/webp', 'image/avif'],
     minimumCacheTTL: 3600,
     dangerouslyAllowSVG: true,
