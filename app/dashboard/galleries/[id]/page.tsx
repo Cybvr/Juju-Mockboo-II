@@ -1,5 +1,6 @@
+
 "use client"
-import React, { useState, useEffect, use } from 'react';
+import React, { useState, useEffect, use, useMemo, useCallback, lazy, Suspense } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
@@ -15,11 +16,82 @@ import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { storage } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { ImageModal } from '@/app/common/dashboard/ImageModal';
+
+// Lazy load heavy components
+const ImageModal = lazy(() => import('@/app/common/dashboard/ImageModal').then(module => ({ default: module.ImageModal })));
 
 interface GalleryPageProps {
   params: Promise<{ id: string }>;
 }
+
+// Memoized image component for better performance
+const OptimizedGalleryImage = React.memo(({ 
+  imageUrl, 
+  index, 
+  onClick, 
+  onDelete 
+}: { 
+  imageUrl: string; 
+  index: number; 
+  onClick: () => void; 
+  onDelete: () => void; 
+}) => {
+  const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState(false);
+
+  return (
+    <Card 
+      className="group overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary transition-all"
+      onClick={onClick}
+    >
+      <CardContent className="p-0">
+        <div className="relative aspect-square bg-gray-100">
+          {!error ? (
+            <>
+              {imageUrl.includes('.mp4') || imageUrl.includes('video') ? (
+                <video
+                  src={imageUrl}
+                  className="w-full h-full object-cover"
+                  controls
+                  preload="metadata"
+                />
+              ) : (
+                <img
+                  src={imageUrl}
+                  alt={`Generated image ${index + 1}`}
+                  className={`w-full h-full object-cover transition-opacity ${loaded ? 'opacity-100' : 'opacity-0'}`}
+                  loading="lazy"
+                  onLoad={() => setLoaded(true)}
+                  onError={() => setError(true)}
+                />
+              )}
+              {!loaded && !imageUrl.includes('video') && (
+                <div className="absolute inset-0 bg-gray-200 animate-pulse" />
+              )}
+            </>
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-gray-100">
+              <span className="text-gray-400 text-sm">Failed to load</span>
+            </div>
+          )}
+          <Button
+            size="icon"
+            variant="destructive"
+            className="absolute top-2 right-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+          >
+            <Trash2 className="w-4 h-4" />
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+});
+
+OptimizedGalleryImage.displayName = 'OptimizedGalleryImage';
 
 export default function GalleryPage({ params }: GalleryPageProps) {
   const { id } = use(params);
@@ -44,32 +116,140 @@ export default function GalleryPage({ params }: GalleryPageProps) {
     aspectRatio: "16:9"
   });
 
-  useEffect(() => {
-    if (user) {
-      loadGallery();
-    }
-  }, [user, id]);
+  // Memoized handlers to prevent recreation on every render
+  const handleDeleteImage = useCallback(async (imageIndex: number) => {
+    if (!gallery) return;
+    if (!confirm('Are you sure you want to delete this image?')) return;
 
-  const loadGallery = async () => {
-    if (!user) return;
     try {
-      setLoading(true);
-      const galleryData = await galleryService.getGalleryById(id);
-      if (galleryData && galleryData.userId === user.uid) {
-        setGallery(galleryData);
-        setPrompt(galleryData.prompt || '');
-        setEditedTitle(galleryData.title);
-      } else {
-        toast.error('Gallery not found');
-        router.push('/dashboard/galleries');
-      }
+      const updatedImages = gallery.images.filter((_, index) => index !== imageIndex);
+
+      await galleryService.updateGallery(gallery.id, { 
+        images: updatedImages 
+      });
+
+      setGallery(prev => prev ? {
+        ...prev,
+        images: updatedImages,
+        updatedAt: Date.now()
+      } : null);
+
+      setSelectedImageIndex(null);
+      toast.success('Image deleted successfully');
     } catch (error) {
-      console.error('Failed to load gallery:', error);
-      toast.error('Failed to load gallery');
-    } finally {
-      setLoading(false);
+      console.error('Failed to delete image:', error);
+      toast.error('Failed to delete image');
     }
-  };
+  }, [gallery]);
+
+  const handleImageClick = useCallback((index: number) => {
+    setSelectedImageIndex(index);
+  }, []);
+
+  // Optimized file upload handler
+  const handleFileUpload = useCallback(async (files: FileList) => {
+    if (!gallery || !user) return;
+
+    setUploading(true);
+    try {
+      const validFiles = Array.from(files).filter(file => 
+        file.type.startsWith('image/') || file.type.startsWith('video/')
+      );
+
+      if (validFiles.length === 0) {
+        toast.error('Please select valid image or video files');
+        return;
+      }
+
+      // Upload files in batches of 3 to avoid overwhelming the server
+      const batchSize = 3;
+      const uploadedUrls: string[] = [];
+
+      for (let i = 0; i < validFiles.length; i += batchSize) {
+        const batch = validFiles.slice(i, i + batchSize);
+        
+        const batchPromises = batch.map(async (file) => {
+          const timestamp = Date.now();
+          const fileName = `${timestamp}-${Math.random().toString(36).substr(2, 9)}-${file.name}`;
+          const filePath = `users/${user.uid}/images/${fileName}`;
+
+          const storageRef = ref(storage, filePath);
+          await uploadBytes(storageRef, file);
+          return await getDownloadURL(storageRef);
+        });
+
+        const batchUrls = await Promise.all(batchPromises);
+        uploadedUrls.push(...batchUrls);
+      }
+
+      const newImages = [...(gallery.images || []), ...uploadedUrls];
+
+      await galleryService.updateGallery(gallery.id, { 
+        images: newImages
+      });
+
+      setGallery(prev => prev ? {
+        ...prev,
+        images: newImages,
+        updatedAt: Date.now()
+      } : null);
+
+      toast.success(`Uploaded ${validFiles.length} file(s) successfully`);
+    } catch (error) {
+      console.error('Failed to upload files:', error);
+      toast.error('Failed to upload files');
+    } finally {
+      setUploading(false);
+    }
+  }, [gallery, user]);
+
+  // Memoized drag handlers
+  const dragHandlers = useMemo(() => ({
+    handleDrop: (e: React.DragEvent) => {
+      e.preventDefault();
+      setIsDragging(false);
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        handleFileUpload(e.dataTransfer.files);
+      }
+    },
+    handleDragOver: (e: React.DragEvent) => {
+      e.preventDefault();
+      setIsDragging(true);
+    },
+    handleDragLeave: (e: React.DragEvent) => {
+      e.preventDefault();
+      if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+        setIsDragging(false);
+      }
+    }
+  }), [handleFileUpload]);
+
+  // Load gallery data
+  useEffect(() => {
+    if (!user) return;
+    
+    const loadGallery = async () => {
+      try {
+        setLoading(true);
+        const galleryData = await galleryService.getGalleryById(id);
+        if (galleryData && galleryData.userId === user.uid) {
+          setGallery(galleryData);
+          setPrompt(galleryData.prompt || '');
+          setEditedTitle(galleryData.title);
+        } else {
+          toast.error('Gallery not found');
+          router.push('/dashboard/galleries');
+        }
+      } catch (error) {
+        console.error('Failed to load gallery:', error);
+        toast.error('Failed to load gallery');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadGallery();
+  }, [user, id, router]);
 
   const handleMoreLikeThis = async () => {
     if (!user || !gallery) return;
@@ -104,11 +284,11 @@ export default function GalleryPage({ params }: GalleryPageProps) {
           images: updatedImages
         });
 
-        setGallery({
-          ...gallery,
+        setGallery(prev => prev ? {
+          ...prev,
           images: updatedImages,
           updatedAt: Date.now()
-        });
+        } : null);
 
         setSelectedImageIndex(null);
         toast.success(`Generated ${data.images.length} similar images`);
@@ -162,12 +342,12 @@ export default function GalleryPage({ params }: GalleryPageProps) {
             prompt: prompt.trim()
           });
 
-          setGallery({
-            ...gallery,
+          setGallery(prev => prev ? {
+            ...prev,
             images: updatedImages,
             prompt: prompt.trim(),
             updatedAt: Date.now()
-          });
+          } : null);
 
           toast.success(`Generated ${data.images.length} images successfully`);
         } else {
@@ -206,12 +386,12 @@ export default function GalleryPage({ params }: GalleryPageProps) {
             prompt: prompt.trim()
           });
 
-          setGallery({
-            ...gallery,
+          setGallery(prev => prev ? {
+            ...prev,
             images: updatedImages,
             prompt: prompt.trim(),
             updatedAt: Date.now()
-          });
+          } : null);
 
           toast.success(`Generated ${data.videos.length} videos successfully`);
         } else {
@@ -223,31 +403,6 @@ export default function GalleryPage({ params }: GalleryPageProps) {
       toast.error(error instanceof Error ? error.message : `Failed to generate ${generationMode}s`);
     } finally {
       setGenerating(false);
-    }
-  };
-
-  const handleDeleteImage = async (imageIndex: number) => {
-    if (!gallery) return;
-    if (!confirm('Are you sure you want to delete this image?')) return;
-
-    try {
-      const updatedImages = gallery.images.filter((_, index) => index !== imageIndex);
-
-      await galleryService.updateGallery(gallery.id, { 
-        images: updatedImages 
-      });
-
-      setGallery({
-        ...gallery,
-        images: updatedImages,
-        updatedAt: Date.now()
-      });
-
-      setSelectedImageIndex(null);
-      toast.success('Image deleted successfully');
-    } catch (error) {
-      console.error('Failed to delete image:', error);
-      toast.error('Failed to delete image');
     }
   };
 
@@ -278,11 +433,11 @@ export default function GalleryPage({ params }: GalleryPageProps) {
         title: editedTitle.trim() 
       });
 
-      setGallery({
-        ...gallery,
+      setGallery(prev => prev ? {
+        ...prev,
         title: editedTitle.trim(),
         updatedAt: Date.now()
-      });
+      } : null);
 
       setIsEditingTitle(false);
       toast.success('Title updated');
@@ -300,11 +455,11 @@ export default function GalleryPage({ params }: GalleryPageProps) {
         isPublic: accessLevel === 'public'
       });
 
-      setGallery({
-        ...gallery,
+      setGallery(prev => prev ? {
+        ...prev,
         isPublic: accessLevel === 'public',
         updatedAt: Date.now()
-      });
+      } : null);
 
       setGalleryAccessLevel(accessLevel);
       toast.success(accessLevel === 'public' ? 'Gallery is now public' : 'Gallery is now private');
@@ -318,74 +473,6 @@ export default function GalleryPage({ params }: GalleryPageProps) {
     const shareUrl = `${window.location.origin}/m/gallery/${gallery?.id}`;
     navigator.clipboard.writeText(shareUrl);
     toast.success('Link copied to clipboard');
-  };
-
-  const handleFileUpload = async (files: FileList) => {
-    if (!gallery || !user) return;
-
-    setUploading(true);
-    try {
-      const validFiles = Array.from(files).filter(file => 
-        file.type.startsWith('image/') || file.type.startsWith('video/')
-      );
-
-      if (validFiles.length === 0) {
-        toast.error('Please select valid image or video files');
-        return;
-      }
-
-      // Upload files directly to Firebase Storage
-      const uploadPromises = validFiles.map(async (file) => {
-        const timestamp = Date.now();
-        const fileName = `${timestamp}-${file.name}`;
-        const filePath = `users/${user.uid}/images/${fileName}`;
-
-        const storageRef = ref(storage, filePath);
-        await uploadBytes(storageRef, file);
-        return await getDownloadURL(storageRef);
-      });
-
-      const uploadedUrls = await Promise.all(uploadPromises);
-      const newImages = [...(gallery.images || []), ...uploadedUrls];
-
-      await galleryService.updateGallery(gallery.id, { 
-        images: newImages
-      });
-
-      setGallery({
-        ...gallery,
-        images: newImages,
-        updatedAt: Date.now()
-      });
-
-      toast.success(`Uploaded ${validFiles.length} file(s) successfully`);
-    } catch (error) {
-      console.error('Failed to upload files:', error);
-      toast.error('Failed to upload files');
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      handleFileUpload(e.dataTransfer.files);
-    }
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-      setIsDragging(false);
-    }
   };
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -424,7 +511,10 @@ export default function GalleryPage({ params }: GalleryPageProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+          <p>Loading gallery...</p>
+        </div>
       </div>
     );
   }
@@ -488,7 +578,6 @@ export default function GalleryPage({ params }: GalleryPageProps) {
                 {gallery.title}
               </h1>
             )}
-
           </div>
         </div>
 
@@ -539,11 +628,10 @@ export default function GalleryPage({ params }: GalleryPageProps) {
         </div>
       </div>
 
-
       <div
-        onDrop={handleDrop}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
+        onDrop={dragHandlers.handleDrop}
+        onDragOver={dragHandlers.handleDragOver}
+        onDragLeave={dragHandlers.handleDragLeave}
         className={`min-h-[400px] relative ${
           isDragging ? 'bg-blue-50 border-2 border-dashed border-blue-300 rounded-lg' : ''
         }`}
@@ -568,42 +656,15 @@ export default function GalleryPage({ params }: GalleryPageProps) {
               ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4' 
               : 'grid-cols-1'
           }`}>
-          {gallery.images.map((imageUrl, index) => (
-            <Card 
-              key={index} 
-              className="group overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary transition-all"
-              onClick={() => setSelectedImageIndex(index)}
-            >
-              <CardContent className="p-0">
-                <div className="relative aspect-square">
-                  {imageUrl.includes('.mp4') || imageUrl.includes('video') ? (
-                    <video
-                      src={imageUrl}
-                      className="w-full h-full object-cover"
-                      controls
-                    />
-                  ) : (
-                    <img
-                      src={imageUrl}
-                      alt={`Generated image ${index + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                  )}
-                  <Button
-                    size="icon"
-                    variant="destructive"
-                    className="absolute top-2 right-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteImage(index);
-                    }}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+            {gallery.images.map((imageUrl, index) => (
+              <OptimizedGalleryImage
+                key={`${imageUrl}-${index}`}
+                imageUrl={imageUrl}
+                index={index}
+                onClick={() => handleImageClick(index)}
+                onDelete={() => handleDeleteImage(index)}
+              />
+            ))}
           </div>
         )}
       </div>
@@ -684,21 +745,25 @@ export default function GalleryPage({ params }: GalleryPageProps) {
         </div>
       </div>
 
-      <ImageModal
-        isOpen={selectedImageIndex !== null}
-        onClose={() => setSelectedImageIndex(null)}
-        images={gallery.images}
-        selectedIndex={selectedImageIndex}
-        onNavigate={navigateImage}
-        onDownload={handleDownload}
-        onDelete={handleDeleteImage}
-        onMoreLikeThis={handleMoreLikeThis}
-        gallery={{
-          title: gallery.title,
-          type: gallery.type,
-          prompt: prompt
-        }}
-      />
+      <Suspense fallback={<div className="flex justify-center p-8"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
+        {selectedImageIndex !== null && (
+          <ImageModal
+            isOpen={selectedImageIndex !== null}
+            onClose={() => setSelectedImageIndex(null)}
+            images={gallery.images}
+            selectedIndex={selectedImageIndex}
+            onNavigate={navigateImage}
+            onDownload={handleDownload}
+            onDelete={handleDeleteImage}
+            onMoreLikeThis={handleMoreLikeThis}
+            gallery={{
+              title: gallery.title,
+              type: gallery.type,
+              prompt: prompt
+            }}
+          />
+        )}
+      </Suspense>
 
       {/* Share Modal */}
       <Dialog open={isShareModalOpen} onOpenChange={setIsShareModalOpen}>
