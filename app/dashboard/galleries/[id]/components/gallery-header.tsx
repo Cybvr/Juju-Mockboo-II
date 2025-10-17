@@ -122,7 +122,6 @@ export function GalleryHeader({
           className="flex items-center gap-2"
         >
           <Share2 className="w-4 h-4" />
-          <span className="hidden sm:inline">Share</span>
         </Button>
         <Button
           variant={viewMode === 'grid' ? 'default' : 'outline'}
