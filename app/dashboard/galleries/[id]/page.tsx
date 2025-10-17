@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Sparkles, Download, Trash2, Grid, List, X, ChevronLeft, ChevronRight, Check, Pencil, Share2, Copy, Upload, Video } from 'lucide-react';
+import { ArrowLeft, ArrowUp, Download, Trash2, Grid, List, X, ChevronLeft, ChevronRight, Check, Pencil, Share2, Copy, Upload, Video } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { galleryService } from '@/services/galleryService';
 import type { Gallery } from '@/types/gallery';
@@ -605,7 +605,7 @@ export default function GalleryPage({ params }: GalleryPageProps) {
       <div className="pb-32"></div>
 
       {/* Fixed Prompt Box at Bottom Center */}
-      <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-40 w-full max-w-3xl px-4">
+      <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-40 w-full max-w-3xl px-4 shadow-4xl">
         <div className="relative rounded-2xl border border-border bg-background shadow-lg focus-within:shadow-xl transition-shadow">
           <div className="relative">
             <Textarea
@@ -631,13 +631,13 @@ export default function GalleryPage({ params }: GalleryPageProps) {
               <Button
                 onClick={handleGenerate}
                 size="sm"
-                className="h-8 w-8 p-0 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-50"
+                className="h-8 w-8 p-0 rounded-lg bg-foreground hover:bg-foreground/90 text-background disabled:opacity-50 rounded-full"
                 disabled={generating || !prompt.trim()}
               >
                 {generating ? (
                   <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
                 ) : (
-                  <Sparkles className="w-4 h-4" />
+                  <ArrowUp className="w-4 h-4" />
                 )}
               </Button>
             </div>
