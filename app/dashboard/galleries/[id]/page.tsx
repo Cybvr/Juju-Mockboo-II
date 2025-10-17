@@ -269,7 +269,7 @@ export default function GalleryPage({ params }: GalleryPageProps) {
 
   const handleFileUpload = async (files: FileList) => {
     if (!gallery || !user) return;
-    
+
     setUploading(true);
     try {
       const validFiles = Array.from(files).filter(file => 
@@ -286,7 +286,7 @@ export default function GalleryPage({ params }: GalleryPageProps) {
         const timestamp = Date.now();
         const fileName = `${timestamp}-${file.name}`;
         const filePath = `users/${user.uid}/images/${fileName}`;
-        
+
         const storageRef = ref(storage, filePath);
         await uploadBytes(storageRef, file);
         return await getDownloadURL(storageRef);
@@ -317,7 +317,7 @@ export default function GalleryPage({ params }: GalleryPageProps) {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    
+
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       handleFileUpload(e.dataTransfer.files);
     }
@@ -547,40 +547,38 @@ export default function GalleryPage({ params }: GalleryPageProps) {
         )}
       </div>
 
-      {/* Sticky Prompt Box at Bottom */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-background border-t p-4">
-        <div className="max-w-3xl mx-auto">
-          <div className="relative rounded-2xl border border-border bg-background shadow-sm focus-within:shadow-md transition-shadow">
-            <div className="relative">
-              <Textarea
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                placeholder="Edit your prompt and generate 4 more images..."
-                rows={3}
-                className="resize-none text-base border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[100px] pl-3 pr-14 pb-12"
-              />
-              
-              <div className="absolute bottom-3 right-3 flex items-center gap-2">
-                <Button
-                  onClick={handleGenerate}
-                  size="sm"
-                  className="h-8 w-8 p-0 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-50"
-                  disabled={generating || !prompt.trim()}
-                >
-                  {generating ? (
-                    <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                  ) : (
-                    <Sparkles className="w-4 h-4" />
-                  )}
-                </Button>
-              </div>
+      {/* Add padding to prevent content from being hidden behind fixed prompt box */}
+      <div className="pb-32"></div>
+
+      {/* Fixed Prompt Box at Bottom Center */}
+      <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-40 w-full max-w-3xl px-4">
+        <div className="relative rounded-2xl border border-border bg-background shadow-lg focus-within:shadow-xl transition-shadow">
+          <div className="relative">
+            <Textarea
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              placeholder="Edit your prompt and generate 4 more images..."
+              rows={3}
+              className="resize-none text-base border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[100px] pl-3 pr-14 pb-12"
+            />
+
+            <div className="absolute bottom-3 right-3 flex items-center gap-2">
+              <Button
+                onClick={handleGenerate}
+                size="sm"
+                className="h-8 w-8 p-0 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-50"
+                disabled={generating || !prompt.trim()}
+              >
+                {generating ? (
+                  <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                ) : (
+                  <Sparkles className="w-4 h-4" />
+                )}
+              </Button>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Add bottom padding to prevent content overlap */}
-      <div className="h-40"></div>
 
       {/* Pinterest-style Image Modal - Mobile Optimized */}
       {selectedImageIndex !== null && gallery.images[selectedImageIndex] && (
