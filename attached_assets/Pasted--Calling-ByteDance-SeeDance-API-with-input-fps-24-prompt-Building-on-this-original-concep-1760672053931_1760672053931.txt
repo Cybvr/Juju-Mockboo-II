@@ -1,0 +1,70 @@
+
+Calling ByteDance SeeDance API with input: {
+  fps: 24,
+  prompt: 'Building on this original concept: "Meet Juju – your AI moodboard builder that brings your vision to life in seconds. Transform inspiration into stunning boards effortlessly. Dream it, design it, done."\n' +
+    '\n' +
+    'Now explore: Meet Juju – your AI moodboard builder that brings your vision to life in seconds. Transform inspiration into stunning boards effortlessly. Dream it, design it, done.\n' +
+    '\n' +
+    'This is video 1 of 2 total videos requested. Create a cinematic video that explores this concept with dynamic motion and engaging visuals.',
+  duration: 5,
+  resolution: '1080p',
+  aspect_ratio: '16:9',
+  camera_fixed: false
+}
+ GET /dashboard/galleries/S0OCKQxw7QHFOSDGxGk8 200 in 189ms
+ ✓ Compiled /_not-found in 425ms (1382 modules)
+ GET /images/jujucircle.png 404 in 737ms
+ByteDance SeeDance generation successful: ReadableStream { locked: false, state: 'readable', supportsBYOB: false }
+Extracted video URL: URL {
+  href: 'https://replicate.delivery/xezq/Wf2dijvfkuoFikOkCvGVm9fm25Js9goswo8zGuULjyoLVtfVB/tmpdet38m7_.mp4',
+  origin: 'https://replicate.delivery',
+  protocol: 'https:',
+  username: '',
+  password: '',
+  host: 'replicate.delivery',
+  hostname: 'replicate.delivery',
+  port: '',
+  pathname: '/xezq/Wf2dijvfkuoFikOkCvGVm9fm25Js9goswo8zGuULjyoLVtfVB/tmpdet38m7_.mp4',
+  search: '',
+  searchParams: URLSearchParams {},
+  hash: ''
+}
+Downloading video from URL: https://replicate.delivery/xezq/Wf2dijvfkuoFikOkCvGVm9fm25Js9goswo8zGuULjyoLVtfVB/tmpdet38m7_.mp4
+Video downloaded, size: 14730821 bytes
+Uploading to Firebase Storage: galleries/gallery_video_1760671914628_0.mp4
+Video uploaded to Firebase: https://firebasestorage.googleapis.com/v0/b/jujuagi-new.firebasestorage.app/o/galleries%2Fgallery_video_1760671914628_0.mp4?alt=media&token=1ed2eef5-bae3-428b-ac04-35606a4e9724
+Calling ByteDance SeeDance API with input: {
+  fps: 24,
+  prompt: 'Building on this original concept: "Meet Juju – your AI moodboard builder that brings your vision to life in seconds. Transform inspiration into stunning boards effortlessly. Dream it, design it, done."\n' +
+    '\n' +
+    'Now explore: Meet Juju – your AI moodboard builder that brings your vision to life in seconds. Transform inspiration into stunning boards effortlessly. Dream it, design it, done.\n' +
+    '\n' +
+    'This is video 2 of 2 total videos requested. Create a cinematic video that explores this concept with dynamic motion and engaging visuals.',
+  duration: 5,
+  resolution: '1080p',
+  aspect_ratio: '16:9',
+  camera_fixed: false
+}
+ByteDance SeeDance generation successful: ReadableStream { locked: false, state: 'readable', supportsBYOB: false }
+Extracted video URL: URL {
+  href: 'https://replicate.delivery/xezq/2wsSC89iPQpNI5W2BUGllqLuI5tW1UyyzordZrJetFDzV7vKA/tmpt6vjvs4k.mp4',
+  origin: 'https://replicate.delivery',
+  protocol: 'https:',
+  username: '',
+  password: '',
+  host: 'replicate.delivery',
+  hostname: 'replicate.delivery',
+  port: '',
+  pathname: '/xezq/2wsSC89iPQpNI5W2BUGllqLuI5tW1UyyzordZrJetFDzV7vKA/tmpt6vjvs4k.mp4',
+  search: '',
+  searchParams: URLSearchParams {},
+  hash: ''
+}
+Downloading video from URL: https://replicate.delivery/xezq/2wsSC89iPQpNI5W2BUGllqLuI5tW1UyyzordZrJetFDzV7vKA/tmpt6vjvs4k.mp4
+Video downloaded, size: 21410314 bytes
+Uploading to Firebase Storage: galleries/gallery_video_1760671978079_1.mp4
+Video uploaded to Firebase: https://firebasestorage.googleapis.com/v0/b/jujuagi-new.firebasestorage.app/o/galleries%2Fgallery_video_1760671978079_1.mp4?alt=media&token=867ec1ae-6202-440e-b67a-44c94a9ef7c6
+ POST /api/galleries/video-generate 200 in 139706ms
+ ○ Compiling /api/image-proxy ...
+ ✓ Compiled /api/image-proxy in 3.4s (1141 modules)
+ GET /api/image-proxy?url=https%3A%2F%2Ffirebasestorage.googleapis.com%2Fv0%2Fb%2Fjujuagi-new.firebasestorage.app%2Fo%2Fgalleries%252Fgallery_video_1760671914628_0.mp4%3Falt%3Dmedia%26token%3D1ed2eef5-bae3-428b-ac04-35606a4e9724 200 in 5565ms
