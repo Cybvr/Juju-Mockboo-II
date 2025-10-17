@@ -7,9 +7,8 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import {
-  LayoutDashboard,
   Home,
-  Drama,
+  Drama,GalleryVerticalEnd,
   Clapperboard,
   Image as ImageIcon,
   Video,
@@ -24,7 +23,6 @@ import { auth } from '@/lib/firebase';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import { ProfileDropdown } from '@/app/common/dashboard/ProfileDropdown';
-import { CreditDisplay } from '@/components/CreditDisplay';
 import { CreditService } from '@/lib/credits';
 
 function SimpleCreditDisplay() {
@@ -64,41 +62,16 @@ export function Sidebar({ className, onNavigate }: SidebarProps) {
   const pathname = usePathname();
   const [user] = useAuthState(auth);
 
-  const createNewCanvas = async () => {
-    if (!user) return;
-    try {
-      const { documentService } = await import('@/services/documentService');
-      const canvasDocument = await documentService.createDocument(user.uid, {
-        title: 'New Canvas',
-        content: {
-          elements: [],
-          version: '1.0',
-        },
-        tags: ['canvas'],
-        type: 'canvas' as const,
-        isPublic: false,
-        starred: false,
-        shared: false,
-        category: 'UGC' as const,
-      });
-      window.location.href = `/dashboard/canvas/${canvasDocument}`;
-      if (onNavigate) onNavigate();
-    } catch (error) {
-      console.error('Error creating new canvas:', error);
-    }
-  };
-
   const navItems = [
     {
-      label: 'New',
-      icon: Folder,
-      href: '#',
-      active: false,
-      onClick: createNewCanvas,
+      label: 'Home',
+      icon: Home,
+      href: '/dashboard',
+      active: pathname === '/dashboard',
     },
     {
       label: 'Videos',
-      icon: Clapperboard,
+      icon: Video,
       href: '/dashboard/videos',
       active: pathname.startsWith('/dashboard/videos'),
     },
@@ -108,10 +81,9 @@ export function Sidebar({ className, onNavigate }: SidebarProps) {
       href: '/dashboard/stories',
       active: pathname.startsWith('/dashboard/stories'),
     },
-
     {
       label: 'Galleries',
-      icon: Clapperboard,
+      icon: GalleryVerticalEnd,
       href: '/dashboard/galleries',
       active: pathname.startsWith('/dashboard/galleries'),
     },
@@ -123,91 +95,69 @@ export function Sidebar({ className, onNavigate }: SidebarProps) {
     },
   ];
 
-
-  const showLabels = true;
-
   return (
     <TooltipProvider delayDuration={300}>
       <div
         className={cn(
-          'h-full rounded-none transition-all duration-300 relative w-56 bg-card',
+          'h-full rounded-none transition-all duration-300 relative w-16 bg-card',
           className
         )}
       >
-        <div className="p-4 h-full flex flex-col justify-between">
-          <div className="text-muted-foreground">
-            {/* Logo */}
-            <div className="mb-4 flex items-center justify-center">
-              <Link href="/dashboard" className="flex">
-                <div className="flex items-center justify-center">
-                  <Image
-                    src="/assets/images/juju/JUJUBLACK.png"
-                    alt="Logo"
-                    width={64}
-                    height={64}
-                    className="object-contain dark:hidden"
-                  />
-                  <Image
-                    src="/assets/images/juju/JUJUWHITE.png"
-                    alt="Logo"
-                    width={64}
-                    height={64}
-                    className="object-contain hidden dark:block"
-                  />
-                </div>
-              </Link>
-            </div>
-
-            {/* Navigation */}
-            <nav className="space-y-2 mb-4">
+        <div className="p-4 h-full flex flex-col items-center">
+          {/* Logo */}
+          <div className="mb-6 flex items-center justify-center">
+            <Link href="/dashboard" className="flex">
+              <div className="flex items-center justify-center">
+                <Image
+                  src="/assets/images/juju/JUJUBLACK.png"
+                  alt="Logo"
+                  width={48}
+                  height={48}
+                  className="object-contain dark:hidden"
+                />
+                <Image
+                  src="/assets/images/juju/JUJUWHITE.png"
+                  alt="Logo"
+                  width={48}
+                  height={48}
+                  className="object-contain hidden dark:block"
+                />
+              </div>
+            </Link>
+          </div>
+          {/* Navigation - Centered Vertically */}
+          <div className="flex-1 flex items-center justify-center w-full">
+            <nav className=" w-full flex flex-col items-center">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 return (
                   <Tooltip key={item.href}>
                     <TooltipTrigger asChild>
-                      {item.label === 'New' ? (
+                      <Link href={item.href} onClick={onNavigate}>
                         <Button
-                          onClick={item.onClick}
-                          variant="outline"
+                          variant="ghost"
+                          size="lg"
                           className={cn(
-                            'w-full transition-all duration-200 border-dashed',
-                            showLabels ? 'justify-start gap-3 h-10' : 'justify-center px-2 h-10'
+                            'w-14 h-14 p-0 text-muted-foreground hover:text-foreground',
+                            item.active && 'text-primary bg-background-50'
                           )}
                         >
-                          <Icon className="h-4 w-4 flex-shrink-0" />
-                          {showLabels && <span className="truncate">{item.label}</span>}
+                          <Icon className="h-6 w-6" />
                         </Button>
-                      ) : (
-                        <Link href={item.href} onClick={onNavigate}>
-                          <Button
-                            variant="ghost"
-                            className={cn(
-                              'w-full transition-all duration-200',
-                              showLabels ? 'justify-start gap-3 h-10' : 'justify-center px-2 h-10',
-                              item.active && 'text-primary bg-background-50'
-                            )}
-                          >
-                            <Icon className="h-4 w-4 flex-shrink-0" />
-                            {showLabels && <span className="truncate">{item.label}</span>}
-                          </Button>
-                        </Link>
-                      )}
+                      </Link>
                     </TooltipTrigger>
-                    {!showLabels && (
-                      <TooltipContent side="right" align="center">
-                        <p>{item.label}</p>
-                      </TooltipContent>
-                    )}
+                    <TooltipContent side="right" align="center">
+                      <p>{item.label}</p>
+                    </TooltipContent>
                   </Tooltip>
                 );
               })}
             </nav>
           </div>
-
           {/* Bottom Section - Credits and Profile */}
-          <div className="pt-4 border-t text-muted-foreground">
+          <div className="pt-4 border-t w-full flex flex-col items-center">
             <SimpleCreditDisplay />
-            <div className="flex items-left justify-start">
+            <div className="flex items-center justify-center">
               <ProfileDropdown />
             </div>
           </div>

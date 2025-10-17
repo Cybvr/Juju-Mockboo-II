@@ -54,7 +54,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
+    <div className="flex-1 flex flex-col overflow-hidden mx-auto max-w-4xl">
       <main className="flex-1 overflow-y-auto p-3 lg:p-6">
         {activeView === "documents" && (
           <div className="space-y-2">

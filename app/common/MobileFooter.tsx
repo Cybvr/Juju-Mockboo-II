@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { 
   Clapperboard,
   Home, 
-  Palette, 
+  Palette, GalleryVerticalEnd,
   Video,
   User
 } from 'lucide-react';
@@ -61,7 +61,7 @@ export function MobileFooter() {
     },
     {
       label: 'Galleries',
-      icon: <Clapperboard className="h-5 w-5" />,
+      icon: <GalleryVerticalEnd className="h-5 w-5" />,
       href: '/dashboard/galleries',
       active: pathname.startsWith('/dashboard/galleries')
     },
