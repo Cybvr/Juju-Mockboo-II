@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Sparkles, Download, Trash2, Grid, List, X, ChevronLeft, ChevronRight, Check, Pencil, Share2, Copy, Upload } from 'lucide-react';
+import { ArrowLeft, Sparkles, Download, Trash2, Grid, List, X, ChevronLeft, ChevronRight, Check, Pencil, Share2, Copy, Upload, Video } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { galleryService } from '@/services/galleryService';
 import type { Gallery } from '@/types/gallery';
@@ -37,6 +37,7 @@ export default function GalleryPage({ params }: GalleryPageProps) {
   const [galleryAccessLevel, setGalleryAccessLevel] = useState<'private' | 'public'>('private');
   const [isDragging, setIsDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [generationMode, setGenerationMode] = useState<'image' | 'video'>('image');
 
   useEffect(() => {
     if (user) {
@@ -126,49 +127,93 @@ export default function GalleryPage({ params }: GalleryPageProps) {
 
     setGenerating(true);
     try {
-      const response = await fetch('/api/galleries/generate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-user-id': user.uid,
-        },
-        body: JSON.stringify({
-          prompt: prompt.trim(),
-          previousPrompt: gallery.prompt,
-          outputs: 4,
-          aspectRatio: "1:1"
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to generate images');
-      }
-
-      const data = await response.json();
-
-      if (data.images && data.images.length > 0) {
-        const updatedImages = [...(gallery.images || []), ...data.images];
-
-        await galleryService.updateGallery(gallery.id, { 
-          images: updatedImages,
-          prompt: prompt.trim()
+      if (generationMode === 'image') {
+        const response = await fetch('/api/galleries/generate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-user-id': user.uid,
+          },
+          body: JSON.stringify({
+            prompt: prompt.trim(),
+            previousPrompt: gallery.prompt,
+            outputs: 4,
+            aspectRatio: "1:1"
+          }),
         });
 
-        setGallery({
-          ...gallery,
-          images: updatedImages,
-          prompt: prompt.trim(),
-          updatedAt: Date.now()
-        });
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to generate images');
+        }
 
-        toast.success(`Generated ${data.images.length} images successfully`);
+        const data = await response.json();
+
+        if (data.images && data.images.length > 0) {
+          const updatedImages = [...(gallery.images || []), ...data.images];
+
+          await galleryService.updateGallery(gallery.id, { 
+            images: updatedImages,
+            prompt: prompt.trim()
+          });
+
+          setGallery({
+            ...gallery,
+            images: updatedImages,
+            prompt: prompt.trim(),
+            updatedAt: Date.now()
+          });
+
+          toast.success(`Generated ${data.images.length} images successfully`);
+        } else {
+          throw new Error('No images were generated');
+        }
       } else {
-        throw new Error('No images were generated');
+        // Video generation
+        const response = await fetch('/api/galleries/video-generate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-user-id': user.uid,
+          },
+          body: JSON.stringify({
+            prompt: prompt.trim(),
+            previousPrompt: gallery.prompt,
+            seconds: 8,
+            outputs: 2
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to generate videos');
+        }
+
+        const data = await response.json();
+
+        if (data.videos && data.videos.length > 0) {
+          const updatedImages = [...(gallery.images || []), ...data.videos];
+
+          await galleryService.updateGallery(gallery.id, { 
+            images: updatedImages,
+            prompt: prompt.trim()
+          });
+
+          setGallery({
+            ...gallery,
+            images: updatedImages,
+            prompt: prompt.trim(),
+            updatedAt: Date.now()
+          });
+
+          toast.success(`Generated ${data.videos.length} videos successfully`);
+        } else {
+          throw new Error('No videos were generated');
+        }
       }
     } catch (error) {
-      console.error('Failed to generate images:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to generate images');
+      console.error(`Failed to generate ${generationMode}s:`, error);
+      toast.error(error instanceof Error ? error.message : `Failed to generate ${generationMode}s`);
     } finally {
       setGenerating(false);
     }
@@ -566,7 +611,7 @@ export default function GalleryPage({ params }: GalleryPageProps) {
             <Textarea
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              placeholder="Edit your prompt and generate 4 more images or videos..."
+              placeholder={`Edit your prompt and generate ${generationMode === 'image' ? '4 more images' : '2 more videos'}...`}
               rows={3}
               className="resize-none text-base border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[100px] pl-3 pr-14 pb-12"
             />
@@ -574,13 +619,20 @@ export default function GalleryPage({ params }: GalleryPageProps) {
             <div className="absolute bottom-3 right-3 flex items-center gap-2">
               {/* Toggle for Image/Video Generation */}
               <Button
-                onClick={() => { /* Handle toggle logic here */ }}
+                onClick={() => setGenerationMode(generationMode === 'image' ? 'video' : 'image')}
                 size="sm"
-                className="h-8 w-8 p-0 rounded-lg bg-secondary text-secondary-foreground"
+                className={`h-8 w-8 p-0 rounded-lg transition-colors ${
+                  generationMode === 'image' 
+                    ? 'bg-blue-100 text-blue-600 hover:bg-blue-200' 
+                    : 'bg-purple-100 text-purple-600 hover:bg-purple-200'
+                }`}
+                title={`Switch to ${generationMode === 'image' ? 'video' : 'image'} generation`}
               >
-                {/* Icon for image or video generation */}
-                {/* For example, use Sparkles for images and a video icon for videos */}
-                <Sparkles className="w-4 h-4" /> 
+                {generationMode === 'image' ? (
+                  <Sparkles className="w-4 h-4" />
+                ) : (
+                  <Video className="w-4 h-4" />
+                )}
               </Button>
               <Button
                 onClick={handleGenerate}
