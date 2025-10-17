@@ -253,7 +253,7 @@ export default function PublicGalleryPage({ params }: PublicGalleryPageProps) {
                       onClick={() => draggedIndex === null && setSelectedImageIndex(index)}
                     >
                       <CardContent className="p-0">
-                        <div className="relative aspect-square bg-black">
+                        <div className="relative aspect-[9/16] bg-black">
                           {isVideo ? (
                             <video
                               src={imageUrl}

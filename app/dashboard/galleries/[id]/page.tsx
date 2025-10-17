@@ -48,7 +48,7 @@ const OptimizedGalleryImage = React.memo(({
       onClick={onClick}
     >
       <CardContent className="p-0">
-        <div className="relative aspect-square bg-gray-100">
+        <div className="relative aspect-[9/16] bg-gray-100">
           {!error ? (
             <>
               {imageUrl.includes('.mp4') || imageUrl.includes('video') ? (

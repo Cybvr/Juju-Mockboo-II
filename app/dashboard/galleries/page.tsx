@@ -47,7 +47,7 @@ const GalleryCard: React.FC<{
       onClick={onClick}
       className="group cursor-pointer transition-all duration-300 overflow-hidden flex flex-col"
     >
-      <div className="relative aspect-video bg-muted">
+      <div className="relative aspect-[9/16] bg-muted">
         {firstImage ? (
           <OptimizedImage 
             src={firstImage} 
@@ -333,13 +333,13 @@ return (
       {filteredGalleries.length > 0 ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {filteredGalleries.map((gallery) => (
-            <div key={gallery.id} className="aspect-[9/16]">
+            <Card key={gallery.id} className="aspect-[9/16] overflow-hidden">
               <GalleryCard
                 gallery={gallery}
                 onClick={() => router.push(`/dashboard/galleries/${gallery.id}`)}
                 onDelete={() => handleDeleteGallery(gallery.id)}
               />
-            </div>
+            </Card>
           ))}
         </div>
       ) : galleries.length === 0 ? (
