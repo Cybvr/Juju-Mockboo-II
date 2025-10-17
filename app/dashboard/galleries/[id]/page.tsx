@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Sparkles, Download, Trash2, Grid, List, X, ChevronLeft, ChevronRight, Check, Pencil, Share2, Copy } from 'lucide-react';
+import { ArrowLeft, Sparkles, Download, Trash2, Grid, List, X, ChevronLeft, ChevronRight, Check, Pencil, Share2, Copy, Upload } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { galleryService } from '@/services/galleryService';
 import type { Gallery } from '@/types/gallery';
@@ -32,6 +32,8 @@ export default function GalleryPage({ params }: GalleryPageProps) {
   const [editedTitle, setEditedTitle] = useState('');
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [galleryAccessLevel, setGalleryAccessLevel] = useState<'private' | 'public'>('private');
+  const [isDragging, setIsDragging] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -263,6 +265,97 @@ export default function GalleryPage({ params }: GalleryPageProps) {
     toast.success('Link copied to clipboard');
   };
 
+  const handleFileUpload = async (files: FileList) => {
+    if (!gallery || !user) return;
+    
+    setUploading(true);
+    try {
+      const validFiles = Array.from(files).filter(file => 
+        file.type.startsWith('image/') || file.type.startsWith('video/')
+      );
+
+      if (validFiles.length === 0) {
+        toast.error('Please select valid image or video files');
+        return;
+      }
+
+      const uploadPromises = validFiles.map(async (file) => {
+        const reader = new FileReader();
+        return new Promise<string>((resolve) => {
+          reader.onload = (e) => {
+            resolve(e.target?.result as string);
+          };
+          reader.readAsDataURL(file);
+        });
+      });
+
+      const fileDataUrls = await Promise.all(uploadPromises);
+      
+      // Upload to Firebase Storage
+      const response = await fetch('/api/images/save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': user.uid,
+        },
+        body: JSON.stringify({
+          images: fileDataUrls,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to upload files');
+      }
+
+      const data = await response.json();
+      const newImages = [...(gallery.images || []), ...data.imageUrls];
+
+      await galleryService.updateGallery(gallery.id, { 
+        images: newImages
+      });
+
+      setGallery({
+        ...gallery,
+        images: newImages,
+        updatedAt: Date.now()
+      });
+
+      toast.success(`Uploaded ${validFiles.length} file(s) successfully`);
+    } catch (error) {
+      console.error('Failed to upload files:', error);
+      toast.error('Failed to upload files');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      handleFileUpload(e.dataTransfer.files);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+      setIsDragging(false);
+    }
+  };
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      handleFileUpload(e.target.files);
+    }
+  };
+
   const navigateImage = (direction: 'prev' | 'next') => {
     if (selectedImageIndex === null || !gallery) return;
 
@@ -362,6 +455,25 @@ export default function GalleryPage({ params }: GalleryPageProps) {
         </div>
 
         <div className="flex items-center gap-2">
+          <input
+            type="file"
+            accept="image/*,video/*"
+            multiple
+            onChange={handleFileInputChange}
+            className="hidden"
+            id="file-upload"
+          />
+          <Button
+            variant="outline"
+            onClick={() => document.getElementById('file-upload')?.click()}
+            className="flex items-center gap-2"
+            disabled={uploading}
+          >
+            <Upload className="w-4 h-4" />
+            <span className="hidden sm:inline">
+              {uploading ? 'Uploading...' : 'Upload'}
+            </span>
+          </Button>
           <Button
             variant="outline"
             onClick={() => setIsShareModalOpen(true)}
@@ -390,16 +502,34 @@ export default function GalleryPage({ params }: GalleryPageProps) {
       </div>
 
 
-      {gallery.images.length === 0 ? (
-        <div className="text-center py-20">
-          <p className="text-muted-foreground">No images yet. Generate some above!</p>
-        </div>
-      ) : (
-        <div className={`grid gap-4 ${
-          viewMode === 'grid' 
-            ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4' 
-            : 'grid-cols-1'
-        }`}>
+      <div
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        className={`min-h-[400px] relative ${
+          isDragging ? 'bg-blue-50 border-2 border-dashed border-blue-300 rounded-lg' : ''
+        }`}
+      >
+        {isDragging && (
+          <div className="absolute inset-0 flex items-center justify-center bg-blue-50/90 rounded-lg z-10">
+            <div className="text-center">
+              <Upload className="w-12 h-12 text-blue-500 mx-auto mb-2" />
+              <p className="text-blue-700 font-medium">Drop files here to upload</p>
+              <p className="text-blue-600 text-sm">Images and videos supported</p>
+            </div>
+          </div>
+        )}
+
+        {gallery.images.length === 0 ? (
+          <div className="text-center py-20">
+            <p className="text-muted-foreground">No images yet. Generate some above or drag files here!</p>
+          </div>
+        ) : (
+          <div className={`grid gap-4 ${
+            viewMode === 'grid' 
+              ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4' 
+              : 'grid-cols-1'
+          }`}>
           {gallery.images.map((imageUrl, index) => (
             <Card 
               key={index} 
@@ -428,8 +558,9 @@ export default function GalleryPage({ params }: GalleryPageProps) {
               </CardContent>
             </Card>
           ))}
-        </div>
-      )}
+          </div>
+        )}
+      </div>
 
       {/* Sticky Prompt Box at Bottom */}
       <div className="fixed bottom-0 left-0 right-0 z-40 bg-background border-t p-4">
