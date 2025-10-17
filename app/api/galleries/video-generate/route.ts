@@ -1,4 +1,3 @@
-
 import { NextRequest, NextResponse } from 'next/server';
 import Replicate from "replicate";
 import { storage } from '@/lib/firebase';
@@ -82,11 +81,10 @@ This is video ${i + 1} of ${numOutputs} total videos requested. Create a cinemat
         const videoBlob = await videoResponse.blob();
         console.log('Video downloaded, size:', videoBlob.size, 'bytes');
 
-        // Upload to Firebase Storage - use user-specific path that matches storage rules
+        // Upload to Firebase Storage - use same path as images
         const timestamp = Date.now();
         const fileName = `gallery_video_${timestamp}_${i}.mp4`;
-        const userId = request.headers.get('x-user-id') || 'anonymous';
-        const videoPath = `users/${userId}/videos/${fileName}`;
+        const videoPath = `galleries/${fileName}`;
         console.log('Uploading to Firebase Storage:', videoPath);
         const videoRef = ref(storage, videoPath);
         await uploadBytes(videoRef, videoBlob);
