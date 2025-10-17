@@ -8,12 +8,12 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import {
-  IoHome,
-  IoFilm,
-  IoImages,
-  IoVideocam,
-  IoSettings,
-} from 'react-icons/io5';
+  FaRegHome,
+  FaRegPlayCircle,
+  FaRegImages,
+  FaRegVideo,
+  FaRegCog,
+} from 'react-icons/fa';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -64,31 +64,31 @@ export function Sidebar({ className, onNavigate }: SidebarProps) {
   const navItems = [
     {
       label: 'Home',
-      icon: IoHome,
+      icon: FaRegHome,
       href: '/dashboard',
       active: pathname === '/dashboard',
     },
     {
       label: 'Videos',
-      icon: IoVideocam,
+      icon: FaRegVideo,
       href: '/dashboard/videos',
       active: pathname.startsWith('/dashboard/videos'),
     },
     {
       label: 'Stories',
-      icon: IoFilm,
+      icon: FaRegPlayCircle,
       href: '/dashboard/stories',
       active: pathname.startsWith('/dashboard/stories'),
     },
     {
       label: 'Galleries',
-      icon: IoImages,
+      icon: FaRegImages,
       href: '/dashboard/galleries',
       active: pathname.startsWith('/dashboard/galleries'),
     },
     {
       label: 'Settings',
-      icon: IoSettings,
+      icon: FaRegCog,
       href: '/dashboard/account',
       active: pathname.startsWith('/dashboard/account'),
     },
