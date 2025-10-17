@@ -381,7 +381,7 @@ export default function GalleriesPage() {
         )}
       </div>
       {/* Sticky Create Gallery Prompt Box */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-background border-t p-4">
+      <div className="sticky bottom-0 bg-background border-t p-4 mt-8">
         <div className="max-w-6xl mx-auto">
           {type === "Custom" && (
             <div className="mb-4">
