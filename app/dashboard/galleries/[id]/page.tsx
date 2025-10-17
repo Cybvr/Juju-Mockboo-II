@@ -16,6 +16,7 @@ import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { storage } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { useDragDrop } from './hooks/use-drag-drop';
 
 // Lazy load heavy components
 const ImageModal = lazy(() => import('@/app/common/dashboard/ImageModal').then(module => ({ default: module.ImageModal })));
@@ -107,7 +108,6 @@ export default function GalleryPage({ params }: GalleryPageProps) {
   const [editedTitle, setEditedTitle] = useState('');
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [galleryAccessLevel, setGalleryAccessLevel] = useState<'private' | 'public'>('private');
-  const [isDragging, setIsDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [generationMode, setGenerationMode] = useState<'image' | 'video'>('image');
   const [videoSettings, setVideoSettings] = useState({
@@ -203,26 +203,11 @@ export default function GalleryPage({ params }: GalleryPageProps) {
     }
   }, [gallery, user]);
 
-  // Memoized drag handlers
-  const dragHandlers = useMemo(() => ({
-    handleDrop: (e: React.DragEvent) => {
-      e.preventDefault();
-      setIsDragging(false);
-      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-        handleFileUpload(e.dataTransfer.files);
-      }
-    },
-    handleDragOver: (e: React.DragEvent) => {
-      e.preventDefault();
-      setIsDragging(true);
-    },
-    handleDragLeave: (e: React.DragEvent) => {
-      e.preventDefault();
-      if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-        setIsDragging(false);
-      }
-    }
-  }), [handleFileUpload]);
+  // Drag and drop functionality
+  const { isDragging, dragHandlers } = useDragDrop({
+    onFileDrop: handleFileUpload,
+    acceptedTypes: ['image/*', 'video/*']
+  });
 
   // Load gallery data
   useEffect(() => {
@@ -629,9 +614,9 @@ export default function GalleryPage({ params }: GalleryPageProps) {
       </div>
 
       <div
-        onDrop={dragHandlers.handleDrop}
-        onDragOver={dragHandlers.handleDragOver}
-        onDragLeave={dragHandlers.handleDragLeave}
+        onDrop={dragHandlers.onDrop}
+        onDragOver={dragHandlers.onDragOver}
+        onDragLeave={dragHandlers.onDragLeave}
         className={`min-h-[400px] relative ${
           isDragging ? 'bg-blue-50 border-2 border-dashed border-blue-300 rounded-lg' : ''
         }`}
