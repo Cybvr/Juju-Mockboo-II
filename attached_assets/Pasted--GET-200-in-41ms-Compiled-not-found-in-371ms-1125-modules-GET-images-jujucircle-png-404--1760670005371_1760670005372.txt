@@ -1,0 +1,91 @@
+
+ GET / 200 in 41ms
+ ✓ Compiled /_not-found in 371ms (1125 modules)
+ GET /images/jujucircle.png 404 in 626ms
+ ○ Compiling /api/galleries/video-generate ...
+ ✓ Compiled /api/galleries/video-generate in 2.7s (1382 modules)
+Calling ByteDance SeeDance API with input: {
+  fps: 24,
+  prompt: 'Building on this original concept: "Meet Juju – your AI moodboard builder that brings your vision to life in seconds. Transform inspiration into stunning boards effortlessly. Dream it, design it, done."\n' +
+    '\n' +
+    'Now explore: Meet Juju – your AI moodboard builder that brings your vision to life in seconds. Transform inspiration into stunning boards effortlessly. Dream it, design it, done.\n' +
+    '\n' +
+    'This is video 1 of 2 total videos requested. Create a cinematic video that explores this concept with dynamic motion and engaging visuals.',
+  duration: 10,
+  resolution: '1080p',
+  aspect_ratio: '16:9',
+  camera_fixed: false
+}
+ GET / 200 in 978ms
+ GET /dashboard/galleries/S0OCKQxw7QHFOSDGxGk8 200 in 946ms
+ GET /images/jujucircle.png 404 in 217ms
+ByteDance SeeDance generation successful: ReadableStream { locked: false, state: 'readable', supportsBYOB: false }
+Extracted video URL: URL {
+  href: 'https://replicate.delivery/xezq/z5CVr5EsISpeQK49xGHG4dfywEsbVvCBbz51aKMNIBpWJ2fqA/tmpzmztbjec.mp4',
+  origin: 'https://replicate.delivery',
+  protocol: 'https:',
+  username: '',
+  password: '',
+  host: 'replicate.delivery',
+  hostname: 'replicate.delivery',
+  port: '',
+  pathname: '/xezq/z5CVr5EsISpeQK49xGHG4dfywEsbVvCBbz51aKMNIBpWJ2fqA/tmpzmztbjec.mp4',
+  search: '',
+  searchParams: URLSearchParams {},
+  hash: ''
+}
+Downloading video from URL: https://replicate.delivery/xezq/z5CVr5EsISpeQK49xGHG4dfywEsbVvCBbz51aKMNIBpWJ2fqA/tmpzmztbjec.mp4
+Video downloaded, size: 21387620 bytes
+Uploading to Firebase Storage: galleries/videos/gallery_video_1760669784704_0.mp4
+Error generating video 1: [Error [FirebaseError]: Firebase Storage: User does not have permission to access 'galleries/videos/gallery_video_1760669784704_0.mp4'. (storage/unauthorized)] {
+  code: 'storage/unauthorized',
+  customData: [Object],
+  status_: 403,
+  _baseMessage: "Firebase Storage: User does not have permission to access 'galleries/videos/gallery_video_1760669784704_0.mp4'. (storage/unauthorized)"
+}
+Calling ByteDance SeeDance API with input: {
+  fps: 24,
+  prompt: 'Building on this original concept: "Meet Juju – your AI moodboard builder that brings your vision to life in seconds. Transform inspiration into stunning boards effortlessly. Dream it, design it, done."\n' +
+    '\n' +
+    'Now explore: Meet Juju – your AI moodboard builder that brings your vision to life in seconds. Transform inspiration into stunning boards effortlessly. Dream it, design it, done.\n' +
+    '\n' +
+    'This is video 2 of 2 total videos requested. Create a cinematic video that explores this concept with dynamic motion and engaging visuals.',
+  duration: 10,
+  resolution: '1080p',
+  aspect_ratio: '16:9',
+  camera_fixed: false
+}
+ByteDance SeeDance generation successful: ReadableStream { locked: false, state: 'readable', supportsBYOB: false }
+Extracted video URL: URL {
+  href: 'https://replicate.delivery/xezq/wnPUE8dMuA7YNlZmmM4wnFabDtMRrGdUGAyAE2diFxjwi9XF/tmpqm4s_iwv.mp4',
+  origin: 'https://replicate.delivery',
+  protocol: 'https:',
+  username: '',
+  password: '',
+  host: 'replicate.delivery',
+  hostname: 'replicate.delivery',
+  port: '',
+  pathname: '/xezq/wnPUE8dMuA7YNlZmmM4wnFabDtMRrGdUGAyAE2diFxjwi9XF/tmpqm4s_iwv.mp4',
+  search: '',
+  searchParams: URLSearchParams {},
+  hash: ''
+}
+Downloading video from URL: https://replicate.delivery/xezq/wnPUE8dMuA7YNlZmmM4wnFabDtMRrGdUGAyAE2diFxjwi9XF/tmpqm4s_iwv.mp4
+Video downloaded, size: 20595525 bytes
+Uploading to Firebase Storage: galleries/videos/gallery_video_1760669893684_1.mp4
+Error generating video 2: [Error [FirebaseError]: Firebase Storage: User does not have permission to access 'galleries/videos/gallery_video_1760669893684_1.mp4'. (storage/unauthorized)] {
+  code: 'storage/unauthorized',
+  customData: [Object],
+  status_: 403,
+  _baseMessage: "Firebase Storage: User does not have permission to access 'galleries/videos/gallery_video_1760669893684_1.mp4'. (storage/unauthorized)"
+}
+Gallery video generation error: Error: No videos were generated successfully
+    at POST (app/api/galleries/video-generate/route.ts:105:13)
+  103 |
+  104 |     if (generatedVideos.length === 0) {
+> 105 |       throw new Error('No videos were generated successfully');
+      |             ^
+  106 |     }
+  107 |
+  108 |     return NextResponse.json({
+ POST /api/galleries/video-generate 500 in 216333ms
