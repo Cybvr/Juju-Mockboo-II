@@ -177,29 +177,29 @@ export const ImageModal: React.FC<ImageModalProps> = ({
             <Badge variant="secondary" className="mt-2">{gallery.type}</Badge>
           </div>
 
-          {/* Color Palette */}
-          {imageColors.length > 0 && (
-            <div className="p-6 border-b">
-              <h4 className="text-sm font-medium text-muted-foreground mb-3">Color Palette</h4>
-              <div className="flex gap-2">
-                {imageColors.map((color, index) => (
-                  <button
-                    key={index}
-                    className="w-8 h-8 rounded-full border-2 border-border hover:scale-110 transition-transform cursor-pointer"
-                    style={{ backgroundColor: color }}
-                    onClick={() => handleCopyColor(color)}
-                    title={`Click to copy ${color}`}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* Prompt */}
           {gallery.prompt && (
             <div className="p-6 border-b">
               <h4 className="text-sm font-medium text-muted-foreground mb-2">Prompt</h4>
               <p className="text-sm leading-relaxed">{gallery.prompt}</p>
+              
+              {/* Color Palette under prompt */}
+              {imageColors.length > 0 && (
+                <div className="mt-4">
+                  <h4 className="text-sm font-medium text-muted-foreground mb-3">Color Palette</h4>
+                  <div className="flex gap-2">
+                    {imageColors.map((color, index) => (
+                      <button
+                        key={index}
+                        className="w-8 h-8 rounded-full border-2 border-border hover:scale-110 transition-transform cursor-pointer"
+                        style={{ backgroundColor: color }}
+                        onClick={() => handleCopyColor(color)}
+                        title={`Click to copy ${color}`}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
