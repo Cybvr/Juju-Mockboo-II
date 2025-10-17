@@ -17,6 +17,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { storage } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useDragDrop } from './hooks/use-drag-drop';
+import { GalleryPromptBox } from './components/gallery-prompt-box';
 
 // Lazy load heavy components
 const ImageModal = lazy(() => import('@/app/common/dashboard/ImageModal').then(module => ({ default: module.ImageModal })));
@@ -658,77 +659,16 @@ export default function GalleryPage({ params }: GalleryPageProps) {
       <div className="pb-32"></div>
 
       {/* Fixed Prompt Box at Bottom Center */}
-      <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-40 w-full max-w-3xl px-4 shadow-4xl">
-        <div className="relative rounded-2xl border border-border bg-background shadow-lg focus-within:shadow-xl transition-shadow">
-          <div className="relative">
-            <Textarea
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              placeholder={`Edit your prompt and generate ${generationMode === 'image' ? '4 more images' : '2 more videos'}...`}
-              rows={3}
-              className="resize-none text-base border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[100px] pl-3 pr-14 pb-12"
-            />
-
-            <div className="absolute bottom-3 left-3 flex items-center gap-2">
-              <Button
-                onClick={() => setGenerationMode(generationMode === 'image' ? 'video' : 'image')}
-                size="sm"
-                variant="outline"
-                className="h-8 px-3 text-xs font-medium"
-              >
-                {generationMode === 'image' ? 'Image' : 'Video'}
-              </Button>
-              
-              {generationMode === 'video' && (
-                <>
-                  <select
-                    value={videoSettings.duration}
-                    onChange={(e) => setVideoSettings({...videoSettings, duration: parseInt(e.target.value)})}
-                    className="h-8 px-2 text-xs border border-border rounded bg-background"
-                  >
-                    <option value={5}>5s</option>
-                    <option value={10}>10s</option>
-                  </select>
-                  
-                  <select
-                    value={videoSettings.resolution}
-                    onChange={(e) => setVideoSettings({...videoSettings, resolution: e.target.value})}
-                    className="h-8 px-2 text-xs border border-border rounded bg-background"
-                  >
-                    <option value="480p">480p</option>
-                    <option value="1080p">1080p</option>
-                  </select>
-                  
-                  <select
-                    value={videoSettings.aspectRatio}
-                    onChange={(e) => setVideoSettings({...videoSettings, aspectRatio: e.target.value})}
-                    className="h-8 px-2 text-xs border border-border rounded bg-background"
-                  >
-                    <option value="16:9">16:9</option>
-                    <option value="9:16">9:16</option>
-                    <option value="1:1">1:1</option>
-                  </select>
-                </>
-              )}
-            </div>
-
-            <div className="absolute bottom-3 right-3 flex items-center gap-2">
-              <Button
-                onClick={handleGenerate}
-                size="sm"
-                className="h-8 w-8 p-0 rounded-lg bg-foreground hover:bg-foreground/90 text-background disabled:opacity-50 rounded-full"
-                disabled={generating || !prompt.trim()}
-              >
-                {generating ? (
-                  <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                ) : (
-                  <ArrowUp className="w-4 h-4" />
-                )}
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <GalleryPromptBox
+        prompt={prompt}
+        onPromptChange={setPrompt}
+        onGenerate={handleGenerate}
+        generating={generating}
+        generationMode={generationMode}
+        onModeChange={setGenerationMode}
+        videoSettings={videoSettings}
+        onVideoSettingsChange={setVideoSettings}
+      />
 
       <Suspense fallback={<div className="flex justify-center p-8"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
         {selectedImageIndex !== null && (
