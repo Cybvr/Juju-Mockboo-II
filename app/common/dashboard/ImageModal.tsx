@@ -107,6 +107,30 @@ export const ImageModal: React.FC<ImageModalProps> = ({
     toast.success(`Copied ${color}`);
   };
 
+  const handleDownload = async (mediaUrl: string, index: number) => {
+    try {
+      const isVideo = mediaUrl.includes('.mp4') || mediaUrl.includes('video');
+      const fileExtension = isVideo ? 'mp4' : 'png';
+
+      const response = await fetch(mediaUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `gallery_${gallery?.title}_${index}.${fileExtension}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      toast.success(`${isVideo ? 'Video' : 'Image'} downloaded`);
+    } catch (error) {
+      console.error(`Failed to download ${mediaUrl.includes('video') ? 'video' : 'image'}:`, error);
+      toast.error(`Failed to download ${mediaUrl.includes('video') ? 'video' : 'image'}`);
+    }
+  };
+
+  const isVideo = images[selectedIndex].includes('.mp4') || images[selectedIndex].includes('video');
+
   return (
     <div
       className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
@@ -156,11 +180,19 @@ export const ImageModal: React.FC<ImageModalProps> = ({
             <ChevronRight className="w-6 h-6" />
           </Button>
 
-          <img
-            src={images[selectedIndex]}
-            alt={`Image ${selectedIndex + 1}`}
-            className="max-w-full max-h-full object-contain"
-          />
+          {isVideo ? (
+            <video
+              src={images[selectedIndex]}
+              controls
+              className="max-w-full max-h-full object-contain"
+            />
+          ) : (
+            <img
+              src={images[selectedIndex]}
+              alt={`Image ${selectedIndex + 1}`}
+              className="max-w-full max-h-full object-contain"
+            />
+          )}
 
           <div className="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-1.5 rounded text-sm">
             {selectedIndex + 1} / {images.length}
@@ -192,7 +224,7 @@ export const ImageModal: React.FC<ImageModalProps> = ({
               <p className="text-sm leading-relaxed">{gallery.prompt}</p>
 
               {/* Color Palette */}
-              {imageColors.length > 0 && (
+              {!isVideo && imageColors.length > 0 && (
                 <div className="mt-4 p-4 bg-muted/30 rounded-lg">
                   <h4 className="text-sm font-medium text-foreground mb-3">🎨 Color Palette</h4>
                   <div className="flex gap-3 flex-wrap">
@@ -245,13 +277,13 @@ export const ImageModal: React.FC<ImageModalProps> = ({
               className="w-full justify-start"
               onClick={(e) => {
                 e.stopPropagation();
-                const imageUrl = images[selectedIndex];
-                navigator.clipboard.writeText(imageUrl);
-                toast.success('Image URL copied');
+                const mediaUrl = images[selectedIndex];
+                navigator.clipboard.writeText(mediaUrl);
+                toast.success('Media URL copied');
               }}
             >
               <Copy className="w-4 h-4 mr-3" />
-              Copy Image URL
+              Copy Media URL
             </Button>
 
             <Button
