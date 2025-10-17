@@ -65,7 +65,17 @@ const extractImageColors = async (imageUrl: string): Promise<string[]> => {
           .slice(0, 6)
           .map(([color]) => color);
 
-        resolve(sortedColors.length > 0 ? sortedColors : ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#DDA0DD']);
+        const finalColors = sortedColors.length > 0 ? sortedColors : ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#DDA0DD'];
+        
+        console.log('🎨 COLOR EXTRACTION DEBUG:');
+        console.log('Image URL:', imageUrl);
+        console.log('Canvas size:', canvas.width, 'x', canvas.height);
+        console.log('Total pixels sampled:', pixels.length / 4);
+        console.log('Color map size:', colorMap.size);
+        console.log('Extracted colors:', finalColors);
+        console.log('Using fallback colors?', sortedColors.length === 0);
+        
+        resolve(finalColors);
       } catch (error) {
         // Fallback colors if extraction fails
         resolve(['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#DDA0DD']);
@@ -97,7 +107,11 @@ export const ImageModal: React.FC<ImageModalProps> = ({
 
   useEffect(() => {
     if (isOpen && images[selectedIndex]) {
-      extractImageColors(images[selectedIndex]).then(setImageColors);
+      console.log('🚀 Starting color extraction for image:', images[selectedIndex]);
+      extractImageColors(images[selectedIndex]).then((colors) => {
+        console.log('✅ Color extraction complete, setting colors:', colors);
+        setImageColors(colors);
+      });
     }
   }, [isOpen, selectedIndex, images]);
 
@@ -195,22 +209,27 @@ export const ImageModal: React.FC<ImageModalProps> = ({
               <p className="text-sm leading-relaxed">{gallery.prompt}</p>
 
               {/* Color Palette under prompt */}
-              {imageColors.length > 0 && (
-                <div className="mt-4">
-                  <h4 className="text-sm font-medium text-muted-foreground mb-3">Color Palette</h4>
-                  <div className="flex gap-2">
-                    {imageColors.map((color, index) => (
+              <div className="mt-4 p-4 bg-muted/30 rounded-lg border-2 border-yellow-400">
+                <h4 className="text-sm font-medium text-foreground mb-3 font-bold">🎨 Color Palette (DEBUG)</h4>
+                <div className="flex gap-3 flex-wrap">
+                  {imageColors.map((color, index) => (
+                    <div key={index} className="flex flex-col items-center gap-1">
                       <button
-                        key={index}
-                        className="w-8 h-8 rounded-full border-2 border-border hover:scale-110 transition-transform cursor-pointer"
+                        className="w-12 h-12 rounded-lg border-4 border-black hover:scale-110 transition-transform cursor-pointer shadow-lg"
                         style={{ backgroundColor: color }}
                         onClick={() => handleCopyColor(color)}
                         title={`Click to copy ${color}`}
                       />
-                    ))}
-                  </div>
+                      <span className="text-xs font-mono text-foreground bg-background px-1 py-0.5 rounded border">
+                        {color}
+                      </span>
+                    </div>
+                  ))}
                 </div>
-              )}
+                <div className="mt-2 text-xs text-muted-foreground">
+                  Total colors extracted: {imageColors.length}
+                </div>
+              </div>
             </div>
           )}
 
