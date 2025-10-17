@@ -1,4 +1,3 @@
-
 'use client'
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
@@ -25,48 +24,60 @@ interface ImageModalProps {
 const extractImageColors = async (imageUrl: string): Promise<string[]> => {
   return new Promise((resolve) => {
     const img = new Image();
-    img.crossOrigin = 'anonymous';
-    
+
     img.onload = () => {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      
-      if (!ctx) {
-        resolve([]);
-        return;
-      }
-      
-      canvas.width = img.width;
-      canvas.height = img.height;
-      ctx.drawImage(img, 0, 0);
-      
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const pixels = imageData.data;
-      const colorMap = new Map<string, number>();
-      
-      // Sample every 10th pixel to improve performance
-      for (let i = 0; i < pixels.length; i += 40) {
-        const r = pixels[i];
-        const g = pixels[i + 1];
-        const b = pixels[i + 2];
-        const alpha = pixels[i + 3];
-        
-        if (alpha > 128) { // Skip transparent pixels
-          const color = `rgb(${r}, ${g}, ${b})`;
-          colorMap.set(color, (colorMap.get(color) || 0) + 1);
+      try {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        if (!ctx) {
+          resolve(['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8']);
+          return;
         }
+
+        canvas.width = Math.min(img.width, 200);
+        canvas.height = Math.min(img.height, 200);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const pixels = imageData.data;
+        const colorMap = new Map<string, number>();
+
+        // Sample every 20th pixel
+        for (let i = 0; i < pixels.length; i += 80) {
+          const r = pixels[i];
+          const g = pixels[i + 1];
+          const b = pixels[i + 2];
+          const alpha = pixels[i + 3];
+
+          if (alpha > 100) {
+            // Round colors to reduce variation
+            const roundedR = Math.round(r / 32) * 32;
+            const roundedG = Math.round(g / 32) * 32;
+            const roundedB = Math.round(b / 32) * 32;
+            const color = `rgb(${roundedR}, ${roundedG}, ${roundedB})`;
+            colorMap.set(color, (colorMap.get(color) || 0) + 1);
+          }
+        }
+
+        const sortedColors = Array.from(colorMap.entries())
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 6)
+          .map(([color]) => color);
+
+        resolve(sortedColors.length > 0 ? sortedColors : ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#DDA0DD']);
+      } catch (error) {
+        // Fallback colors if extraction fails
+        resolve(['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#DDA0DD']);
       }
-      
-      // Get top 5 colors
-      const sortedColors = Array.from(colorMap.entries())
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 5)
-        .map(([color]) => color);
-      
-      resolve(sortedColors);
     };
-    
-    img.onerror = () => resolve([]);
+
+    img.onerror = () => {
+      // Fallback colors if image fails to load
+      resolve(['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#DDA0DD']);
+    };
+
+    img.crossOrigin = 'anonymous';
     img.src = imageUrl;
   });
 };
@@ -100,11 +111,11 @@ export const ImageModal: React.FC<ImageModalProps> = ({
   };
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
       onClick={onClose}
     >
-      <div 
+      <div
         className="bg-background w-full h-full md:rounded-2xl md:shadow-2xl md:max-w-7xl md:w-auto md:max-h-[90vh] flex flex-col md:flex-row overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
@@ -122,7 +133,7 @@ export const ImageModal: React.FC<ImageModalProps> = ({
           >
             <ChevronLeft className="w-6 h-6" />
           </Button>
-          
+
           <Button
             size="icon"
             variant="ghost"
@@ -153,7 +164,7 @@ export const ImageModal: React.FC<ImageModalProps> = ({
             alt={`Image ${selectedIndex + 1}`}
             className="max-w-full max-h-full object-contain"
           />
-          
+
           <div className="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-1.5 rounded text-sm">
             {selectedIndex + 1} / {images.length}
           </div>
@@ -182,7 +193,7 @@ export const ImageModal: React.FC<ImageModalProps> = ({
             <div className="p-6 border-b">
               <h4 className="text-sm font-medium text-muted-foreground mb-2">Prompt</h4>
               <p className="text-sm leading-relaxed">{gallery.prompt}</p>
-              
+
               {/* Color Palette under prompt */}
               {imageColors.length > 0 && (
                 <div className="mt-4">
