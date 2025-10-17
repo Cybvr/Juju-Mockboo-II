@@ -39,7 +39,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en">
       <head>
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#ffffff" />
@@ -50,31 +50,19 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/images/juju.png" />
       </head>
       <body className={dmSans.className}>
-        <div className="min-h-screen relative">
-          {/* Dot Grid Background */}
-          <div 
-            className="fixed inset-0 opacity-20 pointer-events-none"
-            style={{
-              backgroundImage: `radial-gradient(circle, #9ca3af 1px, transparent 1px)`,
-              backgroundSize: '20px 20px'
-            }}
-          />
-          <div className="relative z-10">
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="light"
-              enableSystem
-              disableTransitionOnChange
-            >
-              {children}
-              <Toaster />
-            </ThemeProvider>
-          </div>
-        </div>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem={false}
+          disableTransitionOnChange
+        >
+          {children}
+          <Toaster />
+        </ThemeProvider>
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              if ('serviceWorker' in navigator) {
+              if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
                 window.addEventListener('load', function() {
                   navigator.serviceWorker.register('/sw.js');
                 });
