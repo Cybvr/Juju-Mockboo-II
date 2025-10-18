@@ -1,9 +1,9 @@
 'use client';
 import React, { useState, useEffect, useCallback } from 'react';
 import type { FilmProject } from '@/types/storytypes';
-import { ProjectDashboard } from '@/app/common/dashboard/stories/ProjectDashboard';
-import { FilmEditor } from '@/app/common/dashboard/stories/FilmEditor';
-import { CreationHub } from '@/app/common/dashboard/stories/CreationHub';
+import { ProjectDashboard } from './common/ProjectDashboard';
+import { FilmEditor } from './common/FilmEditor';
+import { CreationHub } from './common/CreationHub';
 import { templates } from '@/data/filmTemplates';
 import {
   AlertDialog,
@@ -156,17 +156,19 @@ const App: React.FC = () => {
 
   const confirmDeleteProject = async () => {
     if (!deleteProjectId) return;
-    
+
+    const projectIdToDelete = deleteProjectId;
+    // Close the dialog immediately to prevent hanging
+    setDeleteProjectId(null);
+
     try {
-      await deleteStory(deleteProjectId);
-      setProjects(prevProjects => prevProjects.filter(p => p.id !== deleteProjectId));
-      if (activeProjectId === deleteProjectId) {
+      await deleteStory(projectIdToDelete);
+      setProjects(prevProjects => prevProjects.filter(p => p.id !== projectIdToDelete));
+      if (activeProjectId === projectIdToDelete) {
         setActiveProjectId(null);
       }
     } catch (error) {
       console.error('Failed to delete project:', error);
-    } finally {
-      setDeleteProjectId(null);
     }
   };
 
@@ -256,7 +258,7 @@ const App: React.FC = () => {
   return (
     <main className="min-h-screen w-full transition-colors duration-300 mx-auto max-w-4xl">
       {renderContent()}
-      
+
       <AlertDialog open={!!deleteProjectId} onOpenChange={(open) => {
         if (!open) setDeleteProjectId(null);
       }}>

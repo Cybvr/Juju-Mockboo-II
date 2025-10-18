@@ -23,7 +23,7 @@ interface AnalyzedScriptData {
  * Generates a film script from a given prompt.
  */
 export const generateScript = async (prompt: string): Promise<string> => {
-  const response = await fetch('/api/film', {
+  const response = await fetch('/api/stories', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -46,7 +46,7 @@ export const generateScript = async (prompt: string): Promise<string> => {
  * Generates a single image from a prompt and returns a base64 data URL.
  */
 export const generateSingleImage = async (prompt: string, aspectRatio: string = '16:9'): Promise<string> => {
-  const response = await fetch('/api/film', {
+  const response = await fetch('/api/stories', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -70,7 +70,7 @@ export const generateSingleImage = async (prompt: string, aspectRatio: string = 
  * Analyzes a script and extracts storyboard scenes, characters, locations, and sound design.
  */
 export const analyzeScript = async (script: string): Promise<AnalyzedScriptData> => {
-  const response = await fetch('/api/film', {
+  const response = await fetch('/api/stories', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -93,7 +93,7 @@ export const analyzeScript = async (script: string): Promise<AnalyzedScriptData>
  * Generates a video from a prompt and a base64 image, returning a data URL.
  */
 export const generateVideo = async (prompt: string, base64Image: string): Promise<string> => {
-  const response = await fetch('/api/film', {
+  const response = await fetch('/api/stories', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
