@@ -179,8 +179,28 @@ export async function POST(request: NextRequest) {
         const output = await replicate.run("kwaivgi/kling-v2.1", { input });
 
         if (output && typeof output.url === 'function') {
-          const videoUrl = output.url();
-          return NextResponse.json({ success: true, videoUrl: videoUrl });
+          const replicateVideoUrl = output.url();
+          
+          // Download video from Replicate
+          const videoResponse = await fetch(replicateVideoUrl);
+          if (!videoResponse.ok) {
+            throw new Error(`Failed to download video from Replicate`);
+          }
+          const videoBlob = await videoResponse.blob();
+          
+          // Upload to Firebase Storage
+          const { storage } = await import('@/lib/firebase');
+          const { ref, uploadBytes, getDownloadURL } = await import('firebase/storage');
+          
+          const timestamp = Date.now();
+          const fileName = `story_video_${timestamp}.mp4`;
+          const videoPath = `stories/${fileName}`;
+          const videoRef = ref(storage, videoPath);
+          await uploadBytes(videoRef, videoBlob);
+          
+          // Get permanent Firebase URL
+          const firebaseVideoUrl = await getDownloadURL(videoRef);
+          return NextResponse.json({ success: true, videoUrl: firebaseVideoUrl });
         }
 
         return NextResponse.json({ error: 'Video generation failed' }, { status: 500 });
