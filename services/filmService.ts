@@ -1,4 +1,7 @@
 import type { FilmProject } from '@/types/storytypes';
+import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
+import { storage } from '@/lib/firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 interface AnalyzedScriptData {
   storyboard: Array<{
@@ -137,3 +140,22 @@ export const generateProjectPatch = async (prompt: string, project: FilmProject)
   // This would also need to be moved to API route if used
   throw new Error('generateProjectPatch not implemented - move to API route if needed');
 };
+
+export async function uploadImageToStorage(base64Data: string, sceneId: string): Promise<string> {
+  try {
+    // Convert base64 to blob
+    const base64String = base64Data.replace(/^data:image\/\w+;base64,/, '')
+    const buffer = Buffer.from(base64String, 'base64')
+    const blob = new Blob([buffer], { type: 'image/jpeg' })
+
+    // Upload to Firebase Storage
+    const storageRef = ref(storage, `scenes/${sceneId}/${Date.now()}.jpg`)
+    const uploadResult = await uploadBytes(storageRef, blob)
+    const downloadURL = await getDownloadURL(uploadResult.ref)
+
+    return downloadURL
+  } catch (error) {
+    console.error('Error uploading image to storage:', error)
+    throw error
+  }
+}

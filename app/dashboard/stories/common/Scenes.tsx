@@ -86,10 +86,11 @@ const SceneCard: React.FC<{
       console.log(`📦 Total images received: ${images.length}`)
       console.log(`🖼️ First image preview: ${images[0] ? images[0].substring(0, 100) + '...' : 'null'}`)
       
+      // Don't store base64 images to avoid Firebase size limits
       onUpdateScene({ 
         ...scene, 
         imageUrl: images[0], 
-        generatedImages: images,
+        generatedImages: images.slice(0, 1), // Only store first image temporarily
         generating: false 
       })
       
