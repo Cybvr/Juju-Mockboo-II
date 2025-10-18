@@ -96,78 +96,80 @@ const SceneCard: React.FC<{
                             </Button>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                            <Select 
-                                value={scene.characterId || undefined} 
-                                onValueChange={(value) => handleFieldChange('characterId', value || null)}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select Character" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {project.characters.map(c => (
-                                        <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-
-                            <Select 
-                                value={scene.locationId || undefined} 
-                                onValueChange={(value) => handleFieldChange('locationId', value || null)}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select Location" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {project.locations.map(l => (
-                                        <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-
-                            <Select 
-                                value={scene.soundId || undefined} 
-                                onValueChange={(value) => handleFieldChange('soundId', value || null)}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select Sound" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {project.sound_design.map(s => (
-                                        <SelectItem key={s.id} value={s.id}>
-                                            {s.scene_match}: {s.description.substring(0, 20)}...
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-
                         <Textarea
                             ref={textareaRef}
                             value={scene.prompt}
                             onChange={handleTextareaChange}
                             placeholder="Action prompt: e.g., 'looks out the window at the rain...'"
-                            className="flex-grow resize-none overflow-hidden min-h-[60px]"
+                            className="flex-grow resize-none overflow-hidden min-h-[60px] mb-4"
                             rows={2}
                         />
 
-                        <div className="flex justify-end items-center gap-2">
-                            <Button 
-                                variant="ghost" 
-                                size="icon"
-                                className="hover:bg-muted"
-                                title="Regenerate"
-                            >
-                                <RotateCcw className="w-4 h-4"/>
-                            </Button>
-                            <Button 
-                                onClick={handleGenerateImage}
-                                disabled={scene.generating}
-                                className="flex items-center gap-2"
-                            >
-                                 <Sparkles className="w-4 h-4" />
-                                 Generate
-                            </Button>
+                        <div className="flex justify-between items-end gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 flex-grow">
+                                <Select 
+                                    value={scene.characterId || undefined} 
+                                    onValueChange={(value) => handleFieldChange('characterId', value || null)}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select Character" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {project.characters.map(c => (
+                                            <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+
+                                <Select 
+                                    value={scene.locationId || undefined} 
+                                    onValueChange={(value) => handleFieldChange('locationId', value || null)}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select Location" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {project.locations.map(l => (
+                                            <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+
+                                <Select 
+                                    value={scene.soundId || undefined} 
+                                    onValueChange={(value) => handleFieldChange('soundId', value || null)}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select Sound" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {project.sound_design.map(s => (
+                                            <SelectItem key={s.id} value={s.id}>
+                                                {s.scene_match}: {s.description.substring(0, 20)}...
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                                <Button 
+                                    variant="ghost" 
+                                    size="icon"
+                                    className="hover:bg-muted"
+                                    title="Regenerate"
+                                >
+                                    <RotateCcw className="w-4 h-4"/>
+                                </Button>
+                                <Button 
+                                    onClick={handleGenerateImage}
+                                    disabled={scene.generating}
+                                    className="flex items-center gap-2"
+                                >
+                                     <Sparkles className="w-4 h-4" />
+                                     Generate
+                                </Button>
+                            </div>
                         </div>
                     </div>
                 </div>
