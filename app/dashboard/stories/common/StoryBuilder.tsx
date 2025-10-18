@@ -455,74 +455,72 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({ project, onUpdatePro
 
     return (
         <div className="flex flex-col h-screen text-foreground">
-            <header className="flex-shrink-0 flex items-center justify-between p-1 border-b border-border bg-card">
+            <header className="flex-shrink-0 flex items-center justify-between p-2 sm:p-4 border-b border-border bg-card">
                 <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
-                    <Button variant="ghost" size="icon" onClick={onBackToDashboard} className="flex-shrink-0">
-                        <ArrowLeft className="w-3 h-3 sm:w-4 sm:h-4" />
+                    <Button variant="ghost" size="icon" onClick={onBackToDashboard} className="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10">
+                        <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
                     </Button>
                     <Input
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         onBlur={handleTitleBlur}
-                        className="text-sm font-bold bg-transparent border-none focus:ring-0 focus:ring-transparent px-2 h-auto flex-1 w-fit"
+                        className="text-sm sm:text-base font-bold bg-transparent border-none focus:ring-0 focus:ring-transparent px-2 h-auto flex-1 min-w-0"
                     />
                 </div>
                 <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-                    <Button variant="outline" onClick={() => setIsShareModalOpen(true)} className="gap-2 hidden sm:flex">
-                        <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
-                        <span className="hidden sm:inline">Share</span>
-                    </Button>
-                    <Button variant="outline" size="icon" onClick={() => setIsShareModalOpen(true)} className="sm:hidden">
+                    <Button variant="outline" size="icon" onClick={() => setIsShareModalOpen(true)} className="h-8 w-8 sm:h-10 sm:w-10">
                         <Share2 className="w-4 h-4" />
                     </Button>
-                    <Button variant="outline" onClick={() => setIsSettingsModalOpen(true)} className="gap-2 hidden sm:flex">
-                        <Settings className="w-4 h-4 sm:w-5 sm:h-5" />
-                        <span className="hidden sm:inline">Settings</span>
-                    </Button>
-                    <Button variant="outline" size="icon" onClick={() => setIsSettingsModalOpen(true)} className="sm:hidden">
+                    <Button variant="outline" size="icon" onClick={() => setIsSettingsModalOpen(true)} className="h-8 w-8 sm:h-10 sm:w-10">
                         <Settings className="w-4 h-4" />
                     </Button>
                 </div>
             </header>
+
             {isAnalyzing && (
                 <div className="bg-primary/20 text-primary p-2 sm:p-3 text-center text-xs sm:text-sm flex items-center justify-center gap-2">
                     <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
                     Analyzing script...
                 </div>
             )}
+
             {analysisError && (
                 <div className="bg-destructive/20 text-destructive p-2 sm:p-3 text-center text-xs sm:text-sm">{analysisError}</div>
             )}
-            <div className="flex-grow flex p-2 sm:p-4 gap-2 sm:gap-4 overflow-hidden relative bg-accent">
-                {/* Left section with stitch editor and tabs */}
-                <div className="flex flex-col w-2/3 px-2 lg:px-8 overflow-auto">
+
+            <div className="flex-grow flex flex-col lg:flex-row p-2 sm:p-4 gap-2 sm:gap-4 overflow-hidden bg-accent">
+                {/* Left section - storyboard */}
+                <div className="flex flex-col w-full lg:w-2/3 px-2 sm:px-4 lg:px-8 overflow-auto">
                     <StitchEditor project={project} onUpdateProject={onUpdateProject} />
-                    <div className="flex border-b border-border">
+
+                    <div className="flex border-b border-border mt-4">
                         <button
                             onClick={() => setActiveTab('scenes')}
-                            className={`px-4 py-2 ${activeTab === 'scenes' ? 'border-b-2 border-primary' : ''}`}
+                            className={`px-3 sm:px-4 py-2 text-sm sm:text-base ${activeTab === 'scenes' ? 'border-b-2 border-primary font-semibold' : ''}`}
                         >
                             Scenes
                         </button>
                         <button
                             onClick={() => setActiveTab('assets')}
-                            className={`px-4 py-2 ${activeTab === 'assets' ? 'border-b-2 border-primary' : ''}`}
+                            className={`px-3 sm:px-4 py-2 text-sm sm:text-base ${activeTab === 'assets' ? 'border-b-2 border-primary font-semibold' : ''}`}
                         >
                             Assets
                         </button>
                     </div>
+
                     {/* Emoji Reactions */}
-                    <div className="mt-4 flex justify-center">
-                        <div className="flex items-center gap-4 bg-white/90 backdrop-blur-sm rounded-full px-6 py-3 shadow-lg">
-                            <button className="text-2xl hover:scale-110 transition-transform">😂</button>
-                            <button className="text-2xl hover:scale-110 transition-transform">😍</button>
-                            <button className="text-2xl hover:scale-110 transition-transform">😱</button>
-                            <button className="text-2xl hover:scale-110 transition-transform">🙌</button>
-                            <button className="text-2xl hover:scale-110 transition-transform">👍</button>
-                            <button className="text-2xl hover:scale-110 transition-transform">👎</button>
-                            <button className="text-2xl hover:scale-110 transition-transform">😊</button>
+                    <div className="mt-4 flex justify-center overflow-x-auto">
+                        <div className="flex items-center gap-2 sm:gap-4 bg-white/90 backdrop-blur-sm rounded-full px-4 sm:px-6 py-2 sm:py-3 shadow-lg">
+                            <button className="text-xl sm:text-2xl hover:scale-110 transition-transform">😂</button>
+                            <button className="text-xl sm:text-2xl hover:scale-110 transition-transform">😍</button>
+                            <button className="text-xl sm:text-2xl hover:scale-110 transition-transform">😱</button>
+                            <button className="text-xl sm:text-2xl hover:scale-110 transition-transform">🙌</button>
+                            <button className="text-xl sm:text-2xl hover:scale-110 transition-transform">👍</button>
+                            <button className="text-xl sm:text-2xl hover:scale-110 transition-transform">👎</button>
+                            <button className="text-xl sm:text-2xl hover:scale-110 transition-transform">😊</button>
                         </div>
                     </div>
+
                     {activeTab === 'scenes' ? (
                         <div className="mt-4">
                             {project.storyboard.length > 0 ? (
@@ -540,10 +538,10 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({ project, onUpdatePro
                                         ))}
                                 </Accordion>
                             ) : (
-                                <div className="text-center py-20">
-                                    <Camera className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-                                    <h2 className="text-xl font-semibold text-foreground">Empty Storyboard</h2>
-                                    <p className="text-muted-foreground mt-2">Analyze your script or add a scene to get started.</p>
+                                <div className="text-center py-12 sm:py-20">
+                                    <Camera className="w-12 h-12 sm:w-16 sm:h-16 mx-auto text-muted-foreground mb-4" />
+                                    <h2 className="text-lg sm:text-xl font-semibold text-foreground">Empty Storyboard</h2>
+                                    <p className="text-sm sm:text-base text-muted-foreground mt-2 px-4">Analyze your script or add a scene to get started.</p>
                                     <Button onClick={handleAddScene} className="mt-4">Add Scene</Button>
                                 </div>
                             )}
@@ -552,27 +550,33 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({ project, onUpdatePro
                         <AssetManager project={project} onUpdateProject={onUpdateProject} />
                     )}
                 </div>
-                {/* Right section with sticky script */}
-                <div className="w-1/3 h-full sticky top-0 bg-card rounded-2xl overflow-y-auto">
-                    <div className="h-full flex flex-col rounded-lg sm:rounded-2xl shadow-inner">
-                        <div className="flex-grow p-3 sm:p-4 md:p-6 min-h-0">
-                            <Textarea
-                                value={script}
-                                onChange={handleScriptChange}
-                                onBlur={handleScriptBlur}
-                                placeholder="INT. COFFEE SHOP - DAY..."
-                                className="w-full h-full p-2 text-xs sm:text-sm bg-transparent resize-none border-none focus:ring-2 focus:ring-primary"
-                            />
-                        </div>
+
+                {/* Right section - script and chat */}
+                <div className="w-full lg:w-1/3 h-64 lg:h-full bg-card rounded-lg sm:rounded-2xl overflow-hidden flex flex-col">
+                    <div className="flex-1 min-h-0 overflow-y-auto p-3 sm:p-4 md:p-6">
+                        <Textarea
+                            value={script}
+                            onChange={handleScriptChange}
+                            onBlur={handleScriptBlur}
+                            placeholder="INT. COFFEE SHOP - DAY..."
+                            className="w-full h-full p-2 text-xs sm:text-sm bg-transparent resize-none border-none focus:ring-2 focus:ring-primary"
+                        />
+                    </div>
+                    <div className="border-t border-border">
                         <ChatInterface project={project} onUpdateProject={onUpdateProject} />
                     </div>
                 </div>
             </div>
+
             <Modal isOpen={isShareModalOpen} onClose={() => setIsShareModalOpen(false)} title="Share Project">
                 <ShareProjectContent project={project} />
             </Modal>
+
             <Modal isOpen={isSettingsModalOpen} onClose={() => setIsSettingsModalOpen(false)} title="Project Settings">
-                <ProjectSettings settings={project.settings} onUpdate={(newSettings) => onUpdateProject({ ...project, settings: newSettings })} />
+                <ProjectSettings 
+                    settings={project.settings} 
+                    onUpdate={(newSettings) => onUpdateProject({ ...project, settings: newSettings })} 
+                />
             </Modal>
         </div>
     );
