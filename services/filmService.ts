@@ -45,26 +45,43 @@ export const generateScript = async (prompt: string): Promise<string> => {
 /**
  * Generates a single image from a prompt and returns a base64 data URL.
  */
-export const generateSingleImage = async (prompt: string, aspectRatio: string = '16:9'): Promise<string> => {
+export async function generateSingleImage(prompt: string, aspectRatio: string = '16:9'): Promise<string> {
+  console.log(`📡 generateSingleImage: Making API call to /api/stories`)
+  console.log(`📝 Prompt: "${prompt}"`)
+  console.log(`📐 Aspect Ratio: ${aspectRatio}`)
+
+  const requestBody = {
+    action: 'generateImage',
+    prompt,
+    aspectRatio
+  };
+
+  console.log(`📤 Request body:`, requestBody)
+
   const response = await fetch('/api/stories', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      action: 'generateImage',
-      prompt,
-      aspectRatio,
-    }),
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(requestBody)
   });
 
+  console.log(`📥 API Response status: ${response.status} ${response.statusText}`)
+
   if (!response.ok) {
-    throw new Error('Failed to generate image');
+    console.error(`❌ API Error: HTTP ${response.status}: ${response.statusText}`)
+    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
   }
 
   const data = await response.json();
+  console.log(`📦 API Response data:`, data)
+
+  if (!data.success) {
+    console.error(`❌ API returned failure:`, data.error)
+    throw new Error(data.error || 'Image generation failed');
+  }
+
+  console.log(`✅ generateSingleImage SUCCESS - Got imageUrl: ${data.imageUrl ? data.imageUrl.substring(0, 100) + '...' : 'null'}`)
   return data.imageUrl;
-};
+}
 
 /**
  * Analyzes a script and extracts storyboard scenes, characters, locations, and sound design.

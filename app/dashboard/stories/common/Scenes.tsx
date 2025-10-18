@@ -40,34 +40,61 @@ const SceneCard: React.FC<{
   }, [localPrompt, adjustHeight])
 
   const handleGenerateImage = useCallback(async () => {
+    console.log(`🎬 SCENE ${scene.scene_number}: Starting image generation...`)
+    console.log(`📝 User requested ${generateOutputs} outputs`)
+    
     const character = project.characters.find((c) => c.id === scene.characterId)
     const location = project.locations.find((l) => l.id === scene.locationId)
     let builtPrompt = scene.prompt || "A cinematic scene."
+    
     if (character) {
       builtPrompt = `${character.name} ${builtPrompt}. Description of ${character.name}: ${character.description}.`
+      console.log(`👤 Added character: ${character.name}`)
     }
     if (location) {
       builtPrompt = `${builtPrompt} The setting is ${location.name}. Description of location: ${location.description}.`
+      console.log(`📍 Added location: ${location.name}`)
     }
+    
+    console.log(`🎯 Final prompt: "${builtPrompt}"`)
+    console.log(`📐 Aspect ratio: ${project.settings.aspectRatio}`)
+    
     if (character?.imageUrl) {
       console.log("Character image available, but not yet used in generation.", character.imageUrl)
     }
+    
     onUpdateScene({ ...scene, generating: true })
+    console.log(`🔄 Set generating state to true for scene ${scene.scene_number}`)
+    
     try {
       const images = []
+      console.log(`📡 Starting ${generateOutputs} API calls...`)
+      
       for (let i = 0; i < generateOutputs; i++) {
+        console.log(`📡 API Call ${i + 1}/${generateOutputs} - Sending to generateSingleImage...`)
         const imageUrl = await generateSingleImage(builtPrompt, project.settings.aspectRatio)
+        console.log(`✅ API Call ${i + 1} SUCCESS - Got image: ${imageUrl ? imageUrl.substring(0, 50) + '...' : 'null'}`)
         images.push(imageUrl)
       }
+      
+      console.log(`🎉 All ${generateOutputs} images generated successfully!`)
+      console.log(`📦 Total images received: ${images.length}`)
+      console.log(`🖼️ First image preview: ${images[0] ? images[0].substring(0, 100) + '...' : 'null'}`)
+      
       onUpdateScene({ 
         ...scene, 
         imageUrl: images[0], 
         generatedImages: images,
         generating: false 
       })
+      
+      console.log(`✨ Scene ${scene.scene_number} updated with ${images.length} images - COMPLETE!`)
+      
     } catch (error) {
-      console.error("Image generation failed:", error)
+      console.error(`❌ SCENE ${scene.scene_number} - Image generation FAILED:`, error)
+      console.error(`💥 Error details:`, error.message || error)
       onUpdateScene({ ...scene, generating: false, imageUrl: "error" })
+      console.log(`🔴 Set scene ${scene.scene_number} to error state`)
     }
   }, [scene, project, onUpdateScene, generateOutputs])
 
