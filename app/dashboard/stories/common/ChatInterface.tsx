@@ -98,8 +98,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ project, onUpdateP
                 handleSubmit(e as any);
               }
             }}
-            placeholder="Tell the AI what to change... e.g., 'Change title to Cosmic Odyssey' or 'Make scene 1 prompt about a rainy day'"
-            className="w-full h-14 p-4 pr-16 text-base rounded-2xl resize-none"
+            placeholder="Tell Juju what to change... e.g., 'Change title to Cosmic Odyssey' or 'Make scene 1 prompt about a rainy day'"
+            className="w-full h-14 p-4 pr-16 text-xs rounded-2xl resize-none"
             rows={1}
           />
           <Button

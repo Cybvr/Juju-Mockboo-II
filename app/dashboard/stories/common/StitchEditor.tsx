@@ -186,7 +186,7 @@ export const StitchEditor: React.FC<StitchPlayerProps> = ({ project }) => {
     return (
         <div
             ref={containerRef}
-            className="relative w-full h-screen bg-black group"
+            className="relative w-full h-screen bg-black group "
             onMouseMove={handleMouseMove}
             onMouseLeave={() => isPlaying && setShowControls(false)}
         >
@@ -212,7 +212,7 @@ export const StitchEditor: React.FC<StitchPlayerProps> = ({ project }) => {
                 }`}
             >
                 {/* Timeline */}
-                <div className="px-4 pb-2">
+                <div className="px-4 pb-2 ">
                     <div
                         className="relative h-1 bg-white/30 rounded-full cursor-pointer group/timeline hover:h-1.5 transition-all"
                         onClick={handleTimelineClick}
@@ -276,18 +276,6 @@ export const StitchEditor: React.FC<StitchPlayerProps> = ({ project }) => {
                 </div>
             )}
             
-            {/* Emoji Reactions */}
-            <div className="mt-4 flex justify-center">
-                <div className="flex items-center gap-4 bg-white/90 backdrop-blur-sm rounded-full px-6 py-3 shadow-lg">
-                    <button className="text-2xl hover:scale-110 transition-transform">😂</button>
-                    <button className="text-2xl hover:scale-110 transition-transform">😍</button>
-                    <button className="text-2xl hover:scale-110 transition-transform">😱</button>
-                    <button className="text-2xl hover:scale-110 transition-transform">🙌</button>
-                    <button className="text-2xl hover:scale-110 transition-transform">👍</button>
-                    <button className="text-2xl hover:scale-110 transition-transform">👎</button>
-                    <button className="text-2xl hover:scale-110 transition-transform">😊</button>
-                </div>
-            </div>
         </div>
     );
 };

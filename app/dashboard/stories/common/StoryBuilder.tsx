@@ -455,7 +455,7 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({ project, onUpdatePro
 
     return (
         <div className="flex flex-col h-screen text-foreground">
-            <header className="flex-shrink-0 flex items-center justify-between p-1 border-b border-border">
+            <header className="flex-shrink-0 flex items-center justify-between p-1 border-b border-border bg-card">
                 <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
                     <Button variant="ghost" size="icon" onClick={onBackToDashboard} className="flex-shrink-0">
                         <ArrowLeft className="w-3 h-3 sm:w-4 sm:h-4" />
@@ -482,7 +482,6 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({ project, onUpdatePro
                     <Button variant="outline" size="icon" onClick={() => setIsSettingsModalOpen(true)} className="sm:hidden">
                         <Settings className="w-4 h-4" />
                     </Button>
-                    <ProfileDropdown />
                 </div>
             </header>
             {isAnalyzing && (
@@ -512,6 +511,17 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({ project, onUpdatePro
                             Assets
                         </button>
                     </div>
+                    {/* Emoji Reactions */}
+                    <div className="mt-4 flex justify-center">
+                        <div className="flex items-center gap-4 bg-white/90 backdrop-blur-sm rounded-full px-6 py-3 shadow-lg">
+                            <button className="text-2xl hover:scale-110 transition-transform">😂</button>
+                            <button className="text-2xl hover:scale-110 transition-transform">😍</button>
+                            <button className="text-2xl hover:scale-110 transition-transform">😱</button>
+                            <button className="text-2xl hover:scale-110 transition-transform">🙌</button>
+                            <button className="text-2xl hover:scale-110 transition-transform">👍</button>
+                            <button className="text-2xl hover:scale-110 transition-transform">👎</button>
+                            <button className="text-2xl hover:scale-110 transition-transform">😊</button>
+                        </div>
                     {activeTab === 'scenes' ? (
                         <div className="">
                             {project.storyboard.length > 0 ? (
@@ -549,7 +559,7 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({ project, onUpdatePro
                                 onChange={handleScriptChange}
                                 onBlur={handleScriptBlur}
                                 placeholder="INT. COFFEE SHOP - DAY..."
-                                className="w-full h-full p-2 font-mono text-xs sm:text-sm bg-transparent resize-none border-none focus:ring-2 focus:ring-primary"
+                                className="w-full h-full p-2 text-xs sm:text-sm bg-transparent resize-none border-none focus:ring-2 focus:ring-primary"
                             />
                         </div>
                         <ChatInterface project={project} onUpdateProject={onUpdateProject} />
