@@ -1,7 +1,7 @@
 import type React from "react"
 import { useCallback, useRef, useEffect } from "react"
 import type { FilmProject, StoryboardScene } from "@/types/storytypes"
-import { Camera, Trash2, RotateCcw, Sparkles, Plus, ArrowUp } from "lucide-react"
+import { Camera, Trash2, Plus, ArrowUp } from "lucide-react"
 import { generateSingleImage } from "@/services/filmService"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -21,12 +21,18 @@ const SceneCard: React.FC<{
   onDeleteScene: (sceneId: string) => void
 }> = ({ scene, project, onUpdateScene, onDeleteScene }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-  useEffect(() => {
+
+  const adjustHeight = useCallback(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto"
       textareaRef.current.style.height = textareaRef.current.scrollHeight + "px"
     }
-  }, [scene.prompt])
+  }, [])
+
+  useEffect(() => {
+    adjustHeight()
+  }, [scene.prompt, adjustHeight])
+
   const handleGenerateImage = useCallback(async () => {
     const character = project.characters.find((c) => c.id === scene.characterId)
     const location = project.locations.find((l) => l.id === scene.locationId)
@@ -49,14 +55,16 @@ const SceneCard: React.FC<{
       onUpdateScene({ ...scene, generating: false, imageUrl: "error" })
     }
   }, [scene, project, onUpdateScene])
+
   const handleFieldChange = (field: keyof StoryboardScene, value: string | null) => {
     onUpdateScene({ ...scene, [field]: value })
   }
+
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     handleFieldChange("prompt", e.target.value)
-    e.target.style.height = "auto"
-    e.target.style.height = e.target.scrollHeight + "px"
+    setTimeout(() => adjustHeight(), 0)
   }
+
   return (
     <Card className="mb-4">
       <CardContent className="p-4">
@@ -76,10 +84,10 @@ const SceneCard: React.FC<{
               </Button>
             </div>
             {/* Text Section */}
-            <div className="space-y-4 bg-accent/10">
+            <div className="space-y-4">
               <Textarea
                 ref={textareaRef}
-                value={scene.prompt}
+                value={scene.prompt || ""}
                 onChange={handleTextareaChange}
                 placeholder="Action prompt: e.g., 'looks out the window at the rain...'"
                 className="flex-grow resize-none overflow-hidden min-h-[60px]"
@@ -141,7 +149,7 @@ const SceneCard: React.FC<{
               {/* Media Sections */}
               <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
                 {/* Image Section */}
-                <div className="lg:col-span-2 space-y-3 bg-accent/10 rounded-xl p-4">
+                <div className="lg:col-span-2">
                   <div className="grid grid-cols-2 gap-2">
                     {/* 4 generated image slots */}
                     {Array.from({ length: 4 }, (_, index) => (
@@ -164,17 +172,20 @@ const SceneCard: React.FC<{
                   </div>
                 </div>
                 {/* Video Section */}
-                <div className="lg:col-span-3 space-y-3">
+                <div className="lg:col-span-3">
                   <div className="aspect-video bg-muted/50 rounded-lg overflow-hidden flex items-center justify-center border-2 border-dashed border-muted-foreground/20">
                     {scene.videoGenerating ? (
                       <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
                     ) : scene.videoUrl ? (
                       <video src={scene.videoUrl} className="w-full h-full object-cover" controls muted loop />
                     ) : (
-                      <div className="text-center">
-                        <Camera className="w-8 h-8 text-muted-foreground/50 mx-auto mb-2" />
-                        <p className="text-xs text-muted-foreground">Video Placeholder</p>
-                      </div>
+                      <video 
+                        src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" 
+                        className="w-full h-full object-cover" 
+                        controls 
+                        muted 
+                        loop 
+                      />
                     )}
                   </div>
                 </div>
