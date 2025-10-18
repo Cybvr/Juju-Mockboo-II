@@ -15,7 +15,6 @@ import { generateSingleImage } from "@/services/filmService";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface StoryBuilderProps {
     project: FilmProject;
@@ -497,58 +496,52 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({ project, onUpdatePro
             )}
             <div className="flex-grow flex p-2 sm:p-4 gap-2 sm:gap-4 overflow-hidden relative bg-accent">
                 {/* Left section with stitch editor and tabs */}
-                <div className="flex flex-col w-2/3 min-h-0">
-                    <div className="flex-shrink-0 p-2 lg:px-8 lg:pt-8">
-                        <StitchEditor project={project} onUpdateProject={onUpdateProject} />
-                        <div className="flex border-b border-border mt-4">
-                            <button
-                                onClick={() => setActiveTab('scenes')}
-                                className={`px-4 py-2 ${activeTab === 'scenes' ? 'border-b-2 border-primary' : ''}`}
-                            >
-                                Scenes
-                            </button>
-                            <button
-                                onClick={() => setActiveTab('assets')}
-                                className={`px-4 py-2 ${activeTab === 'assets' ? 'border-b-2 border-primary' : ''}`}
-                            >
-                                Assets
-                            </button>
-                        </div>
+                <div className="flex flex-col w-2/3 px-2 lg:px-8 overflow-auto">
+                    <StitchEditor project={project} onUpdateProject={onUpdateProject} />
+                    <div className="flex border-b border-border">
+                        <button
+                            onClick={() => setActiveTab('scenes')}
+                            className={`px-4 py-2 ${activeTab === 'scenes' ? 'border-b-2 border-primary' : ''}`}
+                        >
+                            Scenes
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('assets')}
+                            className={`px-4 py-2 ${activeTab === 'assets' ? 'border-b-2 border-primary' : ''}`}
+                        >
+                            Assets
+                        </button>
                     </div>
-                    <ScrollArea className="flex-grow px-2 lg:px-8 pb-8">
-                        {activeTab === 'scenes' ? (
-                            <div className="pr-4">
-                                {project.storyboard.length > 0 ? (
-                                    <Accordion type="multiple" value={expandedScenes} onValueChange={setExpandedScenes}>
-                                        {project.storyboard
-                                            .sort((a, b) => a.scene_number - b.scene_number)
-                                            .map((scene) => (
-                                                <SceneCard
-                                                    key={scene.id}
-                                                    scene={scene}
-                                                    project={project}
-                                                    onUpdateScene={handleUpdateScene}
-                                                    onDeleteScene={handleDeleteScene}
-                                                />
-                                            ))}
-                                    </Accordion>
-                                ) : (
-                                    <div className="text-center py-20">
-                                        <Camera className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-                                        <h2 className="text-xl font-semibold text-foreground">Empty Storyboard</h2>
-                                        <p className="text-muted-foreground mt-2">Analyze your script or add a scene to get started.</p>
-                                    </div>
-                                )}
-                            </div>
-                        ) : (
-                            <div className="pr-4">
-                                <AssetManager project={project} onUpdateProject={onUpdateProject} />
-                            </div>
-                        )}
-                    </ScrollArea>
+                    {activeTab === 'scenes' ? (
+                        <div className="">
+                            {project.storyboard.length > 0 ? (
+                                <Accordion type="multiple" value={expandedScenes} onValueChange={setExpandedScenes}>
+                                    {project.storyboard
+                                        .sort((a, b) => a.scene_number - b.scene_number)
+                                        .map((scene) => (
+                                            <SceneCard
+                                                key={scene.id}
+                                                scene={scene}
+                                                project={project}
+                                                onUpdateScene={handleUpdateScene}
+                                                onDeleteScene={handleDeleteScene}
+                                            />
+                                        ))}
+                                </Accordion>
+                            ) : (
+                                <div className="text-center py-20">
+                                    <Camera className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+                                    <h2 className="text-xl font-semibold text-foreground">Empty Storyboard</h2>
+                                    <p className="text-muted-foreground mt-2">Analyze your script or add a scene to get started.</p>
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <AssetManager project={project} onUpdateProject={onUpdateProject} />
+                    )}
                 </div>
                 {/* Right section with sticky script */}
-                <div className="w-1/3 h-full sticky top-0 bg-card">
+                <div className="w-1/3 h-full sticky top-0 bg-card rounded-2xl overflow">
                     <div className="h-full flex flex-col rounded-lg sm:rounded-2xl shadow-inner">
                         <div className="flex-grow p-3 sm:p-4 md:p-6 min-h-0">
                             <Textarea

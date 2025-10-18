@@ -42,11 +42,9 @@ export const StitchEditor: React.FC<StitchPlayerProps> = ({ project }) => {
 
     useEffect(() => {
         if (videoScenes.length === 0) return;
-
         const loadDurations = async () => {
             const durationsMap = new Map<string, number>();
             let total = 0;
-
             for (const scene of videoScenes) {
                 if (scene.videoUrl) {
                     const video = document.createElement('video');
@@ -63,26 +61,21 @@ export const StitchEditor: React.FC<StitchPlayerProps> = ({ project }) => {
                     });
                 }
             }
-
             setSceneDurations(durationsMap);
             setTotalDuration(total);
             setVideosLoaded(true);
-
             if (playerRef.current && videoScenes[0]?.videoUrl) {
                 playerRef.current.src = videoScenes[0].videoUrl;
                 playerRef.current.currentTime = videoScenes[0].trimStart || 0;
             }
         };
-
         loadDurations();
     }, [videoScenes]);
 
     useEffect(() => {
         if (!isPlaying || !playerRef.current || !videosLoaded) return;
-
         const step = () => {
             if (!playerRef.current) return;
-
             let accumulatedTime = 0;
             let sceneIndex = 0;
             for (let i = 0; i < videoScenes.length; i++) {
@@ -93,12 +86,10 @@ export const StitchEditor: React.FC<StitchPlayerProps> = ({ project }) => {
                 }
                 accumulatedTime += duration;
             }
-
             const scene = videoScenes[sceneIndex];
             const timeInScene = currentGlobalTime - accumulatedTime;
             const trimStart = scene.trimStart || 0;
             const targetTime = trimStart + timeInScene;
-
             if (playerRef.current.src !== scene.videoUrl) {
                 playerRef.current.src = scene.videoUrl!;
                 playerRef.current.currentTime = targetTime;
@@ -106,7 +97,6 @@ export const StitchEditor: React.FC<StitchPlayerProps> = ({ project }) => {
             } else if (Math.abs(playerRef.current.currentTime - targetTime) > 0.3) {
                 playerRef.current.currentTime = targetTime;
             }
-
             setCurrentGlobalTime(prev => {
                 const next = prev + 1 / 60;
                 if (next >= totalDuration) {
@@ -116,7 +106,6 @@ export const StitchEditor: React.FC<StitchPlayerProps> = ({ project }) => {
                 return next;
             });
         };
-
         const interval = setInterval(step, 1000 / 60);
         return () => clearInterval(interval);
     }, [isPlaying, currentGlobalTime, videoScenes, sceneDurations, totalDuration, videosLoaded]);
@@ -140,9 +129,7 @@ export const StitchEditor: React.FC<StitchPlayerProps> = ({ project }) => {
         const rect = e.currentTarget.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const clickedTime = (x / rect.width) * totalDuration;
-
         setCurrentGlobalTime(clickedTime);
-
         let accumulated = 0;
         for (let i = 0; i < videoScenes.length; i++) {
             const duration = sceneDurations.get(videoScenes[i].id) || 0;
@@ -151,7 +138,6 @@ export const StitchEditor: React.FC<StitchPlayerProps> = ({ project }) => {
                 const trimStart = scene.trimStart || 0;
                 const timeInScene = clickedTime - accumulated;
                 const newSceneTime = trimStart + timeInScene;
-
                 if (playerRef.current) {
                     playerRef.current.src = scene.videoUrl!;
                     playerRef.current.currentTime = newSceneTime;
@@ -198,52 +184,49 @@ export const StitchEditor: React.FC<StitchPlayerProps> = ({ project }) => {
     const hasVideos = videoScenes.length > 0;
 
     return (
-        <div 
+        <div
             ref={containerRef}
             className="relative w-full h-screen bg-black group"
             onMouseMove={handleMouseMove}
             onMouseLeave={() => isPlaying && setShowControls(false)}
         >
             {/* Video Player */}
-            <video 
-                ref={playerRef} 
-                className="w-full h-full object-contain cursor-pointer" 
+            <video
+                ref={playerRef}
+                className="w-full h-full object-contain cursor-pointer rounded-2xl"
                 playsInline
                 onClick={handlePlayPause}
             />
-
             {!hasVideos && (
                 <div className="absolute inset-0 flex items-center justify-center text-white/70">
                     <div className="text-center">
-                        <Film className="w-16 h-16 mx-auto mb-4" />
+                        <Film className="w-8 h-8 mx-auto mb-4" />
                         <p className="text-lg">No videos loaded</p>
                     </div>
                 </div>
             )}
-
             {/* Controls Overlay */}
-            <div 
+            <div
                 className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent transition-opacity duration-300 ${
                     showControls ? 'opacity-100' : 'opacity-0'
                 }`}
             >
                 {/* Timeline */}
                 <div className="px-4 pb-2">
-                    <div 
+                    <div
                         className="relative h-1 bg-white/30 rounded-full cursor-pointer group/timeline hover:h-1.5 transition-all"
                         onClick={handleTimelineClick}
                     >
-                        <div 
+                        <div
                             className="absolute h-full bg-red-600 rounded-full transition-all"
                             style={{ width: `${progressPercent}%` }}
                         />
-                        <div 
+                        <div
                             className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-red-600 rounded-full opacity-0 group-hover/timeline:opacity-100 transition-opacity"
                             style={{ left: `${progressPercent}%`, transform: 'translate(-50%, -50%)' }}
                         />
                     </div>
                 </div>
-
                 {/* Control Bar */}
                 <div className="flex items-center gap-4 px-4 pb-4">
                     <button
@@ -251,11 +234,10 @@ export const StitchEditor: React.FC<StitchPlayerProps> = ({ project }) => {
                         disabled={!hasVideos || !videosLoaded}
                         className="text-white hover:text-white/80 transition-colors disabled:opacity-50"
                     >
-                        {isPlaying ? <Pause className="w-8 h-8" /> : <Play className="w-8 h-8" />}
+                        {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
                     </button>
-
                     <div className="flex items-center gap-2">
-                        <Volume2 className="w-5 h-5 text-white" />
+                        <Volume2 className="w-4 h-4 text-white" />
                         <input
                             type="range"
                             min="0"
@@ -270,31 +252,26 @@ export const StitchEditor: React.FC<StitchPlayerProps> = ({ project }) => {
                             className="w-20 h-1 accent-white"
                         />
                     </div>
-
                     <span className="text-white text-sm font-medium">
                         {formatTime(currentGlobalTime)} / {formatTime(totalDuration)}
                     </span>
-
                     <div className="flex-1" />
-
                     <button className="text-white hover:text-white/80 transition-colors">
-                        <Settings className="w-6 h-6" />
+                        <Settings className="w-5 h-5" />
                     </button>
-
-                    <button 
+                    <button
                         onClick={handleFullscreen}
                         className="text-white hover:text-white/80 transition-colors"
                     >
-                        <Maximize className="w-6 h-6" />
+                        <Maximize className="w-5 h-5" />
                     </button>
                 </div>
             </div>
-
             {/* Center Play Button (when paused) */}
             {!isPlaying && hasVideos && videosLoaded && (
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                     <div className="w-20 h-20 rounded-full bg-black/50 flex items-center justify-center">
-                        <Play className="w-10 h-10 text-white ml-1" />
+                        <Play className="w-8 h-8 text-white ml-1" />
                     </div>
                 </div>
             )}
