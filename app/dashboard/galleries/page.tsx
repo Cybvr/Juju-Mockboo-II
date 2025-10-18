@@ -148,6 +148,7 @@ export default function GalleriesPage() {
       await galleryService.deleteGallery(deleteGalleryId)
       setGalleries((prevGalleries) => prevGalleries.filter((g) => g.id !== deleteGalleryId))
       toast.success("Gallery deleted successfully")
+      window.location.reload()
     } catch (error) {
       console.error("Failed to delete gallery:", error)
       toast.error("Failed to delete gallery")
