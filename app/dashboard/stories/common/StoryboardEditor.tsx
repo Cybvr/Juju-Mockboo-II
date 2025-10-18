@@ -155,9 +155,9 @@ const SceneCard: React.FC<{
                         </div>
 
                         {/* Media Sections */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                             {/* Image Section */}
-                            <div className="space-y-3">
+                            <div className="lg:col-span-2 space-y-3">
                                 <div className="flex items-center justify-between">
                                     <h4 className="text-sm font-medium">Generated Images</h4>
                                     <Button 
@@ -171,7 +171,7 @@ const SceneCard: React.FC<{
                                 </div>
                                 <div className="grid grid-cols-4 gap-2">
                                     {/* Main generated image */}
-                                    <div className="aspect-[9/16] bg-muted rounded-lg overflow-hidden flex items-center justify-center">
+                                    <div className="aspect-square bg-muted rounded-lg overflow-hidden flex items-center justify-center">
                                         {scene.generating ? (
                                             <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
                                         ) : scene.imageUrl === 'error' ? (
@@ -184,13 +184,13 @@ const SceneCard: React.FC<{
                                     </div>
                                     
                                     {/* Thumbnail placeholders */}
-                                    <div className="aspect-[9/16] bg-muted/50 rounded-lg overflow-hidden flex items-center justify-center border-2 border-dashed border-muted-foreground/20">
+                                    <div className="aspect-square bg-muted/50 rounded-lg overflow-hidden flex items-center justify-center border-2 border-dashed border-muted-foreground/20">
                                         <Camera className="w-4 h-4 text-muted-foreground/50" />
                                     </div>
-                                    <div className="aspect-[9/16] bg-muted/50 rounded-lg overflow-hidden flex items-center justify-center border-2 border-dashed border-muted-foreground/20">
+                                    <div className="aspect-square bg-muted/50 rounded-lg overflow-hidden flex items-center justify-center border-2 border-dashed border-muted-foreground/20">
                                         <Camera className="w-4 h-4 text-muted-foreground/50" />
                                     </div>
-                                    <div className="aspect-[9/16] bg-muted/50 rounded-lg overflow-hidden flex items-center justify-center border-2 border-dashed border-muted-foreground/20">
+                                    <div className="aspect-square bg-muted/50 rounded-lg overflow-hidden flex items-center justify-center border-2 border-dashed border-muted-foreground/20">
                                         <Camera className="w-4 h-4 text-muted-foreground/50" />
                                     </div>
                                 </div>
@@ -210,7 +210,7 @@ const SceneCard: React.FC<{
                                         Generate
                                     </Button>
                                 </div>
-                                <div className="aspect-[9/16] bg-muted/50 rounded-lg overflow-hidden flex items-center justify-center border-2 border-dashed border-muted-foreground/20">
+                                <div className="aspect-video bg-muted/50 rounded-lg overflow-hidden flex items-center justify-center border-2 border-dashed border-muted-foreground/20">
                                     {scene.videoGenerating ? (
                                         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
                                     ) : scene.videoUrl ? (
