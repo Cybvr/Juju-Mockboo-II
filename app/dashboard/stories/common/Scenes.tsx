@@ -95,7 +95,7 @@ const SceneCard: React.FC<{
                 value={scene.prompt || ""}
                 onChange={handleTextareaChange}
                 placeholder="Action prompt: e.g., 'looks out the window at the rain...'"
-                className="flex-grow resize-none overflow-hidden min-h-[60px] focus:ring-2 focus:ring-primary focus:border-primary"
+                className="flex-grow resize-none min-h-[60px]"
                 rows={2}
               />
               <div className="flex items-start justify-between gap-3">
