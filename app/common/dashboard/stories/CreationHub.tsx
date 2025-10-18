@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { generateScript, analyzeScript } from '@/services/filmService';
+import { TemplateBrowser } from './TemplateBrowser';
 
 interface CreationHubProps {
     project: FilmProject;
