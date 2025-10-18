@@ -275,6 +275,19 @@ export const StitchEditor: React.FC<StitchPlayerProps> = ({ project }) => {
                     </div>
                 </div>
             )}
+            
+            {/* Emoji Reactions */}
+            <div className="mt-4 flex justify-center">
+                <div className="flex items-center gap-4 bg-white/90 backdrop-blur-sm rounded-full px-6 py-3 shadow-lg">
+                    <button className="text-2xl hover:scale-110 transition-transform">😂</button>
+                    <button className="text-2xl hover:scale-110 transition-transform">😍</button>
+                    <button className="text-2xl hover:scale-110 transition-transform">😱</button>
+                    <button className="text-2xl hover:scale-110 transition-transform">🙌</button>
+                    <button className="text-2xl hover:scale-110 transition-transform">👍</button>
+                    <button className="text-2xl hover:scale-110 transition-transform">👎</button>
+                    <button className="text-2xl hover:scale-110 transition-transform">😊</button>
+                </div>
+            </div>
         </div>
     );
 };
