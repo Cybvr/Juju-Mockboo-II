@@ -45,7 +45,7 @@ const GalleryCard: React.FC<{
   return (
     <div
       onClick={onClick}
-      className="group cursor-pointer transition-all duration-300 overflow-hidden flex flex-col"
+      className="group cursor-pointer transition-all duration-300 overflow-hidden flex flex-col "
     >
       <div className="relative aspect-[9/16] bg-muted">
         {firstImage ? (
@@ -57,8 +57,8 @@ const GalleryCard: React.FC<{
             priority={false}
           />
         ) : (
-          <div className="flex items-center justify-center h-full">
-            <Grid className="w-12 h-12 text-muted-foreground" />
+          <div className="flex items-center justify-center h-full ">
+            <Grid className="w-12 h-12 text-muted-foreground " />
           </div>
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
@@ -315,7 +315,7 @@ export default function GalleriesPage() {
     return (
       <main className="min-h-screen w-full transition-colors duration-300 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-foreground mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-foreground mx-auto mb-4  "></div>
           <p className="text-foreground">Loading your galleries...</p>
         </div>
       </main>
@@ -327,11 +327,9 @@ return (
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-md font-bold text-foreground">Galleries</h1>
       </div>
-
       {galleries.length > 0 && <div className="mb-6"></div>}
-
       {filteredGalleries.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
           {filteredGalleries.map((gallery) => (
             <Card key={gallery.id} className="aspect-[9/16] overflow-hidden">
               <GalleryCard
@@ -343,20 +341,19 @@ return (
           ))}
         </div>
       ) : galleries.length === 0 ? (
-        <div className="text-center py-20 border-2 border-dashed border-border rounded-2xl">
+        <div className="text-center py-20 border-2 border-dashed border-border  bg-green-500 rounded-2xl">
           <Grid className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
           <h2 className="text-2xl font-semibold text-foreground">No galleries yet</h2>
           <p className="text-muted-foreground mt-2">Click "New" to create your first gallery.</p>
         </div>
       ) : (
         <div className="text-center py-20 border-2 border-dashed border-border rounded-2xl">
-          <Grid className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+          <Grid className="w-16 h-16 mx-auto text-muted-foreground mb-4 " />
           <h2 className="text-2xl font-semibold text-foreground">No galleries found</h2>
           <p className="text-muted-foreground mt-2">Try adjusting your search terms.</p>
         </div>
       )}
     </div>
-
     {/* Sticky Create Gallery Prompt Box */}
     <div className="sticky bottom-0 p-4 mt-8 mx-auto">
       <div className="max-w-3xl mx-auto">
@@ -370,7 +367,7 @@ return (
             />
           </div>
         )}
-        <div className="relative rounded-2xl border border-border bg-background shadow-sm focus-within:shadow-md transition-shadow">
+        <div className="relative rounded-2xl  border border-border bg-background shadow-sm focus-within:shadow-md transition-shadow ">
           {referenceImage && previewUrl && (
             <div className="flex items-center gap-3 p-3 border-b border-border">
               <div className="relative w-12 h-12 rounded-md overflow-hidden flex-shrink-0 bg-muted">
@@ -441,7 +438,6 @@ return (
         </div>
       </div>
     </div>
-
     <AlertDialog
       open={!!deleteGalleryId}
       onOpenChange={(open) => {
@@ -465,4 +461,5 @@ return (
       </AlertDialogContent>
     </AlertDialog>
   </main>
-)}
+)
+}
