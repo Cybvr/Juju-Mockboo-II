@@ -39,19 +39,14 @@ const SceneCard: React.FC<{
     adjustHeight()
   }, [localPrompt, adjustHeight])
 
-  const handleResetGenerating = useCallback(() => {
-    console.log(`🔄 RESET: Manually resetting generating state for scene ${scene.scene_number}`)
-    onUpdateScene({ ...scene, generating: false })
-  }, [scene, onUpdateScene])
-
   const handleGenerateImage = useCallback(async () => {
     console.log(`🎬 SCENE ${scene.scene_number}: Starting image generation...`)
     console.log(`📝 User requested ${generateOutputs} outputs`)
-    
+
     const character = project.characters.find((c) => c.id === scene.characterId)
     const location = project.locations.find((l) => l.id === scene.locationId)
     let builtPrompt = scene.prompt || "A cinematic scene."
-    
+
     if (character) {
       builtPrompt = `${character.name} ${builtPrompt}. Description of ${character.name}: ${character.description}.`
       console.log(`👤 Added character: ${character.name}`)
@@ -60,45 +55,49 @@ const SceneCard: React.FC<{
       builtPrompt = `${builtPrompt} The setting is ${location.name}. Description of location: ${location.description}.`
       console.log(`📍 Added location: ${location.name}`)
     }
-    
+
     console.log(`🎯 Final prompt: "${builtPrompt}"`)
     console.log(`📐 Aspect ratio: ${project.settings.aspectRatio}`)
-    
+
     if (character?.imageUrl) {
       console.log("Character image available, but not yet used in generation.", character.imageUrl)
     }
-    
+
     onUpdateScene({ ...scene, generating: true })
     console.log(`🔄 Set generating state to true for scene ${scene.scene_number}`)
-    
+
     try {
       const images = []
       console.log(`📡 Starting ${generateOutputs} API calls...`)
-      
+
       for (let i = 0; i < generateOutputs; i++) {
         console.log(`📡 API Call ${i + 1}/${generateOutputs} - Sending to generateSingleImage...`)
         const imageUrl = await generateSingleImage(builtPrompt, project.settings.aspectRatio)
         console.log(`✅ API Call ${i + 1} SUCCESS - Got image: ${imageUrl ? imageUrl.substring(0, 50) + '...' : 'null'}`)
         images.push(imageUrl)
+
+        // Update scene immediately after each image loads
+        onUpdateScene({ 
+          ...scene, 
+          imageUrl: images[0], 
+          generatedImages: [...images], 
+          generating: i < generateOutputs - 1 // Keep generating true until last image
+        })
       }
-      
+
       console.log(`🎉 All ${generateOutputs} images generated successfully!`)
       console.log(`📦 Total images received: ${images.length}`)
-      console.log(`🖼️ First image preview: ${images[0] ? images[0].substring(0, 100) + '...' : 'null'}`)
-      
-      // Update scene with generated image
-      const updatedScene = { 
+
+      // Final update with generating set to false
+      onUpdateScene({ 
         ...scene, 
         imageUrl: images[0], 
         generatedImages: images, 
         generating: false 
-      }
-      
-      console.log(`🔄 Updating scene with image data:`, updatedScene)
-      onUpdateScene(updatedScene)
-      
+      })
+
       console.log(`✨ Scene ${scene.scene_number} updated with ${images.length} images - COMPLETE!`)
-      
+
     } catch (error) {
       console.error(`❌ SCENE ${scene.scene_number} - Image generation FAILED:`, error)
       console.error(`💥 Error details:`, error.message || error)
@@ -133,15 +132,14 @@ const SceneCard: React.FC<{
     e.preventDefault()
     const imageUrl = e.dataTransfer.getData('text/plain')
     const draggedSceneId = e.dataTransfer.getData('application/x-scene-id')
-    
+
     if (imageUrl && draggedSceneId === scene.id) {
       onUpdateScene({ ...scene, videoGenerating: true })
       try {
-        // Convert data URL to base64 if needed
         const base64Image = imageUrl.includes('base64,') 
           ? imageUrl.split('base64,')[1] 
           : imageUrl
-        
+
         const response = await fetch('/api/stories', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -151,7 +149,7 @@ const SceneCard: React.FC<{
             base64Image: base64Image
           })
         })
-        
+
         const data = await response.json()
         if (data.success) {
           onUpdateScene({ ...scene, videoUrl: data.videoUrl, videoGenerating: false })
@@ -257,15 +255,9 @@ const SceneCard: React.FC<{
                       <SelectItem value="4">4</SelectItem>
                     </SelectContent>
                   </Select>
-                  {scene.generating ? (
-                    <Button onClick={handleResetGenerating} variant="outline" size="icon" title="Reset generating state">
-                      <span className="text-xs">⏹</span>
-                    </Button>
-                  ) : (
-                    <Button onClick={handleGenerateImage} disabled={!localPrompt.trim()} size="icon">
-                      <ArrowUp className="w-4 h-4" />
-                    </Button>
-                  )}
+                  <Button onClick={handleGenerateImage} disabled={!localPrompt.trim() || scene.generating} size="icon">
+                    <ArrowUp className="w-4 h-4" />
+                  </Button>
                 </div>
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
@@ -275,12 +267,11 @@ const SceneCard: React.FC<{
                       {Array.from({ length: 4 }, (_, index) => {
                         const images = scene.generatedImages || (scene.imageUrl ? [scene.imageUrl] : [])
                         const imageUrl = images[index]
-                        const isGeneratingThisSlot = scene.generating && index < generateOutputs && !imageUrl
-                        
+
                         return (
                           <div key={index} className="w-full aspect-video bg-muted rounded-lg overflow-hidden flex items-center justify-center">
-                            {isGeneratingThisSlot ? (
-                              <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                            {!imageUrl && scene.generating && index < generateOutputs ? (
+                              <p className="text-xs text-muted-foreground">Generating...</p>
                             ) : imageUrl === "error" ? (
                               <p className="text-destructive text-xs">Error</p>
                             ) : imageUrl ? (
@@ -308,7 +299,6 @@ const SceneCard: React.FC<{
                   >
                     {scene.videoGenerating ? (
                       <div className="flex flex-col items-center gap-2">
-                        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
                         <p className="text-sm text-muted-foreground">Generating video...</p>
                       </div>
                     ) : scene.videoUrl ? (
@@ -331,6 +321,19 @@ const SceneCard: React.FC<{
 }
 
 export const Scenes: React.FC<ScenesProps> = ({ project, onUpdateProject }) => {
+  // Clean up any stuck generating states on mount
+  useEffect(() => {
+    const hasStuckGenerating = project.storyboard.some(s => s.generating)
+    if (hasStuckGenerating) {
+      const cleanedStoryboard = project.storyboard.map(s => ({
+        ...s,
+        generating: false,
+        videoGenerating: false
+      }))
+      onUpdateProject({ ...project, storyboard: cleanedStoryboard })
+    }
+  }, [])
+
   const handleUpdateScene = (updatedScene: StoryboardScene) => {
     const newStoryboard = project.storyboard.map((s) => (s.id === updatedScene.id ? updatedScene : s))
     onUpdateProject({ ...project, storyboard: newStoryboard })
