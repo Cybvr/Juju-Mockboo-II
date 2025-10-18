@@ -279,7 +279,7 @@ const App: React.FC = () => {
 
       {/* ✅ Unmounted Dialog (prevents stuck overlay) */}
       {deleteProjectId && (
-        <AlertDialog>
+        <AlertDialog open={true} onOpenChange={() => setDeleteProjectId(null)}>
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Delete Story</AlertDialogTitle>
