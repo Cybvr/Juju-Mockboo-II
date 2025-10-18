@@ -94,6 +94,12 @@ service firebase.storage {
       allow write: if true; // Allow server-side uploads from API
     }
 
+    // Stories images - public read, server write
+    match /stories/{fileName} {
+      allow read: if true; // Stories images are publicly readable
+      allow write: if true; // Allow server-side uploads from API
+    }
+
     // Deny all other access
     match /{allPaths=**} {
       allow read, write: if false;

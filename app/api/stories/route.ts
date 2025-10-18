@@ -1,4 +1,3 @@
-
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI, GenerateContentResponse, Type } from "@google/genai";
 
@@ -17,7 +16,7 @@ export async function POST(request: NextRequest) {
         if (!prompt) {
           return NextResponse.json({ error: 'Prompt is required' }, { status: 400 });
         }
-        
+
         const response: GenerateContentResponse = await ai.models.generateContent({
           model: 'gemini-2.0-flash',
           contents: `Based on the following idea, write a short film script. The script should be formatted correctly with scene headings, character names, and dialogue. Idea: "${prompt}"`,
@@ -36,15 +35,15 @@ export async function POST(request: NextRequest) {
         const analysisResponse = await ai.models.generateContent({
           model: 'gemini-2.0-flash',
           contents: `Analyze the following film script and extract the requested information in JSON format.
-          
+
           For the storyboard, create a detailed visual prompt for each distinct scene or major action beat. The prompt should be descriptive and suitable for an image generation model.
-          
+
           For characters, list their names and a brief description based on their actions and dialogue.
-          
+
           For locations, list the primary settings.
-          
+
           For sound design, list key sound effects or music cues mentioned or implied.
-          
+
           Script:
           ---
           ${script}
@@ -115,7 +114,7 @@ export async function POST(request: NextRequest) {
         console.log(`🎨 API: generateImage action received`)
         console.log(`📝 Prompt: "${prompt}"`)
         console.log(`📐 Aspect Ratio requested: ${aspectRatio}`)
-        
+
         if (!prompt) {
           console.error(`❌ API: No prompt provided`)
           return NextResponse.json({ error: 'Prompt is required' }, { status: 400 });
@@ -178,10 +177,10 @@ export async function POST(request: NextRequest) {
         };
 
         const output = await replicate.run("kwaivgi/kling-v2.1", { input });
-        
+
         if (output && typeof output.url === 'function') {
           const videoUrl = output.url();
-          
+
           // Download video and convert to base64 for consistent return format
           const videoResponse = await fetch(videoUrl);
           if (!videoResponse.ok) {
