@@ -154,42 +154,79 @@ const SceneCard: React.FC<{
                             </div>
                         </div>
 
-                        {/* Image Section */}
-                        <div className="space-y-3">
-                            <div className="flex items-center justify-between">
-                                <h4 className="text-sm font-medium">Generated Images</h4>
-                                <Button 
-                                    variant="ghost" 
-                                    size="icon"
-                                    className="hover:bg-muted"
-                                    title="Regenerate"
-                                >
-                                    <RotateCcw className="w-4 h-4"/>
-                                </Button>
+                        {/* Media Sections */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Image Section */}
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <h4 className="text-sm font-medium">Generated Images</h4>
+                                    <Button 
+                                        variant="ghost" 
+                                        size="icon"
+                                        className="hover:bg-muted"
+                                        title="Regenerate"
+                                    >
+                                        <RotateCcw className="w-4 h-4"/>
+                                    </Button>
+                                </div>
+                                <div className="grid grid-cols-4 gap-2">
+                                    {/* Main generated image */}
+                                    <div className="aspect-[9/16] bg-muted rounded-lg overflow-hidden flex items-center justify-center">
+                                        {scene.generating ? (
+                                            <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                                        ) : scene.imageUrl === 'error' ? (
+                                            <p className="text-destructive text-xs">Error</p>
+                                        ) : scene.imageUrl ? (
+                                            <img src={scene.imageUrl} alt={`Scene ${scene.scene_number}`} className="w-full h-full object-cover" />
+                                        ) : (
+                                            <Camera className="w-6 h-6 text-muted-foreground" />
+                                        )}
+                                    </div>
+                                    
+                                    {/* Thumbnail placeholders */}
+                                    <div className="aspect-[9/16] bg-muted/50 rounded-lg overflow-hidden flex items-center justify-center border-2 border-dashed border-muted-foreground/20">
+                                        <Camera className="w-4 h-4 text-muted-foreground/50" />
+                                    </div>
+                                    <div className="aspect-[9/16] bg-muted/50 rounded-lg overflow-hidden flex items-center justify-center border-2 border-dashed border-muted-foreground/20">
+                                        <Camera className="w-4 h-4 text-muted-foreground/50" />
+                                    </div>
+                                    <div className="aspect-[9/16] bg-muted/50 rounded-lg overflow-hidden flex items-center justify-center border-2 border-dashed border-muted-foreground/20">
+                                        <Camera className="w-4 h-4 text-muted-foreground/50" />
+                                    </div>
+                                </div>
                             </div>
-                            <div className="grid grid-cols-4 gap-3">
-                                {/* Main generated image */}
-                                <div className="aspect-[9/16] bg-muted rounded-lg overflow-hidden flex items-center justify-center">
-                                    {scene.generating ? (
-                                        <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-                                    ) : scene.imageUrl === 'error' ? (
-                                        <p className="text-destructive text-xs">Error</p>
-                                    ) : scene.imageUrl ? (
-                                        <img src={scene.imageUrl} alt={`Scene ${scene.scene_number}`} className="w-full h-full object-cover" />
+
+                            {/* Video Section */}
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <h4 className="text-sm font-medium">Scene {scene.scene_number} Video</h4>
+                                    <Button 
+                                        variant="ghost" 
+                                        size="sm"
+                                        className="hover:bg-muted"
+                                        title="Generate Video"
+                                    >
+                                        <Sparkles className="w-4 h-4 mr-1" />
+                                        Generate
+                                    </Button>
+                                </div>
+                                <div className="aspect-[9/16] bg-muted/50 rounded-lg overflow-hidden flex items-center justify-center border-2 border-dashed border-muted-foreground/20">
+                                    {scene.videoGenerating ? (
+                                        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                                    ) : scene.videoUrl ? (
+                                        <video 
+                                            src={scene.videoUrl} 
+                                            className="w-full h-full object-cover" 
+                                            controls 
+                                            muted 
+                                            loop 
+                                        />
                                     ) : (
-                                        <Camera className="w-6 h-6 text-muted-foreground" />
+                                        <div className="text-center">
+                                            <Camera className="w-8 h-8 text-muted-foreground/50 mx-auto mb-2" />
+                                            <p className="text-xs text-muted-foreground">Video Placeholder</p>
+                                        </div>
                                     )}
-                                </div>
-                                
-                                {/* Thumbnail placeholders */}
-                                <div className="aspect-[9/16] bg-muted/50 rounded-lg overflow-hidden flex items-center justify-center border-2 border-dashed border-muted-foreground/20">
-                                    <Camera className="w-4 h-4 text-muted-foreground/50" />
-                                </div>
-                                <div className="aspect-[9/16] bg-muted/50 rounded-lg overflow-hidden flex items-center justify-center border-2 border-dashed border-muted-foreground/20">
-                                    <Camera className="w-4 h-4 text-muted-foreground/50" />
-                                </div>
-                                <div className="aspect-[9/16] bg-muted/50 rounded-lg overflow-hidden flex items-center justify-center border-2 border-dashed border-muted-foreground/20">
-                                    <Camera className="w-4 h-4 text-muted-foreground/50" />
                                 </div>
                             </div>
                         </div>
