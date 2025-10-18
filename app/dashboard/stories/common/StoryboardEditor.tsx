@@ -68,18 +68,7 @@ const SceneCard: React.FC<{
     return (
         <Card className="mb-4">
             <CardContent className="p-4">
-                <div className="flex flex-col md:flex-row gap-4">
-                    <div className="aspect-video md:w-1/3 bg-muted rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center">
-                         {scene.generating ? (
-                            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-                        ) : scene.imageUrl === 'error' ? (
-                             <p className="text-destructive">Error</p>
-                        ) : scene.imageUrl ? (
-                            <img src={scene.imageUrl} alt={`Scene ${scene.scene_number}`} className="w-full h-full object-cover" />
-                        ) : (
-                            <Camera className="w-12 h-12 text-muted-foreground" />
-                        )}
-                    </div>
+                <div className="flex flex-col gap-4">
 
                     <div className="flex-grow flex flex-col gap-4">
                         <div className="flex justify-between items-center">
@@ -96,71 +85,64 @@ const SceneCard: React.FC<{
                             </Button>
                         </div>
 
-                        <Textarea
-                            ref={textareaRef}
-                            value={scene.prompt}
-                            onChange={handleTextareaChange}
-                            placeholder="Action prompt: e.g., 'looks out the window at the rain...'"
-                            className="flex-grow resize-none overflow-hidden min-h-[60px] mb-4"
-                            rows={2}
-                        />
+                        {/* Text Section */}
+                        <div className="space-y-4">
+                            <Textarea
+                                ref={textareaRef}
+                                value={scene.prompt}
+                                onChange={handleTextareaChange}
+                                placeholder="Action prompt: e.g., 'looks out the window at the rain...'"
+                                className="flex-grow resize-none overflow-hidden min-h-[60px]"
+                                rows={2}
+                            />
 
-                        <div className="flex justify-between items-end gap-4">
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 flex-grow">
-                                <Select 
-                                    value={scene.characterId || undefined} 
-                                    onValueChange={(value) => handleFieldChange('characterId', value || null)}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select Character" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {project.characters.map(c => (
-                                            <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                            <div className="flex justify-between items-end gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 flex-grow">
+                                    <Select 
+                                        value={scene.characterId || undefined} 
+                                        onValueChange={(value) => handleFieldChange('characterId', value || null)}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select Character" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {project.characters.map(c => (
+                                                <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
 
-                                <Select 
-                                    value={scene.locationId || undefined} 
-                                    onValueChange={(value) => handleFieldChange('locationId', value || null)}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select Location" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {project.locations.map(l => (
-                                            <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                                    <Select 
+                                        value={scene.locationId || undefined} 
+                                        onValueChange={(value) => handleFieldChange('locationId', value || null)}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select Location" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {project.locations.map(l => (
+                                                <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
 
-                                <Select 
-                                    value={scene.soundId || undefined} 
-                                    onValueChange={(value) => handleFieldChange('soundId', value || null)}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select Sound" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {project.sound_design.map(s => (
-                                            <SelectItem key={s.id} value={s.id}>
-                                                {s.scene_match}: {s.description.substring(0, 20)}...
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
+                                    <Select 
+                                        value={scene.soundId || undefined} 
+                                        onValueChange={(value) => handleFieldChange('soundId', value || null)}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select Sound" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {project.sound_design.map(s => (
+                                                <SelectItem key={s.id} value={s.id}>
+                                                    {s.scene_match}: {s.description.substring(0, 20)}...
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
 
-                            <div className="flex items-center gap-2">
-                                <Button 
-                                    variant="ghost" 
-                                    size="icon"
-                                    className="hover:bg-muted"
-                                    title="Regenerate"
-                                >
-                                    <RotateCcw className="w-4 h-4"/>
-                                </Button>
                                 <Button 
                                     onClick={handleGenerateImage}
                                     disabled={scene.generating}
@@ -169,6 +151,46 @@ const SceneCard: React.FC<{
                                      <Sparkles className="w-4 h-4" />
                                      Generate
                                 </Button>
+                            </div>
+                        </div>
+
+                        {/* Image Section */}
+                        <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                                <h4 className="text-sm font-medium">Generated Images</h4>
+                                <Button 
+                                    variant="ghost" 
+                                    size="icon"
+                                    className="hover:bg-muted"
+                                    title="Regenerate"
+                                >
+                                    <RotateCcw className="w-4 h-4"/>
+                                </Button>
+                            </div>
+                            <div className="grid grid-cols-4 gap-3">
+                                {/* Main generated image */}
+                                <div className="aspect-[9/16] bg-muted rounded-lg overflow-hidden flex items-center justify-center">
+                                    {scene.generating ? (
+                                        <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                                    ) : scene.imageUrl === 'error' ? (
+                                        <p className="text-destructive text-xs">Error</p>
+                                    ) : scene.imageUrl ? (
+                                        <img src={scene.imageUrl} alt={`Scene ${scene.scene_number}`} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <Camera className="w-6 h-6 text-muted-foreground" />
+                                    )}
+                                </div>
+                                
+                                {/* Thumbnail placeholders */}
+                                <div className="aspect-[9/16] bg-muted/50 rounded-lg overflow-hidden flex items-center justify-center border-2 border-dashed border-muted-foreground/20">
+                                    <Camera className="w-4 h-4 text-muted-foreground/50" />
+                                </div>
+                                <div className="aspect-[9/16] bg-muted/50 rounded-lg overflow-hidden flex items-center justify-center border-2 border-dashed border-muted-foreground/20">
+                                    <Camera className="w-4 h-4 text-muted-foreground/50" />
+                                </div>
+                                <div className="aspect-[9/16] bg-muted/50 rounded-lg overflow-hidden flex items-center justify-center border-2 border-dashed border-muted-foreground/20">
+                                    <Camera className="w-4 h-4 text-muted-foreground/50" />
+                                </div>
                             </div>
                         </div>
                     </div>
