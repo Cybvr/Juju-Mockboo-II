@@ -165,13 +165,9 @@ export async function POST(request: NextRequest) {
         const Replicate = require('replicate');
         const replicate = new Replicate({ auth: process.env.REPLICATE_API_TOKEN });
 
-        // Upload base64 image to a temporary URL (convert to public URL)
-        const base64Data = base64Image.replace(/^data:image\/[a-z]+;base64,/, '');
-        const imageBuffer = Buffer.from(base64Data, 'base64');
-        
-        // For now, we'll use the base64 image directly as Kling can handle it
-        // In production, you might want to upload to a temporary storage first
-        const tempImageUrl = `data:image/jpeg;base64,${base64Data}`;
+        // Upload base64 image to Firebase Storage to get public URL
+        const { uploadImageToStorage } = await import('@/services/filmService');
+        const tempImageUrl = await uploadImageToStorage(base64Image, `kling_input_${Date.now()}.jpg`);
 
         const input = {
           mode: "standard",
