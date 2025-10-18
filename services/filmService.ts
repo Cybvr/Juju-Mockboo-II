@@ -1,4 +1,4 @@
-import type { FilmProject } from '@/types/storytypes';
+import type { FilmProject, StoryboardScene, Character, Location } from '@/types/storytypes';
 import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 import { storage } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -21,6 +21,30 @@ interface AnalyzedScriptData {
     description: string;
   }>;
 }
+
+// Helper function to upload base64 image to Firebase Storage
+export const uploadImageToStorage = async (base64Image: string, fileName: string): Promise<string> => {
+  try {
+    // Convert base64 to blob
+    const response = await fetch(base64Image)
+    const blob = await response.blob()
+
+    // Create storage reference
+    const timestamp = Date.now()
+    const storageRef = ref(storage, `stories/${timestamp}_${fileName}`)
+
+    // Upload to Firebase Storage
+    await uploadBytes(storageRef, blob)
+
+    // Get download URL
+    const downloadUrl = await getDownloadURL(storageRef)
+    return downloadUrl
+  } catch (error) {
+    console.error('Failed to upload image to storage:', error)
+    throw error
+  }
+}
+
 
 /**
  * Generates a film script from a given prompt.
@@ -46,25 +70,20 @@ export const generateScript = async (prompt: string): Promise<string> => {
 };
 
 /**
- * Generates a single image from a prompt and returns a base64 data URL.
+ * Generates a single image from a prompt and returns a Firebase Storage URL.
  */
-export async function generateSingleImage(prompt: string, aspectRatio: string = '16:9'): Promise<string> {
-  console.log(`📡 generateSingleImage: Making API call to /api/stories`)
-  console.log(`📝 Prompt: "${prompt}"`)
-  console.log(`📐 Aspect Ratio: ${aspectRatio}`)
-
-  const requestBody = {
-    action: 'generateImage',
-    prompt,
-    aspectRatio
-  };
-
-  console.log(`📤 Request body:`, requestBody)
+export const generateSingleImage = async (prompt: string, aspectRatio: string = '16:9'): Promise<string> => {
+  console.log(`🎯 generateSingleImage called with prompt: "${prompt}"`)
+  console.log(`📐 Aspect ratio: ${aspectRatio}`)
 
   const response = await fetch('/api/stories', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(requestBody)
+    body: JSON.stringify({
+      action: 'generateImage',
+      prompt,
+      aspectRatio
+    }),
   });
 
   console.log(`📥 API Response status: ${response.status} ${response.statusText}`)
@@ -82,8 +101,14 @@ export async function generateSingleImage(prompt: string, aspectRatio: string = 
     throw new Error(data.error || 'Image generation failed');
   }
 
-  console.log(`✅ generateSingleImage SUCCESS - Got imageUrl: ${data.imageUrl ? data.imageUrl.substring(0, 100) + '...' : 'null'}`)
-  return data.imageUrl;
+  console.log(`🖼️ Base64 image received, uploading to Firebase Storage...`)
+
+  // Upload base64 image to Firebase Storage and get URL
+  const fileName = `scene_${Date.now()}.jpg`
+  const storageUrl = await uploadImageToStorage(data.imageUrl, fileName)
+
+  console.log(`☁️ Image uploaded to Firebase Storage: ${storageUrl}`)
+  return storageUrl
 }
 
 /**
@@ -141,21 +166,23 @@ export const generateProjectPatch = async (prompt: string, project: FilmProject)
   throw new Error('generateProjectPatch not implemented - move to API route if needed');
 };
 
-export async function uploadImageToStorage(base64Data: string, sceneId: string): Promise<string> {
-  try {
-    // Convert base64 to blob
-    const base64String = base64Data.replace(/^data:image\/\w+;base64,/, '')
-    const buffer = Buffer.from(base64String, 'base64')
-    const blob = new Blob([buffer], { type: 'image/jpeg' })
 
-    // Upload to Firebase Storage
-    const storageRef = ref(storage, `scenes/${sceneId}/${Date.now()}.jpg`)
-    const uploadResult = await uploadBytes(storageRef, blob)
-    const downloadURL = await getDownloadURL(uploadResult.ref)
+/**
+ * Generates an image for a character and returns its Firebase Storage URL.
+ */
+export const generateCharacterImage = async (character: Character): Promise<string> => {
+  const prompt = `Professional headshot of ${character.name}: ${character.description}. Portrait style, high quality.`
+  const storageUrl = await generateSingleImage(prompt)
+  console.log(`👤 Character image uploaded: ${character.name}`)
+  return storageUrl
+}
 
-    return downloadURL
-  } catch (error) {
-    console.error('Error uploading image to storage:', error)
-    throw error
-  }
+/**
+ * Generates an image for a location and returns its Firebase Storage URL.
+ */
+export const generateLocationImage = async (location: Location): Promise<string> => {
+  const prompt = `${location.name}: ${location.description}. Cinematic establishing shot, high quality.`
+  const storageUrl = await generateSingleImage(prompt)
+  console.log(`📍 Location image uploaded: ${location.name}`)
+  return storageUrl
 }
