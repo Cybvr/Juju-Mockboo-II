@@ -61,13 +61,9 @@ const SceneCard: React.FC<{
   }
 
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const cursorPosition = e.target.selectionStart
     handleFieldChange("prompt", e.target.value)
     requestAnimationFrame(() => {
       adjustHeight()
-      if (textareaRef.current) {
-        textareaRef.current.setSelectionRange(cursorPosition, cursorPosition)
-      }
     })
   }
 
