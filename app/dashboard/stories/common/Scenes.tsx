@@ -1,5 +1,5 @@
 import type React from "react"
-import { useCallback, useRef, useEffect } from "react"
+import { useCallback, useRef, useEffect, useState } from "react"
 import type { FilmProject, StoryboardScene } from "@/types/storytypes"
 import { Camera, Trash2, Plus, ArrowUp } from "lucide-react"
 import { generateSingleImage } from "@/services/filmService"
@@ -21,6 +21,7 @@ const SceneCard: React.FC<{
   onDeleteScene: (sceneId: string) => void
 }> = ({ scene, project, onUpdateScene, onDeleteScene }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const [localPrompt, setLocalPrompt] = useState(scene.prompt || "")
 
   const adjustHeight = useCallback(() => {
     if (textareaRef.current) {
@@ -30,8 +31,12 @@ const SceneCard: React.FC<{
   }, [])
 
   useEffect(() => {
+    setLocalPrompt(scene.prompt || "")
+  }, [scene.prompt])
+
+  useEffect(() => {
     adjustHeight()
-  }, [scene.prompt, adjustHeight])
+  }, [localPrompt, adjustHeight])
 
   const handleGenerateImage = useCallback(async () => {
     const character = project.characters.find((c) => c.id === scene.characterId)
@@ -61,10 +66,16 @@ const SceneCard: React.FC<{
   }
 
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    handleFieldChange("prompt", e.target.value)
+    setLocalPrompt(e.target.value)
     requestAnimationFrame(() => {
       adjustHeight()
     })
+  }
+
+  const handleTextareaBlur = () => {
+    if (localPrompt !== scene.prompt) {
+      handleFieldChange("prompt", localPrompt)
+    }
   }
 
   return (
@@ -88,8 +99,9 @@ const SceneCard: React.FC<{
             <div className="space-y-4">
               <Textarea
                 ref={textareaRef}
-                value={scene.prompt || ""}
+                value={localPrompt}
                 onChange={handleTextareaChange}
+                onBlur={handleTextareaBlur}
                 placeholder="Action prompt: e.g., 'looks out the window at the rain...'"
                 className="flex-grow resize-none min-h-[60px]"
                 rows={2}
