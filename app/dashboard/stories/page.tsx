@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import type { FilmProject } from '@/types/storytypes';
 import { ProjectDashboard } from './common/ProjectDashboard';
-import { FilmEditor } from './common/FilmEditor';
+import { StoryBuilder } from './common/StoryBuilder';
 import { CreationHub } from './common/CreationHub';
 import { templates } from '@/data/filmTemplates';
 import {
@@ -22,6 +22,7 @@ import {
   deleteStory,
   duplicateStory
 } from '@/services/storiesService';
+import { StoryBuilder } from './common/StoryBuilder';
 
 type Theme = 'light' | 'dark';
 
@@ -221,7 +222,7 @@ const App: React.FC = () => {
       }
       // Otherwise, show the full editor
       return (
-        <FilmEditor
+        <StoryBuilder
           key={activeProject.id}
           project={activeProject}
           onUpdateProject={handleUpdateProject}

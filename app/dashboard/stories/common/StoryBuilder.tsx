@@ -14,7 +14,7 @@ import { StitchEditor } from './StitchEditor';
 import { Modal } from './Modal';
 import { ChatInterface } from './ChatInterface';
 
-interface FilmEditorProps {
+interface StoryBuilderProps {
     project: FilmProject;
     onUpdateProject: (updatedProject: FilmProject) => void;
     onBackToDashboard: () => void;
@@ -86,7 +86,7 @@ const ShareProjectContent: React.FC<{project: FilmProject}> = ({ project }) => {
     );
 };
 
-export const FilmEditor: React.FC<FilmEditorProps> = ({ project, onUpdateProject, onBackToDashboard, theme, onToggleTheme }) => {
+export const StoryBuilder: React.FC<StoryBuilderProps> = ({ project, onUpdateProject, onBackToDashboard, theme, onToggleTheme }) => {
     const [activeTab, setActiveTab] = useState<ActiveTab>('script');
     const [title, setTitle] = useState(project.title);
     const [script, setScript] = useState(project.script);
@@ -162,7 +162,7 @@ export const FilmEditor: React.FC<FilmEditorProps> = ({ project, onUpdateProject
         switch (activeTab) {
             case 'script':
                 return (
-                    <div className="h-full flex flex-col bg-card rounded-lg sm:rounded-2xl shadow-inner">
+                    <div className="h-full flex flex-col  rounded-lg sm:rounded-2xl shadow-inner">
                         <div className="flex-grow p-3 sm:p-4 md:p-6 min-h-0">
                             <Textarea
                                 value={script}
@@ -191,7 +191,7 @@ export const FilmEditor: React.FC<FilmEditorProps> = ({ project, onUpdateProject
     };
 
     return (
-        <div className="flex flex-col h-screen bg-background text-foreground">
+        <div className="flex flex-col h-screen text-foreground">
             <header className="flex-shrink-0 flex items-center justify-between p-2 sm:p-4 border-b border-border">
                 <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
                     <Button variant="ghost" size="icon" onClick={onBackToDashboard} className="flex-shrink-0">
@@ -245,13 +245,13 @@ export const FilmEditor: React.FC<FilmEditorProps> = ({ project, onUpdateProject
 
                 {/* Navigation */}
                 <nav className={`
-                    flex flex-col gap-2 p-2 bg-card rounded-lg sm:rounded-2xl shadow-sm
+                    flex flex-col gap-2 p-2   rounded-lg sm:rounded-2xl shadow-sm 
                     lg:relative lg:translate-x-0 lg:w-48 lg:flex-shrink-0
                     fixed top-0 left-0 bottom-0 w-64 z-50 transition-transform duration-300
                     ${mobileNavOpen ? 'translate-x-0' : '-translate-x-full'}
                     lg:block
                 `}>
-                    <div className="flex justify-between items-center lg:hidden mb-2 p-2">
+                    <div className="flex justify-between items-center lg:hidden mb-2 p-2 ">
                         <span className="font-semibold">Menu</span>
                         <Button variant="ghost" size="icon" onClick={() => setMobileNavOpen(false)}>
                             <X className="w-5 h-5" />

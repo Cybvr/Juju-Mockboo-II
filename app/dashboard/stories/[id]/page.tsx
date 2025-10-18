@@ -5,7 +5,7 @@ import { use } from "react"
 import { useState, useEffect } from "react"
 import { getStoryById, updateStory } from "@/services/storiesService"
 import type { FilmProject } from "@/types/storytypes"
-import { FilmEditor } from "../common/FilmEditor"
+import { StoryBuilder } from "../common/StoryBuilder"
 import { CreationHub } from "../common/CreationHub"
 import { templates } from "@/data/filmTemplates"
 import { useRouter } from "next/navigation"
@@ -105,7 +105,7 @@ export default function StoryPage({ params }: StoryPageProps) {
 
   // Otherwise, show the full editor
   return (
-    <FilmEditor
+    <StoryBuilder
       key={project.id}
       project={project}
       onUpdateProject={handleUpdateProject}
