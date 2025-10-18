@@ -272,7 +272,7 @@ const SceneCard: React.FC<{
                       {Array.from({ length: 4 }, (_, index) => {
                         const images = scene.generatedImages || (scene.imageUrl ? [scene.imageUrl] : [])
                         const imageUrl = images[index]
-                        const isGeneratingThisSlot = scene.generating && index < generateOutputs
+                        const isGeneratingThisSlot = scene.generating && index === 0
                         
                         return (
                           <div key={index} className="w-full aspect-video bg-muted rounded-lg overflow-hidden flex items-center justify-center">
