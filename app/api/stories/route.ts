@@ -158,26 +158,36 @@ export async function POST(request: NextRequest) {
           return NextResponse.json({ error: 'Prompt and base64Image are required' }, { status: 400 });
         }
 
-        let operation = await ai.models.generateVideos({
-          model: 'veo-2.0-generate-001',
-          prompt,
-          image: {
-            imageBytes: base64Image,
-            mimeType: 'image/jpeg',
-          },
-          config: {
-            numberOfVideos: 1,
-          }
-        });
-
-        while (!operation.done) {
-          await new Promise(resolve => setTimeout(resolve, 10000));
-          operation = await ai.operations.getVideosOperation({ operation: operation });
+        if (!process.env.REPLICATE_API_TOKEN) {
+          return NextResponse.json({ error: 'Replicate API token not configured' }, { status: 500 });
         }
+
+        const Replicate = require('replicate');
+        const replicate = new Replicate({ auth: process.env.REPLICATE_API_TOKEN });
+
+        // Upload base64 image to a temporary URL (convert to public URL)
+        const base64Data = base64Image.replace(/^data:image\/[a-z]+;base64,/, '');
+        const imageBuffer = Buffer.from(base64Data, 'base64');
         
-        if (operation.response?.generatedVideos?.[0]?.video?.uri) {
-          const downloadLink = operation.response.generatedVideos[0].video.uri;
-          const videoResponse = await fetch(`${downloadLink}&key=${process.env.GEMINI_API_KEY}`);
+        // For now, we'll use the base64 image directly as Kling can handle it
+        // In production, you might want to upload to a temporary storage first
+        const tempImageUrl = `data:image/jpeg;base64,${base64Data}`;
+
+        const input = {
+          mode: "standard",
+          prompt: prompt,
+          duration: 5,
+          start_image: tempImageUrl,
+          negative_prompt: ""
+        };
+
+        const output = await replicate.run("kwaivgi/kling-v2.1", { input });
+        
+        if (output && typeof output.url === 'function') {
+          const videoUrl = output.url();
+          
+          // Download video and convert to base64 for consistent return format
+          const videoResponse = await fetch(videoUrl);
           if (!videoResponse.ok) {
             throw new Error(`Failed to fetch video: ${videoResponse.statusText}`);
           }
