@@ -22,6 +22,7 @@ const SceneCard: React.FC<{
 }> = ({ scene, project, onUpdateScene, onDeleteScene }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [localPrompt, setLocalPrompt] = useState(scene.prompt || "")
+  const [generateOutputs, setGenerateOutputs] = useState(1)
 
   const adjustHeight = useCallback(() => {
     if (textareaRef.current) {
@@ -53,13 +54,22 @@ const SceneCard: React.FC<{
     }
     onUpdateScene({ ...scene, generating: true })
     try {
-      const imageUrl = await generateSingleImage(builtPrompt, project.settings.aspectRatio)
-      onUpdateScene({ ...scene, imageUrl, generating: false })
+      const images = []
+      for (let i = 0; i < generateOutputs; i++) {
+        const imageUrl = await generateSingleImage(builtPrompt, project.settings.aspectRatio)
+        images.push(imageUrl)
+      }
+      onUpdateScene({ 
+        ...scene, 
+        imageUrl: images[0], 
+        generatedImages: images,
+        generating: false 
+      })
     } catch (error) {
       console.error("Image generation failed:", error)
       onUpdateScene({ ...scene, generating: false, imageUrl: "error" })
     }
-  }, [scene, project, onUpdateScene])
+  }, [scene, project, onUpdateScene, generateOutputs])
 
   const handleFieldChange = (field: keyof StoryboardScene, value: string | null) => {
     onUpdateScene({ ...scene, [field]: value })
@@ -76,6 +86,51 @@ const SceneCard: React.FC<{
     if (localPrompt !== scene.prompt) {
       handleFieldChange("prompt", localPrompt)
     }
+  }
+
+  const handleImageDragStart = (e: React.DragEvent, imageUrl: string) => {
+    e.dataTransfer.setData('text/plain', imageUrl)
+    e.dataTransfer.setData('application/x-scene-id', scene.id)
+  }
+
+  const handleVideoDrop = async (e: React.DragEvent) => {
+    e.preventDefault()
+    const imageUrl = e.dataTransfer.getData('text/plain')
+    const draggedSceneId = e.dataTransfer.getData('application/x-scene-id')
+    
+    if (imageUrl && draggedSceneId === scene.id) {
+      onUpdateScene({ ...scene, videoGenerating: true })
+      try {
+        // Convert data URL to base64 if needed
+        const base64Image = imageUrl.includes('base64,') 
+          ? imageUrl.split('base64,')[1] 
+          : imageUrl
+        
+        const response = await fetch('/api/stories', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'generateVideo',
+            prompt: localPrompt || 'A cinematic scene',
+            base64Image: base64Image
+          })
+        })
+        
+        const data = await response.json()
+        if (data.success) {
+          onUpdateScene({ ...scene, videoUrl: data.videoUrl, videoGenerating: false })
+        } else {
+          throw new Error(data.error || 'Video generation failed')
+        }
+      } catch (error) {
+        console.error('Video generation failed:', error)
+        onUpdateScene({ ...scene, videoGenerating: false })
+      }
+    }
+  }
+
+  const handleVideoDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
   }
 
   return (
@@ -154,49 +209,72 @@ const SceneCard: React.FC<{
                     </SelectContent>
                   </Select>
                 </div>
-                <Button onClick={handleGenerateImage} disabled={scene.generating} className="flex items-center gap-2 flex-shrink-0">
-                  <ArrowUp className="w-4 h-4" />
-                  Generate
-                </Button>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <Select value={generateOutputs.toString()} onValueChange={(value) => setGenerateOutputs(parseInt(value))}>
+                    <SelectTrigger className="w-16 h-10">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">1</SelectItem>
+                      <SelectItem value="2">2</SelectItem>
+                      <SelectItem value="3">3</SelectItem>
+                      <SelectItem value="4">4</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button onClick={handleGenerateImage} disabled={scene.generating} size="icon">
+                    <ArrowUp className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
                 <div className="lg:col-span-2">
                   <div className="w-full aspect-video bg-muted/50 rounded-lg p-2 border-2 border-dashed border-muted-foreground/20">
                     <div className="grid grid-cols-2 gap-2 w-full h-full">
-                      {Array.from({ length: 4 }, (_, index) => (
-                        <div key={index} className="w-full h-full bg-muted rounded-lg overflow-hidden flex items-center justify-center">
-                          {scene.generating ? (
-                            <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-                          ) : scene.imageUrl === "error" ? (
-                            <p className="text-destructive text-xs">Error</p>
-                          ) : scene.imageUrl && index === 0 ? (
-                            <img
-                              src={scene.imageUrl}
-                              alt={`Scene ${scene.scene_number}`}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <Camera className="w-4 h-4 text-muted-foreground/50" />
-                          )}
-                        </div>
-                      ))}
+                      {Array.from({ length: 4 }, (_, index) => {
+                        const images = scene.generatedImages || (scene.imageUrl ? [scene.imageUrl] : [])
+                        const imageUrl = images[index]
+                        
+                        return (
+                          <div key={index} className="w-full aspect-video bg-muted rounded-lg overflow-hidden flex items-center justify-center">
+                            {scene.generating ? (
+                              <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                            ) : imageUrl === "error" ? (
+                              <p className="text-destructive text-xs">Error</p>
+                            ) : imageUrl ? (
+                              <img
+                                src={imageUrl}
+                                alt={`Scene ${scene.scene_number} - ${index + 1}`}
+                                className="w-full h-full object-cover cursor-grab"
+                                draggable
+                                onDragStart={(e) => handleImageDragStart(e, imageUrl)}
+                              />
+                            ) : (
+                              <Camera className="w-4 h-4 text-muted-foreground/50" />
+                            )}
+                          </div>
+                        )
+                      })}
                     </div>
                   </div>
                 </div>
                 <div className="lg:col-span-3">
-                  <div className="w-full aspect-video bg-muted/50 rounded-lg overflow-hidden flex items-center justify-center border-2 border-dashed border-muted-foreground/20">
+                  <div 
+                    className="w-full aspect-video bg-muted/50 rounded-lg overflow-hidden flex items-center justify-center border-2 border-dashed border-muted-foreground/20 relative"
+                    onDrop={handleVideoDrop}
+                    onDragOver={handleVideoDragOver}
+                  >
                     {scene.videoGenerating ? (
-                      <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                        <p className="text-sm text-muted-foreground">Generating video...</p>
+                      </div>
                     ) : scene.videoUrl ? (
                       <video src={scene.videoUrl} className="w-full h-full object-cover" controls muted loop />
                     ) : (
-                      <video 
-                        src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" 
-                        className="w-full h-full object-cover" 
-                        controls 
-                        muted 
-                        loop 
-                      />
+                      <div className="text-center">
+                        <Camera className="w-12 h-12 text-muted-foreground/30 mx-auto mb-2" />
+                        <p className="text-sm text-muted-foreground">Drag image here to generate video</p>
+                      </div>
                     )}
                   </div>
                 </div>

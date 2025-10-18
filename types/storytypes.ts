@@ -13,6 +13,7 @@ export interface StoryboardScene {
   scene_number: number;
   prompt: string;
   imageUrl: string | null;
+  generatedImages?: string[];
   generating: boolean;
   videoUrl: string | null;
   videoGenerating: boolean;
