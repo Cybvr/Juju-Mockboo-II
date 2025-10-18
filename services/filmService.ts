@@ -25,8 +25,13 @@ interface AnalyzedScriptData {
 // Helper function to upload base64 image to Firebase Storage
 export const uploadImageToStorage = async (base64Image: string, fileName: string): Promise<string> => {
   try {
+    // Ensure proper data URL format
+    const dataUrl = base64Image.startsWith('data:') 
+      ? base64Image 
+      : `data:image/jpeg;base64,${base64Image}`
+
     // Convert base64 to blob
-    const response = await fetch(base64Image)
+    const response = await fetch(dataUrl)
     const blob = await response.blob()
 
     // Create storage reference
