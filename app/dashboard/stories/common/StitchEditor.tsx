@@ -1,186 +1,303 @@
-
 import React, { useState, useEffect, useRef } from 'react';
-import type { FilmProject, StoryboardScene } from '@/types/storytypes';
-import { Film, GripVertical, Play, Pause, Upload } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Film, Play, Pause, Volume2, Maximize, Settings } from 'lucide-react';
 
-interface StitchEditorProps {
-    project: FilmProject;
-    onUpdateProject: (updatedProject: FilmProject) => void;
+interface StoryboardScene {
+    id: string;
+    scene_number: number;
+    description?: string;
+    videoUrl?: string;
+    trimStart?: number;
+    trimEnd?: number;
 }
 
-export const StitchEditor: React.FC<StitchEditorProps> = ({ project, onUpdateProject }) => {
+interface FilmProject {
+    storyboard: StoryboardScene[];
+}
+
+interface StitchPlayerProps {
+    project: FilmProject;
+    onUpdateProject?: (updatedProject: FilmProject) => void;
+}
+
+export const StitchEditor: React.FC<StitchPlayerProps> = ({ project }) => {
     const [videoScenes, setVideoScenes] = useState<StoryboardScene[]>([]);
-    const [draggedItem, setDraggedItem] = useState<StoryboardScene | null>(null);
     const playerRef = useRef<HTMLVideoElement>(null);
-    const [currentPlayingIndex, setCurrentPlayingIndex] = useState<number>(-1);
+    const containerRef = useRef<HTMLDivElement>(null);
     const [isPlaying, setIsPlaying] = useState(false);
+    const [currentGlobalTime, setCurrentGlobalTime] = useState(0);
+    const [totalDuration, setTotalDuration] = useState(0);
+    const [sceneDurations, setSceneDurations] = useState<Map<string, number>>(new Map());
+    const [videosLoaded, setVideosLoaded] = useState(false);
+    const [showControls, setShowControls] = useState(true);
+    const [volume, setVolume] = useState(1);
+    const hideControlsTimeout = useRef<NodeJS.Timeout>();
 
     useEffect(() => {
         const sortedVideoScenes = project.storyboard
             .filter(s => s.videoUrl)
             .sort((a, b) => a.scene_number - b.scene_number);
         setVideoScenes(sortedVideoScenes);
+        setVideosLoaded(false);
     }, [project.storyboard]);
 
-    const handleDragStart = (e: React.DragEvent<HTMLDivElement>, scene: StoryboardScene) => {
-        setDraggedItem(scene);
-        e.dataTransfer.effectAllowed = 'move';
-        e.dataTransfer.setData('text/html', e.currentTarget.outerHTML);
-    };
+    useEffect(() => {
+        if (videoScenes.length === 0) return;
 
-    const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-    };
+        const loadDurations = async () => {
+            const durationsMap = new Map<string, number>();
+            let total = 0;
 
-    const handleDrop = (e: React.DragEvent<HTMLDivElement>, targetScene: StoryboardScene) => {
-        e.preventDefault();
-        if (!draggedItem || draggedItem.id === targetScene.id) {
-            setDraggedItem(null);
-            return;
-        }
-
-        const newStoryboard = [...project.storyboard];
-        const draggedIdx = newStoryboard.findIndex(s => s.id === draggedItem.id);
-        const targetIdx = newStoryboard.findIndex(s => s.id === targetScene.id);
-
-        if (draggedIdx === -1 || targetIdx === -1) return;
-
-        const [removed] = newStoryboard.splice(draggedIdx, 1);
-        newStoryboard.splice(targetIdx, 0, removed);
-        
-        const renumberedStoryboard = newStoryboard.map((scene, index) => ({
-            ...scene,
-            scene_number: index + 1,
-        }));
-
-        onUpdateProject({
-            ...project,
-            storyboard: renumberedStoryboard,
-        });
-
-        setDraggedItem(null);
-    };
-
-    const handlePlayPause = () => {
-        if (playerRef.current) {
-            if (isPlaying) {
-                playerRef.current.pause();
-            } else {
-                if (currentPlayingIndex === -1 && videoScenes.length > 0) {
-                    setCurrentPlayingIndex(0);
-                } else {
-                    playerRef.current.play();
+            for (const scene of videoScenes) {
+                if (scene.videoUrl) {
+                    const video = document.createElement('video');
+                    video.src = scene.videoUrl;
+                    await new Promise<void>((resolve) => {
+                        video.onloadedmetadata = () => {
+                            const trimStart = scene.trimStart || 0;
+                            const trimEnd = scene.trimEnd || video.duration;
+                            const duration = trimEnd - trimStart;
+                            durationsMap.set(scene.id, duration);
+                            total += duration;
+                            resolve();
+                        };
+                    });
                 }
             }
-            setIsPlaying(!isPlaying);
-        }
-    };
+
+            setSceneDurations(durationsMap);
+            setTotalDuration(total);
+            setVideosLoaded(true);
+
+            if (playerRef.current && videoScenes[0]?.videoUrl) {
+                playerRef.current.src = videoScenes[0].videoUrl;
+                playerRef.current.currentTime = videoScenes[0].trimStart || 0;
+            }
+        };
+
+        loadDurations();
+    }, [videoScenes]);
 
     useEffect(() => {
-        if (currentPlayingIndex >= 0 && currentPlayingIndex < videoScenes.length && playerRef.current) {
-            playerRef.current.src = videoScenes[currentPlayingIndex].videoUrl!;
-            playerRef.current.play().then(() => setIsPlaying(true)).catch(e => console.error("Playback failed", e));
-        } else if (currentPlayingIndex >= videoScenes.length) {
-            setCurrentPlayingIndex(-1);
-            setIsPlaying(false);
-            if(playerRef.current) playerRef.current.src = '';
-        }
-    }, [currentPlayingIndex, videoScenes]);
+        if (!isPlaying || !playerRef.current || !videosLoaded) return;
 
-    const handleVideoEnd = () => {
-        setCurrentPlayingIndex(prev => prev + 1);
+        const step = () => {
+            if (!playerRef.current) return;
+
+            let accumulatedTime = 0;
+            let sceneIndex = 0;
+            for (let i = 0; i < videoScenes.length; i++) {
+                const duration = sceneDurations.get(videoScenes[i].id) || 0;
+                if (currentGlobalTime < accumulatedTime + duration) {
+                    sceneIndex = i;
+                    break;
+                }
+                accumulatedTime += duration;
+            }
+
+            const scene = videoScenes[sceneIndex];
+            const timeInScene = currentGlobalTime - accumulatedTime;
+            const trimStart = scene.trimStart || 0;
+            const targetTime = trimStart + timeInScene;
+
+            if (playerRef.current.src !== scene.videoUrl) {
+                playerRef.current.src = scene.videoUrl!;
+                playerRef.current.currentTime = targetTime;
+                playerRef.current.play();
+            } else if (Math.abs(playerRef.current.currentTime - targetTime) > 0.3) {
+                playerRef.current.currentTime = targetTime;
+            }
+
+            setCurrentGlobalTime(prev => {
+                const next = prev + 1 / 60;
+                if (next >= totalDuration) {
+                    setIsPlaying(false);
+                    return totalDuration;
+                }
+                return next;
+            });
+        };
+
+        const interval = setInterval(step, 1000 / 60);
+        return () => clearInterval(interval);
+    }, [isPlaying, currentGlobalTime, videoScenes, sceneDurations, totalDuration, videosLoaded]);
+
+    const handlePlayPause = () => {
+        if (videoScenes.length === 0 || !videosLoaded) return;
+        if (currentGlobalTime >= totalDuration) {
+            setCurrentGlobalTime(0);
+            if (playerRef.current && videoScenes[0]?.videoUrl) {
+                playerRef.current.src = videoScenes[0].videoUrl;
+                playerRef.current.currentTime = videoScenes[0].trimStart || 0;
+            }
+        }
+        setIsPlaying(!isPlaying);
+        if (!isPlaying && playerRef.current) playerRef.current.play();
+        if (isPlaying && playerRef.current) playerRef.current.pause();
     };
 
+    const handleTimelineClick = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (!videosLoaded || totalDuration === 0) return;
+        const rect = e.currentTarget.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const clickedTime = (x / rect.width) * totalDuration;
+
+        setCurrentGlobalTime(clickedTime);
+
+        let accumulated = 0;
+        for (let i = 0; i < videoScenes.length; i++) {
+            const duration = sceneDurations.get(videoScenes[i].id) || 0;
+            if (clickedTime < accumulated + duration) {
+                const scene = videoScenes[i];
+                const trimStart = scene.trimStart || 0;
+                const timeInScene = clickedTime - accumulated;
+                const newSceneTime = trimStart + timeInScene;
+
+                if (playerRef.current) {
+                    playerRef.current.src = scene.videoUrl!;
+                    playerRef.current.currentTime = newSceneTime;
+                    if (isPlaying) playerRef.current.play();
+                }
+                break;
+            }
+            accumulated += duration;
+        }
+    };
+
+    const handleMouseMove = () => {
+        setShowControls(true);
+        if (hideControlsTimeout.current) {
+            clearTimeout(hideControlsTimeout.current);
+        }
+        hideControlsTimeout.current = setTimeout(() => {
+            if (isPlaying) setShowControls(false);
+        }, 3000);
+    };
+
+    const handleFullscreen = () => {
+        if (containerRef.current) {
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            } else {
+                containerRef.current.requestFullscreen();
+            }
+        }
+    };
+
+    const formatTime = (seconds: number) => {
+        if (isNaN(seconds)) return '0:00';
+        const h = Math.floor(seconds / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        const s = Math.floor(seconds % 60);
+        if (h > 0) {
+            return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+        return `${m}:${s.toString().padStart(2, '0')}`;
+    };
+
+    const progressPercent = totalDuration > 0 ? (currentGlobalTime / totalDuration) * 100 : 0;
     const hasVideos = videoScenes.length > 0;
-    const currentScene = videoScenes[currentPlayingIndex];
 
     return (
-        <div className="h-full flex flex-col bg-gray-900">
-            {/* Video Preview Area */}
-            <div className="flex-grow bg-black flex items-center justify-center relative">
-                <video 
-                    ref={playerRef} 
-                    onEnded={handleVideoEnd} 
-                    onPlay={() => setIsPlaying(true)}
-                    onPause={() => setIsPlaying(false)}
-                    className="max-w-full max-h-full" 
-                    playsInline
-                />
-                {!isPlaying && !currentScene && (
-                    <div className="absolute text-center text-gray-400">
-                        <Film className="w-16 h-16 mx-auto mb-2" />
-                        <p>Timeline Preview</p>
+        <div 
+            ref={containerRef}
+            className="relative w-full h-screen bg-black group"
+            onMouseMove={handleMouseMove}
+            onMouseLeave={() => isPlaying && setShowControls(false)}
+        >
+            {/* Video Player */}
+            <video 
+                ref={playerRef} 
+                className="w-full h-full object-contain cursor-pointer" 
+                playsInline
+                onClick={handlePlayPause}
+            />
+
+            {!hasVideos && (
+                <div className="absolute inset-0 flex items-center justify-center text-white/70">
+                    <div className="text-center">
+                        <Film className="w-16 h-16 mx-auto mb-4" />
+                        <p className="text-lg">No videos loaded</p>
                     </div>
-                )}
-            </div>
-
-            {/* Controls Bar */}
-            <div className="bg-gray-800 px-4 py-3 flex items-center justify-between border-t border-gray-700">
-                <Button onClick={handlePlayPause} disabled={!hasVideos} className="flex items-center gap-2">
-                    {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                    <span>{isPlaying ? 'Pause' : 'Play'}</span>
-                </Button>
-                
-                <div className="text-center text-white">
-                    {currentScene && (
-                        <>
-                            <p className="font-semibold">Scene {currentScene.scene_number}</p>
-                            <p className="text-xs text-gray-400">({currentPlayingIndex + 1} of {videoScenes.length})</p>
-                        </>
-                    )}
                 </div>
-                
-                <Button 
-                    onClick={() => alert("Exporting the final stitched video is not yet implemented.")} 
-                    disabled={!hasVideos} 
-                    variant="outline"
-                    className="flex items-center gap-2"
-                >
-                    <Upload className="w-4 h-4" />
-                    <span>Export</span>
-                </Button>
-            </div>
+            )}
 
-            {/* Timeline */}
-            <div className="h-32 bg-gray-800 border-t border-gray-700 p-2">
-                <h3 className="text-sm font-medium text-white mb-2">Timeline</h3>
-                <div className="flex gap-1 overflow-x-auto">
-                    {hasVideos ? videoScenes.map((scene, index) => (
-                        <div
-                            key={scene.id}
-                            draggable
-                            onDragStart={(e) => handleDragStart(e, scene)}
-                            onDragOver={handleDragOver}
-                            onDrop={(e) => handleDrop(e, scene)}
-                            className={`relative flex-shrink-0 w-20 h-16 bg-gray-700 rounded overflow-hidden cursor-grab transition-all ${
-                                draggedItem?.id === scene.id ? 'opacity-50' : ''
-                            } ${
-                                currentPlayingIndex !== -1 && videoScenes[currentPlayingIndex]?.id === scene.id ? 'ring-2 ring-blue-500' : ''
-                            }`}
-                        >
-                            <video src={scene.videoUrl!} className="w-full h-full object-cover" />
-                            <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-70 text-white text-xs p-1">
-                                {scene.scene_number}
-                            </div>
-                            <GripVertical className="absolute top-1 right-1 w-3 h-3 text-white opacity-70" />
-                        </div>
-                    )) : (
-                        <div className="flex items-center justify-center w-full h-full text-gray-400">
-                            <div className="text-center">
-                                <GripVertical className="w-8 h-8 mx-auto mb-1" />
-                                <p className="text-xs">Generate videos to build timeline</p>
-                            </div>
-                        </div>
-                    )}
+            {/* Controls Overlay */}
+            <div 
+                className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent transition-opacity duration-300 ${
+                    showControls ? 'opacity-100' : 'opacity-0'
+                }`}
+            >
+                {/* Timeline */}
+                <div className="px-4 pb-2">
+                    <div 
+                        className="relative h-1 bg-white/30 rounded-full cursor-pointer group/timeline hover:h-1.5 transition-all"
+                        onClick={handleTimelineClick}
+                    >
+                        <div 
+                            className="absolute h-full bg-red-600 rounded-full transition-all"
+                            style={{ width: `${progressPercent}%` }}
+                        />
+                        <div 
+                            className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-red-600 rounded-full opacity-0 group-hover/timeline:opacity-100 transition-opacity"
+                            style={{ left: `${progressPercent}%`, transform: 'translate(-50%, -50%)' }}
+                        />
+                    </div>
+                </div>
+
+                {/* Control Bar */}
+                <div className="flex items-center gap-4 px-4 pb-4">
+                    <button
+                        onClick={handlePlayPause}
+                        disabled={!hasVideos || !videosLoaded}
+                        className="text-white hover:text-white/80 transition-colors disabled:opacity-50"
+                    >
+                        {isPlaying ? <Pause className="w-8 h-8" /> : <Play className="w-8 h-8" />}
+                    </button>
+
+                    <div className="flex items-center gap-2">
+                        <Volume2 className="w-5 h-5 text-white" />
+                        <input
+                            type="range"
+                            min="0"
+                            max="1"
+                            step="0.1"
+                            value={volume}
+                            onChange={(e) => {
+                                const val = parseFloat(e.target.value);
+                                setVolume(val);
+                                if (playerRef.current) playerRef.current.volume = val;
+                            }}
+                            className="w-20 h-1 accent-white"
+                        />
+                    </div>
+
+                    <span className="text-white text-sm font-medium">
+                        {formatTime(currentGlobalTime)} / {formatTime(totalDuration)}
+                    </span>
+
+                    <div className="flex-1" />
+
+                    <button className="text-white hover:text-white/80 transition-colors">
+                        <Settings className="w-6 h-6" />
+                    </button>
+
+                    <button 
+                        onClick={handleFullscreen}
+                        className="text-white hover:text-white/80 transition-colors"
+                    >
+                        <Maximize className="w-6 h-6" />
+                    </button>
                 </div>
             </div>
 
-            <style>{`
-                .cursor-grab { cursor: grab; }
-                .cursor-grab:active { cursor: grabbing; }
-            `}</style>
+            {/* Center Play Button (when paused) */}
+            {!isPlaying && hasVideos && videosLoaded && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="w-20 h-20 rounded-full bg-black/50 flex items-center justify-center">
+                        <Play className="w-10 h-10 text-white ml-1" />
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

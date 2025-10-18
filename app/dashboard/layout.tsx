@@ -5,7 +5,6 @@ import { useAuthState } from "react-firebase-hooks/auth"
 import { auth } from "@/lib/firebase"
 import { useEffect, useState } from "react"
 import { usePathname } from "next/navigation"
-
 export default function DashboardLayout({
   children,
 }: {
@@ -13,17 +12,21 @@ export default function DashboardLayout({
 }) {
   const [user, loading] = useAuthState(auth)
   const pathname = usePathname()
-
   // Check if current page should hide sidebar
-  const shouldHideSidebar = pathname?.includes('/dashboard/images') || 
+  const shouldHideSidebar = pathname?.includes('/dashboard/images') ||
     pathname?.includes('/dashboard/canvas') ||
-    pathname?.includes('/dashboard/videos') ||  
-    
-    pathname?.match(/\/dashboard\/stories\/[^\/]+$/)
-
+    pathname?.includes('/dashboard/videos')
   // Always render the same structure to avoid hydration mismatch
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden relative">
+      {/* Dot Grid Background */}
+      <div
+        className="absolute inset-0 opacity-20 pointer-events-none"
+        style={{
+          backgroundImage: `radial-gradient(circle, #9ca3af 1px, transparent 1px)`,
+          backgroundSize: '20px 20px'
+        }}
+      />
       {!shouldHideSidebar && (
         <div className="hidden md:block">
           <Sidebar
