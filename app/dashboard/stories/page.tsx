@@ -22,7 +22,6 @@ import {
   deleteStory,
   duplicateStory
 } from '@/services/storiesService';
-import { StoryBuilder } from './common/StoryBuilder';
 
 type Theme = 'light' | 'dark';
 
