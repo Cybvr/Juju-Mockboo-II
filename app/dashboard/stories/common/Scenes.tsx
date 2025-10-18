@@ -61,8 +61,14 @@ const SceneCard: React.FC<{
   }
 
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const cursorPosition = e.target.selectionStart
     handleFieldChange("prompt", e.target.value)
-    setTimeout(() => adjustHeight(), 0)
+    requestAnimationFrame(() => {
+      adjustHeight()
+      if (textareaRef.current) {
+        textareaRef.current.setSelectionRange(cursorPosition, cursorPosition)
+      }
+    })
   }
 
   return (
@@ -83,18 +89,17 @@ const SceneCard: React.FC<{
                 <Trash2 className="w-4 h-4" />
               </Button>
             </div>
-            {/* Text Section */}
             <div className="space-y-4">
               <Textarea
                 ref={textareaRef}
                 value={scene.prompt || ""}
                 onChange={handleTextareaChange}
                 placeholder="Action prompt: e.g., 'looks out the window at the rain...'"
-                className="flex-grow resize-none min-h-[60px]"
+                className="flex-grow resize-none overflow-hidden min-h-[60px] focus:ring-2 focus:ring-primary focus:border-primary"
                 rows={2}
               />
               <div className="flex items-start justify-between gap-3">
-                <div className="flex flex-cols gap-3 text-left">
+                <div className="flex flex-col sm:flex-row gap-3 text-left">
                   <Select
                     value={scene.characterId || undefined}
                     onValueChange={(value) => handleFieldChange("characterId", value || null)}
@@ -141,30 +146,52 @@ const SceneCard: React.FC<{
                     </SelectContent>
                   </Select>
                 </div>
-                <Button onClick={handleGenerateImage} disabled={scene.generating} className="flex items-center gap-2">
+                <Button onClick={handleGenerateImage} disabled={scene.generating} className="flex items-center gap-2 flex-shrink-0">
                   <ArrowUp className="w-4 h-4" />
                   Generate
                 </Button>
               </div>
-              {/* Media Sections */}
-              <div className="grid grid-cols-2 gap-2">
-                {Array.from({ length: 4 }, (_, index) => (
-                  <div key={index} className="aspect-square bg-muted rounded-lg overflow-hidden flex items-center justify-center">
-                    {scene.generating ? (
-                      <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-                    ) : scene.imageUrl === "error" ? (
-                      <p className="text-destructive text-xs">Error</p>
-                    ) : scene.imageUrl && index === 0 ? (
-                      <img
-                        src={scene.imageUrl}
-                        alt={`Scene ${scene.scene_number}`}
-                        className="w-full h-full object-cover"
-                      />
+              <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                <div className="lg:col-span-2">
+                  <div className="w-full aspect-video bg-muted/50 rounded-lg p-2 border-2 border-dashed border-muted-foreground/20">
+                    <div className="grid grid-cols-2 gap-2 w-full h-full">
+                      {Array.from({ length: 4 }, (_, index) => (
+                        <div key={index} className="w-full h-full bg-muted rounded-lg overflow-hidden flex items-center justify-center">
+                          {scene.generating ? (
+                            <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                          ) : scene.imageUrl === "error" ? (
+                            <p className="text-destructive text-xs">Error</p>
+                          ) : scene.imageUrl && index === 0 ? (
+                            <img
+                              src={scene.imageUrl}
+                              alt={`Scene ${scene.scene_number}`}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <Camera className="w-4 h-4 text-muted-foreground/50" />
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <div className="lg:col-span-3">
+                  <div className="w-full aspect-video bg-muted/50 rounded-lg overflow-hidden flex items-center justify-center border-2 border-dashed border-muted-foreground/20">
+                    {scene.videoGenerating ? (
+                      <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                    ) : scene.videoUrl ? (
+                      <video src={scene.videoUrl} className="w-full h-full object-cover" controls muted loop />
                     ) : (
-                      <Camera className="w-4 h-4 text-muted-foreground/50" />
+                      <video 
+                        src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" 
+                        className="w-full h-full object-cover" 
+                        controls 
+                        muted 
+                        loop 
+                      />
                     )}
                   </div>
-                ))}
+                </div>
               </div>
             </div>
           </div>
@@ -204,7 +231,7 @@ export const Scenes: React.FC<ScenesProps> = ({ project, onUpdateProject }) => {
   }
   return (
     <div className="h-full flex flex-col">
-      <div className="overflow-y-auto pr-2 ">
+      <div className="overflow-y-auto pr-2">
         {project.storyboard.length > 0 ? (
           project.storyboard
             .sort((a, b) => a.scene_number - b.scene_number)
