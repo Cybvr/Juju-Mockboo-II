@@ -25,27 +25,26 @@ interface AnalyzedScriptData {
 // Helper function to upload base64 image to Firebase Storage
 export const uploadImageToStorage = async (base64Image: string, fileName: string): Promise<string> => {
   try {
-    // Ensure proper data URL format
-    const dataUrl = base64Image.startsWith('data:') 
-      ? base64Image 
-      : `data:image/jpeg;base64,${base64Image}`
-
     // Convert base64 to blob
-    const response = await fetch(dataUrl)
-    const blob = await response.blob()
+    const byteCharacters = atob(base64Image.split(',')[1])
+    const byteNumbers = new Array(byteCharacters.length)
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i)
+    }
+    const byteArray = new Uint8Array(byteNumbers)
+    const blob = new Blob([byteArray], { type: 'image/jpeg' })
 
     // Create storage reference
-    const timestamp = Date.now()
-    const storageRef = ref(storage, `stories/${timestamp}_${fileName}`)
+    const imageRef = ref(storage, `stories/${fileName}`)
 
-    // Upload to Firebase Storage
-    await uploadBytes(storageRef, blob)
+    // Upload blob to Firebase Storage
+    await uploadBytes(imageRef, blob)
 
     // Get download URL
-    const downloadUrl = await getDownloadURL(storageRef)
-    return downloadUrl
+    const downloadURL = await getDownloadURL(imageRef)
+    return downloadURL
   } catch (error) {
-    console.error('Failed to upload image to storage:', error)
+    console.error('Error uploading image to storage:', error)
     throw error
   }
 }
