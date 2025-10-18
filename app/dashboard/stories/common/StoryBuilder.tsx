@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { ProfileDropdown } from '@/app/common/dashboard/ProfileDropdown';
-import { StoryboardEditor } from './StoryboardEditor';
+import { Scenes } from './Scenes';
 import { AssetManager } from './AssetManager';
 import { ProjectSettings } from './ProjectSettings';
 import { analyzeScript } from '@/services/filmService';
@@ -176,7 +176,7 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({ project, onUpdatePro
                     </div>
                 );
             case 'storyboard':
-                return <StoryboardEditor project={project} onUpdateProject={onUpdateProject} />;
+                return <Scenes project={project} onUpdateProject={onUpdateProject} />;
             case 'assets':
                 return <AssetManager project={project} onUpdateProject={onUpdateProject} />;
             case 'video':
@@ -192,16 +192,16 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({ project, onUpdatePro
 
     return (
         <div className="flex flex-col h-screen text-foreground">
-            <header className="flex-shrink-0 flex items-center justify-between p-2 sm:p-4 border-b border-border">
+            <header className="flex-shrink-0 flex items-center justify-between p-1 border-b border-border">
                 <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
                     <Button variant="ghost" size="icon" onClick={onBackToDashboard} className="flex-shrink-0">
-                        <ArrowLeft className="w-5 h-5 sm:w-6 sm:h-6" />
+                        <ArrowLeft className="w-3 h-3 sm:w-4 sm:h-4" />
                     </Button>
                     <Input
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         onBlur={handleTitleBlur}
-                        className="text-lg sm:text-2xl font-bold bg-transparent border-none focus:ring-2 focus:ring-primary px-2 h-auto flex-1 min-w-0"
+                        className="text-sm font-bold bg-transparent border-none focus:ring-0 focus:ring-transparent px-2 h-auto flex-1 w-fit"
                     />
                 </div>
                 <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
@@ -258,7 +258,7 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({ project, onUpdatePro
                         </Button>
                     </div>
                     <TabButton tabName="script" label="Script" icon={<FileText className="w-4 h-4 sm:w-5 sm:h-5" />} />
-                    <TabButton tabName="storyboard" label="Storyboard" icon={<Camera className="w-4 h-4 sm:w-5 sm:h-5" />} />
+                    <TabButton tabName="storyboard" label="Scenes" icon={<Camera className="w-4 h-4 sm:w-5 sm:h-5" />} />
                     <TabButton tabName="assets" label="Assets" icon={<User className="w-4 h-4 sm:w-5 sm:h-5" />} />
                     <TabButton tabName="video" label="Video" icon={<Film className="w-4 h-4 sm:w-5 sm:h-5" />} />
                     <TabButton tabName="stitch" label="Stitch" icon={<GripVertical className="w-4 h-4 sm:w-5 sm:h-5" />} />

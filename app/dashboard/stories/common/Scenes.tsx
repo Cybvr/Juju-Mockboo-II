@@ -1,5 +1,3 @@
-"use client"
-
 import type React from "react"
 import { useCallback, useRef, useEffect } from "react"
 import type { FilmProject, StoryboardScene } from "@/types/storytypes"
@@ -11,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 
-interface StoryboardEditorProps {
+interface ScenesProps {
   project: FilmProject
   onUpdateProject: (updatedProject: FilmProject) => void
 }
@@ -23,31 +21,25 @@ const SceneCard: React.FC<{
   onDeleteScene: (sceneId: string) => void
 }> = ({ scene, project, onUpdateScene, onDeleteScene }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto"
       textareaRef.current.style.height = textareaRef.current.scrollHeight + "px"
     }
   }, [scene.prompt])
-
   const handleGenerateImage = useCallback(async () => {
     const character = project.characters.find((c) => c.id === scene.characterId)
     const location = project.locations.find((l) => l.id === scene.locationId)
-
     let builtPrompt = scene.prompt || "A cinematic scene."
-
     if (character) {
       builtPrompt = `${character.name} ${builtPrompt}. Description of ${character.name}: ${character.description}.`
     }
     if (location) {
       builtPrompt = `${builtPrompt} The setting is ${location.name}. Description of location: ${location.description}.`
     }
-
     if (character?.imageUrl) {
       console.log("Character image available, but not yet used in generation.", character.imageUrl)
     }
-
     onUpdateScene({ ...scene, generating: true })
     try {
       const imageUrl = await generateSingleImage(builtPrompt, project.settings.aspectRatio)
@@ -57,17 +49,14 @@ const SceneCard: React.FC<{
       onUpdateScene({ ...scene, generating: false, imageUrl: "error" })
     }
   }, [scene, project, onUpdateScene])
-
   const handleFieldChange = (field: keyof StoryboardScene, value: string | null) => {
     onUpdateScene({ ...scene, [field]: value })
   }
-
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     handleFieldChange("prompt", e.target.value)
     e.target.style.height = "auto"
     e.target.style.height = e.target.scrollHeight + "px"
   }
-
   return (
     <Card className="mb-4">
       <CardContent className="p-4">
@@ -86,9 +75,8 @@ const SceneCard: React.FC<{
                 <Trash2 className="w-4 h-4" />
               </Button>
             </div>
-
             {/* Text Section */}
-            <div className="space-y-4">
+            <div className="space-y-4 bg-accent/10">
               <Textarea
                 ref={textareaRef}
                 value={scene.prompt}
@@ -97,7 +85,6 @@ const SceneCard: React.FC<{
                 className="flex-grow resize-none overflow-hidden min-h-[60px]"
                 rows={2}
               />
-
               <div className="flex items-start justify-between gap-3">
                 <div className="flex flex-cols gap-3 text-left">
                   <Select
@@ -115,7 +102,6 @@ const SceneCard: React.FC<{
                       ))}
                     </SelectContent>
                   </Select>
-
                   <Select
                     value={scene.locationId || undefined}
                     onValueChange={(value) => handleFieldChange("locationId", value || null)}
@@ -131,7 +117,6 @@ const SceneCard: React.FC<{
                       ))}
                     </SelectContent>
                   </Select>
-
                   <Select
                     value={scene.soundId || undefined}
                     onValueChange={(value) => handleFieldChange("soundId", value || null)}
@@ -148,24 +133,16 @@ const SceneCard: React.FC<{
                     </SelectContent>
                   </Select>
                 </div>
-
                 <Button onClick={handleGenerateImage} disabled={scene.generating} className="flex items-center gap-2">
                   <ArrowUp className="w-4 h-4" />
                   Generate
                 </Button>
               </div>
-
               {/* Media Sections */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
                 {/* Image Section */}
-                <div className="lg:col-span-2 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-medium">Image </h4>
-                    <Button variant="ghost" size="icon" className="hover:bg-muted" title="Regenerate">
-                      <RotateCcw className="w-4 h-4" />
-                    </Button>
-                  </div>
-                  <div className="grid grid-cols-4 gap-2">
+                <div className="lg:col-span-2 space-y-3 bg-accent/10 rounded-xl p-4">
+                  <div className="grid grid-cols-2 gap-2">
                     {/* Main generated image */}
                     <div className="aspect-square bg-muted rounded-lg overflow-hidden flex items-center justify-center">
                       {scene.generating ? (
@@ -182,29 +159,22 @@ const SceneCard: React.FC<{
                         <Camera className="w-6 h-6 text-muted-foreground" />
                       )}
                     </div>
-
                     {/* Thumbnail placeholders */}
-                    <div className="aspect-square bg-muted/50 rounded-lg overflow-hidden flex items-center justify-center border-2 border-dashed border-muted-foreground/20">
-                      <Camera className="w-4 h-4 text-muted-foreground/50" />
-                    </div>
-                    <div className="aspect-square bg-muted/50 rounded-lg overflow-hidden flex items-center justify-center border-2 border-dashed border-muted-foreground/20">
-                      <Camera className="w-4 h-4 text-muted-foreground/50" />
-                    </div>
-                    <div className="aspect-square bg-muted/50 rounded-lg overflow-hidden flex items-center justify-center border-2 border-dashed border-muted-foreground/20">
-                      <Camera className="w-4 h-4 text-muted-foreground/50" />
+                    <div className="flex flex-col gap-2">
+                      <div className="aspect-square bg-muted/50 rounded-lg overflow-hidden flex items-center justify-center border-2 border-dashed border-muted-foreground/20">
+                        <Camera className="w-4 h-4 text-muted-foreground/50" />
+                      </div>
+                      <div className="aspect-square bg-muted/50 rounded-lg overflow-hidden flex items-center justify-center border-2 border-dashed border-muted-foreground/20">
+                        <Camera className="w-4 h-4 text-muted-foreground/50" />
+                      </div>
+                      <div className="aspect-square bg-muted/50 rounded-lg overflow-hidden flex items-center justify-center border-2 border-dashed border-muted-foreground/20">
+                        <Camera className="w-4 h-4 text-muted-foreground/50" />
+                      </div>
                     </div>
                   </div>
                 </div>
-
                 {/* Video Section */}
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-medium">Video</h4>
-                    <Button variant="ghost" size="sm" className="hover:bg-muted" title="Generate Video">
-                      <Sparkles className="w-4 h-4 mr-1" />
-                      Generate
-                    </Button>
-                  </div>
+                <div className="lg:col-span-3 space-y-3">
                   <div className="aspect-video bg-muted/50 rounded-lg overflow-hidden flex items-center justify-center border-2 border-dashed border-muted-foreground/20">
                     {scene.videoGenerating ? (
                       <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
@@ -227,19 +197,17 @@ const SceneCard: React.FC<{
   )
 }
 
-export const StoryboardEditor: React.FC<StoryboardEditorProps> = ({ project, onUpdateProject }) => {
+export const Scenes: React.FC<ScenesProps> = ({ project, onUpdateProject }) => {
   const handleUpdateScene = (updatedScene: StoryboardScene) => {
     const newStoryboard = project.storyboard.map((s) => (s.id === updatedScene.id ? updatedScene : s))
     onUpdateProject({ ...project, storyboard: newStoryboard })
   }
-
   const handleDeleteScene = (sceneId: string) => {
     const newStoryboard = project.storyboard
       .filter((s) => s.id !== sceneId)
       .map((s, index) => ({ ...s, scene_number: index + 1 }))
     onUpdateProject({ ...project, storyboard: newStoryboard })
   }
-
   const handleAddScene = () => {
     const newSceneNumber =
       project.storyboard.length > 0 ? Math.max(...project.storyboard.map((s) => s.scene_number)) + 1 : 1
@@ -257,7 +225,6 @@ export const StoryboardEditor: React.FC<StoryboardEditorProps> = ({ project, onU
     }
     onUpdateProject({ ...project, storyboard: [...project.storyboard, newScene] })
   }
-
   return (
     <div className="h-full flex flex-col">
       <div className="overflow-y-auto pr-2 ">
