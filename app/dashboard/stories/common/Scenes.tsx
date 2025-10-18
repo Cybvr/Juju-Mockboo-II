@@ -39,6 +39,11 @@ const SceneCard: React.FC<{
     adjustHeight()
   }, [localPrompt, adjustHeight])
 
+  const handleResetGenerating = useCallback(() => {
+    console.log(`🔄 RESET: Manually resetting generating state for scene ${scene.scene_number}`)
+    onUpdateScene({ ...scene, generating: false })
+  }, [scene, onUpdateScene])
+
   const handleGenerateImage = useCallback(async () => {
     console.log(`🎬 SCENE ${scene.scene_number}: Starting image generation...`)
     console.log(`📝 User requested ${generateOutputs} outputs`)
@@ -248,9 +253,15 @@ const SceneCard: React.FC<{
                       <SelectItem value="4">4</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Button onClick={handleGenerateImage} disabled={scene.generating} size="icon">
-                    <ArrowUp className="w-4 h-4" />
-                  </Button>
+                  {scene.generating ? (
+                    <Button onClick={handleResetGenerating} variant="outline" size="icon" title="Reset generating state">
+                      <span className="text-xs">⏹</span>
+                    </Button>
+                  ) : (
+                    <Button onClick={handleGenerateImage} disabled={!localPrompt.trim()} size="icon">
+                      <ArrowUp className="w-4 h-4" />
+                    </Button>
+                  )}
                 </div>
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
