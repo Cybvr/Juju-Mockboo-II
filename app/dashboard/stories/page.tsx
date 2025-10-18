@@ -163,7 +163,6 @@ const App: React.FC = () => {
       if (activeProjectId === deleteProjectId) {
         setActiveProjectId(null);
       }
-      window.location.reload();
     } catch (error) {
       console.error('Failed to delete project:', error);
     } finally {
