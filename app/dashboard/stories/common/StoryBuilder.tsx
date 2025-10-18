@@ -194,16 +194,14 @@ const SceneCard: React.FC<{
         if (imageUrl && draggedSceneId === scene.id) {
             onUpdateScene({ ...scene, videoGenerating: true });
             try {
-                const base64Image = imageUrl.includes('base64,')
-                    ? imageUrl.split('base64,')[1]
-                    : imageUrl;
+                // Use the imageUrl directly - the API will handle Firebase URLs
                 const response = await fetch('/api/stories', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         action: 'generateVideo',
                         prompt: localPrompt || 'A cinematic scene',
-                        base64Image: base64Image
+                        imageUrl: imageUrl
                     })
                 });
                 const data = await response.json();

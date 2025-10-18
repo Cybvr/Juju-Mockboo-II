@@ -153,8 +153,9 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'No image was generated' }, { status: 500 });
 
       case 'generateVideo':
-        if (!prompt || !base64Image) {
-          return NextResponse.json({ error: 'Prompt and base64Image are required' }, { status: 400 });
+        const { imageUrl } = await request.json();
+        if (!prompt || !imageUrl) {
+          return NextResponse.json({ error: 'Prompt and imageUrl are required' }, { status: 400 });
         }
 
         if (!process.env.REPLICATE_API_TOKEN) {
@@ -164,9 +165,12 @@ export async function POST(request: NextRequest) {
         const Replicate = require('replicate');
         const replicate = new Replicate({ auth: process.env.REPLICATE_API_TOKEN });
 
-        // Upload base64 image to Firebase Storage to get public URL
-        const { uploadImageToStorage } = await import('@/services/filmService');
-        const tempImageUrl = await uploadImageToStorage(base64Image, `kling_input_${Date.now()}.jpg`);
+        // Use imageUrl directly if it's already a Firebase URL, or upload if it's base64
+        let tempImageUrl = imageUrl;
+        if (imageUrl.includes('base64,')) {
+          const { uploadImageToStorage } = await import('@/services/filmService');
+          tempImageUrl = await uploadImageToStorage(imageUrl, `kling_input_${Date.now()}.jpg`);
+        }
 
         const input = {
           mode: "standard",
