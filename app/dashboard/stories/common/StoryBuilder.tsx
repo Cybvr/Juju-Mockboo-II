@@ -522,8 +522,9 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({ project, onUpdatePro
                             <button className="text-2xl hover:scale-110 transition-transform">👎</button>
                             <button className="text-2xl hover:scale-110 transition-transform">😊</button>
                         </div>
+                    </div>
                     {activeTab === 'scenes' ? (
-                        <div className="">
+                        <div className="mt-4">
                             {project.storyboard.length > 0 ? (
                                 <Accordion type="multiple" value={expandedScenes} onValueChange={setExpandedScenes}>
                                     {project.storyboard
@@ -543,6 +544,7 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({ project, onUpdatePro
                                     <Camera className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
                                     <h2 className="text-xl font-semibold text-foreground">Empty Storyboard</h2>
                                     <p className="text-muted-foreground mt-2">Analyze your script or add a scene to get started.</p>
+                                    <Button onClick={handleAddScene} className="mt-4">Add Scene</Button>
                                 </div>
                             )}
                         </div>
@@ -551,7 +553,7 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({ project, onUpdatePro
                     )}
                 </div>
                 {/* Right section with sticky script */}
-                <div className="w-1/3 h-full sticky top-0 bg-card rounded-2xl overflow">
+                <div className="w-1/3 h-full sticky top-0 bg-card rounded-2xl overflow-y-auto">
                     <div className="h-full flex flex-col rounded-lg sm:rounded-2xl shadow-inner">
                         <div className="flex-grow p-3 sm:p-4 md:p-6 min-h-0">
                             <Textarea
