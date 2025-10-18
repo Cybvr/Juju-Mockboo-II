@@ -180,16 +180,7 @@ export async function POST(request: NextRequest) {
 
         if (output && typeof output.url === 'function') {
           const videoUrl = output.url();
-
-          // Download video and convert to base64 for consistent return format
-          const videoResponse = await fetch(videoUrl);
-          if (!videoResponse.ok) {
-            throw new Error(`Failed to fetch video: ${videoResponse.statusText}`);
-          }
-          const videoBlob = await videoResponse.blob();
-          const buffer = await videoBlob.arrayBuffer();
-          const base64Video = Buffer.from(buffer).toString('base64');
-          return NextResponse.json({ success: true, videoUrl: `data:video/mp4;base64,${base64Video}` });
+          return NextResponse.json({ success: true, videoUrl: videoUrl });
         }
 
         return NextResponse.json({ error: 'Video generation failed' }, { status: 500 });
