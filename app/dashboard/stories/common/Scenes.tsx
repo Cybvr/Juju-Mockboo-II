@@ -90,9 +90,8 @@ const SceneCard: React.FC<{
                 value={scene.prompt || ""}
                 onChange={handleTextareaChange}
                 placeholder="Action prompt: e.g., 'looks out the window at the rain...'"
-                className="flex-grow resize-none overflow-hidden min-h-[60px] focus:ring-2 focus:ring-primary focus:border-primary"
+                className="flex-grow resize-none min-h-[60px]"
                 rows={2}
-                autoFocus={false}
               />
               <div className="flex items-start justify-between gap-3">
                 <div className="flex flex-cols gap-3 text-left">
@@ -148,50 +147,24 @@ const SceneCard: React.FC<{
                 </Button>
               </div>
               {/* Media Sections */}
-              <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-                {/* Image Section */}
-                <div className="lg:col-span-2">
-                  <div className="aspect-video bg-muted/50 rounded-lg p-2 border-2 border-dashed border-muted-foreground/20">
-                    <div className="grid grid-cols-2 gap-2 h-full">
-                      {/* 4 generated image slots */}
-                      {Array.from({ length: 4 }, (_, index) => (
-                        <div key={index} className="aspect-square bg-muted rounded-lg overflow-hidden flex items-center justify-center">
-                          {scene.generating ? (
-                            <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-                          ) : scene.imageUrl === "error" ? (
-                            <p className="text-destructive text-xs">Error</p>
-                          ) : scene.imageUrl && index === 0 ? (
-                            <img
-                              src={scene.imageUrl}
-                              alt={`Scene ${scene.scene_number}`}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <Camera className="w-4 h-4 text-muted-foreground/50" />
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                {/* Video Section */}
-                <div className="lg:col-span-3">
-                  <div className="aspect-video bg-muted/50 rounded-lg overflow-hidden flex items-center justify-center border-2 border-dashed border-muted-foreground/20">
-                    {scene.videoGenerating ? (
-                      <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-                    ) : scene.videoUrl ? (
-                      <video src={scene.videoUrl} className="w-full h-full object-cover" controls muted loop />
-                    ) : (
-                      <video 
-                        src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" 
-                        className="w-full h-full object-cover" 
-                        controls 
-                        muted 
-                        loop 
+              <div className="grid grid-cols-2 gap-2">
+                {Array.from({ length: 4 }, (_, index) => (
+                  <div key={index} className="aspect-square bg-muted rounded-lg overflow-hidden flex items-center justify-center">
+                    {scene.generating ? (
+                      <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                    ) : scene.imageUrl === "error" ? (
+                      <p className="text-destructive text-xs">Error</p>
+                    ) : scene.imageUrl && index === 0 ? (
+                      <img
+                        src={scene.imageUrl}
+                        alt={`Scene ${scene.scene_number}`}
+                        className="w-full h-full object-cover"
                       />
+                    ) : (
+                      <Camera className="w-4 h-4 text-muted-foreground/50" />
                     )}
                   </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>
