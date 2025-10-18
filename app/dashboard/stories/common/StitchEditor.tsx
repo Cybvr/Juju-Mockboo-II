@@ -97,89 +97,86 @@ export const StitchEditor: React.FC<StitchEditorProps> = ({ project, onUpdatePro
     const currentScene = videoScenes[currentPlayingIndex];
 
     return (
-        <div className="h-full flex flex-col md:flex-row gap-4">
-            <main className="flex-grow h-full flex flex-col">
-                <Card className="flex-grow">
-                    <div className="flex-grow bg-black flex items-center justify-center relative rounded-lg overflow-hidden">
-                        <video 
-                            ref={playerRef} 
-                            onEnded={handleVideoEnd} 
-                            onPlay={() => setIsPlaying(true)}
-                            onPause={() => setIsPlaying(false)}
-                            className="max-w-full max-h-full" 
-                            playsInline
-                        />
-                        {!isPlaying && !currentScene && (
-                            <div className="absolute text-center text-muted-foreground">
-                                <Film className="w-16 h-16 mx-auto mb-2" />
-                                <p>Timeline Preview</p>
-                            </div>
-                        )}
+        <div className="h-full flex flex-col bg-gray-900">
+            {/* Video Preview Area */}
+            <div className="flex-grow bg-black flex items-center justify-center relative">
+                <video 
+                    ref={playerRef} 
+                    onEnded={handleVideoEnd} 
+                    onPlay={() => setIsPlaying(true)}
+                    onPause={() => setIsPlaying(false)}
+                    className="max-w-full max-h-full" 
+                    playsInline
+                />
+                {!isPlaying && !currentScene && (
+                    <div className="absolute text-center text-gray-400">
+                        <Film className="w-16 h-16 mx-auto mb-2" />
+                        <p>Timeline Preview</p>
                     </div>
-                    <CardContent className="p-4 border-t flex items-center justify-between">
-                        <Button onClick={handlePlayPause} disabled={!hasVideos} className="flex items-center gap-2">
-                            {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                            <span>{isPlaying ? 'Pause' : 'Play Sequence'}</span>
-                        </Button>
-                        <div className="text-center">
-                            {currentScene && (
-                                <>
-                                    <p className="font-semibold">Playing: Scene {currentScene.scene_number}</p>
-                                    <p className="text-sm text-muted-foreground">({currentPlayingIndex + 1} of {videoScenes.length})</p>
-                                </>
-                            )}
-                        </div>
-                        <Button 
-                            onClick={() => alert("Exporting the final stitched video is not yet implemented.")} 
-                            disabled={!hasVideos} 
-                            variant="outline"
-                            className="flex items-center gap-2"
+                )}
+            </div>
+
+            {/* Controls Bar */}
+            <div className="bg-gray-800 px-4 py-3 flex items-center justify-between border-t border-gray-700">
+                <Button onClick={handlePlayPause} disabled={!hasVideos} className="flex items-center gap-2">
+                    {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                    <span>{isPlaying ? 'Pause' : 'Play'}</span>
+                </Button>
+                
+                <div className="text-center text-white">
+                    {currentScene && (
+                        <>
+                            <p className="font-semibold">Scene {currentScene.scene_number}</p>
+                            <p className="text-xs text-gray-400">({currentPlayingIndex + 1} of {videoScenes.length})</p>
+                        </>
+                    )}
+                </div>
+                
+                <Button 
+                    onClick={() => alert("Exporting the final stitched video is not yet implemented.")} 
+                    disabled={!hasVideos} 
+                    variant="outline"
+                    className="flex items-center gap-2"
+                >
+                    <Upload className="w-4 h-4" />
+                    <span>Export</span>
+                </Button>
+            </div>
+
+            {/* Timeline */}
+            <div className="h-32 bg-gray-800 border-t border-gray-700 p-2">
+                <h3 className="text-sm font-medium text-white mb-2">Timeline</h3>
+                <div className="flex gap-1 overflow-x-auto">
+                    {hasVideos ? videoScenes.map((scene, index) => (
+                        <div
+                            key={scene.id}
+                            draggable
+                            onDragStart={(e) => handleDragStart(e, scene)}
+                            onDragOver={handleDragOver}
+                            onDrop={(e) => handleDrop(e, scene)}
+                            className={`relative flex-shrink-0 w-20 h-16 bg-gray-700 rounded overflow-hidden cursor-grab transition-all ${
+                                draggedItem?.id === scene.id ? 'opacity-50' : ''
+                            } ${
+                                currentPlayingIndex !== -1 && videoScenes[currentPlayingIndex]?.id === scene.id ? 'ring-2 ring-blue-500' : ''
+                            }`}
                         >
-                            <Upload className="w-4 h-4" />
-                            <span>Export Final Film</span>
-                        </Button>
-                    </CardContent>
-                </Card>
-            </main>
-            <aside className="md:w-72 lg:w-96 flex-shrink-0 flex flex-col h-full">
-                <Card className="h-full flex flex-col">
-                    <CardContent className="p-4 border-b">
-                        <h3 className="text-lg font-bold">Scene Sequence</h3>
-                    </CardContent>
-                    <div className="flex-grow overflow-y-auto p-2 space-y-2">
-                        {hasVideos ? videoScenes.map(scene => (
-                            <Card 
-                                key={scene.id}
-                                draggable
-                                onDragStart={(e) => handleDragStart(e, scene)}
-                                onDragOver={handleDragOver}
-                                onDrop={(e) => handleDrop(e, scene)}
-                                className={`cursor-grab transition-all ${
-                                    draggedItem?.id === scene.id ? 'opacity-50' : ''
-                                } ${
-                                    currentPlayingIndex !== -1 && videoScenes[currentPlayingIndex]?.id === scene.id ? 'ring-2 ring-primary' : ''
-                                }`}
-                            >
-                                <CardContent className="flex items-center gap-3 p-3">
-                                    <GripVertical className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                                    <div className="w-20 h-12 bg-muted rounded overflow-hidden flex-shrink-0">
-                                        <video src={scene.videoUrl!} className="w-full h-full object-cover" />
-                                    </div>
-                                    <div>
-                                        <p className="font-semibold text-sm">Scene {scene.scene_number}</p>
-                                        <p className="text-xs text-muted-foreground line-clamp-2">{scene.prompt}</p>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        )) : (
-                            <div className="text-center p-8 text-muted-foreground">
-                                <GripVertical className="w-12 h-12 mx-auto mb-2" />
-                                <p className="text-sm">Generate videos in the 'Video' tab to start stitching your film.</p>
+                            <video src={scene.videoUrl!} className="w-full h-full object-cover" />
+                            <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-70 text-white text-xs p-1">
+                                {scene.scene_number}
                             </div>
-                        )}
-                    </div>
-                </Card>
-            </aside>
+                            <GripVertical className="absolute top-1 right-1 w-3 h-3 text-white opacity-70" />
+                        </div>
+                    )) : (
+                        <div className="flex items-center justify-center w-full h-full text-gray-400">
+                            <div className="text-center">
+                                <GripVertical className="w-8 h-8 mx-auto mb-1" />
+                                <p className="text-xs">Generate videos to build timeline</p>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+
             <style>{`
                 .cursor-grab { cursor: grab; }
                 .cursor-grab:active { cursor: grabbing; }
