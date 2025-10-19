@@ -570,7 +570,7 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({
         </div>
 
         {/* Mobile Script Sheet */}
-        <div className="lg:hidden fixed bottom-4 right-4 z-50">
+        <div className="lg:hidden fixed top-4 right-4 z-50">
           <Sheet open={isScriptSheetOpen} onOpenChange={setIsScriptSheetOpen}>
             <SheetTrigger asChild>
               <Button size="lg" className="rounded-full shadow-lg">
