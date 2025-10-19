@@ -1,10 +1,11 @@
+
 'use client'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
-import { Check, Zap } from 'lucide-react'
+import { Check, Crown } from 'lucide-react'
 import { PRICING_TIERS, type PricingTier } from '@/data/pricing'
 import { cn } from '@/lib/utils'
 
@@ -25,14 +26,15 @@ export function PricingTable({ currentTier, onSelectPlan, showCurrentPlan = true
 
   const getPrice = (tier: PricingTier) => {
     const plan = PRICING_TIERS[tier]
+    if (typeof plan.price.monthly === 'string') return plan.price.monthly
     return isAnnual ? plan.price.annual : plan.price.monthly
   }
 
   const getSavings = (tier: PricingTier) => {
     const plan = PRICING_TIERS[tier]
-    if (plan.price.monthly === 0) return 0
+    if (typeof plan.price.monthly !== 'number' || plan.price.monthly === 0) return 0
     const monthlyTotal = plan.price.monthly * 12
-    return monthlyTotal - plan.price.annual
+    return monthlyTotal - (plan.price.annual as number)
   }
 
   return (
@@ -58,33 +60,50 @@ export function PricingTable({ currentTier, onSelectPlan, showCurrentPlan = true
       </div>
 
       {/* Pricing Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
         {Object.entries(PRICING_TIERS).map(([key, plan]) => {
           const tier = key as PricingTier
           const price = getPrice(tier)
           const savings = getSavings(tier)
           const isCurrentPlan = currentTier === tier
           const isFree = tier === 'free'
+          const isEnterprise = tier === 'enterprise'
 
           return (
             <Card 
               key={tier} 
               className={cn(
                 "relative transition-all duration-300 hover:shadow-lg flex flex-col",
-                isCurrentPlan && showCurrentPlan && "ring-2 ring-primary"
+                isCurrentPlan && showCurrentPlan && "ring-2 ring-primary",
+                plan.popular && "ring-2 ring-primary"
               )}
             >
+              {plan.badge && (
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                  <Badge className="bg-primary text-primary-foreground">{plan.badge}</Badge>
+                </div>
+              )}
               <CardHeader className="text-left pb-4">
                 <CardTitle className="text-xl font-bold">{plan.name}</CardTitle>
+                {plan.subtitle && (
+                  <p className="text-sm text-muted-foreground">{plan.subtitle}</p>
+                )}
                 <div className="mt-4">
                   <div className="flex items-baseline justify-left">
-                    <span className="text-4xl font-normal">${price}</span>
-                    {!isFree && (
+                    <span className="text-4xl font-normal">
+                      {typeof price === 'string' ? price : `$${price}`}
+                    </span>
+                    {!isFree && !isEnterprise && (
                       <span className="text-muted-foreground ml-1">
-                        /{isAnnual ? 'year' : 'month'}
+                        /month
                       </span>
                     )}
                   </div>
+                  {plan.creditPrice && typeof plan.creditPrice === 'number' && (
+                    <p className="text-sm text-muted-foreground mt-1">
+                      ${plan.creditPrice} per credit
+                    </p>
+                  )}
                   {isAnnual && savings > 0 && (
                     <p className="text-sm text-green-600 mt-1">
                       Save ${savings}/year
@@ -94,9 +113,21 @@ export function PricingTable({ currentTier, onSelectPlan, showCurrentPlan = true
               </CardHeader>
               <CardContent className="flex flex-col flex-grow">
                 <div className="text-left mb-4">
-                  <div className="text-2xl font-semibold">{plan.credits.toLocaleString()}</div>
-                  <div className="text-sm text-muted-foreground">credits/month</div>
+                  <div className="text-2xl font-semibold">
+                    {typeof plan.credits === 'string' ? plan.credits : plan.credits.toLocaleString()}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {isEnterprise ? 'credits' : 'credits/month'}
+                  </div>
                 </div>
+
+                {plan.addOns && (
+                  <div className="mb-4 p-2 bg-muted/50 rounded">
+                    <p className="text-sm font-medium">Add-ons</p>
+                    <p className="text-xs text-muted-foreground">{plan.addOns}</p>
+                  </div>
+                )}
+
                 <ul className="space-y-2 mb-6 flex-grow">
                   {plan.features.map((feature, index) => (
                     <li key={index} className="flex items-center gap-2 text-sm">
@@ -105,6 +136,7 @@ export function PricingTable({ currentTier, onSelectPlan, showCurrentPlan = true
                     </li>
                   ))}
                 </ul>
+
                 <div className="mt-auto">
                   {isCurrentPlan && showCurrentPlan ? (
                     <Button variant="outline" className="w-full" disabled>
@@ -113,13 +145,20 @@ export function PricingTable({ currentTier, onSelectPlan, showCurrentPlan = true
                   ) : (
                     <Button 
                       className={cn(
-                        "w-full"
+                        "w-full gap-2",
+                        plan.popular && "bg-primary hover:bg-primary/90"
                       )}
-                      variant="outline"
+                      variant={plan.popular ? "default" : "outline"}
                       onClick={() => handleSelectPlan(tier)}
                     >
-                      {isFree ? 'Get Started' : 'Upgrade'}
+                      <Crown className="w-4 h-4" />
+                      {isFree ? 'Try for free' : isEnterprise ? 'Contact Sales' : `Get ${plan.name}`}
                     </Button>
+                  )}
+                  {!isFree && !isEnterprise && (
+                    <p className="text-xs text-muted-foreground text-center mt-2">
+                      *Billed monthly until cancelled
+                    </p>
                   )}
                 </div>
               </CardContent>
