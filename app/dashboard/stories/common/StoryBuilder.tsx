@@ -491,8 +491,8 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({ project, onUpdatePro
                 <div className="flex flex-col w-full lg:w-2/3 px-2 sm:px-4 lg:px-8 overflow-auto min-h-0">
                     <StitchEditor project={project} onUpdateProject={onUpdateProject} />
                     {/* Emoji Reactions */}
-                    <div className="mt-4 flex justify-center overflow-x-auto bg-green-500">
-                        <div className="flex items-center gap-2 sm:gap-4 bg-white/90 backdrop-blur-sm rounded-full px-4 sm:px-6 py-2 sm:py-3 shadow-lg">
+                    <div className="mt-4 flex justify-center overflow-x-auto">
+                        <div className="flex items-center gap-2 sm:gap-4 bg-card/90 backdrop-blur-sm rounded-full px-4 sm:px-6 py-2 sm:py-3 shadow-lg border">
                             <button className="text-xl sm:text-2xl hover:scale-110 transition-transform">😂</button>
                             <button className="text-xl sm:text-2xl hover:scale-110 transition-transform">😍</button>
                             <button className="text-xl sm:text-2xl hover:scale-110 transition-transform">😱</button>

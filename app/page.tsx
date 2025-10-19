@@ -88,10 +88,7 @@ export default function LandingPage() {
     );
   }
 
-  // Don't render the landing page if user is logged in (will redirect)
-  if (user) {
-    return null;
-  }
+  
 
   return (
     <div className="min-h-screen">
