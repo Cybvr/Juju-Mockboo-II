@@ -488,7 +488,7 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({ project, onUpdatePro
 
             <div className="flex-grow flex flex-col lg:flex-row p-2 sm:p-4 gap-2 sm:gap-4 overflow-hidden bg-accent">
                 {/* Left section - storyboard */}
-                <div className="flex flex-col w-full lg:w-2/3 px-2 sm:px-4 lg:px-8 overflow-auto">
+                <div className="flex flex-col w-full lg:w-2/3 px-2 sm:px-4 lg:px-8 overflow-auto min-h-0"></div>
                     <StitchEditor project={project} onUpdateProject={onUpdateProject} />
 
                     <div className="flex border-b border-border mt-4">
@@ -550,14 +550,14 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({ project, onUpdatePro
                 </div>
 
                 {/* Right section - script and chat */}
-                <div className="w-full lg:w-1/3 h-64 lg:h-full bg-card rounded-lg sm:rounded-2xl overflow-hidden flex flex-col">
+                <div className="w-full lg:w-1/3 h-96 lg:h-full bg-card rounded-lg sm:rounded-2xl overflow-hidden flex flex-col">
                     <div className="flex-1 min-h-0 overflow-y-auto p-3 sm:p-4 md:p-6">
                         <Textarea
                             value={script}
                             onChange={handleScriptChange}
                             onBlur={handleScriptBlur}
                             placeholder="INT. COFFEE SHOP - DAY..."
-                            className="w-full h-full p-2 text-xs sm:text-sm bg-transparent resize-none border-none focus:ring-2 focus:ring-primary"
+                            className="w-full h-full min-h-[200px] p-2 text-xs sm:text-sm bg-transparent resize-none border-none focus:ring-2 focus:ring-primary"
                         />
                     </div>
                     <div className="border-t border-border">
