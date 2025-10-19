@@ -36,17 +36,23 @@ export const StitchEditor: React.FC<StitchPlayerProps> = ({ project }) => {
         const sortedVideoScenes = project.storyboard
             .filter(s => s.videoUrl)
             .sort((a, b) => a.scene_number - b.scene_number);
+        console.log('🎬 StitchEditor: Updated video scenes:', sortedVideoScenes);
         setVideoScenes(sortedVideoScenes);
         setVideosLoaded(false);
     }, [project.storyboard]);
 
     useEffect(() => {
-        if (videoScenes.length === 0) return;
+        if (videoScenes.length === 0) {
+            console.log('🎬 StitchEditor: No video scenes to load');
+            return;
+        }
+        console.log('🎬 StitchEditor: Loading durations for', videoScenes.length, 'scenes');
         const loadDurations = async () => {
             const durationsMap = new Map<string, number>();
             let total = 0;
             for (const scene of videoScenes) {
                 if (scene.videoUrl) {
+                    console.log('📹 Loading video metadata for scene', scene.scene_number, ':', scene.videoUrl);
                     const video = document.createElement('video');
                     video.src = scene.videoUrl;
                     await new Promise<void>((resolve) => {
@@ -56,6 +62,11 @@ export const StitchEditor: React.FC<StitchPlayerProps> = ({ project }) => {
                             const duration = trimEnd - trimStart;
                             durationsMap.set(scene.id, duration);
                             total += duration;
+                            console.log('✅ Scene', scene.scene_number, 'duration:', duration + 's');
+                            resolve();
+                        };
+                        video.onerror = () => {
+                            console.error('❌ Failed to load video for scene', scene.scene_number);
                             resolve();
                         };
                     });
@@ -64,6 +75,7 @@ export const StitchEditor: React.FC<StitchPlayerProps> = ({ project }) => {
             setSceneDurations(durationsMap);
             setTotalDuration(total);
             setVideosLoaded(true);
+            console.log('🎬 StitchEditor: All videos loaded. Total duration:', total + 's');
             if (playerRef.current && videoScenes[0]?.videoUrl) {
                 playerRef.current.src = videoScenes[0].videoUrl;
                 playerRef.current.currentTime = videoScenes[0].trimStart || 0;

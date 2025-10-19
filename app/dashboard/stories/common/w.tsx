@@ -117,31 +117,41 @@ const SceneCard: React.FC<SceneCardProps> = ({ scene, project, onUpdateScene, on
     e.preventDefault()
     const imageUrl = e.dataTransfer.getData('text/plain')
     const draggedSceneId = e.dataTransfer.getData('application/x-scene-id')
+    console.log('🎬 Video Drop Event:', { imageUrl, draggedSceneId, sceneId: scene.id })
+    
     if (imageUrl && draggedSceneId === scene.id) {
+      console.log('✅ Valid drop - starting video generation')
       onUpdateScene({ ...scene, videoGenerating: true })
       try {
-        const base64Image = imageUrl.includes('base64,')
-          ? imageUrl.split('base64,')[1]
-          : imageUrl
+        const requestBody = {
+          action: 'generateVideo',
+          prompt: localPrompt || 'A cinematic scene',
+          base64Image: imageUrl // Send the full imageUrl, API will handle it
+        }
+        console.log('📤 Sending video generation request:', requestBody)
+        
         const response = await fetch('/api/stories', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action: 'generateVideo',
-            prompt: localPrompt || 'A cinematic scene',
-            base64Image: base64Image
-          })
+          body: JSON.stringify(requestBody)
         })
+        
+        console.log('📥 Video generation response status:', response.status)
         const data = await response.json()
+        console.log('📋 Video generation response data:', data)
+        
         if (data.success) {
+          console.log('🎉 Video generated successfully:', data.videoUrl)
           onUpdateScene({ ...scene, videoUrl: data.videoUrl, videoGenerating: false })
         } else {
           throw new Error(data.error || 'Video generation failed')
         }
       } catch (error) {
-        console.error('Video generation failed:', error)
+        console.error('❌ Video generation failed:', error)
         onUpdateScene({ ...scene, videoGenerating: false })
       }
+    } else {
+      console.log('❌ Invalid drop - ignoring')
     }
   }
 
