@@ -12,6 +12,7 @@ import { StitchEditor } from './StitchEditor';
 import { Modal } from './Modal';
 import { ChatInterface } from './ChatInterface';
 import { StoryHeader } from './StoryHeader';
+import { ScriptPanel } from './ScriptPanel';
 import { generateSingleImage } from "@/services/filmService";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
@@ -543,20 +544,13 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({ project, onUpdatePro
                 </div>
 
                 {/* Right section - script and chat */}
-                <div className="w-full lg:w-1/3 h-96 lg:h-full bg-card rounded-lg sm:rounded-2xl overflow-hidden flex flex-col">
-                    <div className="flex-1 min-h-0 overflow-y-auto p-3 sm:p-4 md:p-6">
-                        <Textarea
-                            value={script}
-                            onChange={handleScriptChange}
-                            onBlur={handleScriptBlur}
-                            placeholder="INT. COFFEE SHOP - DAY..."
-                            className="w-full h-full min-h-[200px] p-2 text-xs sm:text-sm bg-transparent resize-none border-none focus:ring-2 focus:ring-primary"
-                        />
-                    </div>
-                    <div className="border-t border-border">
-                        <ChatInterface project={project} onUpdateProject={onUpdateProject} />
-                    </div>
-                </div>
+                <ScriptPanel
+                    script={script}
+                    onScriptChange={handleScriptChange}
+                    onScriptBlur={handleScriptBlur}
+                    project={project}
+                    onUpdateProject={onUpdateProject}
+                />
             </div>
 
             <Modal isOpen={isShareModalOpen} onClose={() => setIsShareModalOpen(false)} title="Share Project">
