@@ -11,6 +11,7 @@ import { analyzeScript } from '@/services/filmService';
 import { StitchEditor } from './StitchEditor';
 import { Modal } from './Modal';
 import { ChatInterface } from './ChatInterface';
+import { StoryHeader } from './StoryHeader';
 import { generateSingleImage } from "@/services/filmService";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
@@ -453,27 +454,14 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({ project, onUpdatePro
 
     return (
         <div className="flex flex-col h-screen text-foreground ">
-            <header className="flex-shrink-0 flex items-center justify-between p-2 sm:p-4 border-b border-border bg-card">
-                <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
-                    <Button variant="ghost" size="icon" onClick={onBackToDashboard} className="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10">
-                        <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </Button>
-                    <Input
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        onBlur={handleTitleBlur}
-                        className="text-sm sm:text-base font-bold bg-transparent border-none focus:ring-0 focus:ring-transparent px-2 h-auto flex-1 min-w-0"
-                    />
-                </div>
-                <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-                    <Button variant="outline" size="icon" onClick={() => setIsShareModalOpen(true)} className="h-8 w-8 sm:h-10 sm:w-10">
-                        <Share2 className="w-4 h-4" />
-                    </Button>
-                    <Button variant="outline" size="icon" onClick={() => setIsSettingsModalOpen(true)} className="h-8 w-8 sm:h-10 sm:w-10">
-                        <Settings className="w-4 h-4" />
-                    </Button>
-                </div>
-            </header>
+            <StoryHeader
+                title={title}
+                onTitleChange={setTitle}
+                onTitleBlur={handleTitleBlur}
+                onBackToDashboard={onBackToDashboard}
+                onShareClick={() => setIsShareModalOpen(true)}
+                onSettingsClick={() => setIsSettingsModalOpen(true)}
+            />
 
             {isAnalyzing && (
                 <div className="bg-primary/20 text-primary p-2 sm:p-3 text-center text-xs sm:text-sm flex items-center justify-center gap-2">
