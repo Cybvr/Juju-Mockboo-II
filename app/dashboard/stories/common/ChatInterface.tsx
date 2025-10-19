@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { FilmProject } from '@/types/storytypes';
-import { Sparkles } from 'lucide-react';
+import { ArrowUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { generateProjectPatch } from '@/services/filmService';
@@ -98,7 +98,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ project, onUpdateP
                 handleSubmit(e as any);
               }
             }}
-            placeholder="Tell Juju what to change... e.g., 'Change title to Cosmic Odyssey' or 'Make scene 1 prompt about a rainy day'"
+            placeholder="Edit Script"
             className="w-full h-14 p-4 pr-16 text-xs rounded-2xl resize-none"
             rows={1}
           />
@@ -112,7 +112,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ project, onUpdateP
             {isLoading ? (
               <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin"></div>
             ) : (
-              <Sparkles className="w-4 h-4" />
+              <ArrowUp className="w-4 h-4" />
             )}
           </Button>
         </form>

@@ -10,9 +10,9 @@ service cloud.firestore {
         exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
+
     // Documents collection
     match /documents/{documentId} {
-      // Admin access first
       allow read, write: if request.auth != null &&
         exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
@@ -28,6 +28,7 @@ service cloud.firestore {
       allow update: if request.auth != null && 
         (resource == null || resource.data.userId == request.auth.uid);
     }
+
     // Chat sessions collection
     match /chats/{chatId} {
       allow read, write, delete: if request.auth != null && 
@@ -35,6 +36,7 @@ service cloud.firestore {
       allow create: if request.auth != null && 
         request.resource.data.userId == request.auth.uid;
     }
+
     // Messages collection
     match /messages/{messageId} {
       allow read, write, delete: if request.auth != null &&
@@ -47,6 +49,7 @@ service cloud.firestore {
         exists(/databases/$(database)/documents/chats/$(request.resource.data.chatId)) &&
         get(/databases/$(database)/documents/chats/$(request.resource.data.chatId)).data.userId == request.auth.uid;
     }
+
     // Canvas collection
     match /canvases/{canvasId} {
       allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
@@ -61,6 +64,7 @@ service cloud.firestore {
       allow update: if request.auth != null && 
         request.resource.data.keys().hasOnly(['lastOpenedAt', 'viewCount', 'updatedAt']);
     }
+
     // Canvas versions collection
     match /canvas_versions/{versionId} {
       allow read, write: if request.auth != null && 
@@ -68,26 +72,24 @@ service cloud.firestore {
       allow read: if request.auth != null && 
         get(/databases/$(database)/documents/canvases/$(resource.data.canvasId)).data.isPublic == true;
     }
+
     // Stories collection
     match /stories/{storyId} {
-      // Read: allow for public stories or owner or shared stories
       allow read: if resource != null && 
         (resource.data.isPublic == true ||
          (request.auth != null && resource.data.userId == request.auth.uid) ||
          (request.auth != null && resource.data.shared == true));
 
-      // Create: authenticated users can create their own stories
       allow create: if request.auth != null && 
         request.auth.uid == request.resource.data.userId;
         
-      // Update: only the owner can modify their stories
       allow update: if request.auth != null && 
         request.auth.uid == resource.data.userId;
         
-      // Delete: only the owner can delete their stories
       allow delete: if request.auth != null && 
         request.auth.uid == resource.data.userId;
     }
+
     // Galleries collection
     match /galleries/{galleryId} {
       allow read: if resource != null && 
@@ -100,34 +102,29 @@ service cloud.firestore {
       allow delete: if request.auth != null && 
         request.auth.uid == resource.data.userId;
     }
-    // Comments collection
-    match /comments/{commentId} {
-      // Read: allow for public stories or story owner or authenticated users
-      allow read: if request.auth != null &&
-        exists(/databases/$(database)/documents/stories/$(resource.data.storyId)) &&
-        (get(/databases/$(database)/documents/stories/$(resource.data.storyId)).data.isPublic == true ||
-         get(/databases/$(database)/documents/stories/$(resource.data.storyId)).data.userId == request.auth.uid ||
-         get(/databases/$(database)/documents/stories/$(resource.data.storyId)).data.shared == true);
 
-      // Create: authenticated users can comment on accessible stories
+    // ✅ Comments collection (fully public read)
+    match /comments/{commentId} {
+      // Anyone (even unauthenticated) can read comments
+      allow read: if true;
+
+      // Authenticated users can create comments on any story
       allow create: if request.auth != null &&
-        exists(/databases/$(database)/documents/stories/$(request.resource.data.storyId)) &&
-        (get(/databases/$(database)/documents/stories/$(request.resource.data.storyId)).data.isPublic == true ||
-         get(/databases/$(database)/documents/stories/$(request.resource.data.storyId)).data.userId == request.auth.uid ||
-         get(/databases/$(database)/documents/stories/$(request.resource.data.storyId)).data.shared == true);
-         
-      // Update: only the comment author can modify their comments
+        exists(/databases/$(database)/documents/stories/$(request.resource.data.storyId));
+
+      // Only the comment author can edit
       allow update: if request.auth != null && 
         (resource.data.authorId == request.auth.uid ||
          resource.data.author == request.auth.uid);
          
-      // Delete: comment author or story owner can delete
+      // Comment author or story owner can delete
       allow delete: if request.auth != null && 
         (resource.data.authorId == request.auth.uid ||
          resource.data.author == request.auth.uid ||
          (exists(/databases/$(database)/documents/stories/$(resource.data.storyId)) &&
           get(/databases/$(database)/documents/stories/$(resource.data.storyId)).data.userId == request.auth.uid));
     }
+
     // Credit transactions collection
     match /creditTransactions/{transactionId} {
       allow read: if request.auth != null && request.auth.uid == resource.data.userId;
@@ -137,6 +134,7 @@ service cloud.firestore {
         exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
+
     // Admin access to all collections
     match /{document=**} {
       allow read, write: if request.auth != null &&
@@ -145,6 +143,7 @@ service cloud.firestore {
     }
   }
 }
+
 service firebase.storage {
   match /b/{bucket}/o {
     match /users/{userId}/profile/{fileName} {

@@ -1,8 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
 import { Avatar } from '@/components/ui/avatar';
 import { Send, Reply, Trash2 } from 'lucide-react';
 import type { FilmProject } from '@/types/storytypes';
@@ -31,9 +29,18 @@ export const CommentsInterface: React.FC<CommentsInterfaceProps> = ({
   const [newComment, setNewComment] = useState('');
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState('');
-  const [authorName, setAuthorName] = useState(user?.displayName || 'Anonymous');
+  const [authorName, setAuthorName] = useState('Anonymous');
 
-  // Load comments on mount
+  // Sync author name with Firebase user
+  useEffect(() => {
+    if (user) {
+      setAuthorName(user.displayName || 'Anonymous');
+    } else {
+      setAuthorName('Anonymous');
+    }
+  }, [user]);
+
+  // Load comments
   useEffect(() => {
     const loadComments = async () => {
       try {
@@ -128,7 +135,6 @@ export const CommentsInterface: React.FC<CommentsInterfaceProps> = ({
     return 'Just now';
   };
 
-  // Organize comments into threads
   const mainComments = comments.filter(comment => !comment.parentId);
   const getReplies = (commentId: string) => 
     comments.filter(comment => comment.parentId === commentId);
@@ -143,16 +149,6 @@ export const CommentsInterface: React.FC<CommentsInterfaceProps> = ({
 
   return (
     <div className="h-full flex flex-col">
-      {/* Author name input */}
-      <div className="flex-shrink-0 p-3 border-b border-border">
-        <Input
-          value={authorName}
-          onChange={(e) => setAuthorName(e.target.value)}
-          placeholder="Your name"
-          className="text-xs"
-        />
-      </div>
-
       {/* Comments list */}
       <div className="flex-1 overflow-y-auto p-3 space-y-4">
         {mainComments.map((comment) => {
@@ -163,7 +159,7 @@ export const CommentsInterface: React.FC<CommentsInterfaceProps> = ({
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <Avatar className="w-6 h-6 bg-primary text-primary-foreground text-xs">
-                      {comment.author[0].toUpperCase()}
+                      {comment.author?.[0]?.toUpperCase() || '?'}
                     </Avatar>
                     <span className="text-xs font-medium">{comment.author}</span>
                     <span className="text-xs text-muted-foreground">
@@ -201,7 +197,7 @@ export const CommentsInterface: React.FC<CommentsInterfaceProps> = ({
                     <div key={reply.id} className="bg-muted/30 rounded-lg p-2">
                       <div className="flex items-center gap-2 mb-1">
                         <Avatar className="w-5 h-5 bg-secondary text-secondary-foreground text-xs">
-                          {reply.author[0].toUpperCase()}
+                          {reply.author?.[0]?.toUpperCase() || '?'}
                         </Avatar>
                         <span className="text-xs font-medium">{reply.author}</span>
                         <span className="text-xs text-muted-foreground">
@@ -233,6 +229,12 @@ export const CommentsInterface: React.FC<CommentsInterfaceProps> = ({
                     placeholder="Write a reply..."
                     className="flex-1 text-xs resize-none"
                     rows={2}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleAddReply(comment.id);
+                      }
+                    }}
                   />
                   <div className="flex flex-col gap-1">
                     <Button
@@ -277,6 +279,12 @@ export const CommentsInterface: React.FC<CommentsInterfaceProps> = ({
             placeholder="Add a comment..."
             className="flex-1 text-xs resize-none"
             rows={2}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleAddComment();
+              }
+            }}
           />
           <Button
             size="icon"
