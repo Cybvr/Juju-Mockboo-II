@@ -106,13 +106,23 @@ export default function LandingPage() {
                   Turn your ideas into stunning visuals in seconds. No design skills required. Just imagination and AI.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Button
-                    size="lg"
-                    className="px-8 py-6 text-lg rounded-full bg-white hover:bg-white/90 text-black hover:text-black border-0 shadow-lg"
-                    onClick={() => setAuthModalOpen(true)}
-                  >
-                    Start Creating Free
-                  </Button>
+                  {!loading && user ? (
+                    <Button
+                      size="lg"
+                      className="px-8 py-6 text-lg rounded-full bg-white hover:bg-white/90 text-black hover:text-black border-0 shadow-lg"
+                      onClick={() => router.push('/dashboard')}
+                    >
+                      Go to Dashboard
+                    </Button>
+                  ) : (
+                    <Button
+                      size="lg"
+                      className="px-8 py-6 text-lg rounded-full bg-white hover:bg-white/90 text-black hover:text-black border-0 shadow-lg"
+                      onClick={() => setAuthModalOpen(true)}
+                    >
+                      Start Creating Free
+                    </Button>
+                  )}
                   <Button
                     size="lg"
                     variant="outline"
@@ -344,13 +354,23 @@ export default function LandingPage() {
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
             Join thousands of creators who've ditched design bottlenecks and unlocked their creative potential.
           </p>
-          <Button
-            size="lg"
-            className="px-10 py-6 text-xl rounded-full bg-white hover:bg-white/90 text-black hover:text-black border-0 shadow-lg"
-            onClick={() => setAuthModalOpen(true)}
-          >
-            Get Started Free →
-          </Button>
+          {!loading && user ? (
+            <Button
+              size="lg"
+              className="px-10 py-6 text-xl rounded-full bg-white hover:bg-white/90 text-black hover:text-black border-0 shadow-lg"
+              onClick={() => router.push('/dashboard')}
+            >
+              Go to Dashboard →
+            </Button>
+          ) : (
+            <Button
+              size="lg"
+              className="px-10 py-6 text-xl rounded-full bg-white hover:bg-white/90 text-black hover:text-black border-0 shadow-lg"
+              onClick={() => setAuthModalOpen(true)}
+            >
+              Start Creating Free →
+            </Button>
+          )}
           <p className="text-sm text-muted-foreground mt-6">No credit card required. Cancel anytime.</p>
         </div>
       </div>
