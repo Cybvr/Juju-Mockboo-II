@@ -100,6 +100,34 @@ service cloud.firestore {
       allow delete: if request.auth != null && 
         request.auth.uid == resource.data.userId;
     }
+    // Comments collection
+    match /comments/{commentId} {
+      // Read: allow for public stories or story owner or authenticated users
+      allow read: if request.auth != null &&
+        exists(/databases/$(database)/documents/stories/$(resource.data.storyId)) &&
+        (get(/databases/$(database)/documents/stories/$(resource.data.storyId)).data.isPublic == true ||
+         get(/databases/$(database)/documents/stories/$(resource.data.storyId)).data.userId == request.auth.uid ||
+         get(/databases/$(database)/documents/stories/$(resource.data.storyId)).data.shared == true);
+
+      // Create: authenticated users can comment on accessible stories
+      allow create: if request.auth != null &&
+        exists(/databases/$(database)/documents/stories/$(request.resource.data.storyId)) &&
+        (get(/databases/$(database)/documents/stories/$(request.resource.data.storyId)).data.isPublic == true ||
+         get(/databases/$(database)/documents/stories/$(request.resource.data.storyId)).data.userId == request.auth.uid ||
+         get(/databases/$(database)/documents/stories/$(request.resource.data.storyId)).data.shared == true);
+         
+      // Update: only the comment author can modify their comments
+      allow update: if request.auth != null && 
+        (resource.data.authorId == request.auth.uid ||
+         resource.data.author == request.auth.uid);
+         
+      // Delete: comment author or story owner can delete
+      allow delete: if request.auth != null && 
+        (resource.data.authorId == request.auth.uid ||
+         resource.data.author == request.auth.uid ||
+         (exists(/databases/$(database)/documents/stories/$(resource.data.storyId)) &&
+          get(/databases/$(database)/documents/stories/$(resource.data.storyId)).data.userId == request.auth.uid));
+    }
     // Credit transactions collection
     match /creditTransactions/{transactionId} {
       allow read: if request.auth != null && request.auth.uid == resource.data.userId;
