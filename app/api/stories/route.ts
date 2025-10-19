@@ -153,8 +153,10 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'No image was generated' }, { status: 500 });
 
       case 'generateVideo':
+        console.log('🎬 Video generation request:', { prompt, base64Image: base64Image ? 'present' : 'missing' });
         const imageUrl = base64Image; // Use the already parsed data
         if (!prompt || !imageUrl) {
+          console.error('❌ Missing required fields:', { prompt: !!prompt, imageUrl: !!imageUrl });
           return NextResponse.json({ error: 'Prompt and imageUrl are required' }, { status: 400 });
         }
 
