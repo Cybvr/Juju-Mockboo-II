@@ -253,19 +253,18 @@ export function MarketingHeader({ onAuthClick }: MarketingHeaderProps) {
           {!loading && user ? (
             <div className="flex items-center space-x-4">
               <Link href="/dashboard">
-                <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white">
-                  Dashboard
+                <Button className="bg-primary text-white hover:bg-primary/90 border-0">
+                  Go to Dashboard
                 </Button>
               </Link>
               <ProfileDropdown />
             </div>
           ) : (
             <Button 
-              variant="ghost" 
-              className="bg-primary text-white hover:bg-primay/50 hover:text-white  border-0"
+              className="bg-primary text-white hover:bg-primary/90 border-0"
               onClick={onAuthClick}
             >
-              Get Started
+              Start Creating Free
             </Button>
           )}
         </div>
@@ -391,8 +390,8 @@ export function MarketingHeader({ onAuthClick }: MarketingHeaderProps) {
                 {!loading && user ? (
                   <div className="space-y-3">
                     <Link href="/dashboard" onClick={() => setIsOpen(false)}>
-                      <Button variant="outline" className="w-full border-primary text-primary hover:bg-primary hover:text-white">
-                        Dashboard
+                      <Button className="w-full bg-primary text-white hover:bg-primary/90 border-0">
+                        Go to Dashboard
                       </Button>
                     </Link>
                     <div className="flex justify-center">
@@ -412,7 +411,7 @@ export function MarketingHeader({ onAuthClick }: MarketingHeaderProps) {
                       className="w-full bg-primary text-white border-0"
                       onClick={() => { onAuthClick(); setIsOpen(false); }}
                     >
-                      Get Started
+                      Start Creating Free
                     </Button>
                   </>
                 )}
