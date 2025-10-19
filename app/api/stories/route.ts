@@ -9,7 +9,7 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 export async function POST(request: NextRequest) {
   try {
-    const { action, prompt, script, base64Image, aspectRatio = '16:9' } = await request.json();
+    const { action, prompt, script, base64Image, imageUrl, aspectRatio = '16:9' } = await request.json();
 
     switch (action) {
       case 'generateScript':
@@ -153,8 +153,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'No image was generated' }, { status: 500 });
 
       case 'generateVideo':
-        console.log('🎬 Video generation request:', { prompt, base64Image: base64Image ? 'present' : 'missing' });
-        const imageUrl = base64Image; // Use the already parsed data
+        console.log('🎬 Video generation request:', { prompt, imageUrl: imageUrl ? 'present' : 'missing' });
         if (!prompt || !imageUrl) {
           console.error('❌ Missing required fields:', { prompt: !!prompt, imageUrl: !!imageUrl });
           return NextResponse.json({ error: 'Prompt and imageUrl are required' }, { status: 400 });
