@@ -593,7 +593,7 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({
               </div>
             </SheetContent>
           </Sheet>
-        }</div>
+        </div>
       </div>
 
       <Modal isOpen={isShareModalOpen} onClose={() => setIsShareModalOpen(false)} title="Share Project">
