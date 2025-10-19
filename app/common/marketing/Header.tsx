@@ -399,21 +399,12 @@ export function MarketingHeader({ onAuthClick }: MarketingHeaderProps) {
                     </div>
                   </div>
                 ) : (
-                  <>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start"
-                      onClick={() => { onAuthClick(); setIsOpen(false); }}
-                    >
-                      Sign In
-                    </Button>
-                    <Button
-                      className="w-full bg-primary text-white border-0"
-                      onClick={() => { onAuthClick(); setIsOpen(false); }}
-                    >
-                      Start Creating Free
-                    </Button>
-                  </>
+                  <Button
+                    className="w-full bg-primary text-white border-0"
+                    onClick={() => { onAuthClick(); setIsOpen(false); }}
+                  >
+                    Start Creating Free
+                  </Button>
                 )}
               </div>
             </div>
