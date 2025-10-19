@@ -489,21 +489,7 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({ project, onUpdatePro
             <div className="flex-grow flex flex-col lg:flex-row p-2 sm:p-4 gap-2 sm:gap-4 overflow-hidden bg-accent">
                 {/* Left section - storyboard */}
                 <div className="flex flex-col w-full lg:w-2/3 px-2 sm:px-4 lg:px-8 overflow-auto min-h-0">
-                    <div className="relative">
-                        <StitchEditor project={project} onUpdateProject={onUpdateProject} />
-                        {/* Emoji Reactions Overlay */}
-                        <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 z-50">
-                            <div className="flex items-center gap-2 sm:gap-4 bg-black/80 backdrop-blur-sm rounded-full px-4 sm:px-6 py-2 sm:py-3 shadow-lg border border-white/20">
-                                <button className="text-xl sm:text-2xl hover:scale-110 transition-transform text-white">😂</button>
-                                <button className="text-xl sm:text-2xl hover:scale-110 transition-transform text-white">😍</button>
-                                <button className="text-xl sm:text-2xl hover:scale-110 transition-transform text-white">😱</button>
-                                <button className="text-xl sm:text-2xl hover:scale-110 transition-transform text-white">🙌</button>
-                                <button className="text-xl sm:text-2xl hover:scale-110 transition-transform text-white">👍</button>
-                                <button className="text-xl sm:text-2xl hover:scale-110 transition-transform text-white">👎</button>
-                                <button className="text-xl sm:text-2xl hover:scale-110 transition-transform text-white">😊</button>
-                            </div>
-                        </div>
-                    </div>
+                    <StitchEditor project={project} onUpdateProject={onUpdateProject} />
 
                     <div className="flex border-b border-border mt-4">
                         <button
