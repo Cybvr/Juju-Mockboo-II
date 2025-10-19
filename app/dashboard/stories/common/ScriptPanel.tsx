@@ -1,5 +1,3 @@
-
-
 import React, { useState } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -30,13 +28,13 @@ const applyPatch = (doc: FilmProject, patch: any[]): FilmProject => {
     try {
         const pathParts = operation.path.split('/').slice(1);
         let parent = newDoc as any;
-        
+
         for (let i = 0; i < pathParts.length - 1; i++) {
           parent = parent[pathParts[i]];
         }
-    
+
         const finalKey = pathParts[pathParts.length - 1];
-    
+
         switch (operation.op) {
           case 'replace':
             parent[finalKey] = operation.value;
@@ -77,8 +75,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ project, onUpdateProject 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     if (!message.trim() || isLoading) return;
 
     setIsLoading(true);
@@ -97,37 +94,35 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ project, onUpdateProject 
   };
 
   return (
-    <div className="flex-shrink-0 p-4 border-t border-border">
-      <div className="max-w-4xl mx-auto">
-        <form onSubmit={handleSubmit} className="relative">
-          <Textarea
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleSubmit(e as any);
-              }
-            }}
-            placeholder="Edit Script"
-            className="w-full h-14 p-4 pr-16 text-xs rounded-2xl resize-none"
-            rows={1}
-          />
-          <Button
-            type="submit"
-            disabled={isLoading || !message.trim()}
-            size="icon"
-            className="absolute top-1/2 right-4 -translate-y-1/2 h-8 w-8 rounded-full"
-            aria-label="Send message"
-          >
-            {isLoading ? (
-              <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin"></div>
-            ) : (
-              <ArrowUp className="w-4 h-4" />
-            )}
-          </Button>
-        </form>
-        {error && <p className="text-destructive text-sm mt-2 text-center">{error}</p>}
+    <div className="flex-shrink-0 p-2 border-t border-border">
+      <div className="relative">
+        <Textarea
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              handleSubmit();
+            }
+          }}
+          placeholder="Edit Script"
+          className="w-full h-9 py-2 pl-3 pr-10 text-xs rounded-lg resize-none"
+          rows={1}
+        />
+        <Button
+          onClick={handleSubmit}
+          disabled={isLoading || !message.trim()}
+          size="icon"
+          className="absolute top-1/2 right-1.5 -translate-y-1/2 h-6 w-6 rounded-full"
+          aria-label="Send message"
+        >
+          {isLoading ? (
+            <div className="w-3 h-3 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin"></div>
+          ) : (
+            <ArrowUp className="w-3 h-3" />
+          )}
+        </Button>
+        {error && <p className="text-destructive text-xs mt-1">{error}</p>}
       </div>
     </div>
   );
@@ -159,18 +154,16 @@ export const ScriptPanel: React.FC<ScriptPanelProps> = ({
         </div>
 
         <TabsContent value="script" className="flex-1 flex flex-col m-0">
-          <div className="flex-1 min-h-0 overflow-y-auto p-3 sm:p-4 md:p-6">
+          <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6">
             <Textarea
               value={script}
               onChange={onScriptChange}
               onBlur={onScriptBlur}
               placeholder="INT. COFFEE SHOP - DAY..."
-              className="w-full h-full min-h-[200px] p-2 text-xs sm:text-sm bg-transparent resize-none border-none focus:ring-2 focus:ring-primary"
+              className="w-full h-full p-2 text-xs sm:text-sm bg-transparent resize-none border-none focus:ring-2 focus:ring-primary"
             />
           </div>
-          <div className="border-t border-border">
-            <ChatInterface project={project} onUpdateProject={onUpdateProject} />
-          </div>
+          <ChatInterface project={project} onUpdateProject={onUpdateProject} />
         </TabsContent>
 
         <TabsContent value="comments" className="flex-1 flex flex-col m-0">
@@ -180,4 +173,3 @@ export const ScriptPanel: React.FC<ScriptPanelProps> = ({
     </div>
   );
 };
-
