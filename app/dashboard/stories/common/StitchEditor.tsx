@@ -198,19 +198,19 @@ export const StitchEditor: React.FC<StitchPlayerProps> = ({ project }) => {
     return (
         <div
             ref={containerRef}
-            className="relative w-full h-screen bg-black group "
+            className="relative w-full h-screen bg-black group overflow-auto-y rounded-xl"
             onMouseMove={handleMouseMove}
             onMouseLeave={() => isPlaying && setShowControls(false)}
         >
             {/* Video Player */}
             <video
                 ref={playerRef}
-                className="w-full h-full object-contain cursor-pointer rounded-2xl"
+                className="w-full h-full object-contain cursor-pointer rounded-xl"
                 playsInline
                 onClick={handlePlayPause}
             />
             {!hasVideos && (
-                <div className="absolute inset-0 flex items-center justify-center text-white/70">
+                <div className="absolute inset-0 flex items-center justify-center text-white/70 rounded-xl">
                     <div className="text-center">
                         <Film className="w-8 h-8 mx-auto mb-4" />
                         <p className="text-lg">No videos loaded</p>
@@ -219,7 +219,7 @@ export const StitchEditor: React.FC<StitchPlayerProps> = ({ project }) => {
             )}
             {/* Controls Overlay */}
             <div
-                className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent transition-opacity duration-300 ${
+                className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent transition-opacity rounded-xl duration-300 ${
                     showControls ? 'opacity-100' : 'opacity-0'
                 }`}
             >

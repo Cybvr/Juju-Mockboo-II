@@ -489,20 +489,22 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({ project, onUpdatePro
             <div className="flex-grow flex flex-col lg:flex-row p-2 sm:p-4 gap-2 sm:gap-4 overflow-hidden bg-accent">
                 {/* Left section - storyboard */}
                 <div className="flex flex-col w-full lg:w-2/3 px-2 sm:px-4 lg:px-8 overflow-auto min-h-0">
-                    <div className="relative">
-                        <StitchEditor project={project} onUpdateProject={onUpdateProject} />
-                        {/* Emoji Reactions Overlay */}
-                        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-10">
-                            <div className="flex items-center gap-2 bg-black/70 backdrop-blur-sm rounded-full px-4 py-2 shadow-lg">
-                                <button className="text-xl hover:scale-110 transition-transform">😂</button>
-                                <button className="text-xl hover:scale-110 transition-transform">😍</button>
-                                <button className="text-xl hover:scale-110 transition-transform">😱</button>
-                                <button className="text-xl hover:scale-110 transition-transform">🙌</button>
-                                <button className="text-xl hover:scale-110 transition-transform">👍</button>
-                                <button className="text-xl hover:scale-110 transition-transform">👎</button>
-                            </div>
+                   
+
+                    <StitchEditor project={project} onUpdateProject={onUpdateProject} />
+                    {/* Emoji Reactions */}
+                    <div className="mt-4 flex justify-center">
+                        <div className="flex items-center gap-2 sm:gap-4 bg-white/90 backdrop-blur-sm rounded-full px-4 sm:px-6 py-2 sm:py-3 shadow-lg">
+                            <button className="text-xl sm:text-2xl hover:scale-110 transition-transform">😂</button>
+                            <button className="text-xl sm:text-2xl hover:scale-110 transition-transform">😍</button>
+                            <button className="text-xl sm:text-2xl hover:scale-110 transition-transform">😱</button>
+                            <button className="text-xl sm:text-2xl hover:scale-110 transition-transform">🙌</button>
+                            <button className="text-xl sm:text-2xl hover:scale-110 transition-transform">👍</button>
+                            <button className="text-xl sm:text-2xl hover:scale-110 transition-transform">👎</button>
+                            <button className="text-xl sm:text-2xl hover:scale-110 transition-transform">😊</button>
                         </div>
                     </div>
+                    
 
                     <div className="flex border-b border-border mt-4">
                         <button
@@ -517,10 +519,10 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({ project, onUpdatePro
                         >
                             Assets
                         </button>
-                        
-                    </div>
 
+                    </div>
                     
+
 
                     {activeTab === 'scenes' ? (
                         <div className="mt-4">

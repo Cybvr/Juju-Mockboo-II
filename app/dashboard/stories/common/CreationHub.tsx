@@ -123,7 +123,7 @@ export const CreationHub: React.FC<CreationHubProps> = ({ project, templates, on
         const remixedProject: FilmProject = {
             ...template,
             id: project.id,
-            title: `Remix of "${template.title}"`,
+            title: `${template.title} (copy)`,
             isTemplate: false,
             createdAt: Date.now(),
             updatedAt: Date.now(),
