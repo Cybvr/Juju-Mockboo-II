@@ -3,7 +3,7 @@
 import type React from "react"
 import { useState, useCallback, useRef, useEffect } from "react"
 import type { FilmProject, StoryboardScene } from "@/types/storytypes"
-import { Camera, Trash2, ArrowUp } from "lucide-react"
+import { Camera, Trash2, ArrowUp, FileText } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { AssetManager } from "./AssetManager"
@@ -16,6 +16,7 @@ import { generateSingleImage } from "@/services/filmService"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 
 interface StoryBuilderProps {
   project: FilmProject
@@ -399,6 +400,7 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
   const [expandedScenes, setExpandedScenes] = useState<string[]>([])
   const [activeTab, setActiveTab] = useState<"scenes" | "assets">("scenes")
+  const [isScriptSheetOpen, setIsScriptSheetOpen] = useState(false)
 
   useEffect(() => {
     setTitle(project.title)
@@ -491,9 +493,9 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({
         </div>
       )}
 
-      <div className="flex-grow flex flex-col lg:flex-row p-2 sm:p-4 gap-2 sm:gap-4 overflow-hidden bg-accent">
+      <div className="flex-grow flex flex-col lg:flex-row p-2 sm:p-4 gap-2 sm:gap-4 overflow-hidden bg-accent relative">
         {/* Left section - storyboard */}
-        <div className="flex flex-col w-full lg:w-2/3 px-2 sm:px-4 lg:px-8 overflow-auto min-h-0">
+        <div className="flex flex-col w-full px-2 sm:px-4 lg:px-8 overflow-auto min-h-0">
           <StitchEditor project={project} onUpdateProject={onUpdateProject} />
           <div className="mt-4 flex justify-center relative z-10">
             <div className="flex items-center gap-2 sm:gap-4 bg-white/90 backdrop-blur-sm rounded-full px-4 sm:px-6 py-2 sm:py-3 shadow-lg">
@@ -557,13 +559,41 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({
         </div>
 
         {/* Right section - script and chat */}
-        <ScriptPanel
-          script={script}
-          onScriptChange={handleScriptChange}
-          onScriptBlur={handleScriptBlur}
-          project={project}
-          onUpdateProject={onUpdateProject}
-        />
+        <div className="hidden lg:block w-1/3">
+          <ScriptPanel
+            script={script}
+            onScriptChange={handleScriptChange}
+            onScriptBlur={handleScriptBlur}
+            project={project}
+            onUpdateProject={onUpdateProject}
+          />
+        </div>
+
+        {/* Mobile Script Sheet */}
+        <div className="lg:hidden fixed bottom-4 right-4 z-50">
+          <Sheet open={isScriptSheetOpen} onOpenChange={setIsScriptSheetOpen}>
+            <SheetTrigger asChild>
+              <Button size="lg" className="rounded-full shadow-lg">
+                <FileText className="w-5 h-5 mr-2" />
+                Script
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="bottom" className="h-[80vh]">
+              <SheetHeader className="pb-4">
+                <SheetTitle>Script & Comments</SheetTitle>
+              </SheetHeader>
+              <div className="h-full">
+                <ScriptPanel
+                  script={script}
+                  onScriptChange={handleScriptChange}
+                  onScriptBlur={handleScriptBlur}
+                  project={project}
+                  onUpdateProject={onUpdateProject}
+                />
+              </div>
+            </SheetContent>
+          </Sheet>
+        }</div>
       </div>
 
       <Modal isOpen={isShareModalOpen} onClose={() => setIsShareModalOpen(false)} title="Share Project">
