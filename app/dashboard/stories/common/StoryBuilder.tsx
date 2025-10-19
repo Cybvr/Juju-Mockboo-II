@@ -452,7 +452,7 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({ project, onUpdatePro
     };
 
     return (
-        <div className="flex flex-col h-screen text-foreground">
+        <div className="flex flex-col h-screen text-foreground ">
             <header className="flex-shrink-0 flex items-center justify-between p-2 sm:p-4 border-b border-border bg-card">
                 <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
                     <Button variant="ghost" size="icon" onClick={onBackToDashboard} className="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10">
@@ -483,13 +483,25 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({ project, onUpdatePro
             )}
 
             {analysisError && (
-                <div className="bg-destructive/20 text-destructive p-2 sm:p-3 text-center text-xs sm:text-sm">{analysisError}</div>
+                <div className="bg-destructive/20 text-destructive p-2 sm:p-3 text-center  text-xs sm:text-sm">{analysisError}</div>
             )}
 
             <div className="flex-grow flex flex-col lg:flex-row p-2 sm:p-4 gap-2 sm:gap-4 overflow-hidden bg-accent">
                 {/* Left section - storyboard */}
                 <div className="flex flex-col w-full lg:w-2/3 px-2 sm:px-4 lg:px-8 overflow-auto min-h-0">
                     <StitchEditor project={project} onUpdateProject={onUpdateProject} />
+                    {/* Emoji Reactions */}
+                    <div className="mt-4 flex justify-center overflow-x-auto bg-green-500">
+                        <div className="flex items-center gap-2 sm:gap-4 bg-white/90 backdrop-blur-sm rounded-full px-4 sm:px-6 py-2 sm:py-3 shadow-lg">
+                            <button className="text-xl sm:text-2xl hover:scale-110 transition-transform">😂</button>
+                            <button className="text-xl sm:text-2xl hover:scale-110 transition-transform">😍</button>
+                            <button className="text-xl sm:text-2xl hover:scale-110 transition-transform">😱</button>
+                            <button className="text-xl sm:text-2xl hover:scale-110 transition-transform">🙌</button>
+                            <button className="text-xl sm:text-2xl hover:scale-110 transition-transform">👍</button>
+                            <button className="text-xl sm:text-2xl hover:scale-110 transition-transform">👎</button>
+                            <button className="text-xl sm:text-2xl hover:scale-110 transition-transform">😊</button>
+                        </div>
+                    </div>
 
                     <div className="flex border-b border-border mt-4">
                         <button
@@ -504,20 +516,10 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({ project, onUpdatePro
                         >
                             Assets
                         </button>
+                        
                     </div>
 
-                    {/* Emoji Reactions */}
-                    <div className="mt-4 flex justify-center overflow-x-auto">
-                        <div className="flex items-center gap-2 sm:gap-4 bg-white/90 backdrop-blur-sm rounded-full px-4 sm:px-6 py-2 sm:py-3 shadow-lg">
-                            <button className="text-xl sm:text-2xl hover:scale-110 transition-transform">😂</button>
-                            <button className="text-xl sm:text-2xl hover:scale-110 transition-transform">😍</button>
-                            <button className="text-xl sm:text-2xl hover:scale-110 transition-transform">😱</button>
-                            <button className="text-xl sm:text-2xl hover:scale-110 transition-transform">🙌</button>
-                            <button className="text-xl sm:text-2xl hover:scale-110 transition-transform">👍</button>
-                            <button className="text-xl sm:text-2xl hover:scale-110 transition-transform">👎</button>
-                            <button className="text-xl sm:text-2xl hover:scale-110 transition-transform">😊</button>
-                        </div>
-                    </div>
+                    
 
                     {activeTab === 'scenes' ? (
                         <div className="mt-4">
