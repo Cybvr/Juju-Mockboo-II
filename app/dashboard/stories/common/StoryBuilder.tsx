@@ -525,7 +525,7 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({ project, onUpdatePro
                             <AssetManager project={project} onUpdateProject={onUpdateProject} />
                         )}
                     </div>
-                    {/* Script Panel section - stacked below on mobile */}
+                    {/* Right Panel section - stacked below on mobile */}
                     <div className="w-full h-full flex-shrink-0 bg-red-500">
                         <ScriptPanel
                             script={script}
