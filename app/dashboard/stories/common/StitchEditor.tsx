@@ -198,7 +198,7 @@ export const StitchEditor: React.FC<StitchPlayerProps> = ({ project }) => {
     return (
         <div
             ref={containerRef}
-            className="relative w-full h-screen bg-black group overflow-auto-y rounded-xl"
+            className="relative w-full max-auto bg-black group overflow-auto-y rounded-xl"
             onMouseMove={handleMouseMove}
             onMouseLeave={() => isPlaying && setShowControls(false)}
         >

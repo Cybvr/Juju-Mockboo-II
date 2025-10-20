@@ -20,9 +20,8 @@ interface ChatInterfaceProps {
   onUpdateProject: (updatedProject: FilmProject) => void;
 }
 
-// Simple JSON patch applicator (supports 'replace', 'add', 'remove')
 const applyPatch = (doc: FilmProject, patch: any[]): FilmProject => {
-  const newDoc = JSON.parse(JSON.stringify(doc)); // Deep copy to avoid mutation
+  const newDoc = JSON.parse(JSON.stringify(doc));
 
   patch.forEach(operation => {
     try {
@@ -84,7 +83,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ project, onUpdateProject 
       const patch = await generateProjectPatch(message, project);
       const updatedProject = applyPatch(project, patch);
       onUpdateProject(updatedProject);
-      setMessage(''); // Clear input on success
+      setMessage('');
     } catch (err: any) {
       console.error("Chat request failed:", err);
       setError(err.message || 'Failed to apply changes. Please try rephrasing your request.');
@@ -94,7 +93,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ project, onUpdateProject 
   };
 
   return (
-    <div className="flex-shrink-0 p-2 border-t border-border">
+    <div className="w-full p-2 border-t border-border">
       <div className="relative">
         <Textarea
           value={message}
@@ -138,7 +137,7 @@ export const ScriptPanel: React.FC<ScriptPanelProps> = ({
   const [activeTab, setActiveTab] = useState('script');
 
   return (
-    <div className="w-full lg:w-1/3 h-96 lg:h-full bg-card rounded-lg sm:rounded-2xl overflow-hidden flex flex-col">
+    <div className="w-full lg:w-1/3 rounded-lg sm:rounded-2xl overflow-hidden flex flex-col h-full">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
         <div className="flex-shrink-0 p-3 border-b border-border">
           <TabsList className="grid w-full grid-cols-2">
