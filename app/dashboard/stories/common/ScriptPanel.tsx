@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowUp } from 'lucide-react';
+import { Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { generateProjectPatch } from '@/services/filmService';
 import type { FilmProject } from '@/types/storytypes';
@@ -9,11 +9,6 @@ interface ScriptPanelProps {
   script: string;
   onScriptChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   onScriptBlur: () => void;
-  project: FilmProject;
-  onUpdateProject: (updatedProject: FilmProject) => void;
-}
-
-interface ChatInterfaceProps {
   project: FilmProject;
   onUpdateProject: (updatedProject: FilmProject) => void;
 }
@@ -67,7 +62,13 @@ const applyPatch = (doc: FilmProject, patch: any[]): FilmProject => {
   return newDoc;
 };
 
-const ChatInterface: React.FC<ChatInterfaceProps> = ({ project, onUpdateProject }) => {
+export const ScriptPanel: React.FC<ScriptPanelProps> = ({
+  script,
+  onScriptChange,
+  onScriptBlur,
+  project,
+  onUpdateProject
+}) => {
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -91,59 +92,49 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ project, onUpdateProject 
   };
 
   return (
-    <div className="w-full p-2 border-t border-border">
-      <div className="relative">
-        <Textarea
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-              e.preventDefault();
-              handleSubmit();
-            }
-          }}
-          placeholder="Edit Script"
-          className="w-full h-9 py-2 pl-3 pr-10 text-xs rounded-lg resize-none"
-          rows={1}
-        />
-        <Button
-          onClick={handleSubmit}
-          disabled={isLoading || !message.trim()}
-          size="icon"
-          className="absolute top-1/2 right-1.5 -translate-y-1/2 h-6 w-6 rounded-full"
-          aria-label="Send message"
-        >
-          {isLoading ? (
-            <div className="w-3 h-3 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin"></div>
-          ) : (
-            <ArrowUp className="w-3 h-3" />
-          )}
-        </Button>
-        {error && <p className="text-destructive text-xs mt-1">{error}</p>}
-      </div>
-    </div>
-  );
-};
-
-export const ScriptPanel: React.FC<ScriptPanelProps> = ({
-  script,
-  onScriptChange,
-  onScriptBlur,
-  project,
-  onUpdateProject
-}) => {
-  return (
-    <div className="h-full flex flex-col">
-      <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6">
+    <div className="h-screen flex flex-col pb-4">
+      {/* Script content */}
+      <div className="flex-1 overflow-y-auto h-2/3 p-3">
         <Textarea
           value={script}
           onChange={onScriptChange}
           onBlur={onScriptBlur}
           placeholder="INT. COFFEE SHOP - DAY..."
-          className="w-full h-full p-2 text-xs sm:text-sm bg-transparent resize-none border-none focus:ring-2 focus:ring-primary"
+          className="min-h-full"
         />
       </div>
-      <ChatInterface project={project} onUpdateProject={onUpdateProject} />
+
+      {/* Edit script input */}
+      <div className="h-1/3 flex-shrink-0 p-3 border-t border-border">
+        <div className="flex gap-2">
+          <Textarea
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSubmit();
+              }
+            }}
+            placeholder="Edit Script"
+            className="flex-1 text-xs resize-none"
+            rows={2}
+          />
+          <Button
+            size="icon"
+            className="h-12 w-12"
+            onClick={handleSubmit}
+            disabled={!message.trim() || isLoading}
+          >
+            {isLoading ? (
+              <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin"></div>
+            ) : (
+              <Send className="w-4 h-4" />
+            )}
+          </Button>
+        </div>
+        {error && <p className="text-xs text-destructive mt-2">{error}</p>}
+      </div>
     </div>
   );
 };

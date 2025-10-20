@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import type { FilmProject, StoryboardScene } from '@/types/storytypes';
-import { ArrowLeft, Share2, FileText, Camera, GripVertical, User, Settings, Menu, X, Plus, Trash2, ArrowUp, MessageSquare } from 'lucide-react';
+import { ChevronsLeft, Share2, FileText, Camera, GripVertical, User, Settings, Menu, ChevronsRight, Plus, Trash2, ArrowUp, MessageSquare, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { AssetManager } from './AssetManager';
@@ -381,6 +381,7 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({ project, onUpdatePro
     const [expandedScenes, setExpandedScenes] = useState<string[]>([]);
     const [activeTab, setActiveTab] = useState<'scenes' | 'assets'>('scenes');
     const [rightPanelTab, setRightPanelTab] = useState<'script' | 'comments'>('script');
+    const [isRightPanelCollapsed, setIsRightPanelCollapsed] = useState(false);
 
     useEffect(() => {
         setTitle(project.title);
@@ -449,16 +450,20 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({ project, onUpdatePro
         onUpdateProject({ ...project, storyboard: [...project.storyboard, newScene] });
     };
 
+    const toggleRightPanel = () => {
+        setIsRightPanelCollapsed(!isRightPanelCollapsed);
+    };
+
     return (
-        <div className="flex flex-col h-screen text-foreground">
-            <StoryHeader
+        <div className="flex flex-col h-screen text-foreground ">
+            <div className="sticky top-0 z-10"><StoryHeader
                 title={title}
                 onTitleChange={setTitle}
                 onTitleBlur={handleTitleBlur}
                 onBackToDashboard={onBackToDashboard}
                 onShareClick={() => setIsShareModalOpen(true)}
                 onSettingsClick={() => setIsSettingsModalOpen(true)}
-            />
+            /></div>
             {isAnalyzing && (
                 <div className="bg-primary/20 text-primary p-2 sm:p-3 text-center text-xs sm:text-sm flex items-center justify-center gap-2">
                     <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
@@ -468,36 +473,48 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({ project, onUpdatePro
             {analysisError && (
                 <div className="bg-destructive/20 text-destructive p-2 sm:p-3 text-center text-xs sm:text-sm">{analysisError}</div>
             )}
-            <div className="overflow-hidden">
+            <div className="lg:overflow-hidden overflow-auto-y">
                 {/* Main Content Area */}
-                <div className="flex flex-col lg:flex-row lg:h-full w-full bg-green-500">
+                <div className="flex flex-col lg:flex-row lg:h-full w-full ">
                     {/* Left section - storyboard/assets */}
-                    <div className="w-full lg:w-2/3 lg:h-full  overflow-y-auto flex-shrink-0  bg-purple-500">
+                    <div className={`w-full ${isRightPanelCollapsed ? 'lg:w-full' : 'lg:w-2/3'} lg:h-full lg:overflow-y-auto overflow-none lg:flex-shrink-0 relative px-2 py-2 lg:px-12 lg:py-4 justify-center space-y-2`}>
+                        {/* Floating toggle button for collapsed state */}
+                        {isRightPanelCollapsed && (
+                            <Button
+                                variant="default"
+                                size="icon"
+                                onClick={toggleRightPanel}
+                                className="fixed right-4 top-20 z-20 shadow-lg lg:flex hidden"
+                            >
+                                <ChevronsLeft className="w-4 h-4" />
+                            </Button>
+                        )}
                         <StitchEditor project={project} onUpdateProject={onUpdateProject} />
-                        <div className="p-2 flex justify-center bg-yellow-500">
-                            <div className="flex items-center gap-2 sm:gap-4 bg-white/90 backdrop-blur-sm rounded-full px-4 sm:px-6 py-2 sm:py-3 shadow-lg">
-                                <button className="text-xl sm:text-2xl hover:scale-110 transition-transform">😂</button>
-                                <button className="text-xl sm:text-2xl hover:scale-110 transition-transform">😍</button>
-                                <button className="text-xl sm:text-2xl hover:scale-110 transition-transform">😱</button>
-                                <button className="text-xl sm:text-2xl hover:scale-110 transition-transform">🙌</button>
-                                <button className="text-xl sm:text-2xl hover:scale-110 transition-transform">👍</button>
-                                <button className="text-xl sm:text-2xl hover:scale-110 transition-transform">👎</button>
-                                <button className="text-xl sm:text-2xl hover:scale-110 transition-transform">😊</button>
-                            </div>
+                         {/* Emoji list */}
+                        <div className="flex items-center justify-center gap-2 sm:gap-4 bg-card backdrop-blur-sm rounded-full px-4 sm:px-6 py-2 sm:py-3 shadow-lg w-fit mx-auto">
+                            <button className="text-xl sm:text-2xl hover:scale-110 transition-transform">😂</button>
+                            <button className="text-xl sm:text-2xl hover:scale-110 transition-transform">😍</button>
+                            <button className="text-xl sm:text-2xl hover:scale-110 transition-transform">😱</button>
+                            <button className="text-xl sm:text-2xl hover:scale-110 transition-transform">🙌</button>
+                            <button className="text-xl sm:text-2xl hover:scale-110 transition-transform">👍</button>
+                            <button className="text-xl sm:text-2xl hover:scale-110 transition-transform">👎</button>
+                            <button className="text-xl sm:text-2xl hover:scale-110 transition-transform">😊</button>
                         </div>
-                        <div className="flex border-b border-border">
-                            <button
-                                onClick={() => setActiveTab('scenes')}
-                                className={`px-3 sm:px-4 py-2 text-sm sm:text-base ${activeTab === 'scenes' ? 'border-b-2 border-primary font-semibold' : ''}`}
-                            >
-                                Scenes
-                            </button>
-                            <button
-                                onClick={() => setActiveTab('assets')}
-                                className={`px-3 sm:px-4 py-2 text-sm sm:text-base ${activeTab === 'assets' ? 'border-b-2 border-primary font-semibold' : ''}`}
-                            >
-                                Assets
-                            </button>
+                        <div className="flex justify-between items-center border-b border-border">
+                            <div className="flex">
+                                <button
+                                    onClick={() => setActiveTab('scenes')}
+                                    className={`px-3 sm:px-4 py-2 text-sm sm:text-base ${activeTab === 'scenes' ? 'border-b-2 border-primary font-semibold' : ''}`}
+                                >
+                                    Scenes
+                                </button>
+                                <button
+                                    onClick={() => setActiveTab('assets')}
+                                    className={`px-3 sm:px-4 py-2 text-sm sm:text-base ${activeTab === 'assets' ? 'border-b-2 border-primary font-semibold' : ''}`}
+                                >
+                                    Assets
+                                </button>
+                            </div>
                         </div>
                         {activeTab === 'scenes' ? (
                             <div className="p-2">
@@ -528,37 +545,47 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({ project, onUpdatePro
                             <AssetManager project={project} onUpdateProject={onUpdateProject} />
                         )}
                     </div>
+
                     {/* Right Panel section - stacked below on mobile */}
-                    <div className="w-full lg:w-1/3 h-full flex-shrink-0 flex flex-col">
-                        <Tabs value={rightPanelTab} onValueChange={(value) => setRightPanelTab(value as 'script' | 'comments')} className="h-full flex flex-col">
-                            <div className="flex-shrink-0 p-3 border-b border-border">
-                                <TabsList className="grid w-full grid-cols-2">
-                                    <TabsTrigger value="script" className="flex items-center gap-2 text-xs">
-                                        <FileText className="w-3 h-3" />
-                                        Script
-                                    </TabsTrigger>
-                                    <TabsTrigger value="comments" className="flex items-center gap-2 text-xs">
-                                        <MessageSquare className="w-3 h-3" />
-                                        Comments
-                                    </TabsTrigger>
-                                </TabsList>
-                            </div>
-
-                            <TabsContent value="script" className="flex-1 flex flex-col m-0">
-                                <ScriptPanel
-                                    script={script}
-                                    onScriptChange={handleScriptChange}
-                                    onScriptBlur={handleScriptBlur}
-                                    project={project}
-                                    onUpdateProject={onUpdateProject}
-                                />
-                            </TabsContent>
-
-                            <TabsContent value="comments" className="flex-1 flex flex-col m-0">
-                                <CommentsInterface project={project} onUpdateProject={onUpdateProject} />
-                            </TabsContent>
-                        </Tabs>
-                    </div>
+                    {!isRightPanelCollapsed && (
+                        <div className="w-full lg:w-1/3 lg:h-full flex-shrink-0 flex flex-col relative">
+                            {/* Close button in top-right corner */}
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={toggleRightPanel}
+                                className="absolute right-2 top-2 z-10 lg:flex hidden"
+                            >
+                                <ChevronsRight className="w-4 h-4" />
+                            </Button>
+                            <Tabs value={rightPanelTab} onValueChange={(value) => setRightPanelTab(value as 'script' | 'comments')} className="h-full flex flex-col">
+                                <div className="flex-shrink-0 p-3 border-b border-border">
+                                    <TabsList className="grid w-fit grid-cols-2">
+                                        <TabsTrigger value="script" className="flex items-center gap-2 text-xs">
+                                            <FileText className="w-3 h-3" />
+                                            Script
+                                        </TabsTrigger>
+                                        <TabsTrigger value="comments" className="flex items-center gap-2 text-xs">
+                                            <MessageSquare className="w-3 h-3" />
+                                            Comments
+                                        </TabsTrigger>
+                                    </TabsList>
+                                </div>
+                                <TabsContent value="script" className="flex-1 flex flex-col m-0">
+                                    <ScriptPanel
+                                        script={script}
+                                        onScriptChange={handleScriptChange}
+                                        onScriptBlur={handleScriptBlur}
+                                        project={project}
+                                        onUpdateProject={onUpdateProject}
+                                    />
+                                </TabsContent>
+                                <TabsContent value="comments" className="flex-1 flex flex-col m-0">
+                                    <CommentsInterface project={project} onUpdateProject={onUpdateProject} />
+                                </TabsContent>
+                            </Tabs>
+                        </div>
+                    )}
                 </div>
             </div>
             <Modal isOpen={isShareModalOpen} onClose={() => setIsShareModalOpen(false)} title="Share Project">
