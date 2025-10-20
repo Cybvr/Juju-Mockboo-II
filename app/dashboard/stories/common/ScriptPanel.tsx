@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import { Textarea } from '@/components/ui/textarea';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { FileText, MessageSquare, ArrowUp } from 'lucide-react';
+import { ArrowUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { CommentsInterface } from './CommentsInterface';
 import { generateProjectPatch } from '@/services/filmService';
 import type { FilmProject } from '@/types/storytypes';
 
@@ -134,41 +132,18 @@ export const ScriptPanel: React.FC<ScriptPanelProps> = ({
   project,
   onUpdateProject
 }) => {
-  const [activeTab, setActiveTab] = useState('script');
-
   return (
-    <div className="w-full lg:w-1/3 rounded-lg sm:rounded-2xl overflow-hidden flex flex-col h-full">
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-        <div className="flex-shrink-0 p-3 border-b border-border">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="script" className="flex items-center gap-2 text-xs">
-              <FileText className="w-3 h-3" />
-              Script
-            </TabsTrigger>
-            <TabsTrigger value="comments" className="flex items-center gap-2 text-xs">
-              <MessageSquare className="w-3 h-3" />
-              Comments
-            </TabsTrigger>
-          </TabsList>
-        </div>
-
-        <TabsContent value="script" className="flex-1 flex flex-col m-0">
-          <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6">
-            <Textarea
-              value={script}
-              onChange={onScriptChange}
-              onBlur={onScriptBlur}
-              placeholder="INT. COFFEE SHOP - DAY..."
-              className="w-full h-full p-2 text-xs sm:text-sm bg-transparent resize-none border-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
-          <ChatInterface project={project} onUpdateProject={onUpdateProject} />
-        </TabsContent>
-
-        <TabsContent value="comments" className="flex-1 flex flex-col m-0">
-          <CommentsInterface project={project} onUpdateProject={onUpdateProject} />
-        </TabsContent>
-      </Tabs>
+    <div className="h-full flex flex-col">
+      <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6">
+        <Textarea
+          value={script}
+          onChange={onScriptChange}
+          onBlur={onScriptBlur}
+          placeholder="INT. COFFEE SHOP - DAY..."
+          className="w-full h-full p-2 text-xs sm:text-sm bg-transparent resize-none border-none focus:ring-2 focus:ring-primary"
+        />
+      </div>
+      <ChatInterface project={project} onUpdateProject={onUpdateProject} />
     </div>
   );
 };

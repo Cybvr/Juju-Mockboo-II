@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import type { FilmProject, StoryboardScene } from '@/types/storytypes';
-import { ArrowLeft, Share2, FileText, Camera, GripVertical, User, Settings, Menu, X, Plus, Trash2, ArrowUp } from 'lucide-react';
+import { ArrowLeft, Share2, FileText, Camera, GripVertical, User, Settings, Menu, X, Plus, Trash2, ArrowUp, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { AssetManager } from './AssetManager';
@@ -9,6 +9,8 @@ import { StitchEditor } from './StitchEditor';
 import { Modal } from './Modal';
 import { StoryHeader } from './StoryHeader';
 import { ScriptPanel } from './ScriptPanel';
+import { CommentsInterface } from './CommentsInterface';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { generateSingleImage } from "@/services/filmService";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
@@ -378,6 +380,7 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({ project, onUpdatePro
     const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
     const [expandedScenes, setExpandedScenes] = useState<string[]>([]);
     const [activeTab, setActiveTab] = useState<'scenes' | 'assets'>('scenes');
+    const [rightPanelTab, setRightPanelTab] = useState<'script' | 'comments'>('script');
 
     useEffect(() => {
         setTitle(project.title);
@@ -526,14 +529,35 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({ project, onUpdatePro
                         )}
                     </div>
                     {/* Right Panel section - stacked below on mobile */}
-                    <div className="w-full h-full flex-shrink-0 bg-red-500">
-                        <ScriptPanel
-                            script={script}
-                            onScriptChange={handleScriptChange}
-                            onScriptBlur={handleScriptBlur}
-                            project={project}
-                            onUpdateProject={onUpdateProject}
-                        />
+                    <div className="w-full lg:w-1/3 h-full flex-shrink-0 flex flex-col">
+                        <Tabs value={rightPanelTab} onValueChange={(value) => setRightPanelTab(value as 'script' | 'comments')} className="h-full flex flex-col">
+                            <div className="flex-shrink-0 p-3 border-b border-border">
+                                <TabsList className="grid w-full grid-cols-2">
+                                    <TabsTrigger value="script" className="flex items-center gap-2 text-xs">
+                                        <FileText className="w-3 h-3" />
+                                        Script
+                                    </TabsTrigger>
+                                    <TabsTrigger value="comments" className="flex items-center gap-2 text-xs">
+                                        <MessageSquare className="w-3 h-3" />
+                                        Comments
+                                    </TabsTrigger>
+                                </TabsList>
+                            </div>
+
+                            <TabsContent value="script" className="flex-1 flex flex-col m-0">
+                                <ScriptPanel
+                                    script={script}
+                                    onScriptChange={handleScriptChange}
+                                    onScriptBlur={handleScriptBlur}
+                                    project={project}
+                                    onUpdateProject={onUpdateProject}
+                                />
+                            </TabsContent>
+
+                            <TabsContent value="comments" className="flex-1 flex flex-col m-0">
+                                <CommentsInterface project={project} onUpdateProject={onUpdateProject} />
+                            </TabsContent>
+                        </Tabs>
                     </div>
                 </div>
             </div>
