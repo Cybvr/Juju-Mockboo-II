@@ -134,7 +134,7 @@ export const ScriptPanel: React.FC<ScriptPanelProps> = ({
   onUpdateProject
 }) => {
   return (
-    <div className="w-full lg:w-1/3 rounded-lg sm:rounded-2xl overflow-hidden flex flex-col h-full">
+    <div className="w-full rounded-lg sm:rounded-2xl overflow-hidden flex flex-col h-full">
       <div className="flex-shrink-0 p-3 border-b border-border">
         <div className="flex items-center gap-2">
           <FileText className="w-4 h-4" />

@@ -537,7 +537,7 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({ project, onUpdatePro
                         )}
                     </div>
                     {/* Script Panel section - stacked below on mobile */}
-                    <div className="w-full h-full flex-shrink-0 bg-red-500">
+                    <div className="w-full lg:w-1/3 h-full flex-shrink-0 bg-red-500">
                         <ScriptPanel
                             script={script}
                             onScriptChange={handleScriptChange}
