@@ -9,6 +9,7 @@ import { StitchEditor } from './StitchEditor';
 import { Modal } from './Modal';
 import { StoryHeader } from './StoryHeader';
 import { ScriptPanel } from './ScriptPanel';
+import { CommentsInterface } from './CommentsInterface';
 import { generateSingleImage } from "@/services/filmService";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
@@ -377,7 +378,7 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({ project, onUpdatePro
     const [isShareModalOpen, setIsShareModalOpen] = useState(false);
     const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
     const [expandedScenes, setExpandedScenes] = useState<string[]>([]);
-    const [activeTab, setActiveTab] = useState<'scenes' | 'assets'>('scenes');
+    const [activeTab, setActiveTab] = useState<'scenes' | 'assets' | 'comments'>('scenes');
 
     useEffect(() => {
         setTitle(project.title);
@@ -495,6 +496,12 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({ project, onUpdatePro
                             >
                                 Assets
                             </button>
+                            <button
+                                onClick={() => setActiveTab('comments')}
+                                className={`px-3 sm:px-4 py-2 text-sm sm:text-base ${activeTab === 'comments' ? 'border-b-2 border-primary font-semibold' : ''}`}
+                            >
+                                Comments
+                            </button>
                         </div>
                         {activeTab === 'scenes' ? (
                             <div className="p-2">
@@ -521,8 +528,12 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({ project, onUpdatePro
                                     </div>
                                 )}
                             </div>
-                        ) : (
+                        ) : activeTab === 'assets' ? (
                             <AssetManager project={project} onUpdateProject={onUpdateProject} />
+                        ) : (
+                            <div className="h-full">
+                                <CommentsInterface project={project} onUpdateProject={onUpdateProject} />
+                            </div>
                         )}
                     </div>
                     {/* Script Panel section - stacked below on mobile */}
