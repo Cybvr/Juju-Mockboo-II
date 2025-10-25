@@ -3,7 +3,7 @@ import type { Template } from '@/types/storytypes';
 export const templates: Template[] = [
   {
     id: 'template_car_commercial',
-    title: '"Elysian" Car Commercial',
+    title: 'Elysian Car Commercial',
     category: 'Commercial',
     prompt: 'A sleek, futuristic electric car driving through a breathtaking, neon-lit cityscape at night and a sun-drenched coastal highway during the day.',
     script: `
@@ -102,7 +102,7 @@ After a moment of hesitation, she grabs her thermal gear. She has to know.
   },
   {
     id: 'template_cooking_show',
-    title: '"QuickBite" Recipe',
+    title: 'QuickBite Recipe',
     category: 'Cooking',
     prompt: 'A fast-paced, top-down cooking video for a delicious spicy avocado toast.',
     script: `
@@ -145,7 +145,7 @@ SUPER: QuickBite. Good food, fast.
   },
   {
     id: 'template_travel_vlog',
-    title: '"Wanderlust" Travel Diary',
+    title: 'Wanderlust Travel Diary',
     category: 'Travel',
     prompt: 'A travel vlog montage of Kyoto, Japan, featuring temples, bamboo forests, and street food.',
     script: `
@@ -191,7 +191,7 @@ Sometimes, the best stories aren't written, they're lived. Kyoto.
   },
   {
     id: 'template_horror_short',
-    title: '"Echo" Horror Short',
+    title: 'Echo Horror Short',
     category: 'Horror',
     prompt: 'A short, found-footage style horror clip. Someone camping alone in the woods hears a strange sound.',
     script: `
@@ -231,7 +231,7 @@ The zipper of the tent begins to slowly, deliberately UNZIP... from the outside.
   },
   {
     id: 'template_ugc_skincare',
-    title: '"GlowLab" Vitamin C Serum Ad',
+    title: 'GlowLab Vitamin C Serum Ad',
     category: 'UGC',
     prompt: 'Authentic, casual testimonial-style ad for GlowLab vitamin C serum, shot selfie-style in a bathroom.',
     script: `
@@ -274,7 +274,7 @@ My dark spots are literally fading. And my skin feels so much smoother. I'm obse
   },
   {
     id: 'template_ugc_fitness',
-    title: '"PeakPower" Pre-Workout Ad',
+    title: 'PeakPower Pre-Workout Ad',
     category: 'UGC',
     prompt: 'Energetic testimonial for PeakPower pre-workout supplement, filmed at home gym.',
     script: `
@@ -317,7 +317,7 @@ If you're serious about your training, try PeakPower. Link in bio.
   },
   {
     id: 'template_ugc_fashion',
-    title: '"Threadly" Fashion Haul Ad',
+    title: 'Threadly Fashion Haul Ad',
     category: 'Fashion',
     prompt: 'Casual try-on haul for Threadly clothing brand, filmed in bedroom with natural vibes.',
     script: `
@@ -360,7 +360,7 @@ It fits perfect, it's so soft, and I'm definitely ordering more colors from Thre
   },
   {
     id: 'template_ugc_tech',
-    title: '"SoundWave Pro" Earbuds Ad',
+    title: 'SoundWave Pro Earbuds Ad',
     category: 'Tech',
     prompt: 'Authentic unboxing and first impressions of SoundWave Pro wireless earbuds, shot at desk.',
     script: `
@@ -403,7 +403,7 @@ Sound quality is actually really good. And the noise cancellation? Way better th
   },
   {
     id: 'template_ugc_food',
-    title: '"FreshPlate" Meal Delivery Ad',
+    title: 'FreshPlate Meal Delivery Ad',
     category: 'Food',
     prompt: 'Relatable testimonial for FreshPlate meal prep delivery service, filmed in kitchen.',
     script: `
@@ -446,7 +446,7 @@ Tonight I'm having this teriyaki chicken bowl. Takes five minutes to heat up. Fr
   },
   {
     id: 'template_ugc_pet',
-    title: '"TailWaggers" Dog Treats Ad',
+    title: 'TailWaggers Dog Treats Ad',
     category: 'Pet',
     prompt: 'Cute and authentic testimonial for TailWaggers dog treats, filmed with excited dog.',
     script: `
@@ -489,7 +489,7 @@ Also they don't smell disgusting like other treats. Win-win. Get TailWaggers, li
   },
   {
     id: 'template_ugc_app',
-    title: '"TaskFlow" Productivity App Ad',
+    title: 'TaskFlux Productivity App Ad',
     category: 'App',
     prompt: 'Quick testimonial for TaskFlow task management app, screen recording style.',
     script: `

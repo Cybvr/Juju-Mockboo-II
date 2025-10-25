@@ -1,10 +1,7 @@
-// @/app/(marketing)/templates
-
 'use client';
-
 import React, { useState, useEffect } from 'react';
 import type { FilmProject } from '@/types/storytypes';
-import { getAllStories } from '@/services/storiesService';
+import { templates } from '@/data/filmTemplates';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -12,14 +9,20 @@ import { Input } from '@/components/ui/input';
 import { FileText, Globe, Search, Filter } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-const getAllCategories = (templates: FilmProject[]) => {
-  const templateCategories = templates
-    .map(template => template.category)
-    .filter(Boolean)
-    .filter((category, index, self) => self.indexOf(category) === index);
-  
-  return ['All', ...templateCategories.sort()];
-};
+const categories = [
+  'All',
+  'UGC',
+  'Ad/Commercial',
+  'Film/Cinema',
+  'Documentary',
+  'Educational',
+  'Social Media',
+  'Product Demo',
+  'Brand Story',
+  'Tutorial',
+  'Entertainment',
+  'Music Video'
+];
 
 interface TemplateCardProps {
   template: FilmProject;
@@ -28,11 +31,10 @@ interface TemplateCardProps {
 
 const TemplateCard: React.FC<TemplateCardProps> = ({ template, onSelect }) => {
   const firstImageUrl = template.storyboard?.[0]?.imageUrl;
-
   return (
     <Card
       onClick={onSelect}
-      className="group cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden"
+      className="group cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col"
     >
       <div className="relative aspect-video bg-muted">
         {firstImageUrl ? (
@@ -42,27 +44,26 @@ const TemplateCard: React.FC<TemplateCardProps> = ({ template, onSelect }) => {
             <FileText className="w-12 h-12 text-muted-foreground" />
           </div>
         )}
-        {/* Video element with fallback to image */}
-        {template.storyboard?.[0]?.videoUrl && (
-          <video
-            src={template.storyboard[0].videoUrl}
-            className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-            autoPlay
-            muted
-            loop
-            playsInline
-            onError={(e) => {
-              e.currentTarget.style.display = 'none';
-            }}
-          />
-        )}
-        {/* Text overlay positioned in bottom right */}
-        <div className="absolute bottom-2 right-2 bg-black/70 text-white p-2 rounded backdrop-blur-sm">
-          <h3 className="font-bold text-sm group-hover:text-primary transition-colors truncate max-w-32">
-            {template.title}
-          </h3>
+        <div className="absolute top-2 right-2">
+          <Globe className="w-4 h-4 text-green-500 bg-white rounded-full p-0.5" />
         </div>
       </div>
+      <CardContent className="p-4 flex-1">
+        <h3 className="font-bold text-lg group-hover:text-primary transition-colors truncate text-left bg-transparent">
+          {template.title}
+        </h3>
+        <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+          {template.prompt}
+        </p>
+        {template.category && (
+          <Badge variant="outline" className="mt-2 text-xs">
+            {template.category}
+          </Badge>
+        )}
+        <div className="mt-3 text-xs text-muted-foreground">
+          {template.storyboard?.length || 0} scenes
+        </div>
+      </CardContent>
     </Card>
   );
 };
@@ -75,17 +76,32 @@ export default function TemplatesPage() {
   const router = useRouter();
 
   useEffect(() => {
-    loadPublicTemplates();
+    loadTemplates();
   }, []);
 
-  const loadPublicTemplates = async () => {
+  const loadTemplates = () => {
     setLoading(true);
     try {
-      const allStories = await getAllStories();
-      setPublicTemplates(allStories);
+      // Convert templates to FilmProject format
+      const filmTemplates: FilmProject[] = templates.map(template => ({
+        id: template.id,
+        title: template.title,
+        prompt: template.prompt,
+        category: template.category,
+        storyboard: template.storyboard,
+        characters: template.characters,
+        locations: template.locations,
+        sound_design: template.sound_design,
+        settings: template.settings,
+        createdAt: template.createdAt,
+        updatedAt: template.updatedAt,
+        isTemplate: template.isTemplate,
+        isPublic: true,
+        script: template.script || ''
+      }));
+      setPublicTemplates(filmTemplates);
     } catch (error) {
-      console.error('Failed to load public templates:', error);
-      setPublicTemplates([]);
+      console.error('Failed to load templates:', error);
     } finally {
       setLoading(false);
     }
@@ -98,17 +114,8 @@ export default function TemplatesPage() {
     return matchesSearch && matchesCategory;
   });
 
-  const handleSelectTemplate = async (template: FilmProject) => {
-    try {
-      // Import the duplication service
-      const { duplicateStory } = await import('@/services/storiesService');
-      const newStory = await duplicateStory(template.id);
-      router.push(`/dashboard/stories/${newStory.id}`);
-    } catch (error) {
-      console.error('Failed to create copy of template:', error);
-      // Fallback to direct navigation if duplication fails
-      router.push(`/dashboard/stories/${template.id}`);
-    }
+  const handleSelectTemplate = (template: FilmProject) => {
+    router.push(`/dashboard/stories/${template.id}`);
   };
 
   if (loading) {
@@ -134,6 +141,7 @@ export default function TemplatesPage() {
           <div className="space-y-2">
             <h1 className="text-3xl font-bold">Templates</h1>
           </div>
+         
           {/* Templates Grid */}
           {filteredTemplates.length === 0 ? (
             <div className="flex items-center justify-center py-16">
