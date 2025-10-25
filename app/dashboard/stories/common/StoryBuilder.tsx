@@ -599,4 +599,4 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({ project, onUpdatePro
             </Modal>
         </div>
     );
-};
+}; 
