@@ -1,28 +1,9 @@
 
 export const PRICING_TIERS = {
-  free: {
-    id: 'free',
-    name: 'Free',
-    credits: 1,
-    generations: 1,
-    price: { monthly: 0, annual: 0 },
-    features: [
-      '10 Video mins per week',
-      '1 AI credit per week', 
-      '1 Express avatar',
-      '4 Exports per week with watermark',
-      'No generative features'
-    ],
-    limitations: [
-      'Weekly limits',
-      'Watermarked exports',
-      'No generative access'
-    ]
-  },
   plus: {
     id: 'plus',
     name: 'Plus',
-    subtitle: 'best for stock video',
+    subtitle: 'best for getting started',
     credits: 10,
     generations: 10,
     price: { monthly: 35, annual: 350 },
@@ -39,30 +20,10 @@ export const PRICING_TIERS = {
     addOns: '1x Boost, 10 Credits',
     popular: false
   },
-  max: {
-    id: 'max',
-    name: 'Max',
-    subtitle: 'best for stock video',
-    credits: 40,
-    generations: 40,
-    price: { monthly: 60, annual: 600 },
-    creditPrice: 1.5,
-    features: [
-      '40 Credits',
-      '200 Video mins + 320 iStock',
-      '8 UGC product asset ads',
-      '120 secs of generative video',
-      '5 express clones',
-      '3 users, 400GB storage',
-      'Unlimited exports'
-    ],
-    addOns: '1x Boost, 40 Credits',
-    popular: false
-  },
-  generative: {
-    id: 'generative',
-    name: 'Generative',
-    subtitle: 'best for ads and films',
+  pro: {
+    id: 'pro',
+    name: 'Pro',
+    subtitle: 'best for professionals',
     credits: 100,
     generations: 100,
     price: { monthly: 120, annual: 1200 },
@@ -80,39 +41,24 @@ export const PRICING_TIERS = {
     popular: true,
     badge: 'Best Value'
   },
-  team: {
-    id: 'team',
-    name: 'Team',
-    subtitle: 'best for teams',
-    credits: 1000,
-    generations: 1000,
-    price: { monthly: 999, annual: 9990 },
+  max: {
+    id: 'max',
+    name: 'Max',
+    subtitle: 'best for power users',
+    credits: 200,
+    generations: 200,
+    price: { monthly: 200, annual: 2000 },
     creditPrice: 1.0,
     features: [
-      '1000 Credits',
-      '2000 Video mins + 3200 iStock',
-      '50 generative UGC ads',
-      '50 mins of generative videos',
-      '40 express clones',
-      '1 seat, 4TB storage',
+      '200 Credits',
+      '400 Video mins + 640 iStock',
+      '10 generative UGC ads',
+      '600 secs of generative video',
+      '15 express clones',
+      '5 users, 800GB storage',
       'Unlimited exports'
     ],
-    addOns: '1 Seat, 1000 Credits',
-    popular: false
-  },
-  enterprise: {
-    id: 'enterprise',
-    name: 'Enterprise',
-    subtitle: 'Custom',
-    credits: 'Custom',
-    generations: 'Custom',
-    price: { monthly: 'Custom', annual: 'Custom' },
-    creditPrice: 'Custom',
-    features: [
-      'Custom solutions for large organizations',
-      'Advanced security',
-      'Flexible pricing based on needs'
-    ],
+    addOns: '1x Boost, 200 Credits',
     popular: false
   }
 } as const
