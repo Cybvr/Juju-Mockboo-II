@@ -8,7 +8,6 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { generateScript, analyzeScript } from '@/services/filmService';
 import { TemplateBrowser } from './TemplateBrowser';
-import { useRouter } from 'next/navigation';
 
 interface CreationHubProps {
     project: FilmProject;
@@ -35,7 +34,6 @@ export const CreationHub: React.FC<CreationHubProps> = ({ project, templates, on
     const [isAnalyzingScript, setIsAnalyzingScript] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [isTemplateBrowserOpen, setIsTemplateBrowserOpen] = useState(false);
-    const router = useRouter();
 
     const handleGenerateScript = useCallback(async () => {
         if (!prompt.trim()) {
@@ -125,33 +123,18 @@ export const CreationHub: React.FC<CreationHubProps> = ({ project, templates, on
         setPrompt(samplePrompts[randomIndex]);
     }, []);
 
-    const handleSelectTemplate = async (template: Template) => {
-        try {
-          // Import the duplication service
-          const { duplicateStory } = await import('@/services/storiesService');
-          const newStoryId = await duplicateStory(template.id, `${template.title} (Copy)`);
-
-          // Navigate to the new story
-          router.push(`/dashboard/stories/${newStoryId}`);
-        } catch (error) {
-          console.error('Failed to create copy of template:', error);
-          // Fallback: update current project with template data
-          const updatedProject = {
-            ...project,
-            title: template.title,
-            prompt: template.prompt,
-            script: template.script,
-            storyboard: template.storyboard,
-            characters: template.characters,
-            locations: template.locations,
-            sound_design: template.sound_design,
-            settings: template.settings,
-            category: template.category
-          };
-          onUpdateProject(updatedProject);
-          setIsTemplateBrowserOpen(false);
-        }
-      };
+    const handleSelectTemplate = useCallback((template: Template) => {
+        const remixedProject: FilmProject = {
+            ...template,
+            id: project.id,
+            title: `${template.title} (copy)`,
+            isTemplate: false,
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+        };
+        onUpdateProject(remixedProject);
+        setIsTemplateBrowserOpen(false);
+    }, [project, onUpdateProject]);
 
     const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
@@ -207,7 +190,7 @@ export const CreationHub: React.FC<CreationHubProps> = ({ project, templates, on
                     <ArrowLeft className="w-4 h-4" />
                     All Projects
                 </Button>
-
+                
                 {isAdmin && onTogglePublic && (
                     <div className="absolute top-8 right-8 flex items-center gap-2">
                         <Label htmlFor="public-toggle" className="flex items-center gap-2">
