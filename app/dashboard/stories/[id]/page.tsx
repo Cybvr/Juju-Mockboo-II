@@ -1,4 +1,3 @@
-
 "use client"
 
 import { use } from "react"
@@ -10,6 +9,7 @@ import { CreationHub } from "../common/CreationHub"
 import { templates } from "@/data/filmTemplates"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/hooks/useAuth"
+import { StoryHeader } from "../common/StoryHeader"
 
 interface StoryPageProps {
   params: Promise<{ id: string }>
@@ -24,12 +24,17 @@ export default function StoryPage({ params }: StoryPageProps) {
   const { user } = useAuth()
   const isAdmin = user?.role === 'admin'
 
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false)
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
+  const [title, setTitle] = useState<string>('')
+
   useEffect(() => {
     const loadProject = async () => {
       try {
         const story = await getStoryById(id)
         if (story) {
           setProject(story)
+          setTitle(story.title)
         } else {
           router.push('/dashboard/stories')
         }
@@ -81,17 +86,33 @@ export default function StoryPage({ params }: StoryPageProps) {
 
   const handleTogglePublic = async () => {
     if (!project || !isAdmin) return
-    
+
     const updatedProject = {
       ...project,
       isPublic: !project.isPublic
     }
-    
+
     try {
       await updateStory(project.id, updatedProject)
       setProject(updatedProject)
     } catch (error) {
       console.error('Failed to update public status:', error)
+    }
+  }
+
+  const handleTitleBlur = async () => {
+    if (!project || project.title === title) return
+
+    const updatedProject = {
+      ...project,
+      title: title
+    }
+
+    try {
+      await updateStory(project.id, updatedProject)
+      setProject(updatedProject)
+    } catch (error) {
+      console.error('Failed to update title:', error)
     }
   }
 
@@ -126,15 +147,27 @@ export default function StoryPage({ params }: StoryPageProps) {
 
   // Otherwise, show the full editor
   return (
-    <StoryBuilder
-      key={project.id}
-      project={project}
-      onUpdateProject={handleUpdateProject}
-      onBackToDashboard={handleBackToDashboard}
-      theme={theme}
-      onToggleTheme={handleToggleTheme}
-      isAdmin={isAdmin}
-      onTogglePublic={handleTogglePublic}
-    />
+    <div>
+      <StoryHeader
+        title={title}
+        onTitleChange={setTitle}
+        onTitleBlur={handleTitleBlur}
+        onBackToDashboard={() => router.push('/dashboard/stories')}
+        onShareClick={() => setIsShareModalOpen(true)}
+        onSettingsClick={() => setIsSettingsModalOpen(true)}
+        project={project}
+        onTogglePublic={handleTogglePublic}
+      />
+      <StoryBuilder
+        key={project.id}
+        project={project}
+        onUpdateProject={handleUpdateProject}
+        onBackToDashboard={handleBackToDashboard}
+        theme={theme}
+        onToggleTheme={handleToggleTheme}
+        isAdmin={isAdmin}
+        onTogglePublic={handleTogglePublic}
+      />
+    </div>
   )
 }
