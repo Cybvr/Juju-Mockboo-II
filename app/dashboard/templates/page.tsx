@@ -31,7 +31,7 @@ const TemplateCard: React.FC<TemplateCardProps> = ({ template, onSelect }) => {
   return (
     <div
       onClick={onSelect}
-      className="group cursor-pointer hover:shadow-lg  overflow-hidden flex flex-col"
+      className="group cursor-pointer hover:shadow-lg overflow-hidden rounded-lg"
     >
       <div className="relative aspect-video bg-muted">
         {firstImageUrl ? (
@@ -55,25 +55,9 @@ const TemplateCard: React.FC<TemplateCardProps> = ({ template, onSelect }) => {
             }}
           />
         )}
-        {template.isPublic && (
-          <div className="absolute top-2 right-2">
-          </div>
-        )}
-      </div>
-      <div className="p-4 flex-1">
-        <h3 className="font-bold text-lg hover:text-primary transition-colors truncate">
+        {/* Title overlay in bottom right */}
+        <div className="absolute bottom-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-sm font-medium">
           {template.title}
-        </h3>
-        <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-          {template.prompt}
-        </p>
-        {template.category && (
-          <Badge variant="outline" className="mt-2 text-xs">
-            {template.category}
-          </Badge>
-        )}
-        <div className="mt-3 text-xs text-muted-foreground">
-          {template.storyboard?.length || 0} scenes
         </div>
       </div>
     </div>
@@ -160,7 +144,7 @@ export default function TemplatesPage() {
                 <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-lg font-semibold mb-2">No templates found</h3>
                 <p className="text-muted-foreground">
-                  {selectedCategory !== 'All' 
+                  {selectedCategory !== 'All'
                     ? 'Try adjusting your filters'
                     : 'No public templates are available at the moment'}
                 </p>

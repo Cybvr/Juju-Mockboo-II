@@ -33,7 +33,7 @@ const TemplateCard: React.FC<TemplateCardProps> = ({ template, onSelect }) => {
   return (
     <Card
       onClick={onSelect}
-      className="group cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col"
+      className="group cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden"
     >
       <div className="relative aspect-video bg-muted">
         {firstImageUrl ? (
@@ -57,27 +57,11 @@ const TemplateCard: React.FC<TemplateCardProps> = ({ template, onSelect }) => {
             }}
           />
         )}
-        {template.isPublic && (
-          <div className="absolute top-2 right-2">
-          </div>
-        )}
-      </div>
-      <CardContent className="p-4 flex-1">
-        <h3 className="font-bold text-lg group-hover:text-primary transition-colors truncate">
+        {/* Title overlay in bottom right */}
+        <div className="absolute bottom-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-sm font-medium">
           {template.title}
-        </h3>
-        <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-          {template.prompt}
-        </p>
-        {template.category && (
-          <Badge variant="outline" className="mt-2 text-xs">
-            {template.category}
-          </Badge>
-        )}
-        <div className="mt-3 text-xs text-muted-foreground">
-          {template.storyboard?.length || 0} scenes
         </div>
-      </CardContent>
+      </div>
     </Card>
   );
 };
