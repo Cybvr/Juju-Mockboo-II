@@ -95,7 +95,7 @@ export const TemplateBrowser: React.FC<TemplateBrowserProps> = ({ templates, onS
             await onCreateFromTemplate(template);
             onClose();
         } else {
-            // Always duplicate and navigate for any template with an ID
+            // Always duplicate and navigate for ALL templates
             if (template.id) {
                 try {
                     const newStoryId = await duplicateStory(template.id);
@@ -108,8 +108,9 @@ export const TemplateBrowser: React.FC<TemplateBrowserProps> = ({ templates, onS
                     onSelect(template);
                 }
             } else {
-                // For templates without ID (local templates), use regular selection
+                // For templates without ID (local templates), still call onSelect which should handle creating the copy
                 onSelect(template);
+                onClose();
             }
         }
     };

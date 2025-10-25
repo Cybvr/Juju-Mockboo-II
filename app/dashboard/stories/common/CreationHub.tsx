@@ -154,18 +154,39 @@ export const CreationHub: React.FC<CreationHubProps> = ({ project, templates, on
         setPrompt(samplePrompts[randomIndex]);
     }, []);
 
-    const handleSelectTemplate = useCallback((template: Template) => {
-        const remixedProject: FilmProject = {
-            ...template,
-            id: project.id,
-            title: `${template.title} (copy)`,
-            isTemplate: false,
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
-        };
-        onUpdateProject(remixedProject);
+    const handleSelectTemplate = useCallback(async (template: Template) => {
+        try {
+            // For templates with ID, duplicate them properly
+            if (template.id) {
+                const newStoryId = await duplicateStory(template.id);
+                router.push(`/dashboard/stories/${newStoryId}`);
+            } else {
+                // For local templates without ID, update current project
+                const remixedProject: FilmProject = {
+                    ...template,
+                    id: project.id,
+                    title: `${template.title} (copy)`,
+                    isTemplate: false,
+                    createdAt: Date.now(),
+                    updatedAt: Date.now(),
+                };
+                await onUpdateProject(remixedProject);
+            }
+        } catch (error) {
+            console.error('Failed to create from template:', error);
+            // Fallback to updating current project
+            const remixedProject: FilmProject = {
+                ...template,
+                id: project.id,
+                title: `${template.title} (copy)`,
+                isTemplate: false,
+                createdAt: Date.now(),
+                updatedAt: Date.now(),
+            };
+            await onUpdateProject(remixedProject);
+        }
         setIsTemplateBrowserOpen(false);
-    }, [project, onUpdateProject]);
+    }, [project, onUpdateProject, router]);
 
     const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
