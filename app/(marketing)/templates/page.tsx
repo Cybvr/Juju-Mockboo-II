@@ -1,3 +1,4 @@
+
 'use client';
 import React, { useState, useEffect } from 'react';
 import type { FilmProject } from '@/types/storytypes';
@@ -43,6 +44,20 @@ const TemplateCard: React.FC<TemplateCardProps> = ({ template, onSelect }) => {
           <div className="flex items-center justify-center h-full">
             <FileText className="w-12 h-12 text-muted-foreground" />
           </div>
+        )}
+        {/* Video element with fallback to image */}
+        {template.storyboard?.[0]?.videoUrl && (
+          <video
+            src={template.storyboard[0].videoUrl}
+            className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+            autoPlay
+            muted
+            loop
+            playsInline
+            onError={(e) => {
+              e.currentTarget.style.display = 'none';
+            }}
+          />
         )}
         <div className="absolute top-2 right-2">
           <Globe className="w-4 h-4 text-green-500 bg-white rounded-full p-0.5" />
@@ -114,6 +129,9 @@ export default function TemplatesPage() {
     return matchesSearch && matchesCategory;
   });
 
+  // Get unique categories that have templates
+  const availableCategories = ['All', ...new Set(publicTemplates.map(t => t.category).filter(Boolean))];
+
   const handleSelectTemplate = (template: FilmProject) => {
     router.push(`/dashboard/stories/${template.id}`);
   };
@@ -140,6 +158,31 @@ export default function TemplatesPage() {
           {/* Header */}
           <div className="space-y-2">
             <h1 className="text-3xl font-bold">Templates</h1>
+          </div>
+
+          {/* Search and Filters */}
+          <div className="space-y-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+              <Input
+                placeholder="Search templates..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {availableCategories.map((category) => (
+                <Badge
+                  key={category}
+                  variant={selectedCategory === category ? 'default' : 'outline'}
+                  className="cursor-pointer hover:bg-accent transition-colors"
+                  onClick={() => setSelectedCategory(category)}
+                >
+                  {category}
+                </Badge>
+              ))}
+            </div>
           </div>
          
           {/* Templates Grid */}

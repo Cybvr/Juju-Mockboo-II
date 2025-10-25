@@ -34,20 +34,51 @@ const TemplateCard: React.FC<TemplateCardProps> = ({ template, onSelect }) => {
   return (
     <Card
       onClick={onSelect}
-      className="group cursor-pointer overflow-hidden relative aspect-video"
+      className="group cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col"
     >
-      {firstImageUrl ? (
-        <img src={firstImageUrl} alt="Template thumbnail" className="w-full h-full object-cover absolute inset-0" />
-      ) : (
-        <div className="flex items-center justify-center h-full bg-muted absolute inset-0">
-          <FileText className="w-12 h-12 text-muted-foreground" />
-        </div>
-      )}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-      <CardContent className="p-4 absolute bottom-0 left-0 right-0 text-left">
-        <h3 className="font-bold text-lg text-white group-hover:text-primary transition-colors truncate">
+      <div className="relative aspect-video bg-muted">
+        {firstImageUrl ? (
+          <img src={firstImageUrl} alt="Template thumbnail" className="w-full h-full object-cover" />
+        ) : (
+          <div className="flex items-center justify-center h-full">
+            <FileText className="w-12 h-12 text-muted-foreground" />
+          </div>
+        )}
+        {/* Video element with fallback to image */}
+        {template.storyboard?.[0]?.videoUrl && (
+          <video
+            src={template.storyboard[0].videoUrl}
+            className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+            autoPlay
+            muted
+            loop
+            playsInline
+            onError={(e) => {
+              e.currentTarget.style.display = 'none';
+            }}
+          />
+        )}
+        {template.isPublic && (
+          <div className="absolute top-2 right-2">
+            <Globe className="w-4 h-4 text-green-500 bg-white rounded-full p-0.5" />
+          </div>
+        )}
+      </div>
+      <CardContent className="p-4 flex-1">
+        <h3 className="font-bold text-lg group-hover:text-primary transition-colors truncate">
           {template.title}
         </h3>
+        <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+          {template.prompt}
+        </p>
+        {template.category && (
+          <Badge variant="outline" className="mt-2 text-xs">
+            {template.category}
+          </Badge>
+        )}
+        <div className="mt-3 text-xs text-muted-foreground">
+          {template.storyboard?.length || 0} scenes
+        </div>
       </CardContent>
     </Card>
   );
