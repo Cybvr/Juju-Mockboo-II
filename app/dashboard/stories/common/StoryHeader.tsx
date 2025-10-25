@@ -72,9 +72,12 @@ export const StoryHeader: React.FC<StoryHeaderProps> = ({
         });
     };
 
-    const handleAccessLevelChange = (accessLevel: 'private' | 'public') => {
-        if (onTogglePublic && project && project.isPublic !== (accessLevel === 'public')) {
-            onTogglePublic();
+    const handleAccessLevelChange = async (accessLevel: 'private' | 'public') => {
+        if (onTogglePublic && project) {
+            const shouldBePublic = accessLevel === 'public';
+            if (project.isPublic !== shouldBePublic) {
+                await onTogglePublic();
+            }
         }
     };
 
