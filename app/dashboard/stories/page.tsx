@@ -299,7 +299,11 @@ const App: React.FC = () => {
     <main className="min-h-screen w-full transition-colors duration-300 mx-auto max-w-4xl" suppressHydrationWarning>
       {renderContent()}
 
-      <AlertDialog open={deleteDialogOpen} onOpenChange={closeDeleteDialog}>
+      <AlertDialog open={deleteDialogOpen} onOpenChange={(open) => {
+        if (!open) {
+          closeDeleteDialog();
+        }
+      }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Project</AlertDialogTitle>
