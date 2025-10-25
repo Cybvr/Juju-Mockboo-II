@@ -1,4 +1,3 @@
-
 "use client";
 import { Button } from '@/components/ui/button';
 import {
@@ -12,6 +11,7 @@ import { GoHomeFill } from "react-icons/go";
 import { PiVideoBold } from "react-icons/pi";
 import { IoAlbumsOutline } from "react-icons/io5";
 import { PiSlideshowBold } from "react-icons/pi";
+import { IoLayersOutline } from "react-icons/io5";
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -77,6 +77,12 @@ export function Sidebar({ className, onNavigate }: SidebarProps) {
       icon: IoAlbumsOutline,
       href: '/dashboard/galleries',
       active: pathname.startsWith('/dashboard/galleries'),
+    },
+    {
+      label: 'Templates',
+      icon: IoLayersOutline,
+      href: '/dashboard/templates',
+      active: pathname.startsWith('/dashboard/templates'),
     },
   ];
 
