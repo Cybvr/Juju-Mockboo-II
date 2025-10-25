@@ -203,19 +203,13 @@ export const StitchEditor: React.FC<StitchPlayerProps> = ({ project }) => {
             onMouseLeave={() => isPlaying && setShowControls(false)}
         >
             {/* Video Player */}
-            <video
-                ref={playerRef}
-                className="w-full h-full object-contain cursor-pointer rounded-xl"
-                playsInline
-                onClick={handlePlayPause}
-            />
-            {!hasVideos && (
-                <div className="absolute inset-0 flex items-center justify-center text-white/70 rounded-xl">
-                    <div className="text-center">
-                        <Film className="w-8 h-8 mx-auto mb-4" />
-                        <p className="text-lg">No videos loaded</p>
-                    </div>
-                </div>
+            {hasVideos && (
+                <video
+                    ref={playerRef}
+                    className="w-full h-full object-contain cursor-pointer rounded-xl"
+                    playsInline
+                    onClick={handlePlayPause}
+                />
             )}
             {/* Controls Overlay */}
             <div
