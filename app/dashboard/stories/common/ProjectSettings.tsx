@@ -14,17 +14,17 @@ interface ProjectSettingsProps {
 }
 
 const categories = [
-  'Commercial',
-  'Horror', 
-  'Sci-Fi',
-  'Travel',
-  'Cooking',
   'UGC',
-  'Tech',
-  'Fashion',
-  'Food',
-  'Pet',
-  'App'
+  'Ad/Commercial', 
+  'Film/Cinema',
+  'Documentary',
+  'Educational',
+  'Social Media',
+  'Product Demo',
+  'Brand Story',
+  'Tutorial',
+  'Entertainment',
+  'Music Video'
 ];
 
 export const ProjectSettings: React.FC<ProjectSettingsProps> = ({ settings, onUpdate, project, onUpdateProject }) => {
