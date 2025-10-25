@@ -59,7 +59,6 @@ const TemplateCard: React.FC<TemplateCardProps> = ({ template, onSelect }) => {
         )}
         {template.isPublic && (
           <div className="absolute top-2 right-2">
-            <Globe className="w-4 h-4 text-green-500 bg-white rounded-full p-0.5" />
           </div>
         )}
       </div>

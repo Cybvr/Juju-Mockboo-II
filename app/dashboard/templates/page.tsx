@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import type { FilmProject } from '@/types/storytypes';
 import { getAllStories } from '@/services/storiesService';
-import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { FileText, Globe, Filter } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -30,9 +29,9 @@ interface TemplateCardProps {
 const TemplateCard: React.FC<TemplateCardProps> = ({ template, onSelect }) => {
   const firstImageUrl = template.storyboard?.[0]?.imageUrl;
   return (
-    <Card
+    <div
       onClick={onSelect}
-      className="group cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col"
+      className="group cursor-pointer hover:shadow-lg  overflow-hidden flex flex-col"
     >
       <div className="relative aspect-video bg-muted">
         {firstImageUrl ? (
@@ -58,12 +57,11 @@ const TemplateCard: React.FC<TemplateCardProps> = ({ template, onSelect }) => {
         )}
         {template.isPublic && (
           <div className="absolute top-2 right-2">
-            <Globe className="w-4 h-4 text-green-500 bg-white rounded-full p-0.5" />
           </div>
         )}
       </div>
-      <CardContent className="p-4 flex-1">
-        <h3 className="font-bold text-lg group-hover:text-primary transition-colors truncate">
+      <div className="p-4 flex-1">
+        <h3 className="font-bold text-lg hover:text-primary transition-colors truncate">
           {template.title}
         </h3>
         <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
@@ -77,8 +75,8 @@ const TemplateCard: React.FC<TemplateCardProps> = ({ template, onSelect }) => {
         <div className="mt-3 text-xs text-muted-foreground">
           {template.storyboard?.length || 0} scenes
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 
@@ -140,7 +138,6 @@ export default function TemplatesPage() {
           <div className="space-y-2">
             <h1 className="text-sm font-bold">Templates</h1>
           </div>
-
           {/* Category Filters */}
           <div className="space-y-4">
             <div className="flex flex-wrap gap-2">
@@ -156,7 +153,6 @@ export default function TemplatesPage() {
               ))}
             </div>
           </div>
-
           {/* Templates Grid */}
           {filteredTemplates.length === 0 ? (
             <div className="flex items-center justify-center py-16">
