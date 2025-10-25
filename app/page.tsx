@@ -123,13 +123,6 @@ export default function LandingPage() {
                       Start Creating Free
                     </Button>
                   )}
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="px-8 py-6 text-lg rounded-full"
-                  >
-                    See Examples
-                  </Button>
                 </div>
                 {/* Social Proof */}
                 <div className="mt-8 flex flex-wrap justify-center gap-6 text-sm text-muted-foreground">
