@@ -92,9 +92,26 @@ export const TemplateBrowser: React.FC<TemplateBrowserProps> = ({ templates, onC
         try {
             let newStoryId: string;
 
+            // Check if this is a Firebase template by trying to get it first
             if (template.id) {
-                // Template exists in Firebase - duplicate it
-                newStoryId = await duplicateStory(template.id);
+                try {
+                    const { getStoryById } = await import('@/services/storiesService');
+                    const existingStory = await getStoryById(template.id);
+                    if (existingStory) {
+                        // Template exists in Firebase - duplicate it
+                        newStoryId = await duplicateStory(template.id);
+                    } else {
+                        throw new Error('Template not found in Firebase');
+                    }
+                } catch (error) {
+                    // Template doesn't exist in Firebase, treat as local template
+                    const { id, createdAt, updatedAt, ...templateData } = template as any;
+                    newStoryId = await createStory({
+                        ...templateData,
+                        title: `${template.title} (Copy)`,
+                        isTemplate: false,
+                    });
+                }
             } else {
                 // Template is a local object - create new story from it
                 const { id, createdAt, updatedAt, ...templateData } = template as any;
