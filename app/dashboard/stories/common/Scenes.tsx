@@ -1,12 +1,13 @@
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import type { FilmProject, StoryboardScene } from '@/types/storytypes';
-import { Camera, Trash2, ArrowUp, Plus } from 'lucide-react';
+import { Camera, Trash2, ArrowUp, Plus, X, ChevronLeft, ChevronRight, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { generateSingleImage } from "@/services/filmService";
 
 interface SceneCardProps {
@@ -20,6 +21,8 @@ const SceneCard: React.FC<SceneCardProps> = ({ scene, project, onUpdateScene, on
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [localPrompt, setLocalPrompt] = useState(scene.prompt || "");
     const [generateOutputs, setGenerateOutputs] = useState(1);
+    const [lightboxOpen, setLightboxOpen] = useState(false);
+    const [lightboxImageIndex, setLightboxImageIndex] = useState(0);
 
     const adjustHeight = useCallback(() => {
         if (textareaRef.current) {
@@ -144,6 +147,52 @@ const SceneCard: React.FC<SceneCardProps> = ({ scene, project, onUpdateScene, on
         e.preventDefault();
     };
 
+    const handleDeleteImage = (imageIndex: number) => {
+        const images = scene.generatedImages || (scene.imageUrl ? [scene.imageUrl] : []);
+        const updatedImages = images.filter((_, index) => index !== imageIndex);
+        
+        onUpdateScene({ 
+            ...scene, 
+            generatedImages: updatedImages,
+            imageUrl: updatedImages.length > 0 ? updatedImages[0] : null
+        });
+    };
+
+    const handleImageClick = (imageIndex: number) => {
+        setLightboxImageIndex(imageIndex);
+        setLightboxOpen(true);
+    };
+
+    const navigateLightbox = (direction: 'prev' | 'next') => {
+        const images = scene.generatedImages || (scene.imageUrl ? [scene.imageUrl] : []);
+        if (direction === 'prev') {
+            setLightboxImageIndex(lightboxImageIndex > 0 ? lightboxImageIndex - 1 : images.length - 1);
+        } else {
+            setLightboxImageIndex(lightboxImageIndex < images.length - 1 ? lightboxImageIndex + 1 : 0);
+        }
+    };
+
+    const handleDownloadImage = async () => {
+        const images = scene.generatedImages || (scene.imageUrl ? [scene.imageUrl] : []);
+        const imageUrl = images[lightboxImageIndex];
+        if (!imageUrl) return;
+
+        try {
+            const response = await fetch(imageUrl);
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `scene_${scene.scene_number}_image_${lightboxImageIndex + 1}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Failed to download image:', error);
+        }
+    };
+
     return (
         <AccordionItem value={scene.id} className="mb-4 bg-card  px-4">
             <AccordionTrigger className="hover:no-underline py-4">
@@ -235,19 +284,34 @@ const SceneCard: React.FC<SceneCardProps> = ({ scene, project, onUpdateScene, on
                                         const images = scene.generatedImages || (scene.imageUrl ? [scene.imageUrl] : []);
                                         const imageUrl = images[index];
                                         return (
-                                            <div key={index} className="w-full aspect-video bg-muted rounded-lg  flex items-center justify-center">
+                                            <div key={index} className="w-full aspect-video bg-muted rounded-lg flex items-center justify-center relative group">
                                                 {!imageUrl && scene.generating && index < generateOutputs ? (
                                                     <p className="text-xs text-muted-foreground">Generating...</p>
                                                 ) : imageUrl === "error" ? (
                                                     <p className="text-destructive text-xs">Error</p>
                                                 ) : imageUrl ? (
-                                                    <img
-                                                        src={imageUrl}
-                                                        alt={`Scene ${scene.scene_number} - ${index + 1}`}
-                                                        className="w-full h-full object-cover cursor-grab"
-                                                        draggable
-                                                        onDragStart={(e) => handleImageDragStart(e, imageUrl)}
-                                                    />
+                                                    <>
+                                                        <img
+                                                            src={imageUrl}
+                                                            alt={`Scene ${scene.scene_number} - ${index + 1}`}
+                                                            className="w-full h-full object-cover cursor-pointer"
+                                                            draggable
+                                                            onDragStart={(e) => handleImageDragStart(e, imageUrl)}
+                                                            onClick={() => handleImageClick(index)}
+                                                        />
+                                                        {/* Delete button on hover */}
+                                                        <Button
+                                                            size="icon"
+                                                            variant="destructive"
+                                                            className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleDeleteImage(index);
+                                                            }}
+                                                        >
+                                                            <X className="w-3 h-3" />
+                                                        </Button>
+                                                    </>
                                                 ) : (
                                                     <Camera className="w-4 h-4 text-muted-foreground/50" />
                                                 )}
@@ -293,6 +357,76 @@ const SceneCard: React.FC<SceneCardProps> = ({ scene, project, onUpdateScene, on
                     </div>
                 </div>
             </AccordionContent>
+
+            {/* Lightbox Modal */}
+            <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
+                <DialogContent className="max-w-4xl w-full h-[90vh] p-0">
+                    <div className="relative w-full h-full flex items-center justify-center bg-black rounded-lg overflow-hidden">
+                        {(() => {
+                            const images = scene.generatedImages || (scene.imageUrl ? [scene.imageUrl] : []);
+                            const currentImage = images[lightboxImageIndex];
+                            
+                            return currentImage ? (
+                                <>
+                                    {/* Close button */}
+                                    <Button
+                                        size="icon"
+                                        variant="ghost"
+                                        className="absolute top-4 right-4 z-10 bg-black/50 hover:bg-black/70 text-white"
+                                        onClick={() => setLightboxOpen(false)}
+                                    >
+                                        <X className="w-4 h-4" />
+                                    </Button>
+
+                                    {/* Navigation buttons */}
+                                    {images.length > 1 && (
+                                        <>
+                                            <Button
+                                                size="icon"
+                                                variant="ghost"
+                                                className="absolute top-1/2 left-4 -translate-y-1/2 z-10 bg-black/50 hover:bg-black/70 text-white"
+                                                onClick={() => navigateLightbox('prev')}
+                                            >
+                                                <ChevronLeft className="w-4 h-4" />
+                                            </Button>
+                                            <Button
+                                                size="icon"
+                                                variant="ghost"
+                                                className="absolute top-1/2 right-4 -translate-y-1/2 z-10 bg-black/50 hover:bg-black/70 text-white"
+                                                onClick={() => navigateLightbox('next')}
+                                            >
+                                                <ChevronRight className="w-4 h-4" />
+                                            </Button>
+                                        </>
+                                    )}
+
+                                    {/* Download button */}
+                                    <Button
+                                        size="icon"
+                                        variant="ghost"
+                                        className="absolute bottom-4 right-4 z-10 bg-black/50 hover:bg-black/70 text-white"
+                                        onClick={handleDownloadImage}
+                                    >
+                                        <Download className="w-4 h-4" />
+                                    </Button>
+
+                                    {/* Image */}
+                                    <img
+                                        src={currentImage}
+                                        alt={`Scene ${scene.scene_number} - Image ${lightboxImageIndex + 1}`}
+                                        className="max-w-full max-h-full object-contain"
+                                    />
+
+                                    {/* Image counter */}
+                                    <div className="absolute bottom-4 left-4 bg-black/50 text-white px-2 py-1 rounded text-sm">
+                                        {lightboxImageIndex + 1} / {images.length}
+                                    </div>
+                                </>
+                            ) : null;
+                        })()}
+                    </div>
+                </DialogContent>
+            </Dialog>
         </AccordionItem>
     );
 };
