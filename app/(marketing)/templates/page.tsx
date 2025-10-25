@@ -1,8 +1,10 @@
+// @/app/(marketing)/templates
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import type { FilmProject } from '@/types/storytypes';
-import { templates } from '@/data/filmTemplates';
+import { getAllStories } from '@/services/storiesService';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -78,32 +80,17 @@ export default function TemplatesPage() {
   const router = useRouter();
 
   useEffect(() => {
-    loadTemplates();
+    loadPublicTemplates();
   }, []);
 
-  const loadTemplates = () => {
+  const loadPublicTemplates = async () => {
     setLoading(true);
     try {
-      // Convert templates to FilmProject format
-      const filmTemplates: FilmProject[] = templates.map(template => ({
-        id: template.id,
-        title: template.title,
-        prompt: template.prompt,
-        category: template.category,
-        storyboard: template.storyboard,
-        characters: template.characters,
-        locations: template.locations,
-        sound_design: template.sound_design,
-        settings: template.settings,
-        createdAt: template.createdAt,
-        updatedAt: template.updatedAt,
-        isTemplate: template.isTemplate,
-        isPublic: true,
-        script: template.script || ''
-      }));
-      setPublicTemplates(filmTemplates);
+      const allStories = await getAllStories();
+      const publicStories = allStories.filter(story => story.isPublic);
+      setPublicTemplates(publicStories);
     } catch (error) {
-      console.error('Failed to load templates:', error);
+      console.error('Failed to load public templates:', error);
     } finally {
       setLoading(false);
     }
