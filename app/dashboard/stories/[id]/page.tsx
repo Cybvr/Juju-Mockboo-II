@@ -157,6 +157,7 @@ export default function StoryPage({ params }: StoryPageProps) {
         onSettingsClick={() => setIsSettingsModalOpen(true)}
         project={project}
         onTogglePublic={handleTogglePublic}
+        onUpdateProject={handleUpdateProject}
       />
       <StoryBuilder
         key={project.id}

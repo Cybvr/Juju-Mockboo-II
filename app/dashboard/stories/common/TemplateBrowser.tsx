@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import type { Template } from '@/types/storytypes';
-import { FileText, X, Globe } from 'lucide-react';
+import { FileText, X, Globe, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { getAllStories } from '@/services/storiesService';
 
 interface TemplateBrowserProps {
@@ -42,9 +43,25 @@ const TemplateCard: React.FC<{ template: Template; onSelect: () => void }> = ({ 
     );
 };
 
+const categories = [
+    'All',
+    'Commercial',
+    'Horror',
+    'Sci-Fi',
+    'Travel',
+    'Cooking',
+    'UGC',
+    'Tech',
+    'Fashion',
+    'Food',
+    'Pet',
+    'App'
+];
+
 export const TemplateBrowser: React.FC<TemplateBrowserProps> = ({ templates, onSelect, onClose, showPublicTab = false }) => {
     const [publicDocs, setPublicDocs] = useState<Template[]>([]);
     const [loading, setLoading] = useState(false);
+    const [selectedCategory, setSelectedCategory] = useState('All');
 
     useEffect(() => {
         if (showPublicTab) {
@@ -65,8 +82,38 @@ export const TemplateBrowser: React.FC<TemplateBrowserProps> = ({ templates, onS
         }
     };
 
-    const renderTemplateGrid = (items: Template[], isLoading = false) => (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[50vh] overflow-y-auto p-1">
+    const filterItemsByCategory = (items: Template[]) => {
+        if (selectedCategory === 'All') return items;
+        return items.filter(item => item.category === selectedCategory);
+    };
+
+    const renderTemplateGrid = (items: Template[], isLoading = false) => {
+        const filteredItems = filterItemsByCategory(items);
+        
+        return (
+        <div className="space-y-4">
+            <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                    <Filter className="w-4 h-4 text-muted-foreground" />
+                    <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                        <SelectTrigger className="w-48">
+                            <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {categories.map((category) => (
+                                <SelectItem key={category} value={category}>
+                                    {category}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="text-sm text-muted-foreground">
+                    {filteredItems.length} item{filteredItems.length !== 1 ? 's' : ''}
+                </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[50vh] overflow-y-auto p-1">
             {isLoading ? (
                 <div className="col-span-full flex items-center justify-center py-8">
                     <div className="text-center">
@@ -74,12 +121,14 @@ export const TemplateBrowser: React.FC<TemplateBrowserProps> = ({ templates, onS
                         <p className="text-sm text-muted-foreground">Loading...</p>
                     </div>
                 </div>
-            ) : items.length === 0 ? (
+            ) : filteredItems.length === 0 ? (
                 <div className="col-span-full flex items-center justify-center py-8">
-                    <p className="text-sm text-muted-foreground">No items available</p>
+                    <p className="text-sm text-muted-foreground">
+                        {selectedCategory === 'All' ? 'No items available' : `No items in ${selectedCategory} category`}
+                    </p>
                 </div>
             ) : (
-                items.map((item) => (
+                filteredItems.map((item) => (
                     <Card key={item.id} className="cursor-pointer hover:bg-accent/50 transition-colors" onClick={() => onSelect(item)}>
                         <CardHeader className="pb-2">
                             <div className="flex items-center gap-2">
@@ -93,8 +142,10 @@ export const TemplateBrowser: React.FC<TemplateBrowserProps> = ({ templates, onS
                     </Card>
                 ))
             )}
+            </div>
         </div>
-    );
+        );
+    };
 
     return (
         <Dialog open={true} onOpenChange={onClose}>

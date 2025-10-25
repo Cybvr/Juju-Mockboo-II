@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { FilmProject } from '@/types/storytypes';
+import { ProjectSettings } from './ProjectSettings';
 
 interface StoryHeaderProps {
     title: string;
@@ -15,6 +16,7 @@ interface StoryHeaderProps {
     onSettingsClick: () => void;
     project: FilmProject;
     onTogglePublic: () => void;
+    onUpdateProject?: (project: FilmProject) => void;
 }
 
 export const StoryHeader: React.FC<StoryHeaderProps> = ({
@@ -25,9 +27,11 @@ export const StoryHeader: React.FC<StoryHeaderProps> = ({
     onShareClick,
     onSettingsClick,
     project,
-    onTogglePublic
+    onTogglePublic,
+    onUpdateProject
 }) => {
     const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+    const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
     const [shareLink, setShareLink] = useState('Generating link...');
     const [copied, setCopied] = useState(false);
 
@@ -65,6 +69,11 @@ export const StoryHeader: React.FC<StoryHeaderProps> = ({
         if (onShareClick) onShareClick();
     };
 
+    const handleSettingsClick = () => {
+        setIsSettingsModalOpen(true);
+        if (onSettingsClick) onSettingsClick();
+    };
+
     const handleCopy = () => {
         navigator.clipboard.writeText(shareLink).then(() => {
             setCopied(true);
@@ -99,7 +108,7 @@ export const StoryHeader: React.FC<StoryHeaderProps> = ({
                     <Button variant="outline" size="icon" onClick={handleShareClick} className="h-8 w-8 sm:h-10 sm:w-10">
                         <Share2 className="w-4 h-4" />
                     </Button>
-                    <Button variant="outline" size="icon" onClick={onSettingsClick} className="h-8 w-8 sm:h-10 sm:w-10">
+                    <Button variant="outline" size="icon" onClick={handleSettingsClick} className="h-8 w-8 sm:h-10 sm:w-10">
                         <Settings className="w-4 h-4" />
                     </Button>
                 </div>
@@ -167,6 +176,15 @@ export const StoryHeader: React.FC<StoryHeaderProps> = ({
                     </div>
                 </DialogContent>
             </Dialog>
+
+            {/* Settings Modal */}
+            {isSettingsModalOpen && onUpdateProject && (
+                <ProjectSettings
+                    project={project}
+                    onUpdateProject={onUpdateProject}
+                    onClose={() => setIsSettingsModalOpen(false)}
+                />
+            )}
         </>
     );
 };
