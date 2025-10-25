@@ -190,7 +190,7 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({ project, onUpdatePro
                 {/* Main Content Area */}
                 <div className="flex flex-col lg:flex-row lg:h-full w-full ">
                     {/* Left section - storyboard/assets */}
-                    <div className={`w-full ${isRightPanelCollapsed ? 'lg:w-full' : 'lg:w-2/3'} lg:h-full lg:overflow-y-auto overflow-none lg:flex-shrink-0 relative px-2 py-2 lg:px-12 lg:py-4 justify-center space-y-2`}>
+                    <div className={`w-full ${isRightPanelCollapsed ? 'lg:w-full' : 'lg:w-2/3'} lg:h-full lg:overflow-y-auto overflow-none lg:flex-shrink-0 relative px-2 py-2 lg:px-12 lg:py-4 justify-center space-y-2 `}>
                         {/* Floating toggle button for collapsed state */}
                         {isRightPanelCollapsed && (
                             <Button

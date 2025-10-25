@@ -194,7 +194,7 @@ const SceneCard: React.FC<SceneCardProps> = ({ scene, project, onUpdateScene, on
     };
 
     return (
-        <AccordionItem value={scene.id} className="mb-4 bg-card  px-4">
+        <AccordionItem value={scene.id} className="mb-4 bg-card  px-2">
             <AccordionTrigger className="hover:no-underline py-4">
                 <Badge variant="outline" className="text-sm font-semibold">
                     Scene {scene.scene_number}
