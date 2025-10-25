@@ -239,6 +239,12 @@ const App: React.FC = () => {
     setProjectToDelete(null);
   };
 
+  const handleDialogOpenChange = (open: boolean) => {
+    if (!open) {
+      closeDeleteDialog();
+    }
+  };
+
   // ---------------- Render Sections ----------------
   const renderContent = () => {
     const activeProject = projects.find((p) => p.id === activeProjectId);
@@ -299,11 +305,7 @@ const App: React.FC = () => {
     <main className="min-h-screen w-full transition-colors duration-300 mx-auto max-w-4xl" suppressHydrationWarning>
       {renderContent()}
 
-      <AlertDialog open={deleteDialogOpen} onOpenChange={(open) => {
-        if (!open) {
-          closeDeleteDialog();
-        }
-      }}>
+      <AlertDialog open={deleteDialogOpen} onOpenChange={handleDialogOpenChange}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Project</AlertDialogTitle>
