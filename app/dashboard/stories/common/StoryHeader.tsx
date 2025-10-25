@@ -73,7 +73,7 @@ export const StoryHeader: React.FC<StoryHeaderProps> = ({
     };
 
     const handleAccessLevelChange = (accessLevel: 'private' | 'public') => {
-        if (onTogglePublic && project.isPublic !== (accessLevel === 'public')) {
+        if (onTogglePublic && project && project.isPublic !== (accessLevel === 'public')) {
             onTogglePublic();
         }
     };
@@ -114,7 +114,7 @@ export const StoryHeader: React.FC<StoryHeaderProps> = ({
                             <div className="text-sm font-medium">Who can access this story?</div>
                             <div className="space-y-2">
                                 <Button
-                                    variant={!project.isPublic ? 'default' : 'outline'}
+                                    variant={!project?.isPublic ? 'default' : 'outline'}
                                     className="w-full justify-start"
                                     onClick={() => handleAccessLevelChange('private')}
                                 >
@@ -122,7 +122,7 @@ export const StoryHeader: React.FC<StoryHeaderProps> = ({
                                     Private - Only you can view
                                 </Button>
                                 <Button
-                                    variant={project.isPublic ? 'default' : 'outline'}
+                                    variant={project?.isPublic ? 'default' : 'outline'}
                                     className="w-full justify-start"
                                     onClick={() => handleAccessLevelChange('public')}
                                 >
@@ -133,7 +133,7 @@ export const StoryHeader: React.FC<StoryHeaderProps> = ({
                         </div>
 
                         {/* Share Link */}
-                        {project.isPublic && (
+                        {project?.isPublic && (
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">Share Link</label>
                                 <div className="flex gap-2">
@@ -156,7 +156,7 @@ export const StoryHeader: React.FC<StoryHeaderProps> = ({
                             </div>
                         )}
 
-                        {!project.isPublic && (
+                        {!project?.isPublic && (
                             <div className="text-sm text-muted-foreground p-3 bg-muted/30 rounded-lg">
                                 Story is private. Switch to public to share with others.
                             </div>
