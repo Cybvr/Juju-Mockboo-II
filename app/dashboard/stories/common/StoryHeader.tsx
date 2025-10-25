@@ -179,11 +179,19 @@ export const StoryHeader: React.FC<StoryHeaderProps> = ({
 
             {/* Settings Modal */}
             {isSettingsModalOpen && onUpdateProject && (
-                <ProjectSettings
-                    project={project}
-                    onUpdateProject={onUpdateProject}
-                    onClose={() => setIsSettingsModalOpen(false)}
-                />
+                <Dialog open={isSettingsModalOpen} onOpenChange={setIsSettingsModalOpen}>
+                    <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden">
+                        <DialogHeader>
+                            <DialogTitle>Project Settings</DialogTitle>
+                        </DialogHeader>
+                        <div className="overflow-y-auto">
+                            <ProjectSettings
+                                settings={project.settings}
+                                onUpdate={(newSettings) => onUpdateProject({ ...project, settings: newSettings })}
+                            />
+                        </div>
+                    </DialogContent>
+                </Dialog>
             )}
         </>
     );
