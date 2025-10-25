@@ -1,11 +1,10 @@
-
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import type { FilmProject, StoryboardScene } from '@/types/storytypes';
 import { Camera, Trash2, ArrowUp, Plus, X, ChevronLeft, ChevronRight, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { generateSingleImage } from "@/services/filmService";
@@ -129,7 +128,7 @@ const SceneCard: React.FC<SceneCardProps> = ({ scene, project, onUpdateScene, on
                         action: 'generateVideo',
                         prompt: localPrompt || 'A cinematic scene',
                         imageUrl: imageUrl,
-                        aspectRatio: project.settings.aspectRatio // Use project aspect ratio setting
+                        aspectRatio: aspectRatio // Use the scene's current aspect ratio
                     })
                 });
                 const data = await response.json();
@@ -152,9 +151,9 @@ const SceneCard: React.FC<SceneCardProps> = ({ scene, project, onUpdateScene, on
     const handleDeleteImage = (imageIndex: number) => {
         const images = scene.generatedImages || (scene.imageUrl ? [scene.imageUrl] : []);
         const updatedImages = images.filter((_, index) => index !== imageIndex);
-        
-        onUpdateScene({ 
-            ...scene, 
+
+        onUpdateScene({
+            ...scene,
             generatedImages: updatedImages,
             imageUrl: updatedImages.length > 0 ? updatedImages[0] : null
         });
@@ -356,7 +355,7 @@ const SceneCard: React.FC<SceneCardProps> = ({ scene, project, onUpdateScene, on
                             </div>
                         </div>
                     </div>
-                    
+
                     {/* Delete button at bottom right */}
                     <div className="flex justify-end mt-4">
                         <Button
@@ -379,7 +378,7 @@ const SceneCard: React.FC<SceneCardProps> = ({ scene, project, onUpdateScene, on
                         {(() => {
                             const images = scene.generatedImages || (scene.imageUrl ? [scene.imageUrl] : []);
                             const currentImage = images[lightboxImageIndex];
-                            
+
                             return currentImage ? (
                                 <>
                                     {/* Close button */}
@@ -479,7 +478,7 @@ export const Scenes: React.FC<ScenesProps> = ({
                                 />
                             ))}
                     </Accordion>
-                    
+
                     {/* Add Scene button when scenes exist */}
                     <div className="flex justify-center mt-6">
                         <Button onClick={onAddScene} variant="outline" className="w-full max-w-xs">
