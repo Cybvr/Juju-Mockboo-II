@@ -189,7 +189,7 @@ export const CreationHub: React.FC<CreationHubProps> = ({ project, templates, on
                     How would you like to get started?
                 </h1>
                 <p className="text-center text-sm text-muted-foreground mb-8">
-                    Choose a starting point for your new film project.
+                    Choose a starting point for your new video project.
                 </p>
                 <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-4">
                     <MethodButton method="generate" icon={Sparkles} title="Generate with AI" description="Start with an idea and let AI write the first draft of your script." />
