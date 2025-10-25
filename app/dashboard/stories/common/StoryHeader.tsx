@@ -50,7 +50,7 @@ export const StoryHeader: React.FC<StoryHeaderProps> = ({
                     l.generatingImage = false;
                 });
                 const jsonString = JSON.stringify(projectToShare);
-                const encoded = btoa(jsonString);
+                const encoded = btoa(unescape(encodeURIComponent(jsonString)));
                 const url = `${window.location.origin}${window.location.pathname}#project=${encoded}`;
                 setShareLink(url);
             } catch (e) {
