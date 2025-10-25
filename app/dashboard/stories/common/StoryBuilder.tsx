@@ -269,14 +269,6 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({ project, onUpdatePro
 
     return (
         <div className="flex flex-col h-screen text-foreground ">
-            <div className="sticky top-0 z-10"><StoryHeader
-                title={title}
-                onTitleChange={setTitle}
-                onTitleBlur={handleTitleBlur}
-                onBackToDashboard={onBackToDashboard}
-                onShareClick={() => setIsShareModalOpen(true)}
-                onSettingsClick={() => setIsSettingsModalOpen(true)}
-            /></div>
             {isAnalyzing && (
                 <div className="bg-primary/20 text-primary p-2 sm:p-3 text-center text-xs sm:text-sm flex items-center justify-center gap-2">
                     <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
