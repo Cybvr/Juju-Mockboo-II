@@ -72,7 +72,7 @@ const TemplateCard: React.FC<{ template: Template; onSelect: () => void }> = ({ 
 const categories = [
     'All',
     'UGC',
-    'Ad/Commercial',
+    'Ad/Commercial', 
     'Film/Cinema',
     'Documentary',
     'Educational',
@@ -95,8 +95,21 @@ export const TemplateBrowser: React.FC<TemplateBrowserProps> = ({ templates, onS
             await onCreateFromTemplate(template);
             onClose();
         } else {
-            onSelect(template);
-            onClose();
+            // For public templates, duplicate and navigate
+            if (showPublicTab && template.id) {
+                try {
+                    const newStoryId = await duplicateStory(template.id);
+                    console.log('Template browser - Duplicated story ID:', newStoryId);
+                    onClose();
+                    router.push(`/dashboard/stories/${newStoryId}`);
+                } catch (error) {
+                    console.error('Failed to create copy of template:', error);
+                    // Fallback to regular selection
+                    onSelect(template);
+                }
+            } else {
+                onSelect(template);
+            }
         }
     };
 
@@ -126,7 +139,7 @@ export const TemplateBrowser: React.FC<TemplateBrowserProps> = ({ templates, onS
 
     const renderTemplateGrid = (items: Template[], isLoading = false) => {
         const filteredItems = filterItemsByCategory(items);
-
+        
         return (
         <div className="space-y-4">
             <div className="flex flex-wrap gap-2">
@@ -141,7 +154,7 @@ export const TemplateBrowser: React.FC<TemplateBrowserProps> = ({ templates, onS
                     </Badge>
                 ))}
             </div>
-
+            
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[50vh] overflow-y-auto p-1">
             {isLoading ? (
                 <div className="col-span-full flex items-center justify-center py-8">

@@ -155,20 +155,16 @@ export const CreationHub: React.FC<CreationHubProps> = ({ project, templates, on
     }, []);
 
     const handleSelectTemplate = useCallback((template: Template) => {
-        const updatedProject: FilmProject = {
-            ...project,
-            title: template.title || project.title,
-            prompt: template.prompt || '',
-            script: template.script || '',
-            storyboard: template.storyboard || [],
-            characters: template.characters || [],
-            locations: template.locations || [],
-            sound_design: template.sound_design || [],
-            settings: { ...project.settings, ...template.settings },
-            category: template.category || project.category,
+        const remixedProject: FilmProject = {
+            ...template,
+            id: project.id,
+            title: `${template.title} (copy)`,
+            isTemplate: false,
+            createdAt: Date.now(),
             updatedAt: Date.now(),
         };
-        onUpdateProject(updatedProject);
+        onUpdateProject(remixedProject);
+        setIsTemplateBrowserOpen(false);
     }, [project, onUpdateProject]);
 
     const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
