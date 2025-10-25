@@ -6,13 +6,15 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { getAllStories } from '@/services/storiesService';
+import { getAllStories, duplicateStory } from '@/services/storiesService';
+import { useRouter } from 'next/navigation';
 
 interface TemplateBrowserProps {
     templates: Template[];
     onSelect: (template: Template) => void;
     onClose: () => void;
     showPublicTab?: boolean;
+    onCreateFromTemplate?: (template: Template) => Promise<void>;
 }
 
 const TemplateCard: React.FC<{ template: Template; onSelect: () => void }> = ({ template, onSelect }) => {
@@ -29,6 +31,20 @@ const TemplateCard: React.FC<{ template: Template; onSelect: () => void }> = ({ 
                     <div className="flex items-center justify-center h-full">
                         <FileText className="w-12 h-12 text-muted-foreground" />
                     </div>
+                )}
+                {/* Video element with fallback to image */}
+                {template.storyboard?.[0]?.videoUrl && (
+                    <video
+                        src={template.storyboard[0].videoUrl}
+                        className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                        onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                        }}
+                    />
                 )}
                 {template.isPublic && (
                     <div className="absolute top-2 right-2">
@@ -68,10 +84,34 @@ const categories = [
     'Music Video'
 ];
 
-export const TemplateBrowser: React.FC<TemplateBrowserProps> = ({ templates, onSelect, onClose, showPublicTab = false }) => {
+export const TemplateBrowser: React.FC<TemplateBrowserProps> = ({ templates, onSelect, onClose, showPublicTab = false, onCreateFromTemplate }) => {
     const [publicDocs, setPublicDocs] = useState<Template[]>([]);
     const [loading, setLoading] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState('All');
+    const router = useRouter();
+
+    const handleTemplateSelect = async (template: Template) => {
+        if (onCreateFromTemplate) {
+            await onCreateFromTemplate(template);
+            onClose();
+        } else {
+            // For public templates, duplicate and navigate
+            if (showPublicTab && template.id) {
+                try {
+                    const newStoryId = await duplicateStory(template.id);
+                    console.log('Template browser - Duplicated story ID:', newStoryId);
+                    onClose();
+                    router.push(`/dashboard/stories/${newStoryId}`);
+                } catch (error) {
+                    console.error('Failed to create copy of template:', error);
+                    // Fallback to regular selection
+                    onSelect(template);
+                }
+            } else {
+                onSelect(template);
+            }
+        }
+    };
 
     useEffect(() => {
         if (showPublicTab) {
@@ -131,7 +171,7 @@ export const TemplateBrowser: React.FC<TemplateBrowserProps> = ({ templates, onS
                 </div>
             ) : (
                 filteredItems.map((item) => (
-                    <TemplateCard key={item.id} template={item} onSelect={() => onSelect(item)} />
+                    <TemplateCard key={item.id} template={item} onSelect={() => handleTemplateSelect(item)} />
                 ))
             )}
             </div>
