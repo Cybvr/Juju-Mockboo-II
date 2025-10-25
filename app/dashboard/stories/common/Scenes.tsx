@@ -317,19 +317,29 @@ export const Scenes: React.FC<ScenesProps> = ({
     return (
         <div className="p-2">
             {project.storyboard.length > 0 ? (
-                <Accordion type="multiple" value={expandedScenes} onValueChange={onExpandedScenesChange}>
-                    {project.storyboard
-                        .sort((a, b) => a.scene_number - b.scene_number)
-                        .map((scene) => (
-                            <SceneCard
-                                key={scene.id}
-                                scene={scene}
-                                project={project}
-                                onUpdateScene={onUpdateScene}
-                                onDeleteScene={onDeleteScene}
-                            />
-                        ))}
-                </Accordion>
+                <>
+                    <Accordion type="multiple" value={expandedScenes} onValueChange={onExpandedScenesChange}>
+                        {project.storyboard
+                            .sort((a, b) => a.scene_number - b.scene_number)
+                            .map((scene) => (
+                                <SceneCard
+                                    key={scene.id}
+                                    scene={scene}
+                                    project={project}
+                                    onUpdateScene={onUpdateScene}
+                                    onDeleteScene={onDeleteScene}
+                                />
+                            ))}
+                    </Accordion>
+                    
+                    {/* Add Scene button when scenes exist */}
+                    <div className="flex justify-center mt-6">
+                        <Button onClick={onAddScene} variant="outline" className="w-full max-w-xs">
+                            <Plus className="w-4 h-4 mr-2" />
+                            Add Scene
+                        </Button>
+                    </div>
+                </>
             ) : (
                 <div className="text-center py-12 sm:py-20">
                     <Camera className="w-12 h-12 sm:w-16 sm:h-16 mx-auto text-muted-foreground mb-4" />
