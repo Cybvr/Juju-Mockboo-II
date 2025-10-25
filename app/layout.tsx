@@ -54,7 +54,19 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <div className="relative min-h-screen">
+            {/* Dot Grid Background */}
+            <div
+              className="fixed inset-0 opacity-20 pointer-events-none z-0"
+              style={{
+                backgroundImage: `radial-gradient(circle, #9ca3af 1px, transparent 1px)`,
+                backgroundSize: '20px 20px'
+              }}
+            />
+            <div className="relative z-10">
+              {children}
+            </div>
+          </div>
           <Toaster />
         </ThemeProvider>
         <script
