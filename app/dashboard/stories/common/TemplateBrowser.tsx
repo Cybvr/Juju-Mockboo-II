@@ -1,15 +1,23 @@
-
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import type { Template } from '@/types/storytypes';
-import { FileText, X } from 'lucide-react';
+import { FileText, X, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
+// Assuming getAllStories and other necessary imports are available elsewhere or globally
+// For demonstration purposes, let's mock getAllStories and Template type if not provided
+// declare function getAllStories(): Promise<Template[]>;
+
+// Mock implementation for demonstration if not globally available
+declare const getAllStories: () => Promise<Template[]>;
 
 interface TemplateBrowserProps {
-  templates: Template[];
-  onSelect: (template: Template) => void;
-  onClose: () => void;
+    templates: Template[];
+    onSelect: (template: Template) => void;
+    onClose: () => void;
+    showPublicTab?: boolean;
 }
 
 const TemplateCard: React.FC<{ template: Template; onSelect: () => void }> = ({ template, onSelect }) => {
@@ -40,31 +48,89 @@ const TemplateCard: React.FC<{ template: Template; onSelect: () => void }> = ({ 
     );
 };
 
-export const TemplateBrowser: React.FC<TemplateBrowserProps> = ({ templates, onSelect, onClose }) => {
-  return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-        <Card className="w-full max-w-4xl h-[90vh] flex flex-col">
-            <CardHeader className="p-4 border-b flex flex-row justify-between items-center">
-                <h2 className="text-xl font-bold">Choose a Template</h2>
-                <Button onClick={onClose} variant="ghost" size="icon">
-                    <X className="h-4 w-4" />
-                </Button>
-            </CardHeader>
-            <CardContent className="p-6 overflow-y-auto flex-grow">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {templates.map(template => (
-                        <TemplateCard key={template.id} template={template} onSelect={() => onSelect(template)} />
-                    ))}
+export const TemplateBrowser: React.FC<TemplateBrowserProps> = ({ templates, onSelect, onClose, showPublicTab = false }) => {
+    const [publicDocs, setPublicDocs] = useState<Template[]>([]);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (showPublicTab) {
+            loadPublicDocs();
+        }
+    }, [showPublicTab]);
+
+    const loadPublicDocs = async () => {
+        setLoading(true);
+        try {
+            const allStories = await getAllStories();
+            const publicStories = allStories.filter(story => story.isPublic);
+            setPublicDocs(publicStories);
+        } catch (error) {
+            console.error('Failed to load public docs:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const renderTemplateGrid = (items: Template[], isLoading = false) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[50vh] overflow-y-auto p-1">
+            {isLoading ? (
+                <div className="col-span-full flex items-center justify-center py-8">
+                    <div className="text-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+                        <p className="text-sm text-muted-foreground">Loading...</p>
+                    </div>
                 </div>
-            </CardContent>
-        </Card>
-        <style>{`
-            @keyframes fade-in {
-                from { opacity: 0; transform: scale(0.95); }
-                to { opacity: 1; transform: scale(1); }
-            }
-            .animate-fade-in { animation: fade-in 0.2s ease-out forwards; }
-        `}</style>
-    </div>
-  );
+            ) : items.length === 0 ? (
+                <div className="col-span-full flex items-center justify-center py-8">
+                    <p className="text-sm text-muted-foreground">No items available</p>
+                </div>
+            ) : (
+                items.map((item) => (
+                    <Card key={item.id} className="cursor-pointer hover:bg-accent/50 transition-colors" onClick={() => onSelect(item)}>
+                        <CardHeader className="pb-2">
+                            <div className="flex items-center gap-2">
+                                <FileText className="w-5 h-5 text-primary" />
+                                <h3 className="font-semibold text-sm">{item.title}</h3>
+                                {item.isPublic && <Globe className="w-4 h-4 text-green-500" />}
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-xs text-muted-foreground line-clamp-3">
+                                {item.description || 'No description available.'}
+                            </p>
+                        </CardContent>
+                    </Card>
+                ))
+            )}
+        </div>
+    );
+
+    return (
+        <Dialog open={true} onOpenChange={onClose}>
+            <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden">
+                <DialogHeader>
+                    <DialogTitle>Choose a Template</DialogTitle>
+                </DialogHeader>
+
+                {showPublicTab ? (
+                    <Tabs defaultValue="templates" className="w-full">
+                        <TabsList className="grid w-full grid-cols-2">
+                            <TabsTrigger value="templates">Templates</TabsTrigger>
+                            <TabsTrigger value="public">Public Docs</TabsTrigger>
+                        </TabsList>
+
+                        <TabsContent value="templates" className="mt-4">
+                            {renderTemplateGrid(templates)}
+                        </TabsContent>
+
+                        <TabsContent value="public" className="mt-4">
+                            {renderTemplateGrid(publicDocs, loading)}
+                        </TabsContent>
+                    </Tabs>
+                ) : (
+                    renderTemplateGrid(templates)
+                )}
+            </DialogContent>
+        </Dialog>
+    );
 };

@@ -54,6 +54,7 @@ export interface FilmProject {
   locations: Location[];
   sound_design: SoundDesign[];
   settings: ProjectSettings;
+  isPublic?: boolean;
   createdAt: number;
   updatedAt: number;
   isTemplate?: boolean;

@@ -9,6 +9,7 @@ import { StoryBuilder } from "../common/StoryBuilder"
 import { CreationHub } from "../common/CreationHub"
 import { templates } from "@/data/filmTemplates"
 import { useRouter } from "next/navigation"
+import { useAuth } from "@/hooks/useAuth"
 
 interface StoryPageProps {
   params: Promise<{ id: string }>
@@ -20,6 +21,8 @@ export default function StoryPage({ params }: StoryPageProps) {
   const [loading, setLoading] = useState(true)
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
   const router = useRouter()
+  const { user } = useAuth()
+  const isAdmin = user?.role === 'admin'
 
   useEffect(() => {
     const loadProject = async () => {
@@ -76,6 +79,22 @@ export default function StoryPage({ params }: StoryPageProps) {
     setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'))
   }
 
+  const handleTogglePublic = async () => {
+    if (!project || !isAdmin) return
+    
+    const updatedProject = {
+      ...project,
+      isPublic: !project.isPublic
+    }
+    
+    try {
+      await updateStory(project.id, updatedProject)
+      setProject(updatedProject)
+    } catch (error) {
+      console.error('Failed to update public status:', error)
+    }
+  }
+
   if (loading) {
     return (
       <main className="min-h-screen w-full  transition-colors duration-300 flex items-center justify-center">
@@ -99,6 +118,8 @@ export default function StoryPage({ params }: StoryPageProps) {
         templates={templates}
         onUpdateProject={handleUpdateProject}
         onBackToDashboard={handleBackToDashboard}
+        isAdmin={isAdmin}
+        onTogglePublic={handleTogglePublic}
       />
     )
   }
@@ -112,6 +133,8 @@ export default function StoryPage({ params }: StoryPageProps) {
       onBackToDashboard={handleBackToDashboard}
       theme={theme}
       onToggleTheme={handleToggleTheme}
+      isAdmin={isAdmin}
+      onTogglePublic={handleTogglePublic}
     />
   )
 }

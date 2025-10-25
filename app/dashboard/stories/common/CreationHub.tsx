@@ -1,9 +1,11 @@
 import React, { useState, useCallback } from 'react';
 import type { FilmProject, Template } from '@/types/storytypes';
-import { Sparkles, FileText, Palette, ArrowLeft, Dices, Loader2 } from 'lucide-react';
+import { Sparkles, FileText, Palette, ArrowLeft, Dices, Loader2, Globe, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { generateScript, analyzeScript } from '@/services/filmService';
 import { TemplateBrowser } from './TemplateBrowser';
 
@@ -12,6 +14,8 @@ interface CreationHubProps {
     templates: Template[];
     onUpdateProject: (updatedProject: FilmProject) => void;
     onBackToDashboard: () => void;
+    isAdmin?: boolean;
+    onTogglePublic?: () => void;
 }
 
 const samplePrompts = [
@@ -21,7 +25,7 @@ const samplePrompts = [
     "A lonely astronaut on Mars finds a mysterious, glowing plant that offers a connection back to Earth.",
 ];
 
-export const CreationHub: React.FC<CreationHubProps> = ({ project, templates, onUpdateProject, onBackToDashboard }) => {
+export const CreationHub: React.FC<CreationHubProps> = ({ project, templates, onUpdateProject, onBackToDashboard, isAdmin, onTogglePublic }) => {
     const [prompt, setPrompt] = useState('');
     const [script, setScript] = useState('');
     const [activeMethod, setActiveMethod] = useState<'generate' | 'paste' | 'template' | null>(null);
@@ -174,6 +178,7 @@ export const CreationHub: React.FC<CreationHubProps> = ({ project, templates, on
                     templates={templates}
                     onSelect={handleSelectTemplate}
                     onClose={() => setIsTemplateBrowserOpen(false)}
+                    showPublicTab={true}
                 />
             )}
             <div className="w-full max-w-2xl mx-auto py-16 px-4 flex flex-col items-center justify-center min-h-screen">
@@ -185,6 +190,20 @@ export const CreationHub: React.FC<CreationHubProps> = ({ project, templates, on
                     <ArrowLeft className="w-4 h-4" />
                     All Projects
                 </Button>
+                
+                {isAdmin && onTogglePublic && (
+                    <div className="absolute top-8 right-8 flex items-center gap-2">
+                        <Label htmlFor="public-toggle" className="flex items-center gap-2">
+                            {project.isPublic ? <Globe className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
+                            Public
+                        </Label>
+                        <Switch
+                            id="public-toggle"
+                            checked={project.isPublic || false}
+                            onCheckedChange={onTogglePublic}
+                        />
+                    </div>
+                )}
                 <h1 className="text-xl font-normal text-center mb-2">
                     How would you like to get started?
                 </h1>

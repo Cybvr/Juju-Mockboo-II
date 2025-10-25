@@ -19,6 +19,8 @@ interface StoryBuilderProps {
     onBackToDashboard: () => void;
     theme: 'light' | 'dark';
     onToggleTheme: () => void;
+    isAdmin?: boolean;
+    onTogglePublic?: () => void;
 }
 
 const ShareProjectContent: React.FC<{ project: FilmProject }> = ({ project }) => {
@@ -84,7 +86,7 @@ const ShareProjectContent: React.FC<{ project: FilmProject }> = ({ project }) =>
 
 
 
-export const StoryBuilder: React.FC<StoryBuilderProps> = ({ project, onUpdateProject, onBackToDashboard, theme, onToggleTheme }) => {
+export const StoryBuilder: React.FC<StoryBuilderProps> = ({ project, onUpdateProject, onBackToDashboard, theme, onToggleTheme, isAdmin, onTogglePublic }) => {
     const [title, setTitle] = useState(project.title);
     const [script, setScript] = useState(project.script);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
