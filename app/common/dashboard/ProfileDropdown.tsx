@@ -131,17 +131,9 @@ export function ProfileDropdown() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => router.push('/dashboard/profile')}>
+        <DropdownMenuItem onClick={() => router.push('/dashboard/account')}>
           <User className="mr-2 h-4 w-4" />
           Profile
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => router.push('/dashboard/account')}>
-          <Settings className="mr-2 h-4 w-4" />
-          Account Settings
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => router.push('/dashboard/account')}>
-          <CreditCard className="mr-2 h-4 w-4" />
-          Billing
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>

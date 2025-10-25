@@ -2,7 +2,7 @@
 'use client';
 import { Button } from '@/components/ui/button';
 import { GoHomeFill } from "react-icons/go";
-
+import { PiSlideshowBold } from "react-icons/pi";
 import { 
   IoFilm,
   IoHome, 
@@ -61,6 +61,12 @@ export function MobileFooter() {
       active: pathname === '/dashboard'
     },
     {
+      label: 'Stories',
+      icon: <PiSlideshowBold className="h-5 w-5" />,
+      href: '/dashboard/stories',
+      active: pathname.startsWith('/dashboard/stories')
+    },
+    {
       label: 'Canvas',
       icon: <PiPaletteBold className="h-5 w-5" />,
       href: '#',
@@ -74,15 +80,9 @@ export function MobileFooter() {
       active: pathname.startsWith('/dashboard/galleries')
     },
     {
-      label: 'Videos',
-      icon: <PiVideoBold className="h-5 w-5" />,
-      href: '/dashboard/videos',
-      active: pathname.startsWith('/dashboard/videos')
-    },
-    {
       label: 'Profile',
       icon: <IoPerson className="h-5 w-5" />,
-      href: '/dashboard/profile',
+      href: '/dashboard/account',
       active: pathname === '/dashboard/profile'
     }
   ];
