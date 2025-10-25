@@ -42,6 +42,20 @@ const TemplateCard: React.FC<TemplateCardProps> = ({ template, onSelect }) => {
             <FileText className="w-12 h-12 text-muted-foreground" />
           </div>
         )}
+        {/* Video element with fallback to image */}
+        {template.storyboard?.[0]?.videoUrl && (
+          <video
+            src={template.storyboard[0].videoUrl}
+            className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+            autoPlay
+            muted
+            loop
+            playsInline
+            onError={(e) => {
+              e.currentTarget.style.display = 'none';
+            }}
+          />
+        )}
         {/* Text overlay positioned in bottom right */}
         <div className="absolute bottom-2 right-2 bg-black/70 text-white p-2 rounded backdrop-blur-sm">
           <h3 className="font-bold text-sm group-hover:text-primary transition-colors truncate max-w-32">

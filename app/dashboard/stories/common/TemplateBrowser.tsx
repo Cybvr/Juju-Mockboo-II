@@ -30,6 +30,20 @@ const TemplateCard: React.FC<{ template: Template; onSelect: () => void }> = ({ 
                         <FileText className="w-12 h-12 text-muted-foreground" />
                     </div>
                 )}
+                {/* Video element with fallback to image */}
+                {template.storyboard?.[0]?.videoUrl && (
+                    <video
+                        src={template.storyboard[0].videoUrl}
+                        className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                        onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                        }}
+                    />
+                )}
                 {template.isPublic && (
                     <div className="absolute top-2 right-2">
                         <Globe className="w-4 h-4 text-green-500 bg-white rounded-full p-0.5" />
