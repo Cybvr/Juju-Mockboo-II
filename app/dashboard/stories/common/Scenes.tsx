@@ -21,6 +21,7 @@ const SceneCard: React.FC<SceneCardProps> = ({ scene, project, onUpdateScene, on
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [localPrompt, setLocalPrompt] = useState(scene.prompt || "");
     const [generateOutputs, setGenerateOutputs] = useState(1);
+    const [aspectRatio, setAspectRatio] = useState(project.settings.aspectRatio || "16:9");
     const [lightboxOpen, setLightboxOpen] = useState(false);
     const [lightboxImageIndex, setLightboxImageIndex] = useState(0);
 
@@ -54,7 +55,7 @@ const SceneCard: React.FC<SceneCardProps> = ({ scene, project, onUpdateScene, on
             console.log(`📍 Added location: ${location.name}`);
         }
         console.log(`🎯 Final prompt: "${builtPrompt}"`);
-        console.log(`📐 Aspect ratio: ${project.settings.aspectRatio}`);
+        console.log(`📐 Aspect ratio: ${aspectRatio}`);
         if (character?.imageUrl) {
             console.log("Character image available, but not yet used in generation.", character.imageUrl);
         }
@@ -65,7 +66,7 @@ const SceneCard: React.FC<SceneCardProps> = ({ scene, project, onUpdateScene, on
             console.log(`📡 Starting ${generateOutputs} API calls...`);
             for (let i = 0; i < generateOutputs; i++) {
                 console.log(`📡 API Call ${i + 1}/${generateOutputs} - Sending to generateSingleImage...`);
-                const imageUrl = await generateSingleImage(builtPrompt, project.settings.aspectRatio);
+                const imageUrl = await generateSingleImage(builtPrompt, aspectRatio);
                 console.log(`✅ API Call ${i + 1} SUCCESS - Got image: ${imageUrl ? imageUrl.substring(0, 50) + '...' : 'null'}`);
                 images.push(imageUrl);
                 onUpdateScene({
@@ -261,6 +262,18 @@ const SceneCard: React.FC<SceneCardProps> = ({ scene, project, onUpdateScene, on
                             </Select>
                         </div>
                         <div className="flex items-center gap-2 flex-shrink-0">
+                            <Select value={aspectRatio} onValueChange={setAspectRatio}>
+                                <SelectTrigger className="w-20 h-10">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="16:9">16:9</SelectItem>
+                                    <SelectItem value="9:16">9:16</SelectItem>
+                                    <SelectItem value="1:1">1:1</SelectItem>
+                                    <SelectItem value="4:3">4:3</SelectItem>
+                                    <SelectItem value="3:4">3:4</SelectItem>
+                                </SelectContent>
+                            </Select>
                             <Select value={generateOutputs.toString()} onValueChange={(value) => setGenerateOutputs(parseInt(value))}>
                                 <SelectTrigger className="w-16 h-10">
                                     <SelectValue />
