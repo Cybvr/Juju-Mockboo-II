@@ -85,11 +85,11 @@ export default function TemplatesPage() {
   const loadPublicTemplates = async () => {
     setLoading(true);
     try {
-      const allStories = await getAllStories();
-      const publicStories = allStories.filter(story => story.isPublic);
+      const publicStories = await getAllStories();
       setPublicTemplates(publicStories);
     } catch (error) {
       console.error('Failed to load public templates:', error);
+      setPublicTemplates([]);
     } finally {
       setLoading(false);
     }
