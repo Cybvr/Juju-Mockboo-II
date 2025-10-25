@@ -2,12 +2,10 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import type { FilmProject } from '@/types/storytypes';
-import { templates } from '@/data/filmTemplates';
+import { getAllStories } from '@/services/storiesService';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { FileText, Globe, Search, Filter } from 'lucide-react';
+import { FileText, Globe } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 const categories = [
@@ -59,9 +57,11 @@ const TemplateCard: React.FC<TemplateCardProps> = ({ template, onSelect }) => {
             }}
           />
         )}
-        <div className="absolute top-2 right-2">
-          <Globe className="w-4 h-4 text-green-500 bg-white rounded-full p-0.5" />
-        </div>
+        {template.isPublic && (
+          <div className="absolute top-2 right-2">
+            <Globe className="w-4 h-4 text-green-500 bg-white rounded-full p-0.5" />
+          </div>
+        )}
       </div>
       <CardContent className="p-4 flex-1">
         <h3 className="font-bold text-lg group-hover:text-primary transition-colors truncate">
@@ -86,47 +86,29 @@ const TemplateCard: React.FC<TemplateCardProps> = ({ template, onSelect }) => {
 export default function TemplatesPage() {
   const [publicTemplates, setPublicTemplates] = useState<FilmProject[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const router = useRouter();
 
   useEffect(() => {
-    loadTemplates();
+    loadPublicTemplates();
   }, []);
 
-  const loadTemplates = () => {
+  const loadPublicTemplates = async () => {
     setLoading(true);
     try {
-      // Convert templates to FilmProject format
-      const filmTemplates: FilmProject[] = templates.map(template => ({
-        id: template.id,
-        title: template.title,
-        prompt: template.prompt,
-        category: template.category,
-        storyboard: template.storyboard,
-        characters: template.characters,
-        locations: template.locations,
-        sound_design: template.sound_design,
-        settings: template.settings,
-        createdAt: template.createdAt,
-        updatedAt: template.updatedAt,
-        isTemplate: template.isTemplate,
-        isPublic: true,
-        script: template.script || ''
-      }));
-      setPublicTemplates(filmTemplates);
+      const allStories = await getAllStories();
+      const publicStories = allStories.filter(story => story.isPublic);
+      setPublicTemplates(publicStories);
     } catch (error) {
-      console.error('Failed to load templates:', error);
+      console.error('Failed to load public templates:', error);
     } finally {
       setLoading(false);
     }
   };
 
   const filteredTemplates = publicTemplates.filter(template => {
-    const matchesSearch = template.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         template.prompt.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'All' || template.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+    return matchesCategory;
   });
 
   // Get unique categories that have templates
@@ -160,7 +142,7 @@ export default function TemplatesPage() {
             <h1 className="text-sm font-bold">Templates</h1>
           </div>
 
-          {/* Search and Filters */}
+          {/* Category Filters */}
           <div className="space-y-4">
             <div className="flex flex-wrap gap-2">
               {availableCategories.map((category) => (
@@ -183,8 +165,8 @@ export default function TemplatesPage() {
                 <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-lg font-semibold mb-2">No templates found</h3>
                 <p className="text-muted-foreground">
-                  {searchTerm || selectedCategory !== 'All' 
-                    ? 'Try adjusting your search or filters' 
+                  {selectedCategory !== 'All' 
+                    ? 'Try adjusting your filters'
                     : 'No public templates are available at the moment'}
                 </p>
               </div>
