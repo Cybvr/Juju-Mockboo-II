@@ -83,6 +83,20 @@ const categories = [
 ];
 
 export const TemplateBrowser: React.FC<TemplateBrowserProps> = ({ templates, onSelect, onClose, showPublicTab = false }) => {
+    
+    const handleTemplateSelect = async (template: Template) => {
+        try {
+            // Import the duplication service
+            const { duplicateStory } = await import('@/services/storiesService');
+            const newStoryId = await duplicateStory(template.id);
+            // Navigate to the new story
+            window.location.href = `/dashboard/stories/${newStoryId}`;
+        } catch (error) {
+            console.error('Failed to create copy of template:', error);
+            // Fallback to original behavior
+            onSelect(template);
+        }
+    };
     const [publicDocs, setPublicDocs] = useState<Template[]>([]);
     const [loading, setLoading] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState('All');
@@ -145,7 +159,7 @@ export const TemplateBrowser: React.FC<TemplateBrowserProps> = ({ templates, onS
                 </div>
             ) : (
                 filteredItems.map((item) => (
-                    <TemplateCard key={item.id} template={item} onSelect={() => onSelect(item)} />
+                    <TemplateCard key={item.id} template={item} onSelect={() => handleTemplateSelect(item)} />
                 ))
             )}
             </div>
