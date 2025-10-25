@@ -12,20 +12,14 @@ import { Input } from '@/components/ui/input';
 import { FileText, Globe, Search, Filter } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-const categories = [
-  'All',
-  'UGC',
-  'Ad/Commercial',
-  'Film/Cinema',
-  'Documentary',
-  'Educational',
-  'Social Media',
-  'Product Demo',
-  'Brand Story',
-  'Tutorial',
-  'Entertainment',
-  'Music Video'
-];
+const getAllCategories = (templates: FilmProject[]) => {
+  const templateCategories = templates
+    .map(template => template.category)
+    .filter(Boolean)
+    .filter((category, index, self) => self.indexOf(category) === index);
+  
+  return ['All', ...templateCategories.sort()];
+};
 
 interface TemplateCardProps {
   template: FilmProject;
@@ -56,17 +50,7 @@ const TemplateCard: React.FC<TemplateCardProps> = ({ template, onSelect }) => {
         <h3 className="font-bold text-lg group-hover:text-primary transition-colors truncate">
           {template.title}
         </h3>
-        <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-          {template.prompt}
-        </p>
-        {template.category && (
-          <Badge variant="outline" className="mt-2 text-xs">
-            {template.category}
-          </Badge>
-        )}
-        <div className="mt-3 text-xs text-muted-foreground">
-          {template.storyboard?.length || 0} scenes
-        </div>
+        
       </CardContent>
     </Card>
   );
@@ -147,7 +131,7 @@ export default function TemplatesPage() {
             </div>
 
             <div className="flex flex-wrap gap-2">
-              {categories.map((category) => (
+              {getAllCategories(publicTemplates).map((category) => (
                 <Badge
                   key={category}
                   variant={selectedCategory === category ? 'default' : 'outline'}
