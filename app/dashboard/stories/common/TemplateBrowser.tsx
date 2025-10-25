@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import type { Template } from '@/types/storytypes';
-import { FileText, X, Globe, Filter } from 'lucide-react';
+import { FileText, X, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import { getAllStories } from '@/services/storiesService';
 
 interface TemplateBrowserProps {
@@ -24,10 +24,15 @@ const TemplateCard: React.FC<{ template: Template; onSelect: () => void }> = ({ 
         >
             <div className="relative aspect-video bg-muted">
                 {firstImageUrl ? (
-                    <img src={firstImageUrl} alt="Concept art" className="w-full h-full object-cover" />
+                    <img src={firstImageUrl} alt="Template thumbnail" className="w-full h-full object-cover" />
                 ) : (
                     <div className="flex items-center justify-center h-full">
                         <FileText className="w-12 h-12 text-muted-foreground" />
+                    </div>
+                )}
+                {template.isPublic && (
+                    <div className="absolute top-2 right-2">
+                        <Globe className="w-4 h-4 text-green-500 bg-white rounded-full p-0.5" />
                     </div>
                 )}
             </div>
@@ -38,6 +43,11 @@ const TemplateCard: React.FC<{ template: Template; onSelect: () => void }> = ({ 
                 <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
                     {template.prompt}
                 </p>
+                {template.category && (
+                    <Badge variant="outline" className="mt-2 text-xs">
+                        {template.category}
+                    </Badge>
+                )}
             </CardContent>
         </Card>
     );
@@ -92,25 +102,17 @@ export const TemplateBrowser: React.FC<TemplateBrowserProps> = ({ templates, onS
         
         return (
         <div className="space-y-4">
-            <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                    <Filter className="w-4 h-4 text-muted-foreground" />
-                    <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                        <SelectTrigger className="w-48">
-                            <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {categories.map((category) => (
-                                <SelectItem key={category} value={category}>
-                                    {category}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-                <div className="text-sm text-muted-foreground">
-                    {filteredItems.length} item{filteredItems.length !== 1 ? 's' : ''}
-                </div>
+            <div className="flex flex-wrap gap-2">
+                {categories.map((category) => (
+                    <Badge
+                        key={category}
+                        variant={selectedCategory === category ? 'default' : 'outline'}
+                        className="cursor-pointer hover:bg-accent transition-colors"
+                        onClick={() => setSelectedCategory(category)}
+                    >
+                        {category}
+                    </Badge>
+                ))}
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[50vh] overflow-y-auto p-1">
@@ -129,17 +131,7 @@ export const TemplateBrowser: React.FC<TemplateBrowserProps> = ({ templates, onS
                 </div>
             ) : (
                 filteredItems.map((item) => (
-                    <Card key={item.id} className="cursor-pointer hover:bg-accent/50 transition-colors" onClick={() => onSelect(item)}>
-                        <CardHeader className="pb-2">
-                            <div className="flex items-center gap-2">
-                                <FileText className="w-5 h-5 text-primary" />
-                                <h3 className="font-semibold text-sm">{item.title}</h3>
-                                {item.isPublic && <Globe className="w-4 h-4 text-green-500" />}
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                        </CardContent>
-                    </Card>
+                    <TemplateCard key={item.id} template={item} onSelect={() => onSelect(item)} />
                 ))
             )}
             </div>
