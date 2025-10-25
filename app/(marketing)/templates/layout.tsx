@@ -15,7 +15,7 @@ export default function TemplatesLayout({
   return (
     <div className="flex flex-col min-h-screen">
       <MarketingHeader onAuthClick={handleAuthClick} />
-      <div className="pt-4 lg:pt-12">
+      <div className="flex-1 flex flex-col min-w-0">
         {children}
       </div>
       <MarketingFooter />

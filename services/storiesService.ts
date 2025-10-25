@@ -1,3 +1,4 @@
+
 import { 
   collection, 
   doc, 
@@ -27,9 +28,9 @@ export interface FirebaseFilmProject extends Omit<FilmProject, 'createdAt' | 'up
 export const getAllStories = async (): Promise<FilmProject[]> => {
   try {
     const storiesRef = collection(db, STORIES_COLLECTION);
-    const q = query(storiesRef, where('isPublic', '==', true), orderBy('updatedAt', 'desc'));
+    const q = query(storiesRef, orderBy('updatedAt', 'desc'));
     const querySnapshot = await getDocs(q);
-
+    
     const stories: FilmProject[] = [];
     querySnapshot.forEach((doc) => {
       const data = doc.data() as FirebaseFilmProject;
@@ -40,11 +41,11 @@ export const getAllStories = async (): Promise<FilmProject[]> => {
         updatedAt: data.updatedAt.toMillis(),
       });
     });
-
+    
     return stories;
   } catch (error) {
     console.error('Error fetching stories:', error);
-    return [];
+    throw new Error('Failed to fetch stories from Firebase');
   }
 };
 
@@ -55,7 +56,7 @@ export const getStoryById = async (id: string): Promise<FilmProject | null> => {
   try {
     const storyRef = doc(db, STORIES_COLLECTION, id);
     const docSnap = await getDoc(storyRef);
-
+    
     if (docSnap.exists()) {
       const data = docSnap.data() as FirebaseFilmProject;
       return {
@@ -65,7 +66,7 @@ export const getStoryById = async (id: string): Promise<FilmProject | null> => {
         updatedAt: data.updatedAt.toMillis(),
       };
     }
-
+    
     return null;
   } catch (error) {
     console.error('Error fetching story:', error);
@@ -84,7 +85,7 @@ export const createStory = async (story: Omit<FilmProject, 'id' | 'createdAt' | 
       createdAt: now,
       updatedAt: now,
     };
-
+    
     const docRef = await addDoc(collection(db, STORIES_COLLECTION), storyData);
     return docRef.id;
   } catch (error) {
@@ -103,11 +104,11 @@ export const updateStory = async (id: string, updates: Partial<FilmProject>): Pr
       ...updates,
       updatedAt: Timestamp.now(),
     };
-
+    
     // Remove id, createdAt from updates if they exist
     delete updateData.id;
     delete updateData.createdAt;
-
+    
     await updateDoc(storyRef, updateData);
   } catch (error) {
     console.error('Error updating story:', error);
@@ -141,10 +142,10 @@ export const searchStoriesByTitle = async (searchTerm: string): Promise<FilmProj
       orderBy('title'),
       orderBy('updatedAt', 'desc')
     );
-
+    
     const querySnapshot = await getDocs(q);
     const stories: FilmProject[] = [];
-
+    
     querySnapshot.forEach((doc) => {
       const data = doc.data() as FirebaseFilmProject;
       stories.push({
@@ -154,7 +155,7 @@ export const searchStoriesByTitle = async (searchTerm: string): Promise<FilmProj
         updatedAt: data.updatedAt.toMillis(),
       });
     });
-
+    
     return stories;
   } catch (error) {
     console.error('Error searching stories:', error);
@@ -171,18 +172,18 @@ export const duplicateStory = async (originalId: string, newTitle?: string): Pro
     if (!originalStory) {
       throw new Error('Original story not found');
     }
-
+    
     const duplicatedStory = {
       ...originalStory,
       title: newTitle || `${originalStory.title} (Copy)`,
       isTemplate: false,
     };
-
+    
     // Remove id, createdAt, updatedAt for the new story
     delete duplicatedStory.id;
     delete duplicatedStory.createdAt;
     delete duplicatedStory.updatedAt;
-
+    
     return await createStory(duplicatedStory);
   } catch (error) {
     console.error('Error duplicating story:', error);
@@ -201,10 +202,10 @@ export const getTemplateStories = async (): Promise<FilmProject[]> => {
       where('isTemplate', '==', true),
       orderBy('createdAt', 'desc')
     );
-
+    
     const querySnapshot = await getDocs(q);
     const templates: FilmProject[] = [];
-
+    
     querySnapshot.forEach((doc) => {
       const data = doc.data() as FirebaseFilmProject;
       templates.push({
@@ -214,7 +215,7 @@ export const getTemplateStories = async (): Promise<FilmProject[]> => {
         updatedAt: data.updatedAt.toMillis(),
       });
     });
-
+    
     return templates;
   } catch (error) {
     console.error('Error fetching template stories:', error);
