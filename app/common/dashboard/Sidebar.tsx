@@ -67,12 +67,6 @@ export function Sidebar({ className, onNavigate }: SidebarProps) {
       active: pathname === '/dashboard',
     },
     {
-      label: 'Videos',
-      icon: PiVideoBold ,
-      href: '/dashboard/videos',
-      active: pathname.startsWith('/dashboard/videos'),
-    },
-    {
       label: 'Stories',
       icon: PiSlideshowBold ,
       href: '/dashboard/stories',

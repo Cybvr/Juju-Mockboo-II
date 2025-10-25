@@ -226,20 +226,20 @@ The zipper of the tent begins to slowly, deliberately UNZIP... from the outside.
   },
   {
     id: 'template_ugc_skincare',
-    title: 'Skincare Routine UGC',
-    prompt: 'Authentic, casual testimonial-style ad for a vitamin C serum, shot selfie-style in a bathroom.',
+    title: '"GlowLab" Vitamin C Serum Ad',
+    prompt: 'Authentic, casual testimonial-style ad for GlowLab vitamin C serum, shot selfie-style in a bathroom.',
     script: `
 INT. BATHROOM - MORNING
 MAYA (late 20s) holds her phone camera at arm's length, no makeup, natural lighting from a window. Casual and authentic.
 MAYA
 (talking to camera)
-Okay, so I've been using this vitamin C serum for three weeks now and... guys. The difference is insane.
+Okay, so I've been using GlowLab's vitamin C serum for three weeks now and... guys. The difference is insane.
 She holds up the product bottle to the camera.
 MAYA (CONT'D)
 I was so skeptical at first, but look—
 She leans closer to the camera, showing her skin.
 MAYA (CONT'D)
-My dark spots are literally fading. And my skin feels so much smoother. I'm obsessed.
+My dark spots are literally fading. And my skin feels so much smoother. I'm obsessed with GlowLab.
     `,
     storyboard: [
       { id: 't_sb_15', scene_number: 1, prompt: 'Selfie-style shot of a woman in her late 20s in a bright bathroom, holding phone camera. Natural morning light, no makeup, genuine expression. She\'s wearing a cozy robe. Authentic UGC aesthetic.', imageUrl: null, generating: false, videoUrl: null, videoGenerating: false, characterId: 't_char_4', locationId: 't_loc_9', soundId: null },
@@ -268,20 +268,20 @@ My dark spots are literally fading. And my skin feels so much smoother. I'm obse
   },
   {
     id: 'template_ugc_fitness',
-    title: 'Workout Supplement UGC',
-    prompt: 'Energetic testimonial for a pre-workout supplement, filmed at home gym.',
+    title: '"PeakPower" Pre-Workout Ad',
+    prompt: 'Energetic testimonial for PeakPower pre-workout supplement, filmed at home gym.',
     script: `
 INT. HOME GYM - AFTERNOON
 JAKE (early 30s, athletic) sets up his phone on a weight rack, filming himself. He's wearing a tank top and workout shorts, slightly sweaty.
 JAKE
 (breathing a bit heavy, excited)
-Alright, so I just finished my workout and I gotta tell you about this pre-workout I've been using.
+Alright, so I just finished my workout and I gotta tell you about PeakPower pre-workout I've been using.
 He picks up a container from nearby and shows it to camera.
 JAKE (CONT'D)
-I've tried like ten different brands, and this one actually works. No crash, clean energy, and my lifts have gone up.
+I've tried like ten different brands, and PeakPower actually works. No crash, clean energy, and my lifts have gone up.
 He gives a confident nod.
 JAKE (CONT'D)
-If you're serious about your training, try it. Link in bio.
+If you're serious about your training, try PeakPower. Link in bio.
     `,
     storyboard: [
       { id: 't_sb_18', scene_number: 1, prompt: 'Medium shot of athletic man in his 30s in a home gym, phone propped on equipment. He\'s slightly sweaty, genuine energy. Weights and gym equipment visible. Natural window light mixed with overhead lights.', imageUrl: null, generating: false, videoUrl: null, videoGenerating: false, characterId: 't_char_5', locationId: 't_loc_10', soundId: null },
@@ -310,20 +310,20 @@ If you're serious about your training, try it. Link in bio.
   },
   {
     id: 'template_ugc_fashion',
-    title: 'Fashion Haul UGC',
-    prompt: 'Casual try-on haul for a clothing brand, filmed in bedroom with natural vibes.',
+    title: '"Threadly" Fashion Haul Ad',
+    prompt: 'Casual try-on haul for Threadly clothing brand, filmed in bedroom with natural vibes.',
     script: `
 INT. BEDROOM - DAY
 SOPHIE (mid 20s, trendy) sits on her bed, phone propped up on a shelf. Clothes scattered around her. Natural, conversational energy.
 SOPHIE
 (excited, talking fast)
-Okay so this package just came and I had to show you. I ordered from this brand I found on TikTok and—
+Okay so this package from Threadly just came and I had to show you. I ordered from them after seeing them on TikTok and—
 She holds up a sweater.
 SOPHIE (CONT'D)
 Look how cute this is! And the quality? Way better than I expected for the price.
 Quick cut - she's now wearing the sweater, showing it off.
 SOPHIE (CONT'D)
-It fits perfect, it's so soft, and I'm definitely ordering more colors. Use code SOPHIE15 for 15% off.
+It fits perfect, it's so soft, and I'm definitely ordering more colors from Threadly. Use code SOPHIE15 for 15% off.
     `,
     storyboard: [
       { id: 't_sb_21', scene_number: 1, prompt: 'Medium shot of trendy woman in mid 20s sitting on bed, phone camera view. Clothes and packages scattered around. Bright natural window light. Cozy bedroom aesthetic. Authentic UGC style.', imageUrl: null, generating: false, videoUrl: null, videoGenerating: false, characterId: 't_char_6', locationId: 't_loc_11', soundId: null },
@@ -352,20 +352,20 @@ It fits perfect, it's so soft, and I'm definitely ordering more colors. Use code
   },
   {
     id: 'template_ugc_tech',
-    title: 'Tech Product Review UGC',
-    prompt: 'Authentic unboxing and first impressions of wireless earbuds, shot at desk.',
+    title: '"SoundWave Pro" Earbuds Ad',
+    prompt: 'Authentic unboxing and first impressions of SoundWave Pro wireless earbuds, shot at desk.',
     script: `
 INT. HOME OFFICE - DAY
 MARCUS (late 20s, tech enthusiast) sits at his desk with his phone propped up. A product box sits in front of him.
 MARCUS
 (casual, confident)
-Just got these wireless earbuds everyone's been talking about. Let's see if they're actually worth the hype.
+Just got the new SoundWave Pro earbuds everyone's been talking about. Let's see if they're actually worth the hype.
 He opens the box, showing the contents to camera.
 MARCUS (CONT'D)
 Okay, packaging is clean. Nice. Let's try them out.
 Quick cut - earbuds are now in. He nods along to music.
 MARCUS (CONT'D)
-Sound quality is actually really good. And the noise cancellation? Way better than my last pair. For the price, these are a steal.
+Sound quality is actually really good. And the noise cancellation? Way better than my last pair. For the price, SoundWave Pro is a steal.
     `,
     storyboard: [
       { id: 't_sb_24', scene_number: 1, prompt: 'Medium shot of man in late 20s at desk with product box. Phone camera POV. Natural home office setting with monitor and tech items visible. Natural window light. Authentic reviewer energy.', imageUrl: null, generating: false, videoUrl: null, videoGenerating: false, characterId: 't_char_7', locationId: 't_loc_12', soundId: null },
@@ -394,8 +394,8 @@ Sound quality is actually really good. And the noise cancellation? Way better th
   },
   {
     id: 'template_ugc_food',
-    title: 'Meal Prep Service UGC',
-    prompt: 'Relatable testimonial for a meal prep delivery service, filmed in kitchen.',
+    title: '"FreshPlate" Meal Delivery Ad',
+    prompt: 'Relatable testimonial for FreshPlate meal prep delivery service, filmed in kitchen.',
     script: `
 INT. KITCHEN - EVENING
 LISA (30s, busy professional) stands in her kitchen with meal prep containers on the counter. Phone propped against a fruit bowl.
@@ -404,10 +404,10 @@ LISA
 So I'm gonna be real with you. I hate cooking after work. Like, I get home exhausted and the last thing I want to do is spend an hour in the kitchen.
 She gestures to the containers.
 LISA (CONT'D)
-This meal prep service has literally saved me. Everything's pre-portioned, healthy, and actually tastes good.
+FreshPlate has literally saved me. Everything's pre-portioned, healthy, and actually tastes good.
 She opens a container, showing the food.
 LISA (CONT'D)
-Tonight I'm having this teriyaki chicken bowl. Takes five minutes to heat up. This is the way.
+Tonight I'm having this teriyaki chicken bowl. Takes five minutes to heat up. FreshPlate is the way.
     `,
     storyboard: [
       { id: 't_sb_27', scene_number: 1, prompt: 'Medium shot of professional woman in 30s standing in modern kitchen. Meal prep containers on counter. Phone camera POV. Natural evening light. Relatable, tired-after-work energy. Authentic home kitchen.', imageUrl: null, generating: false, videoUrl: null, videoGenerating: false, characterId: 't_char_8', locationId: 't_loc_13', soundId: null },
@@ -436,20 +436,20 @@ Tonight I'm having this teriyaki chicken bowl. Takes five minutes to heat up. Th
   },
   {
     id: 'template_ugc_pet',
-    title: 'Pet Product UGC',
-    prompt: 'Cute and authentic testimonial for dog treats, filmed with excited dog.',
+    title: '"TailWaggers" Dog Treats Ad',
+    prompt: 'Cute and authentic testimonial for TailWaggers dog treats, filmed with excited dog.',
     script: `
 INT. LIVING ROOM - DAY
 EMMA (late 20s, dog mom energy) sits on the floor with her golden retriever. Phone propped on coffee table.
 EMMA
 (excited, talking to camera and dog)
-Okay so Buddy has been obsessed with these new treats I found. Look at him!
+Okay so Buddy has been obsessed with these TailWaggers treats I found. Look at him!
 The dog's tail is wagging intensely, staring at the treat bag.
 EMMA (CONT'D)
 They're all natural, no weird ingredients, and he literally does tricks I didn't even know he knew just to get one.
 She gives the dog a treat. He chomps happily.
 EMMA (CONT'D)
-Also they don't smell disgusting like other treats. Win-win. Link in my bio!
+Also they don't smell disgusting like other treats. Win-win. Get TailWaggers, link in my bio!
     `,
     storyboard: [
       { id: 't_sb_30', scene_number: 1, prompt: 'Medium shot of woman sitting on floor with excited golden retriever. Living room setting with couch visible. Phone POV from coffee table. Natural bright lighting. Dog is alert and happy. Authentic pet owner energy.', imageUrl: null, generating: false, videoUrl: null, videoGenerating: false, characterId: 't_char_9', locationId: 't_loc_14', soundId: null },
@@ -478,8 +478,8 @@ Also they don't smell disgusting like other treats. Win-win. Link in my bio!
   },
   {
     id: 'template_ugc_app',
-    title: 'Productivity App UGC',
-    prompt: 'Quick testimonial for a task management app, screen recording style.',
+    title: '"TaskFlow" Productivity App Ad',
+    prompt: 'Quick testimonial for TaskFlow task management app, screen recording style.',
     script: `
 INT. HOME OFFICE - DAY
 Screen recording of a phone showing a productivity app. A VOICEOVER narrates.
@@ -487,10 +487,10 @@ V.O. (ALEX, 20s, casual and relatable)
 Okay so I used to be the most disorganized person ever. I had like seven different to-do lists and still forgot everything.
 The screen shows the app interface, clean and intuitive.
 V.O. (CONT'D)
-Then I found this app and it actually changed my life. Everything's in one place, I can set reminders, and it syncs across all my devices.
+Then I found TaskFlow and it actually changed my life. Everything's in one place, I can set reminders, and it syncs across all my devices.
 The screen shows tasks being checked off satisfyingly.
 V.O. (CONT'D)
-I've been using it for two months and I haven't missed a deadline since. If you're a mess like me, you need this.
+I've been using TaskFlow for two months and I haven't missed a deadline since. If you're a mess like me, you need this.
     `,
     storyboard: [
       { id: 't_sb_33', scene_number: 1, prompt: 'Clean screen recording of smartphone showing productivity app home screen. Modern, intuitive interface with task lists visible. Bright screen, clear UI elements. Professional but accessible look.', imageUrl: null, generating: false, videoUrl: null, videoGenerating: false, characterId: null, locationId: null, soundId: null },
