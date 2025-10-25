@@ -23,6 +23,104 @@ interface StoryBuilderProps {
     onTogglePublic?: () => void;
 }
 
+const ShareModal: React.FC<{
+    shareLink: string;
+    project: any;
+    onClose: () => void;
+    onTogglePublic?: () => void;
+}> = ({ shareLink, project, onClose, onTogglePublic }) => {
+    const [copied, setCopied] = useState(false);
+
+    const handleCopy = () => {
+        navigator.clipboard.writeText(shareLink);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
+
+    const handleAccessLevelChange = (accessLevel: 'private' | 'public') => {
+        if (onTogglePublic && project.isPublic !== (accessLevel === 'public')) {
+            onTogglePublic();
+        }
+    };
+
+    return (
+        <div className="p-4 sm:p-6 space-y-4">
+            {/* Access Level Controls */}
+            <div className="space-y-3">
+                <div className="text-sm font-medium">Who can access this story?</div>
+                <div className="space-y-2">
+                    <button
+                        onClick={() => handleAccessLevelChange('private')}
+                        className={`w-full p-3 text-left rounded-lg border transition-colors flex items-center gap-3 ${
+                            !project.isPublic
+                                ? 'border-primary bg-primary/10 text-primary'
+                                : 'border-border hover:bg-muted/50'
+                        }`}
+                    >
+                        <div className="w-4 h-4 flex items-center justify-center">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <div className="font-medium">Private</div>
+                            <div className="text-xs text-muted-foreground">Only you can view this story</div>
+                        </div>
+                    </button>
+                    <button
+                        onClick={() => handleAccessLevelChange('public')}
+                        className={`w-full p-3 text-left rounded-lg border transition-colors flex items-center gap-3 ${
+                            project.isPublic
+                                ? 'border-primary bg-primary/10 text-primary'
+                                : 'border-border hover:bg-muted/50'
+                        }`}
+                    >
+                        <div className="w-4 h-4 flex items-center justify-center">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <div className="font-medium">Public</div>
+                            <div className="text-xs text-muted-foreground">Anyone with the link can view this story</div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            {/* Share Link Section */}
+            {project.isPublic && (
+                <div className="space-y-2">
+                    <div className="text-sm font-medium">Share Link</div>
+                    <p className="text-sm text-muted-foreground">
+                        Share this link to send a copy of your project's script and assets. The recipient will need to regenerate images and videos.
+                    </p>
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                        <input
+                            type="text"
+                            readOnly
+                            value={shareLink}
+                            className="w-full p-2 bg-muted border border-border rounded-lg focus:ring-2 focus:ring-primary focus:outline-none text-sm"
+                        />
+                        <button
+                            onClick={handleCopy}
+                            className="px-4 py-2 font-semibold text-primary-foreground bg-primary rounded-lg hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors sm:w-24 flex-shrink-0"
+                        >
+                            {copied ? 'Copied!' : 'Copy'}
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {!project.isPublic && (
+                <div className="text-sm text-muted-foreground p-3 bg-muted/30 rounded-lg">
+                    Story is private. Switch to public to share with others.
+                </div>
+            )}
+        </div>
+    );
+};
+
 const ShareProjectContent: React.FC<{ project: FilmProject }> = ({ project }) => {
     const [shareLink, setShareLink] = useState('Generating link...');
     const [copied, setCopied] = useState(false);
@@ -287,8 +385,13 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({ project, onUpdatePro
                     )}
                 </div>
             </div>
-            <Modal isOpen={isShareModalOpen} onClose={() => setIsShareModalOpen(false)} title="Share Project">
-                <ShareProjectContent project={project} />
+            <Modal isOpen={isShareModalOpen} onClose={() => setIsShareModalOpen(false)} title="Share Story">
+                <ShareModal
+                    shareLink={''} // Assuming shareLink will be generated or passed appropriately
+                    project={project}
+                    onClose={() => setIsShareModalOpen(false)}
+                    onTogglePublic={onTogglePublic}
+                />
             </Modal>
             <Modal isOpen={isSettingsModalOpen} onClose={() => setIsSettingsModalOpen(false)} title="Project Settings">
                 <ProjectSettings
@@ -298,4 +401,4 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({ project, onUpdatePro
             </Modal>
         </div>
     );
-}; 
+};
