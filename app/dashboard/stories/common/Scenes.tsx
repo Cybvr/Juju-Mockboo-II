@@ -146,24 +146,11 @@ const SceneCard: React.FC<SceneCardProps> = ({ scene, project, onUpdateScene, on
 
     return (
         <AccordionItem value={scene.id} className="mb-4 bg-card rounded-lg border px-4">
-            <div className="flex justify-between items-center">
-                <AccordionTrigger className="hover:no-underline flex-1 py-4">
-                    <Badge variant="outline" className="text-sm font-semibold">
-                        Scene {scene.scene_number}
-                    </Badge>
-                </AccordionTrigger>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onDeleteScene(scene.id);
-                    }}
-                    className="text-destructive hover:text-destructive hover:bg-destructive/10 ml-2"
-                >
-                    <Trash2 className="w-4 h-4" />
-                </Button>
-            </div>
+            <AccordionTrigger className="hover:no-underline py-4">
+                <Badge variant="outline" className="text-sm font-semibold">
+                    Scene {scene.scene_number}
+                </Badge>
+            </AccordionTrigger>
             <AccordionContent>
                 <div className="space-y-4 pb-4">
                     <Textarea
@@ -290,6 +277,19 @@ const SceneCard: React.FC<SceneCardProps> = ({ scene, project, onUpdateScene, on
                                 )}
                             </div>
                         </div>
+                    </div>
+                    
+                    {/* Delete button at bottom right */}
+                    <div className="flex justify-end mt-4">
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => onDeleteScene(scene.id)}
+                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                        >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Delete Scene
+                        </Button>
                     </div>
                 </div>
             </AccordionContent>
