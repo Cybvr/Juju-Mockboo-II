@@ -93,13 +93,15 @@ export const TemplateBrowser: React.FC<TemplateBrowserProps> = ({ templates, onS
     const handleTemplateSelect = async (template: Template) => {
         if (onCreateFromTemplate) {
             await onCreateFromTemplate(template);
+            onClose();
         } else {
             // For public templates, duplicate and navigate
             if (showPublicTab && template.id) {
                 try {
                     const newStoryId = await duplicateStory(template.id);
-                    router.push(`/dashboard/stories/${newStoryId}`);
+                    console.log('Template browser - Duplicated story ID:', newStoryId);
                     onClose();
+                    router.push(`/dashboard/stories/${newStoryId}`);
                 } catch (error) {
                     console.error('Failed to create copy of template:', error);
                     // Fallback to regular selection
