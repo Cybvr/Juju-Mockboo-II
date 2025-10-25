@@ -64,7 +64,7 @@ const TemplateCard: React.FC<TemplateCardProps> = ({ template, onSelect }) => {
         </div>
       </div>
       <CardContent className="p-4 flex-1">
-        <h3 className="font-bold text-lg group-hover:text-primary transition-colors truncate text-left bg-transparent">
+        <h3 className="font-bold text-lg group-hover:text-primary transition-colors truncate">
           {template.title}
         </h3>
         <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
@@ -157,20 +157,11 @@ export default function TemplatesPage() {
         <div className="space-y-6">
           {/* Header */}
           <div className="space-y-2">
-            <h1 className="text-3xl font-bold">Templates</h1>
+            <h1 className="text-sm font-bold">Templates</h1>
           </div>
 
           {/* Search and Filters */}
           <div className="space-y-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input
-                placeholder="Search templates..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
             <div className="flex flex-wrap gap-2">
               {availableCategories.map((category) => (
                 <Badge
@@ -184,7 +175,7 @@ export default function TemplatesPage() {
               ))}
             </div>
           </div>
-         
+
           {/* Templates Grid */}
           {filteredTemplates.length === 0 ? (
             <div className="flex items-center justify-center py-16">
@@ -192,8 +183,8 @@ export default function TemplatesPage() {
                 <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-lg font-semibold mb-2">No templates found</h3>
                 <p className="text-muted-foreground">
-                  {searchTerm || selectedCategory !== 'All'
-                    ? 'Try adjusting your search or filters'
+                  {searchTerm || selectedCategory !== 'All' 
+                    ? 'Try adjusting your search or filters' 
                     : 'No public templates are available at the moment'}
                 </p>
               </div>
