@@ -40,11 +40,22 @@ const TemplateCard: React.FC<TemplateCardProps> = ({ template, onSelect }) => {
             <FileText className="w-12 h-12 text-muted-foreground" />
           </div>
         )}
+        {/* Overlay for text at the bottom right */}
+        <div className="absolute bottom-2 right-2 text-white bg-black bg-opacity-50 p-1 rounded">
+          <h4 className="text-sm font-semibold truncate">{template.title}</h4>
+          {template.category && <p className="text-xs truncate">{template.category}</p>}
+        </div>
       </div>
       <CardContent className="p-4 flex-1">
         <h3 className="font-bold text-lg group-hover:text-primary transition-colors truncate">
           {template.title}
         </h3>
+        {/* This badge is now redundant due to overlay, but kept for potential future use or if the overlay is removed */}
+        {template.category && (
+          <Badge variant="outline" className="mt-2">
+            {template.category}
+          </Badge>
+        )}
       </CardContent>
     </Card>
   );

@@ -32,7 +32,7 @@ const TemplateCard: React.FC<TemplateCardProps> = ({ template, onSelect }) => {
   return (
     <Card
       onClick={onSelect}
-      className="group cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col"
+      className="group cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden"
     >
       <div className="relative aspect-video bg-muted">
         {firstImageUrl ? (
@@ -42,13 +42,13 @@ const TemplateCard: React.FC<TemplateCardProps> = ({ template, onSelect }) => {
             <FileText className="w-12 h-12 text-muted-foreground" />
           </div>
         )}
+        {/* Text overlay positioned in bottom right */}
+        <div className="absolute bottom-2 right-2 bg-black/70 text-white p-2 rounded backdrop-blur-sm">
+          <h3 className="font-bold text-sm group-hover:text-primary transition-colors truncate max-w-32">
+            {template.title}
+          </h3>
+        </div>
       </div>
-      <CardContent className="p-4 flex-1">
-        <h3 className="font-bold text-lg group-hover:text-primary transition-colors truncate">
-          {template.title}
-        </h3>
-        
-      </CardContent>
     </Card>
   );
 };
