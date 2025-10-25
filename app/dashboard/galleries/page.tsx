@@ -13,16 +13,7 @@ import { useRouter } from "next/navigation"
 import { galleryService } from "@/services/galleryService"
 import type { Gallery } from "@/types/gallery"
 import { OptimizedImage } from "@/components/OptimizedImage"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { toast } from "sonner"
 const galleryPrompts = {
@@ -438,28 +429,40 @@ return (
         </div>
       </div>
     </div>
-    <AlertDialog
-      open={!!deleteGalleryId}
-      onOpenChange={(open) => {
-        if (!open) setDeleteGalleryId(null)
-      }}
-    >
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Delete Gallery</AlertDialogTitle>
-          <AlertDialogDescription>
-            Are you sure you want to delete this gallery? This action cannot be undone and will permanently remove all
-            images and content.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel onClick={() => setDeleteGalleryId(null)}>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={confirmDeleteGallery} className="bg-destructive hover:bg-destructive/90">
-            Delete Gallery
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    {deleteGalleryId && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        {/* Backdrop - clicking closes dialog */}
+        <div 
+          className="absolute inset-0 bg-black/50" 
+          onClick={() => setDeleteGalleryId(null)}
+        />
+        
+        {/* Dialog Content */}
+        <div className="relative bg-background border rounded-lg shadow-lg max-w-md w-full p-6 space-y-4">
+          <div className="space-y-2">
+            <h3 className="text-lg font-semibold">Delete Gallery</h3>
+            <p className="text-sm text-muted-foreground">
+              Are you sure you want to delete this gallery? This action cannot be undone and will permanently remove all images and content.
+            </p>
+          </div>
+          
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 gap-2 sm:gap-0">
+            <button
+              onClick={() => setDeleteGalleryId(null)}
+              className="px-4 py-2 text-sm font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-md transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={confirmDeleteGallery}
+              className="px-4 py-2 text-sm font-medium bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-md transition-colors"
+            >
+              Delete Gallery
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
   </main>
 )
 }
