@@ -14,7 +14,7 @@ interface StoryHeaderProps {
     onShareClick: () => void;
     onSettingsClick: () => void;
     project: FilmProject;
-    onTogglePublic?: () => void;
+    onTogglePublic: () => void;
 }
 
 export const StoryHeader: React.FC<StoryHeaderProps> = ({
@@ -73,7 +73,7 @@ export const StoryHeader: React.FC<StoryHeaderProps> = ({
     };
 
     const handleAccessLevelChange = async (accessLevel: 'private' | 'public') => {
-        if (onTogglePublic && project) {
+        if (project) {
             const shouldBePublic = accessLevel === 'public';
             if (project.isPublic !== shouldBePublic) {
                 await onTogglePublic();
