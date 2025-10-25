@@ -84,8 +84,17 @@ export default function TemplatesPage() {
     return matchesSearch && matchesCategory;
   });
 
-  const handleSelectTemplate = (template: FilmProject) => {
-    router.push(`/dashboard/stories/${template.id}`);
+  const handleSelectTemplate = async (template: FilmProject) => {
+    try {
+      // Import the duplication service
+      const { duplicateStory } = await import('@/services/storiesService');
+      const newStory = await duplicateStory(template.id);
+      router.push(`/dashboard/stories/${newStory.id}`);
+    } catch (error) {
+      console.error('Failed to create copy of template:', error);
+      // Fallback to direct navigation if duplication fails
+      router.push(`/dashboard/stories/${template.id}`);
+    }
   };
 
   if (loading) {
