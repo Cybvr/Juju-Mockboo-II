@@ -13,16 +13,6 @@ import {
   duplicateStory,
   deleteStory,
 } from '@/services/storiesService';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 
 type Theme = 'light' | 'dark';
 
@@ -239,14 +229,6 @@ const App: React.FC = () => {
     setProjectToDelete(null);
   };
 
-  const handleDialogOpenChange = (open: boolean) => {
-    if (!open) {
-      closeDeleteDialog();
-    }
-    // Prevent event propagation to avoid blocking
-    return false;
-  };
-
   // ---------------- Render Sections ----------------
   const renderContent = () => {
     const activeProject = projects.find((p) => p.id === activeProjectId);
@@ -307,29 +289,40 @@ const App: React.FC = () => {
     <main className="min-h-screen w-full transition-colors duration-300 mx-auto max-w-4xl" suppressHydrationWarning>
       {renderContent()}
 
-      <AlertDialog open={deleteDialogOpen} onOpenChange={(open) => !open && closeDeleteDialog()}>
-        <AlertDialogContent 
-          className="pointer-events-auto"
-          onEscapeKeyDown={closeDeleteDialog}
-          onPointerDownOutside={closeDeleteDialog}
-        >
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Project</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete "{projectToDeleteTitle}"? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={closeDeleteDialog}>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={confirmDelete} 
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {deleteDialogOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Backdrop - clicking closes dialog */}
+          <div 
+            className="absolute inset-0 bg-black/50" 
+            onClick={closeDeleteDialog}
+          />
+          
+          {/* Dialog Content */}
+          <div className="relative bg-background border rounded-lg shadow-lg max-w-md w-full p-6 space-y-4">
+            <div className="space-y-2">
+              <h3 className="text-lg font-semibold">Delete Project</h3>
+              <p className="text-sm text-muted-foreground">
+                Are you sure you want to delete "{projectToDeleteTitle}"? This action cannot be undone.
+              </p>
+            </div>
+            
+            <div className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 gap-2 sm:gap-0">
+              <button
+                onClick={closeDeleteDialog}
+                className="px-4 py-2 text-sm font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-md transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="px-4 py-2 text-sm font-medium bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-md transition-colors"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 };
