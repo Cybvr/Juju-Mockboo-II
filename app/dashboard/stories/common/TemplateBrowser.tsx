@@ -5,13 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-
-// Assuming getAllStories and other necessary imports are available elsewhere or globally
-// For demonstration purposes, let's mock getAllStories and Template type if not provided
-// declare function getAllStories(): Promise<Template[]>;
-
-// Mock implementation for demonstration if not globally available
-declare const getAllStories: () => Promise<Template[]>;
+import { getAllStories } from '@/services/storiesService';
 
 interface TemplateBrowserProps {
     templates: Template[];
