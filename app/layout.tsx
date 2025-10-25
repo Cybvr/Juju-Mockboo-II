@@ -1,11 +1,17 @@
 import './globals.css';
 import type { Metadata } from 'next';
-import { DM_Sans } from 'next/font/google';
+import { DM_Sans, Space_Grotesk } from 'next/font/google';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
 
 // Load DM Sans font with the desired subsets
 const dmSans = DM_Sans({ subsets: ['latin'] });
+
+// Load Space Grotesk font for headlines
+const spaceGrotesk = Space_Grotesk({ 
+  subsets: ['latin'],
+  variable: '--font-space-grotesk'
+});
 
 export const metadata: Metadata = {
   title: 'Juju - Workspace Suite',
@@ -41,7 +47,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head />
-      <body suppressHydrationWarning>
+      <body suppressHydrationWarning className={`${spaceGrotesk.variable}`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"

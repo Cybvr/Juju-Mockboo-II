@@ -154,6 +154,9 @@
   }
 
   @layer components {
+    .headline {
+      font-family: var(--font-space-grotesk), system-ui, sans-serif;
+    }
     .gradient-purple {
       background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
     }
