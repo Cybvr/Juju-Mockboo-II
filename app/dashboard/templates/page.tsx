@@ -4,9 +4,7 @@ import type { FilmProject } from '@/types/storytypes';
 import { getAllStories } from '@/services/storiesService';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { FileText, Globe, Search, Filter } from 'lucide-react';
+import { FileText, Globe, Filter } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 const categories = [
@@ -87,7 +85,6 @@ const TemplateCard: React.FC<TemplateCardProps> = ({ template, onSelect }) => {
 export default function TemplatesPage() {
   const [publicTemplates, setPublicTemplates] = useState<FilmProject[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const router = useRouter();
 
@@ -109,10 +106,8 @@ export default function TemplatesPage() {
   };
 
   const filteredTemplates = publicTemplates.filter(template => {
-    const matchesSearch = template.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         template.prompt.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'All' || template.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+    return matchesCategory;
   });
 
   // Get unique categories that have templates
@@ -146,7 +141,7 @@ export default function TemplatesPage() {
             <h1 className="text-sm font-bold">Templates</h1>
           </div>
 
-          {/* Search and Filters */}
+          {/* Category Filters */}
           <div className="space-y-4">
             <div className="flex flex-wrap gap-2">
               {availableCategories.map((category) => (
@@ -169,8 +164,8 @@ export default function TemplatesPage() {
                 <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-lg font-semibold mb-2">No templates found</h3>
                 <p className="text-muted-foreground">
-                  {searchTerm || selectedCategory !== 'All' 
-                    ? 'Try adjusting your search or filters' 
+                  {selectedCategory !== 'All' 
+                    ? 'Try adjusting your filters'
                     : 'No public templates are available at the moment'}
                 </p>
               </div>
