@@ -1,10 +1,18 @@
 'use client';
+
 import React, { useState, useEffect, useCallback } from 'react';
 import type { FilmProject } from '@/types/storytypes';
 import { ProjectDashboard } from './common/ProjectDashboard';
 import { StoryBuilder } from './common/StoryBuilder';
 import { CreationHub } from './common/CreationHub';
 import { templates } from '@/data/filmTemplates';
+import {
+  getAllStories,
+  createStory,
+  updateStory,
+  duplicateStory,
+  deleteStory,
+} from '@/services/storiesService';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,13 +23,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import {
-  getAllStories,
-  createStory,
-  updateStory,
-  deleteStory,
-  duplicateStory,
-} from '@/services/storiesService';
 
 type Theme = 'light' | 'dark';
 
@@ -30,8 +31,8 @@ const App: React.FC = () => {
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
   const [theme, setTheme] = useState<Theme>('light');
   const [loading, setLoading] = useState(true);
-  const [deleteProjectId, setDeleteProjectId] = useState<string | null>(null);
-  const [deleting, setDeleting] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
 
   // ---------------- Load Projects & Theme ----------------
   useEffect(() => {
@@ -63,12 +64,14 @@ const App: React.FC = () => {
                 p.script === importedProjectData.script &&
                 p.prompt === importedProjectData.prompt
             );
+
             if (!projectExists) {
               const importedProject = {
                 ...importedProjectData,
                 title: `Imported: ${importedProjectData.title}`,
                 isTemplate: false,
               };
+
               const newProjectId = await createStory(importedProject);
               const newProject: FilmProject = {
                 ...importedProject,
@@ -76,9 +79,11 @@ const App: React.FC = () => {
                 createdAt: Date.now(),
                 updatedAt: Date.now(),
               };
+
               setProjects((prev) => [newProject, ...prev]);
               setActiveProjectId(newProjectId);
             }
+
             window.history.replaceState(
               null,
               document.title,
@@ -97,6 +102,7 @@ const App: React.FC = () => {
         setLoading(false);
       }
     };
+
     loadData();
   }, []);
 
@@ -130,6 +136,7 @@ const App: React.FC = () => {
           watermark: false,
         },
       };
+
       const newProjectId = await createStory(newProjectData);
       const newProject: FilmProject = {
         ...newProjectData,
@@ -137,6 +144,7 @@ const App: React.FC = () => {
         createdAt: Date.now(),
         updatedAt: Date.now(),
       };
+
       setProjects((prev) => [newProject, ...prev]);
       setActiveProjectId(newProject.id);
     } catch (error) {
@@ -165,28 +173,6 @@ const App: React.FC = () => {
 
   const handleBackToDashboard = () => setActiveProjectId(null);
 
-  const handleDeleteProject = (id: string) => {
-    setDeleteProjectId(id);
-  };
-
-  const confirmDeleteProject = async () => {
-    if (!deleteProjectId) return;
-
-    setDeleting(true);
-    try {
-      await deleteStory(deleteProjectId);
-      setProjects((prev) => prev.filter((p) => p.id !== deleteProjectId));
-      if (activeProjectId === deleteProjectId) {
-        setActiveProjectId(null);
-      }
-    } catch (error) {
-      console.error('Failed to delete project:', error);
-    } finally {
-      setDeleting(false);
-      setDeleteProjectId(null); // unmounts the whole dialog
-    }
-  };
-
   const handleRenameProject = async (id: string, newTitle: string) => {
     try {
       await updateStory(id, { title: newTitle.trim() });
@@ -209,6 +195,7 @@ const App: React.FC = () => {
         id,
         `${projectToDuplicate.title} (Copy)`
       );
+
       const newProject: FilmProject = {
         ...JSON.parse(JSON.stringify(projectToDuplicate)),
         id: newProjectId,
@@ -217,15 +204,44 @@ const App: React.FC = () => {
         updatedAt: Date.now(),
         isTemplate: false,
       };
+
       setProjects((prev) => [newProject, ...prev]);
     } catch (error) {
       console.error('Failed to duplicate project:', error);
     }
   };
 
+  const handleDeleteProject = (id: string) => {
+    setProjectToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!projectToDelete) return;
+
+    try {
+      await deleteStory(projectToDelete);
+      setProjects((prev) => prev.filter((p) => p.id !== projectToDelete));
+
+      if (activeProjectId === projectToDelete) {
+        setActiveProjectId(null);
+      }
+    } catch (error) {
+      console.error('Failed to delete project:', error);
+    } finally {
+      closeDeleteDialog();
+    }
+  };
+
+  const closeDeleteDialog = () => {
+    setDeleteDialogOpen(false);
+    setProjectToDelete(null);
+  };
+
   // ---------------- Render Sections ----------------
   const renderContent = () => {
     const activeProject = projects.find((p) => p.id === activeProjectId);
+
     if (activeProject) {
       if (!activeProject.prompt && !activeProject.script) {
         return (
@@ -237,6 +253,7 @@ const App: React.FC = () => {
           />
         );
       }
+
       return (
         <StoryBuilder
           key={activeProject.id}
@@ -254,9 +271,9 @@ const App: React.FC = () => {
         projects={projects}
         onCreateProject={handleCreateProject}
         onSelectProject={handleSelectProject}
-        onDeleteProject={handleDeleteProject}
         onRenameProject={handleRenameProject}
         onDuplicateProject={handleDuplicateProject}
+        onDeleteProject={handleDeleteProject}
       />
     );
   };
@@ -273,39 +290,30 @@ const App: React.FC = () => {
     );
   }
 
+  const projectToDeleteTitle = projectToDelete
+    ? projects.find((p) => p.id === projectToDelete)?.title
+    : '';
+
   return (
     <main className="min-h-screen w-full transition-colors duration-300 mx-auto max-w-4xl">
       {renderContent()}
 
-      {/* ✅ Unmounted Dialog (prevents stuck overlay) */}
-      {deleteProjectId && (
-        <AlertDialog open={true} onOpenChange={() => setDeleteProjectId(null)}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Delete Story</AlertDialogTitle>
-              <AlertDialogDescription>
-                Are you sure you want to delete this story? This action cannot be
-                undone and will permanently remove all content.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel
-                disabled={deleting}
-                onClick={() => setDeleteProjectId(null)}
-              >
-                Cancel
-              </AlertDialogCancel>
-              <AlertDialogAction
-                disabled={deleting}
-                onClick={confirmDeleteProject}
-                className="bg-destructive hover:bg-destructive/90"
-              >
-                {deleting ? 'Deleting…' : 'Delete Story'}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      )}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={closeDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Project</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{projectToDeleteTitle}"? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={closeDeleteDialog}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </main>
   );
 };
