@@ -123,17 +123,28 @@ export const CreationHub: React.FC<CreationHubProps> = ({ project, templates, on
         setPrompt(samplePrompts[randomIndex]);
     }, []);
 
-    const handleSelectTemplate = useCallback((template: Template) => {
-        const remixedProject: FilmProject = {
-            ...template,
-            id: project.id,
-            title: `${template.title} (copy)`,
-            isTemplate: false,
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
-        };
-        onUpdateProject(remixedProject);
-        setIsTemplateBrowserOpen(false);
+    const handleSelectTemplate = useCallback(async (template: Template) => {
+        try {
+            // Import the duplication service
+            const { duplicateStory } = await import('@/services/storiesService');
+            const newStory = await duplicateStory(template.id);
+            
+            // Navigate to the new story
+            window.location.href = `/dashboard/stories/${newStory.id}`;
+        } catch (error) {
+            console.error('Failed to create copy of template:', error);
+            // Fallback to updating current project if duplication fails
+            const remixedProject: FilmProject = {
+                ...template,
+                id: project.id,
+                title: `${template.title} (copy)`,
+                isTemplate: false,
+                createdAt: Date.now(),
+                updatedAt: Date.now(),
+            };
+            onUpdateProject(remixedProject);
+            setIsTemplateBrowserOpen(false);
+        }
     }, [project, onUpdateProject]);
 
     const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
