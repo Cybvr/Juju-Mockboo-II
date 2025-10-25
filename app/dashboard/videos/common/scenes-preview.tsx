@@ -46,7 +46,7 @@ export function ScenesPreview({
   }, [currentTime, scenes])
 
   // Use selected scene if available, otherwise use current scene from timeline
-  const displayScene = selectedSceneId 
+  const displayScene = selectedSceneId
     ? scenes.find(s => s.id === selectedSceneId) || scenes[currentSceneIndex]
     : scenes[currentSceneIndex]
 
@@ -58,7 +58,7 @@ export function ScenesPreview({
     // Wait for video metadata to load to get actual duration
     const handleLoadedMetadata = () => {
       const actualVideoDuration = video.duration
-      
+
       // Update scene duration if it doesn't match actual video duration
       if (Math.abs(displayScene.duration - actualVideoDuration) > 0.1 && onUpdateScene) {
         onUpdateScene(displayScene.id, { duration: actualVideoDuration })
@@ -174,14 +174,14 @@ export function ScenesPreview({
               onMouseDown={(e) => {
                 const canvas = containerRef.current
                 if (!canvas) return
-                
+
                 const rect = canvas.getBoundingClientRect()
                 const scaleX = canvas.width / rect.width
                 const scaleY = canvas.height / rect.height
-                
+
                 const x = (e.clientX - rect.left) * scaleX
                 const y = (e.clientY - rect.top) * scaleY
-                
+
                 // Simple object selection (you can expand this)
                 console.log('Canvas clicked at:', x, y)
               }}
@@ -192,9 +192,9 @@ export function ScenesPreview({
               }}
               tabIndex={0}
             />
-            
+
             {/* Play/Pause Overlay */}
-            <div 
+            <div
               className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black/20 pointer-events-none"
               onClick={(e) => {
                 e.stopPropagation()
@@ -216,7 +216,7 @@ export function ScenesPreview({
               </Button>
             </div>
 
-            
+
           </div>
         ) : null}
       </div>
