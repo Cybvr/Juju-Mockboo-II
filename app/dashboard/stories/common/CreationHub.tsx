@@ -8,6 +8,8 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { generateScript, analyzeScript } from '@/services/filmService';
 import { TemplateBrowser } from './TemplateBrowser';
+import { useRouter } from 'next/navigation';
+import { duplicateStory } from '@/services/storyService';
 
 interface CreationHubProps {
     project: FilmProject;
@@ -34,6 +36,35 @@ export const CreationHub: React.FC<CreationHubProps> = ({ project, templates, on
     const [isAnalyzingScript, setIsAnalyzingScript] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [isTemplateBrowserOpen, setIsTemplateBrowserOpen] = useState(false);
+    const router = useRouter();
+
+    const handleCreateFromTemplate = async (template: Template) => {
+        try {
+            // If it's a public template with an ID, duplicate it
+            if (template.id && template.isPublic) {
+                const newStoryId = await duplicateStory(template.id);
+                router.push(`/dashboard/stories/${newStoryId}`);
+            } else {
+                // For local templates, update the current project
+                const updatedProject = {
+                    ...project,
+                    title: template.title || project.title,
+                    prompt: template.prompt || '',
+                    script: template.script || '',
+                    storyboard: template.storyboard || [],
+                    characters: template.characters || [],
+                    locations: template.locations || [],
+                    sound_design: template.sound_design || [],
+                    settings: { ...project.settings, ...template.settings },
+                    category: template.category || project.category,
+                };
+                await onUpdateProject(updatedProject);
+            }
+            setIsTemplateBrowserOpen(false);
+        } catch (error) {
+            console.error('Failed to create from template:', error);
+        }
+    };
 
     const handleGenerateScript = useCallback(async () => {
         if (!prompt.trim()) {
@@ -179,6 +210,7 @@ export const CreationHub: React.FC<CreationHubProps> = ({ project, templates, on
                     onSelect={handleSelectTemplate}
                     onClose={() => setIsTemplateBrowserOpen(false)}
                     showPublicTab={true}
+                    onCreateFromTemplate={handleCreateFromTemplate}
                 />
             )}
             <div className="w-full max-w-2xl mx-auto py-16 px-4 flex flex-col items-center justify-center min-h-screen">
@@ -190,7 +222,7 @@ export const CreationHub: React.FC<CreationHubProps> = ({ project, templates, on
                     <ArrowLeft className="w-4 h-4" />
                     All Projects
                 </Button>
-                
+
                 {isAdmin && onTogglePublic && (
                     <div className="absolute top-8 right-8 flex items-center gap-2">
                         <Label htmlFor="public-toggle" className="flex items-center gap-2">
