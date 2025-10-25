@@ -89,9 +89,6 @@ export const TemplateBrowser: React.FC<TemplateBrowserProps> = ({ templates, onS
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-xs text-muted-foreground line-clamp-3">
-                                {item.description || 'No description available.'}
-                            </p>
                         </CardContent>
                     </Card>
                 ))
