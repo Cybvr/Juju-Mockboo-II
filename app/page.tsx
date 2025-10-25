@@ -15,16 +15,16 @@ import { visualNeedsData } from '@/data/industryData';
 import { Card } from '@/components/ui/card';
 import { Play, FileText } from 'lucide-react';
 
-// Fetch public stories from the templates page
+// Import the stories service
+import { getAllStories } from '@/services/storiesService';
+
+// Fetch public stories using the same logic as templates page
 async function fetchPublicStories() {
   try {
-    const res = await fetch('/api/public/stories'); // Assuming you have an API endpoint for public stories
-    if (!res.ok) {
-      throw new Error('Failed to fetch public stories');
-    }
-    const data = await res.json();
+    const allStories = await getAllStories();
+    const publicStories = allStories.filter(story => story.isPublic);
     // Sort by creation date in descending order and take the latest 3
-    return data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 3);
+    return publicStories.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)).slice(0, 3);
   } catch (error) {
     console.error('Error fetching public stories:', error);
     return [];
@@ -160,69 +160,9 @@ export default function LandingPage() {
             </div>
           </div>
         </div>
-        {/* Tools Gallery Section */}
+
+        {/* Recent Stories Section - moved up */}
         <div className="px-6 py-16">
-          <img src="/assets/images/workspace.jpg" alt="Workspace" className="w-full h-auto rounded-2xl shadow-2xl" />
-        </div>
-        <div className="px-6 pb-12">
-          {/* How It Works */}
-          <div className="mb-16 rounded-2xl p-4 lg:p-8">
-            <div className="mb-12 text-left">
-              <h2 className="text-4xl lg:text-5xl font-semibold mb-4">Three steps to visual perfection</h2>
-              <p className="text-xl text-muted-foreground">It's so simple, you'll wonder why you ever did it any other way</p>
-            </div>
-            <div className="grid lg:grid-cols-3 gap-12 items-start">
-              {features.map((feature, index) => (
-                <div key={index} className="flex items-start">
-                  <div>
-                    <div className="text-sm text-accent font-mono mb-2">0{index + 1}</div>
-                    <h3 className="text-2xl font-semibold mb-3">{feature.title}</h3>
-                    <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Value Props */}
-          <div className="grid md:grid-cols-3 gap-8 mb-16">
-            {valueProps.map((prop, index) => (
-              <div key={index} className="shadow-lg">
-                <div className="mb-6 rounded-xl overflow-hidden">
-                  <img
-                    src={prop.image}
-                    alt={prop.title}
-                    className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-700"
-                  />
-                </div>
-                <div className="text-left">
-                  <h3 className="text-xl font-semibold text-foreground">{prop.title}</h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">{prop.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-          {/* Pricing */}
-          <div className="mb-8">
-            <div className="text-center mb-8">
-              <h2 className="text-4xl lg:text-5xl font-semibold mb-4">Simple, transparent pricing</h2>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                Start free. Scale as you grow. No hidden fees, no surprises.
-              </p>
-            </div>
-            <PricingTable showCurrentPlan={false} />
-          </div>
-        </div>
-
-        {/* Recent Stories Section */}
-        <div className="mx-auto max-w-6xl px-6 py-16">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl lg:text-5xl font-semibold mb-4">Recent Stories</h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              See what creators are building with our AI-powered storytelling tools
-            </p>
-          </div>
-
           {storiesLoading ? (
             <div className="grid md:grid-cols-3 gap-8">
               {[1, 2, 3].map((i) => (
@@ -296,9 +236,9 @@ export default function LandingPage() {
           ) : (
             <div className="text-center py-16">
               <FileText className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-xl font-semibold mb-2">No stories yet</h3>
+              <h3 className="text-xl font-semibold mb-2">Create Your First Story</h3>
               <p className="text-muted-foreground mb-6">
-                Be the first to create amazing video stories with AI
+                Start creating amazing video stories with AI
               </p>
               {!loading && user ? (
                 <Button
@@ -330,6 +270,62 @@ export default function LandingPage() {
             </div>
           )}
         </div>
+
+        {/* Tools Gallery Section */}
+        <div className="px-6 py-16">
+          <img src="/assets/images/workspace.jpg" alt="Workspace" className="w-full h-auto rounded-2xl shadow-2xl" />
+        </div>
+        <div className="px-6 pb-12">
+          {/* How It Works */}
+          <div className="mb-16 rounded-2xl p-4 lg:p-8">
+            <div className="mb-12 text-left">
+              <h2 className="text-4xl lg:text-5xl font-semibold mb-4">Three steps to visual perfection</h2>
+              <p className="text-xl text-muted-foreground">It's so simple, you'll wonder why you ever did it any other way</p>
+            </div>
+            <div className="grid lg:grid-cols-3 gap-12 items-start">
+              {features.map((feature, index) => (
+                <div key={index} className="flex items-start">
+                  <div>
+                    <div className="text-sm text-accent font-mono mb-2">0{index + 1}</div>
+                    <h3 className="text-2xl font-semibold mb-3">{feature.title}</h3>
+                    <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Value Props */}
+          <div className="grid md:grid-cols-3 gap-8 mb-16">
+            {valueProps.map((prop, index) => (
+              <div key={index} className="shadow-lg">
+                <div className="mb-6 rounded-xl overflow-hidden">
+                  <img
+                    src={prop.image}
+                    alt={prop.title}
+                    className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-700"
+                  />
+                </div>
+                <div className="text-left">
+                  <h3 className="text-xl font-semibold text-foreground">{prop.title}</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">{prop.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          {/* Pricing */}
+          <div className="mb-8">
+            <div className="text-center mb-8">
+              <h2 className="text-4xl lg:text-5xl font-semibold mb-4">Simple, transparent pricing</h2>
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                Start free. Scale as you grow. No hidden fees, no surprises.
+              </p>
+            </div>
+            <PricingTable showCurrentPlan={false} />
+          </div>
+        </div>
+
+        
       </div>
       <MarketingFooter />
       <InstallPWA />
