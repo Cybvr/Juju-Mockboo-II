@@ -55,9 +55,11 @@ const TemplateCard: React.FC<TemplateCardProps> = ({ template, onSelect }) => {
             }}
           />
         )}
-        {/* Title overlay in bottom right */}
-        <div className="absolute bottom-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-sm font-medium">
-          {template.title}
+        {/* Title overlay with gradient */}
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+          <h3 className="text-white font-medium text-sm text-left truncate">
+            {template.title}
+          </h3>
         </div>
       </div>
     </div>
