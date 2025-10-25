@@ -42,9 +42,6 @@ const TemplateCard: React.FC<TemplateCardProps> = ({ template, onSelect }) => {
             <FileText className="w-12 h-12 text-muted-foreground" />
           </div>
         )}
-        <div className="absolute top-2 right-2">
-          <Globe className="w-4 h-4 text-green-500 bg-white rounded-full p-0.5" />
-        </div>
       </div>
       <CardContent className="p-4 flex-1">
         <h3 className="font-bold text-lg group-hover:text-primary transition-colors truncate">
@@ -112,42 +109,8 @@ export default function TemplatesPage() {
         <div className="space-y-6">
           {/* Header */}
           <div className="space-y-2">
-            <h1 className="text-3xl font-bold">Public Templates</h1>
-            <p className="text-muted-foreground">
-              Discover and use templates created by the community
-            </p>
+            <h1 className="text-3xl font-bold">Templates</h1>
           </div>
-
-          {/* Search and Filters */}
-          <div className="space-y-4">
-            <div className="relative max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search templates..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              {getAllCategories(publicTemplates).map((category) => (
-                <Badge
-                  key={category}
-                  variant={selectedCategory === category ? 'default' : 'outline'}
-                  className="cursor-pointer hover:bg-accent transition-colors"
-                  onClick={() => setSelectedCategory(category)}
-                >
-                  {category}
-                </Badge>
-              ))}
-            </div>
-
-            <div className="text-sm text-muted-foreground">
-              {filteredTemplates.length} template{filteredTemplates.length !== 1 ? 's' : ''}
-            </div>
-          </div>
-
           {/* Templates Grid */}
           {filteredTemplates.length === 0 ? (
             <div className="flex items-center justify-center py-16">
