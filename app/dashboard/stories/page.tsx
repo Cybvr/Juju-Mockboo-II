@@ -282,12 +282,12 @@ const App: React.FC = () => {
   // ---------------- UI ----------------
   if (loading) {
     return (
-      <main className="min-h-screen w-full flex items-center justify-center">
+      <div className="min-h-screen w-full flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-foreground mx-auto mb-4"></div>
           <p className="text-foreground">Loading your stories...</p>
         </div>
-      </main>
+      </div>
     );
   }
 
@@ -296,7 +296,7 @@ const App: React.FC = () => {
     : '';
 
   return (
-    <main className="min-h-screen w-full transition-colors duration-300 mx-auto max-w-4xl">
+    <main className="min-h-screen w-full transition-colors duration-300 mx-auto max-w-4xl" suppressHydrationWarning>
       {renderContent()}
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={(open) => {
