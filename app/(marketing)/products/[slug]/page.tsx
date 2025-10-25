@@ -2,7 +2,7 @@
 'use client';
 import { use } from 'react';
 import { notFound } from 'next/navigation';
-import { toolsData } from '@/data/toolsData';
+import { toolsData } from '@/data/productsData';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -17,7 +17,7 @@ interface FeaturePageProps {
 
 export default function FeaturePage({ params }: FeaturePageProps) {
   const { slug } = use(params);
-  const feature = toolsData.find(f => f.slug === slug);
+  const feature = productsData.find(f => f.slug === slug);
 
   if (!feature) {
     notFound();
@@ -122,8 +122,8 @@ export default function FeaturePage({ params }: FeaturePageProps) {
               Explore Other Tools
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {toolsData.filter(tool => tool.slug !== slug).map((tool) => (
-                <Link key={tool.id} href={`/tools/${tool.slug}`}>
+              {productsData.filter(product => productsData.slug !== slug).map((product) => (
+                <Link key={product.id} href={`/productss/${product.slug}`}>
                   <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
                     <CardContent className="p-0">
                       <img

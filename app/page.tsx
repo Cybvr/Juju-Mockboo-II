@@ -120,7 +120,7 @@ export default function LandingPage() {
                   Dream It.<br />Design It.<br />Done.
                 </h1>
                 <p className="text-xl lg:text-2xl text-muted-foreground mb-8 max-w-2xl leading-relaxed">
-                  Turn your ideas into stunning visuals in seconds. No design skills required. Just imagination and AI.
+                 Your Image and Video Concepting App. Turn your ideas into stunning visuals in seconds.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   {!loading && user ? (

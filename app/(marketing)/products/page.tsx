@@ -2,7 +2,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowUpRight } from 'lucide-react';
-import { toolsData } from '@/data/toolsData';
+import { productsData } from '@/data/productsData';
 import Link from 'next/link';
 
 export default function ToolsPage() {
@@ -24,7 +24,7 @@ export default function ToolsPage() {
 
         {/* Tools Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {toolsData.map((feature) => (
+          {productsData.map((feature) => (
             <Link key={feature.id} href={feature.href} className="block">
               <Card className="group hover:shadow-lg transition-all duration-300 overflow-hidden cursor-pointer h-full">
                 <div className="aspect-video overflow-hidden">

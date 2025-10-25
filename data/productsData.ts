@@ -1,6 +1,6 @@
 import { Video, Zap, Image as ImageIcon, Package, MessageCircle, Film } from 'lucide-react';
 
-export const toolsData = [
+export const productsData = [
   {
     id: 1,
     title: "Video",

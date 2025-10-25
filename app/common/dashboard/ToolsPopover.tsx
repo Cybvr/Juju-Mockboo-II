@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { LayoutGrid  } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { toolsData } from '@/data/toolsData';
+import { productsData } from '@/data/productsData';
 import Link from 'next/link';
 
 interface ToolsPopoverProps {
@@ -34,7 +34,7 @@ export default function ToolsPopover({ className = '' }: ToolsPopoverProps) {
           <p className="text-xs text-muted-foreground">Quick access to AI tools</p>
         </div>
         <div className="grid grid-cols-4 gap-3">
-          {toolsData.map((tool) => {
+          {productsData.map((tool) => {
             const IconComponent = tool.icon;
             return (
               <Link 
