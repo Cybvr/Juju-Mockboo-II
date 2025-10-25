@@ -243,6 +243,8 @@ const App: React.FC = () => {
     if (!open) {
       closeDeleteDialog();
     }
+    // Prevent event propagation to avoid blocking
+    return false;
   };
 
   // ---------------- Render Sections ----------------
@@ -305,8 +307,12 @@ const App: React.FC = () => {
     <main className="min-h-screen w-full transition-colors duration-300 mx-auto max-w-4xl" suppressHydrationWarning>
       {renderContent()}
 
-      <AlertDialog open={deleteDialogOpen} onOpenChange={handleDialogOpenChange}>
-        <AlertDialogContent>
+      <AlertDialog open={deleteDialogOpen} onOpenChange={(open) => !open && closeDeleteDialog()}>
+        <AlertDialogContent 
+          className="pointer-events-auto"
+          onEscapeKeyDown={closeDeleteDialog}
+          onPointerDownOutside={closeDeleteDialog}
+        >
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Project</AlertDialogTitle>
             <AlertDialogDescription>
@@ -315,7 +321,10 @@ const App: React.FC = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={closeDeleteDialog}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            <AlertDialogAction 
+              onClick={confirmDelete} 
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
