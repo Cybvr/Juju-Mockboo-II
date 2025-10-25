@@ -127,7 +127,8 @@ const SceneCard: React.FC<SceneCardProps> = ({ scene, project, onUpdateScene, on
                     body: JSON.stringify({
                         action: 'generateVideo',
                         prompt: localPrompt || 'A cinematic scene',
-                        imageUrl: imageUrl
+                        imageUrl: imageUrl,
+                        aspectRatio: project.settings.aspectRatio // Use project aspect ratio setting
                     })
                 });
                 const data = await response.json();
