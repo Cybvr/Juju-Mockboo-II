@@ -245,7 +245,7 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({ project, onUpdatePro
 
                     {/* Right Panel section - stacked below on mobile */}
                     {!isRightPanelCollapsed && (
-                        <div className="w-full lg:w-1/3 lg:h-full flex-shrink-0 flex flex-col relative">
+                        <div className="w-full lg:w-1/3 lg:h-full flex-shrink-0 flex flex-col relative bg-card">
                             {/* Close button in top-right corner */}
                             <Button
                                 variant="ghost"
@@ -256,7 +256,7 @@ export const StoryBuilder: React.FC<StoryBuilderProps> = ({ project, onUpdatePro
                                 <ChevronsRight className="w-4 h-4" />
                             </Button>
                             <Tabs value={rightPanelTab} onValueChange={(value) => setRightPanelTab(value as 'script' | 'comments')} className="h-full flex flex-col">
-                                <div className="flex-shrink-0 p-3 border-b border-border">
+                                <div className="flex-shrink-0 p-3 border-b border-border ">
                                     <TabsList className="grid w-fit grid-cols-2">
                                         <TabsTrigger value="script" className="flex items-center gap-2 text-xs">
                                             <FileText className="w-3 h-3" />

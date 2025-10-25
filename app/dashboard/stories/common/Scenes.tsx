@@ -315,7 +315,7 @@ export const Scenes: React.FC<ScenesProps> = ({
     onExpandedScenesChange
 }) => {
     return (
-        <div className="p-2">
+        <div className="">
             {project.storyboard.length > 0 ? (
                 <>
                     <Accordion type="multiple" value={expandedScenes} onValueChange={onExpandedScenesChange}>
