@@ -9,7 +9,6 @@ import { Label } from '@/components/ui/label';
 import { generateScript, analyzeScript } from '@/services/filmService';
 import { TemplateBrowser } from './TemplateBrowser';
 import { useRouter } from 'next/navigation';
-import { duplicateStory } from '@/services/storiesService';
 
 interface CreationHubProps {
     project: FilmProject;
@@ -31,40 +30,11 @@ export const CreationHub: React.FC<CreationHubProps> = ({ project, templates, on
     const [prompt, setPrompt] = useState('');
     const [script, setScript] = useState('');
     const [activeMethod, setActiveMethod] = useState<'generate' | 'paste' | 'template' | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
     const [isGeneratingScript, setIsGeneratingScript] = useState(false);
     const [isAnalyzingScript, setIsAnalyzingScript] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [isTemplateBrowserOpen, setIsTemplateBrowserOpen] = useState(false);
     const router = useRouter();
-
-    const handleCreateFromTemplate = async (template: Template) => {
-        try {
-            // If it's a public template with an ID, duplicate it
-            if (template.id && template.isPublic) {
-                const newStoryId = await duplicateStory(template.id);
-                router.push(`/dashboard/stories/${newStoryId}`);
-            } else {
-                // For local templates, update the current project
-                const updatedProject = {
-                    ...project,
-                    title: template.title || project.title,
-                    prompt: template.prompt || '',
-                    script: template.script || '',
-                    storyboard: template.storyboard || [],
-                    characters: template.characters || [],
-                    locations: template.locations || [],
-                    sound_design: template.sound_design || [],
-                    settings: { ...project.settings, ...template.settings },
-                    category: template.category || project.category,
-                };
-                await onUpdateProject(updatedProject);
-            }
-            setIsTemplateBrowserOpen(false);
-        } catch (error) {
-            console.error('Failed to create from template:', error);
-        }
-    };
 
     const handleGenerateScript = useCallback(async () => {
         if (!prompt.trim()) {
@@ -82,15 +52,6 @@ export const CreationHub: React.FC<CreationHubProps> = ({ project, templates, on
             setIsGeneratingScript(false);
         }
     }, [prompt, onUpdateProject, project]);
-
-    const handlePasteScript = useCallback(() => {
-        if (!script.trim()) {
-            setError("Please paste your script.");
-            return;
-        }
-        setError(null);
-        onUpdateProject({ ...project, script, updatedAt: Date.now() });
-    }, [script, onUpdateProject, project]);
 
     const handleAnalyzeScript = useCallback(async () => {
         if (!script.trim()) {
@@ -154,25 +115,6 @@ export const CreationHub: React.FC<CreationHubProps> = ({ project, templates, on
         setPrompt(samplePrompts[randomIndex]);
     }, []);
 
-    const handleSelectTemplate = useCallback((template: Template) => {
-        const remixedProject: FilmProject = {
-            ...template,
-            id: project.id,
-            title: `${template.title} (copy)`,
-            isTemplate: false,
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
-        };
-        onUpdateProject(remixedProject);
-        setIsTemplateBrowserOpen(false);
-    }, [project, onUpdateProject]);
-
-    const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-        if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-
-        }
-    }, []);
-
     const MethodButton: React.FC<{
         method: 'generate' | 'paste' | 'template';
         icon: React.ComponentType<{ className?: string }>;
@@ -207,10 +149,8 @@ export const CreationHub: React.FC<CreationHubProps> = ({ project, templates, on
             {isTemplateBrowserOpen && (
                 <TemplateBrowser
                     templates={templates}
-                    onSelect={handleSelectTemplate}
                     onClose={() => setIsTemplateBrowserOpen(false)}
                     showPublicTab={true}
-                    onCreateFromTemplate={handleCreateFromTemplate}
                 />
             )}
             <div className="w-full max-w-2xl mx-auto py-16 px-4 flex flex-col items-center justify-center min-h-screen">

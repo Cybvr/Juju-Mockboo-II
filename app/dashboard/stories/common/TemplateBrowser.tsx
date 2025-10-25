@@ -6,15 +6,13 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { getAllStories, duplicateStory } from '@/services/storiesService';
+import { getAllStories, duplicateStory, createStory } from '@/services/storiesService';
 import { useRouter } from 'next/navigation';
 
 interface TemplateBrowserProps {
     templates: Template[];
-    onSelect: (template: Template) => void;
     onClose: () => void;
     showPublicTab?: boolean;
-    onCreateFromTemplate?: (template: Template) => Promise<void>;
 }
 
 const TemplateCard: React.FC<{ template: Template; onSelect: () => void }> = ({ template, onSelect }) => {
@@ -84,33 +82,34 @@ const categories = [
     'Music Video'
 ];
 
-export const TemplateBrowser: React.FC<TemplateBrowserProps> = ({ templates, onSelect, onClose, showPublicTab = false, onCreateFromTemplate }) => {
+export const TemplateBrowser: React.FC<TemplateBrowserProps> = ({ templates, onClose, showPublicTab = false }) => {
     const [publicDocs, setPublicDocs] = useState<Template[]>([]);
     const [loading, setLoading] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState('All');
     const router = useRouter();
 
     const handleTemplateSelect = async (template: Template) => {
-        if (onCreateFromTemplate) {
-            await onCreateFromTemplate(template);
-            onClose();
-        } else {
-            // Always duplicate and navigate for any template with an ID
+        try {
+            let newStoryId: string;
+
             if (template.id) {
-                try {
-                    const newStoryId = await duplicateStory(template.id);
-                    console.log('Template browser - Duplicated story ID:', newStoryId);
-                    onClose();
-                    router.push(`/dashboard/stories/${newStoryId}`);
-                } catch (error) {
-                    console.error('Failed to create copy of template:', error);
-                    // Fallback to regular selection
-                    onSelect(template);
-                }
+                // Template exists in Firebase - duplicate it
+                newStoryId = await duplicateStory(template.id);
             } else {
-                // For templates without ID (local templates), use regular selection
-                onSelect(template);
+                // Template is a local object - create new story from it
+                const { id, createdAt, updatedAt, ...templateData } = template as any;
+                newStoryId = await createStory({
+                    ...templateData,
+                    title: `${template.title} (Copy)`,
+                    isTemplate: false,
+                });
             }
+
+            console.log('Template browser - Created story ID:', newStoryId);
+            onClose();
+            router.push(`/dashboard/stories/${newStoryId}`);
+        } catch (error) {
+            console.error('Failed to create copy of template:', error);
         }
     };
 
@@ -140,7 +139,7 @@ export const TemplateBrowser: React.FC<TemplateBrowserProps> = ({ templates, onS
 
     const renderTemplateGrid = (items: Template[], isLoading = false) => {
         const filteredItems = filterItemsByCategory(items);
-        
+
         return (
         <div className="space-y-4">
             <div className="flex flex-wrap gap-2">
@@ -155,7 +154,7 @@ export const TemplateBrowser: React.FC<TemplateBrowserProps> = ({ templates, onS
                     </Badge>
                 ))}
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[50vh] overflow-y-auto p-1">
             {isLoading ? (
                 <div className="col-span-full flex items-center justify-center py-8">
