@@ -12,17 +12,17 @@ export default function ToolsPage() {
         {/* Header */}
         <div className="mb-16 text-center">
           <Badge variant="secondary" className="w-fit mb-6">
-            All Tools
+            All Products
           </Badge>
           <h1 className="text-4xl lg:text-5xl font-normal leading-tight mb-6">
-            Powerful Creative Tools
+            Powerful Creative Products
           </h1>
           <p className="text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto">
-            Discover all the amazing tools that make Juju the perfect platform for your creative needs.
+            Discover all the amazing products that make Juju the perfect platform for your creative needs.
           </p>
         </div>
 
-        {/* Tools Grid */}
+        {/* Products Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {productsData.map((feature) => (
             <Link key={feature.id} href={feature.href} className="block">

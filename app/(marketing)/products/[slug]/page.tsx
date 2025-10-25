@@ -2,7 +2,7 @@
 'use client';
 import { use } from 'react';
 import { notFound } from 'next/navigation';
-import { toolsData } from '@/data/productsData';
+import { productsData } from '@/data/productsData';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -116,25 +116,25 @@ export default function FeaturePage({ params }: FeaturePageProps) {
             </Link>
           </section>
 
-          {/* Other Tools */}
+          {/* Other Products */}
           <section className="space-y-6 py-12 border-t">
             <h2 className="text-3xl font-normal text-center">
-              Explore Other Tools
+              Explore Other Products
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {productsData.filter(product => productsData.slug !== slug).map((product) => (
-                <Link key={product.id} href={`/productss/${product.slug}`}>
+              {productsData.filter(product => product.slug !== slug).map((product) => (
+                <Link key={product.id} href={`/products/${product.slug}`}>
                   <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
                     <CardContent className="p-0">
                       <img
-                        src={tool.image}
-                        alt={tool.title}
+                        src={product.image}
+                        alt={product.title}
                         className="w-full h-32 object-cover"
                       />
                       <div className="p-4">
-                        <h3 className="font-medium text-sm">{tool.title}</h3>
+                        <h3 className="font-medium text-sm">{product.title}</h3>
                         <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                          {tool.description}
+                          {product.description}
                         </p>
                       </div>
                     </CardContent>

@@ -49,60 +49,86 @@ export function MarketingHeader({ onAuthClick }: MarketingHeaderProps) {
             />
           </Link>
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
+          <nav className="hidden md:flex items-center space-x-6"></nav>
+        </div>
+        
+        {/* Navigation Menu - moved outside of logo container for better spacing */}
+        <div className="hidden md:flex items-center justify-center flex-1">
+          <nav className="flex items-center space-x-6">
           <NavigationMenu>
-            <NavigationMenuList>
-              <NavigationMenuItem>
-                <NavigationMenuTrigger className="bg-transparent hover:bg-accent/50">
-                  Products
-                </NavigationMenuTrigger>
-                <NavigationMenuContent>
-                  <div className="grid gap-3 p-6 w-[500px] lg:w-[600px] lg:grid-cols-2">
-                    <NavigationMenuLink asChild>
-                      <Link
-                        href="/products/mixboard"
-                        className="flex h-full w-full select-none flex-col justify-end rounded-md relative overflow-hidden p-6 no-underline outline-none focus:shadow-md"
-                      >
-                        <Image
-                          src="/assets/images/workspace.jpg"
-                          alt="Mixboard Background"
-                          fill
-                          className="object-cover"
-                        />
-                        <div className="relative z-10 bg-black/50 p-4 rounded-md">
-                          <div className="mb-2 mt-4 text-lg font-medium text-white">
-                            🎨 Mixboard
+              <NavigationMenuList>
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger className="bg-transparent hover:bg-accent/50">
+                    Products
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <div className="grid gap-3 p-6 w-[500px] lg:w-[600px] lg:grid-cols-2">
+                      <NavigationMenuLink asChild>
+                        <Link
+                          href="/products/canvas"
+                          className="flex h-full w-full select-none flex-col justify-end rounded-md relative overflow-hidden p-6 no-underline outline-none focus:shadow-md"
+                        >
+                          <Image
+                            src="/assets/images/workspace.jpg"
+                            alt="Canvas Background"
+                            fill
+                            className="object-cover"
+                          />
+                          <div className="relative z-10 bg-black/50 p-4 rounded-md">
+                            <div className="mb-2 mt-4 text-lg font-medium text-white">
+                              🎨 Canvas
+                            </div>
+                            <p className="text-sm leading-tight text-white/80">
+                              Infinite design workspace for creative projects and visual collaboration.
+                            </p>
                           </div>
-                          <p className="text-sm leading-tight text-white/80">
-                            Infinite canvas design tool for graphics, mockups, and creative projects.
-                          </p>
-                        </div>
-                      </Link>
-                    </NavigationMenuLink>
-                    <NavigationMenuLink asChild>
-                      <Link
-                        href="/products/juju-vids"
-                        className="flex h-full w-full select-none flex-col justify-end rounded-md relative overflow-hidden p-6 no-underline outline-none focus:shadow-md"
-                      >
-                        <Image
-                          src="/assets/images/scenes.jpg"
-                          alt="Juju Vids Background"
-                          fill
-                          className="object-cover"
-                        />
-                        <div className="relative z-10 bg-black/50 p-4 rounded-md">
-                          <div className="mb-2 mt-4 text-lg font-medium text-white">
-                            🎬 Juju Vids
+                        </Link>
+                      </NavigationMenuLink>
+                      <NavigationMenuLink asChild>
+                        <Link
+                          href="/products/galleries"
+                          className="flex h-full w-full select-none flex-col justify-end rounded-md relative overflow-hidden p-6 no-underline outline-none focus:shadow-md"
+                        >
+                          <Image
+                            src="/assets/images/all.jpg"
+                            alt="Galleries Background"
+                            fill
+                            className="object-cover"
+                          />
+                          <div className="relative z-10 bg-black/50 p-4 rounded-md">
+                            <div className="mb-2 mt-4 text-lg font-medium text-white">
+                              🖼️ Galleries
+                            </div>
+                            <p className="text-sm leading-tight text-white/80">
+                              Curated collections of AI-generated images for creative projects.
+                            </p>
                           </div>
-                          <p className="text-sm leading-tight text-white/80">
-                            AI-powered video creation and scene-based editing platform.
-                          </p>
-                        </div>
-                      </Link>
-                    </NavigationMenuLink>
-                  </div>
-                </NavigationMenuContent>
-              </NavigationMenuItem>
+                        </Link>
+                      </NavigationMenuLink>
+                      <NavigationMenuLink asChild>
+                        <Link
+                          href="/products/stories"
+                          className="flex h-full w-full select-none flex-col justify-end rounded-md relative overflow-hidden p-6 no-underline outline-none focus:shadow-md"
+                        >
+                          <Image
+                            src="/assets/images/scenes.jpg"
+                            alt="Stories Background"
+                            fill
+                            className="object-cover"
+                          />
+                          <div className="relative z-10 bg-black/50 p-4 rounded-md">
+                            <div className="mb-2 mt-4 text-lg font-medium text-white">
+                              📖 Stories
+                            </div>
+                            <p className="text-sm leading-tight text-white/80">
+                              AI-powered video storytelling and scene-based content creation.
+                            </p>
+                          </div>
+                        </Link>
+                      </NavigationMenuLink>
+                    </div>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
 
               <NavigationMenuItem>
                 <NavigationMenuTrigger className="bg-transparent hover:bg-accent/50">
@@ -236,23 +262,23 @@ export function MarketingHeader({ onAuthClick }: MarketingHeaderProps) {
               </NavigationMenuItem>
 
             </NavigationMenuList>
-          </NavigationMenu>
-          <Link
-            href="/templates"
-            className="text-sm font-medium hover:text-primary transition-colors"
-          >
-            Templates
-          </Link>
-          {navItems.map((item) => (
+            </NavigationMenu>
             <Link
-              key={item.label}
-              href={item.href}
+              href="/templates"
               className="text-sm font-medium hover:text-primary transition-colors"
             >
-              {item.label}
+              Templates
             </Link>
-          ))}
-        </nav>
+            {navItems.map((item) => (
+              <Link
+                key={item.label}
+                href={item.href}
+                className="text-sm font-medium hover:text-primary transition-colors"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
         </div>
         {/* Desktop Auth Buttons */}
         <div className="hidden md:flex items-center space-x-4">
@@ -292,18 +318,25 @@ export function MarketingHeader({ onAuthClick }: MarketingHeaderProps) {
               </Link>
               <div className="pl-4 space-y-2 border-l-2 border-muted">
                 <Link
-                  href="/products/mixboard"
+                  href="/products/canvas"
                   className="block text-sm text-muted-foreground hover:text-primary transition-colors"
                   onClick={() => setIsOpen(false)}
                 >
-                  🎨 Mixboard
+                  🎨 Canvas
                 </Link>
                 <Link
-                  href="/products/juju-vids"
+                  href="/products/galleries"
                   className="block text-sm text-muted-foreground hover:text-primary transition-colors"
                   onClick={() => setIsOpen(false)}
                 >
-                  🎬 Juju Vids
+                  🖼️ Galleries
+                </Link>
+                <Link
+                  href="/products/stories"
+                  className="block text-sm text-muted-foreground hover:text-primary transition-colors"
+                  onClick={() => setIsOpen(false)}
+                >
+                  📖 Stories
                 </Link>
               </div>
 

@@ -1,8 +1,81 @@
-import { Video, Zap, Image as ImageIcon, Package, MessageCircle, Film } from 'lucide-react';
+
+import { Video, Zap, Image as ImageIcon, Package, MessageCircle, Film, Palette, Grid3X3, BookOpen } from 'lucide-react';
 
 export const productsData = [
   {
     id: 1,
+    title: "Canvas",
+    description: "Infinite design workspace for creative projects and visual collaboration",
+    longDescription: "Create stunning designs with our infinite canvas tool. Perfect for mockups, presentations, and collaborative visual projects. Drag, drop, and design with unlimited creative freedom.",
+    href: "/dashboard",
+    image: "/assets/images/workspace.jpg",
+    slug: "canvas",
+    icon: Palette,
+    benefits: [
+      {
+        title: "Infinite Canvas",
+        description: "Unlimited workspace for all your creative ideas and projects"
+      },
+      {
+        title: "Real-time Collaboration",
+        description: "Work together with your team in real-time on designs"
+      },
+      {
+        title: "Smart Tools",
+        description: "AI-powered design assistance and intelligent layout suggestions"
+      }
+    ]
+  },
+  {
+    id: 2,
+    title: "Galleries",
+    description: "Curated collections of AI-generated images for your creative projects",
+    longDescription: "Create and manage beautiful image galleries with AI-generated content. Perfect for building visual libraries, inspiration boards, and organized creative collections.",
+    href: "/dashboard/galleries",
+    image: "/assets/images/all.jpg",
+    slug: "galleries",
+    icon: Grid3X3,
+    benefits: [
+      {
+        title: "AI Generation",
+        description: "Generate multiple themed images with advanced AI models"
+      },
+      {
+        title: "Smart Organization",
+        description: "Automatically organize and categorize your visual content"
+      },
+      {
+        title: "Easy Sharing",
+        description: "Share galleries publicly or privately with team members"
+      }
+    ]
+  },
+  {
+    id: 3,
+    title: "Stories",
+    description: "AI-powered video storytelling and scene-based content creation",
+    longDescription: "Craft compelling video stories with AI assistance. Create storyboards, generate scenes, and produce professional video content with intelligent narrative tools.",
+    href: "/dashboard/stories",
+    image: "/assets/images/scenes.jpg",
+    slug: "stories",
+    icon: BookOpen,
+    benefits: [
+      {
+        title: "Storyboard Creation",
+        description: "Visual story planning with AI-generated scene suggestions"
+      },
+      {
+        title: "Video Generation",
+        description: "Transform stories into professional video content"
+      },
+      {
+        title: "Narrative Intelligence",
+        description: "AI-powered story structure and pacing recommendations"
+      }
+    ]
+  },
+  {
+    id: 4,
     title: "Video",
     description: "Build authentic user-generated content campaigns",
     longDescription: "Create compelling video content that converts viewers into customers. Our AI-powered video generation transforms your ideas into professional UGC-style videos that drive engagement and build trust with your audience.",
@@ -26,7 +99,7 @@ export const productsData = [
     ]
   },
   {
-    id: 2,
+    id: 5,
     title: "Upscaler",
     description: "Enhance image resolution and quality with intelligent upscaling technology.",
     longDescription: "Transform low-resolution images into crisp, high-quality visuals using advanced AI upscaling. Perfect for e-commerce, marketing materials, and any project requiring professional-grade image quality.",
@@ -46,78 +119,6 @@ export const productsData = [
       {
         title: "Batch Processing",
         description: "Upscale multiple images simultaneously for efficiency"
-      }
-    ]
-  },
-  {
-    id: 3,
-    title: "Images",
-    description: "Edit images with natural language using Nano-banana's advanced AI.",
-    longDescription: "Revolutionary image editing powered by natural language commands. Simply describe what you want to change, and watch as our AI transforms your images with precision and creativity.",
-    href: "/dashboard/images",
-    image: "/assets/images/nano.jpg",
-    slug: "nano-banana",
-    icon: ImageIcon,
-    benefits: [
-      {
-        title: "Natural Language Editing",
-        description: "Edit images by simply describing your vision in plain English"
-      },
-      {
-        title: "Precise Control",
-        description: "Make targeted adjustments without affecting the rest of your image"
-      },
-      {
-        title: "Creative Flexibility",
-        description: "Experiment with styles, colors, and compositions effortlessly"
-      }
-    ]
-  },
-  {
-    id: 4,
-    title: "Multiply",
-    description: "Transform one design into multiple professional versions instantly",
-    longDescription: "Scale your design workflow with intelligent variation generation. Create multiple professional versions of your designs for different platforms, audiences, and use cases in seconds.",
-    href: "/dashboard/multiply",
-    image: "/assets/images/multiply.jpg",
-    slug: "brand-multiply",
-    icon: Package,
-    benefits: [
-      {
-        title: "Instant Variations",
-        description: "Generate multiple design versions from a single source"
-      },
-      {
-        title: "Platform Optimization",
-        description: "Automatically adapt designs for different social platforms"
-      },
-      {
-        title: "Brand Consistency",
-        description: "Maintain visual coherence across all generated variations"
-      }
-    ]
-  },
-  {
-    id: 5,
-    title: "Scenes",
-    description: "Professional video editor for your AI-generated content",
-    longDescription: "Transform your generated images and videos into polished productions. Advanced video editing tools designed specifically for AI-created content, with intuitive controls for cutting, effects, and post-production.",
-    href: "/dashboard/scenes",
-    image: "/assets/images/scenes.jpg",
-    slug: "scenes",
-    icon: Film,
-    benefits: [
-      {
-        title: "AI-Optimized Editing",
-        description: "Tools designed specifically for AI-generated content workflows"
-      },
-      {
-        title: "Professional Effects",
-        description: "Add transitions, filters, and effects to elevate your videos"
-      },
-      {
-        title: "Seamless Integration",
-        description: "Edit content directly from your Video and Images tools"
       }
     ]
   },
