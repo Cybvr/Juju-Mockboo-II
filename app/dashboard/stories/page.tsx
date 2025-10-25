@@ -228,9 +228,10 @@ const App: React.FC = () => {
       }
     } catch (error) {
       console.error('Failed to delete project:', error);
-    } finally {
-      closeDeleteDialog();
     }
+    
+    // Always close dialog, even on error
+    closeDeleteDialog();
   };
 
   const closeDeleteDialog = () => {
@@ -298,7 +299,11 @@ const App: React.FC = () => {
     <main className="min-h-screen w-full transition-colors duration-300 mx-auto max-w-4xl">
       {renderContent()}
 
-      <AlertDialog open={deleteDialogOpen} onOpenChange={closeDeleteDialog}>
+      <AlertDialog open={deleteDialogOpen} onOpenChange={(open) => {
+        if (!open) {
+          closeDeleteDialog();
+        }
+      }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Project</AlertDialogTitle>
