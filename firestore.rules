@@ -75,10 +75,12 @@ service cloud.firestore {
 
     // Stories collection
     match /stories/{storyId} {
-      allow read: if resource != null && 
-        (resource.data.isPublic == true ||
-         (request.auth != null && resource.data.userId == request.auth.uid) ||
-         (request.auth != null && resource.data.shared == true));
+      // Anyone can read public stories
+      allow read: if resource != null && resource.data.isPublic == true;
+      
+      // Authenticated users can read their own stories or shared stories
+      allow read: if request.auth != null && resource != null && 
+        (resource.data.userId == request.auth.uid || resource.data.shared == true);
 
       allow create: if request.auth != null && 
         request.auth.uid == request.resource.data.userId;
