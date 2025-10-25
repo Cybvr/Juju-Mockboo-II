@@ -237,6 +237,12 @@ export function MarketingHeader({ onAuthClick }: MarketingHeaderProps) {
 
             </NavigationMenuList>
           </NavigationMenu>
+          <Link
+            href="/templates"
+            className="text-sm font-medium hover:text-primary transition-colors"
+          >
+            Templates
+          </Link>
           {navItems.map((item) => (
             <Link
               key={item.label}
@@ -375,6 +381,14 @@ export function MarketingHeader({ onAuthClick }: MarketingHeaderProps) {
                   🎬 Production Teams
                 </Link>
               </div>
+
+              <Link
+                href="/templates"
+                className="text-lg font-medium hover:text-primary transition-colors"
+                onClick={() => setIsOpen(false)}
+              >
+                Templates
+              </Link>
 
               {navItems.map((item) => (
                 <Link
