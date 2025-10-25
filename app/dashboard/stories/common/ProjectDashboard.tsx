@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import type { FilmProject } from '@/types/storytypes';
-import { Film, Plus, MoreVertical, Edit, Trash2 } from 'lucide-react';
+import { Film, Plus, MoreVertical, Edit, Trash2, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -29,15 +29,32 @@ const ProjectCard: React.FC<{
             onClick={onClick}
             className="group cursor-pointer hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col"
         >
-            <div className="relative aspect-video bg-muted">
-                {firstImageUrl ? (
-                    <img src={firstImageUrl} alt="Concept art" className="w-full h-full object-cover" />
-                ) : (
-                    <div className="flex items-center justify-center h-full">
-                        <Film className="w-12 h-12 text-muted-foreground" />
-                    </div>
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+            <div className="relative aspect-video bg-muted rounded-lg overflow-hidden">
+              {firstImageUrl ? (
+                <img
+                  src={firstImageUrl}
+                  alt="Project thumbnail"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <Film className="w-12 h-12 text-muted-foreground" />
+                </div>
+              )}
+              {/* Video element with fallback to image */}
+              {project.storyboard?.[0]?.videoUrl && (
+                <video
+                  src={project.storyboard[0].videoUrl}
+                  className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              )}
             </div>
             <CardContent className="p-4 flex-grow flex flex-col justify-between">
                 <div>
