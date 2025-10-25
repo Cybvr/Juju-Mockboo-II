@@ -12,6 +12,24 @@ import { PricingTable } from '@/components/PricingTable';
 import FAQSection from '@/app/common/marketing/FAQSection';
 import { cn } from '@/lib/utils';
 import { visualNeedsData } from '@/data/industryData';
+import { Card } from '@/components/ui/card';
+import { Play, FileText } from 'lucide-react';
+
+// Fetch public stories from the templates page
+async function fetchPublicStories() {
+  try {
+    const res = await fetch('/api/public/stories'); // Assuming you have an API endpoint for public stories
+    if (!res.ok) {
+      throw new Error('Failed to fetch public stories');
+    }
+    const data = await res.json();
+    // Sort by creation date in descending order and take the latest 3
+    return data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 3);
+  } catch (error) {
+    console.error('Error fetching public stories:', error);
+    return [];
+  }
+}
 
 export default function LandingPage() {
   const router = useRouter();
@@ -19,6 +37,9 @@ export default function LandingPage() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [recentStories, setRecentStories] = useState([]);
+  const [storiesLoading, setStoriesLoading] = useState(true);
+
   const handleIndexChange = (newIndex: number) => {
     if (newIndex === activeIndex) return;
     setIsTransitioning(true);
@@ -58,6 +79,16 @@ export default function LandingPage() {
       description: 'Test unlimited variations and styles without additional costs'
     }
   ];
+
+  // Fetch recent stories when the component mounts
+  useEffect(() => {
+    setStoriesLoading(true);
+    fetchPublicStories().then(stories => {
+      setRecentStories(stories);
+      setStoriesLoading(false);
+    });
+  }, []);
+
   // Redirect logged-in users to dashboard
   useEffect(() => {
     if (!loading && user) {
@@ -152,7 +183,7 @@ export default function LandingPage() {
               ))}
             </div>
           </div>
-         
+
           {/* Value Props */}
           <div className="grid md:grid-cols-3 gap-8 mb-16">
             {valueProps.map((prop, index) => (
@@ -182,36 +213,122 @@ export default function LandingPage() {
             <PricingTable showCurrentPlan={false} />
           </div>
         </div>
-        {/* FAQ Section */}
-        <div className="mx-auto max-w-5xl px-6 mb-16">
-          <FAQSection />
-        </div>
-        {/* Final CTA */}
-        <div className="mx-auto max-w-4xl px-6 py-16 text-center">
-          <h2 className="text-4xl lg:text-5xl font-semibold mb-6">
-            Stop dreaming. Start creating.
-          </h2>
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Join thousands of creators who've ditched design bottlenecks and unlocked their creative potential.
-          </p>
-          {!loading && user ? (
-            <Button
-              size="lg"
-              className="px-10 py-6 text-xl rounded-full bg-white hover:bg-white/90 text-black hover:text-black border-0 shadow-lg"
-              onClick={() => router.push('/dashboard')}
-            >
-              Go to Dashboard →
-            </Button>
+
+        {/* Recent Stories Section */}
+        <div className="mx-auto max-w-6xl px-6 py-16">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl lg:text-5xl font-semibold mb-4">Recent Stories</h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              See what creators are building with our AI-powered storytelling tools
+            </p>
+          </div>
+
+          {storiesLoading ? (
+            <div className="grid md:grid-cols-3 gap-8">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="animate-pulse">
+                  <div className="aspect-video bg-muted rounded-xl mb-4"></div>
+                  <div className="h-4 bg-muted rounded mb-2"></div>
+                  <div className="h-3 bg-muted rounded w-2/3"></div>
+                </div>
+              ))}
+            </div>
+          ) : recentStories.length > 0 ? (
+            <div className="grid md:grid-cols-3 gap-8 mb-8">
+              {recentStories.map((story) => {
+                const firstVideoScene = story.storyboard?.find(scene => scene.videoUrl);
+                const firstImageUrl = story.storyboard?.[0]?.imageUrl;
+
+                return (
+                  <Card
+                    key={story.id}
+                    className="group cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden"
+                    onClick={() => router.push(`/dashboard/stories/${story.id}`)}
+                  >
+                    <div className="relative aspect-video bg-muted">
+                      {firstImageUrl ? (
+                        <img 
+                          src={firstImageUrl} 
+                          alt="Story thumbnail" 
+                          className="w-full h-full object-cover" 
+                        />
+                      ) : (
+                        <div className="flex items-center justify-center h-full">
+                          <FileText className="w-12 h-12 text-muted-foreground" />
+                        </div>
+                      )}
+
+                      {/* Video preview on hover if available */}
+                      {firstVideoScene?.videoUrl && (
+                        <video
+                          src={firstVideoScene.videoUrl}
+                          className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                          autoPlay
+                          muted
+                          loop
+                          playsInline
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      )}
+
+                      {/* Play overlay */}
+                      {firstVideoScene?.videoUrl && (
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          <div className="bg-white/20 backdrop-blur rounded-full p-4">
+                            <Play className="w-8 h-8 text-white" fill="white" />
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Title overlay */}
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                        <h3 className="text-white font-medium text-sm truncate">
+                          {story.title}
+                        </h3>
+                      </div>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
           ) : (
-            <Button
-              size="lg"
-              className="px-10 py-6 text-xl rounded-full bg-white hover:bg-white/90 text-black hover:text-black border-0 shadow-lg"
-              onClick={() => setAuthModalOpen(true)}
-            >
-              Start Creating Free →
-            </Button>
+            <div className="text-center py-16">
+              <FileText className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-xl font-semibold mb-2">No stories yet</h3>
+              <p className="text-muted-foreground mb-6">
+                Be the first to create amazing video stories with AI
+              </p>
+              {!loading && user ? (
+                <Button
+                  size="lg"
+                  onClick={() => router.push('/dashboard/stories')}
+                >
+                  Create Your First Story
+                </Button>
+              ) : (
+                <Button
+                  size="lg"
+                  onClick={() => setAuthModalOpen(true)}
+                >
+                  Get Started Free
+                </Button>
+              )}
+            </div>
           )}
-          <p className="text-sm text-muted-foreground mt-6">No credit card required. Cancel anytime.</p>
+
+          {recentStories.length > 0 && (
+            <div className="text-center">
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={() => router.push('/templates')}
+              >
+                View All Templates →
+              </Button>
+            </div>
+          )}
         </div>
       </div>
       <MarketingFooter />
