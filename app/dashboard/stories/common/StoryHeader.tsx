@@ -184,10 +184,12 @@ export const StoryHeader: React.FC<StoryHeaderProps> = ({
                         <DialogHeader>
                             <DialogTitle>Project Settings</DialogTitle>
                         </DialogHeader>
-                        <div className="overflow-y-auto">
+                        <div className="overflow-y-auto max-h-[60vh] pr-2">
                             <ProjectSettings
                                 settings={project.settings}
                                 onUpdate={(newSettings) => onUpdateProject({ ...project, settings: newSettings })}
+                                project={project}
+                                onUpdateProject={onUpdateProject}
                             />
                         </div>
                     </DialogContent>
