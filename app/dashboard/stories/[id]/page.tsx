@@ -85,7 +85,7 @@ export default function StoryPage({ params }: StoryPageProps) {
   }
 
   const handleTogglePublic = async () => {
-    if (!project || !isAdmin) return
+    if (!project) return
 
     const updatedProject = {
       ...project,
