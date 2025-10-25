@@ -95,8 +95,8 @@ export const TemplateBrowser: React.FC<TemplateBrowserProps> = ({ templates, onS
             await onCreateFromTemplate(template);
             onClose();
         } else {
-            // For public templates, duplicate and navigate
-            if (showPublicTab && template.id) {
+            // Always duplicate and navigate for any template with an ID
+            if (template.id) {
                 try {
                     const newStoryId = await duplicateStory(template.id);
                     console.log('Template browser - Duplicated story ID:', newStoryId);
@@ -108,6 +108,7 @@ export const TemplateBrowser: React.FC<TemplateBrowserProps> = ({ templates, onS
                     onSelect(template);
                 }
             } else {
+                // For templates without ID (local templates), use regular selection
                 onSelect(template);
             }
         }
