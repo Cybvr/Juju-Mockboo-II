@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { generateScript, analyzeScript } from '@/services/filmService';
 import { TemplateBrowser } from './TemplateBrowser';
 import { useRouter } from 'next/navigation';
-import { duplicateStory } from '@/services/storyService';
+import { duplicateStory } from '@/services/storiesService';
 
 interface CreationHubProps {
     project: FilmProject;
