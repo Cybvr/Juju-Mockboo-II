@@ -1,0 +1,40 @@
+
+{
+  "name": "Juju - Workspace Suite",
+  "short_name": "Juju",
+  "description": "What would you like to create today?",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/images/jujucircle.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/images/jujucircle.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ],
+  "categories": ["design", "creative", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "Go to dashboard",
+      "url": "/dashboard",
+      "icons": [
+        {
+          "src": "/images/jujucircle.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ]
+}

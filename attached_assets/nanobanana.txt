@@ -1,0 +1,128 @@
+Here’s the **shortest, most practical summary** of Gemini’s image generation and editing capabilities, **with code examples** for each core function:
+
+---
+
+### **1. Text-to-Image**
+**What it does:** Generate images from text prompts.
+**Code (JavaScript):**
+```javascript
+import { GoogleGenAI } from "@google/genai";
+import * as fs from "node:fs";
+
+async function generateImage() {
+  const ai = new GoogleGenAI({});
+  const prompt = "A futuristic nano banana dessert in a high-tech restaurant, glowing under neon lights.";
+  const response = await ai.models.generateContent({
+    model: "gemini-2.5-flash-image-preview",
+    contents: prompt,
+  });
+  const imageData = response.candidates[0].content.parts[0].inlineData.data;
+  fs.writeFileSync("nano_banana.png", Buffer.from(imageData, "base64"));
+  console.log("Image saved!");
+}
+generateImage();
+```
+
+---
+
+### **2. Image + Text-to-Image (Editing)**
+**What it does:** Edit an existing image using text prompts.
+**Code (JavaScript):**
+```javascript
+import { GoogleGenAI } from "@google/genai";
+import * as fs from "node:fs";
+
+async function editImage() {
+  const ai = new GoogleGenAI({});
+  const imagePath = "cat.png";
+  const imageData = fs.readFileSync(imagePath);
+  const base64Image = imageData.toString("base64");
+
+  const prompt = [
+    { text: "Add a tiny astronaut helmet to the cat's head, matching the lighting and style." },
+    { inlineData: { mimeType: "image/png", data: base64Image } },
+  ];
+
+  const response = await ai.models.generateContent({
+    model: "gemini-2.5-flash-image-preview",
+    contents: prompt,
+  });
+
+  const editedImageData = response.candidates[0].content.parts[0].inlineData.data;
+  fs.writeFileSync("cat_astronaut.png", Buffer.from(editedImageData, "base64"));
+  console.log("Edited image saved!");
+}
+editImage();
+```
+
+---
+
+### **3. Multi-Image Composition & Style Transfer**
+**What it does:** Combine multiple images or transfer styles between them.
+**Code (JavaScript):**
+```javascript
+import { GoogleGenAI } from "@google/genai";
+import * as fs from "node:fs";
+
+async function transferStyle() {
+  const ai = new GoogleGenAI({});
+  const imagePath1 = "city.png";
+  const imagePath2 = "van_gogh_style.png";
+  const imageData1 = fs.readFileSync(imagePath1);
+  const imageData2 = fs.readFileSync(imagePath2);
+  const base64Image1 = imageData1.toString("base64");
+  const base64Image2 = imageData2.toString("base64");
+
+  const prompt = [
+    { inlineData: { mimeType: "image/png", data: base64Image1 } },
+    { inlineData: { mimeType: "image/png", data: base64Image2 } },
+    { text: "Transform the city image into the style of Van Gogh's Starry Night." },
+  ];
+
+  const response = await ai.models.generateContent({
+    model: "gemini-2.5-flash-image-preview",
+    contents: prompt,
+  });
+
+  const styledImageData = response.candidates[0].content.parts[0].inlineData.data;
+  fs.writeFileSync("city_van_gogh.png", Buffer.from(styledImageData, "base64"));
+  console.log("Styled image saved!");
+}
+transferStyle();
+```
+
+---
+
+### **4. Iterative Refinement**
+**What it does:** Refine images conversationally over multiple turns.
+**Example Workflow:**
+1. Generate an image.
+2. Edit it with feedback (e.g., “Make the background darker”).
+3. Repeat until satisfied.
+
+---
+
+### **5. High-Fidelity Text Rendering**
+**What it does:** Generate images with accurate, legible text.
+**Code (JavaScript):**
+```javascript
+async function generateLogo() {
+  const ai = new GoogleGenAI({});
+  const prompt = "Create a minimalist logo for 'Nano Banana Tech'. Use a bold sans-serif font with a banana icon integrated into the text. Black and white.";
+  const response = await ai.models.generateContent({
+    model: "gemini-2.5-flash-image-preview",
+    contents: prompt,
+  });
+  const logoData = response.candidates[0].content.parts[0].inlineData.data;
+  fs.writeFileSync("nano_banana_logo.png", Buffer.from(logoData, "base64"));
+  console.log("Logo saved!");
+}
+generateLogo();
+```
+
+---
+
+### **Key Notes**
+- **SynthID Watermark**: All generated images include a watermark.
+- **Limitations**: Supports up to 3 input images. No audio/video.
+- **Best Practices**: Be specific, use photographic terms, and iterate.

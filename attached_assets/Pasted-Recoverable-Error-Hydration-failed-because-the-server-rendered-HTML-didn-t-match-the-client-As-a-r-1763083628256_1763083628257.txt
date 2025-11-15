@@ -1,0 +1,35 @@
+Recoverable Error
+
+Hydration failed because the server rendered HTML didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+See more info here: https://nextjs.org/docs/messages/react-hydration-error
+
+
+  ...
+    <HTTPAccessFallbackErrorBoundary pathname="/dashboard" notFound={<SegmentViewNode>} forbidden={undefined} ...>
+      <RedirectBoundary>
+        <RedirectErrorBoundary router={{...}}>
+          <InnerLayoutRouter url="/dashboard" tree={[...]} cacheNode={{lazyData:null, ...}} segmentPath={[...]}>
+            <SegmentViewNode type="layout" pagePath="dashboard/...">
+              <SegmentTrieNode>
+              <ClientSegmentRoot Component={function DashboardLayout} slots={{...}} params={{}}>
+                <DashboardLayout params={Promise}>
+                  <div className="flex h-scr...">
+                    <div>
+                    <div className="hidden md:...">
+                      <Sidebar className="h-full" isExpanded={true} onToggle={function onToggle}>
+                        <TooltipProvider delayDuration={300}>
+                          <TooltipProviderProvider scope={undefined} isOpenDelayed={true} delayDuration={300} ...>
+                            <div
++                             className="rounded-none transition-all duration-300 relative bg-card border-r border-bor..."
+-                             className="rounded-none transition-all duration-300 relative w-16 bg-card h-full"
+                            >
+                              <div
