@@ -1,7 +1,7 @@
 // Complete @/types/firebase.ts file with all interfaces
-export type DocumentCategory = 'Product' | 'UGC' | 'Storyboard' | 'Posters' | 'Mockups' | 'Products' | 'Commercials' | 'Film' | 'Animation' ;
+export type DocumentCategory = 'Product' | 'UGC' | 'Storyboard' | 'Posters' | 'Mockups' | 'Products' | 'Commercials' | 'Film' | 'Animation';
 
-export type DocumentType = 'image' | 'video' | 'audio' | 'text' | 'pdf' | 'canvas' | 'other';
+export type DocumentType = 'image' | 'video' | 'audio' | 'text' | 'pdf' | 'other';
 
 export interface ShareSettings {
   accessLevel: 'private' | 'view' | 'edit'
@@ -25,9 +25,7 @@ export interface Document {
     chatId?: string;
     batchIndex?: number;
     batchTotal?: number;
-    canvasData?: any;
     thumbnail?: string;
-    canvasVersion?: string;
     scenes?: any[];
     duration?: number;
     videoUrl?: string;
@@ -37,7 +35,7 @@ export interface Document {
     version?: string;
   };
   tags?: string[];
-  type: 'image' | 'video' | 'audio' | 'text' | 'canvas' | 'scenes';
+  type: 'image' | 'video' | 'audio' | 'text' | 'scenes';
   isPublic: boolean;
   starred: boolean;
   shared: boolean;

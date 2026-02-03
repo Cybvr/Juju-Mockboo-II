@@ -75,33 +75,12 @@ export function DocumentGallery({
     loadUserDocuments()
   }, [user])
 
-  const createNewCanvas = async () => {
-    if (!user) return;
-    try {
-      const canvasDocument = await documentService.createDocument(user.uid, {
-        title: 'New Canvas',
-        content: {
-          elements: [],
-          version: '1.0'
-        },
-        tags: ['canvas'],
-        type: 'canvas' as const,
-        isPublic: false,
-        starred: false,
-        shared: false,
-        category: 'UGC' as const,
-      });
-      router.push(`/dashboard/canvas/${canvasDocument}`);
-    } catch (error) {
-      console.error('Error creating new canvas:', error);
-      toast.error("Failed to create new canvas");
-    }
-  };
+
 
   const flattenedDocuments: FlattenedDocument[] = documents.map(doc => {
     let mediaUrl = '/placeholder.svg'
     let mediaType: 'image' | 'video' = 'image'
-    
+
     if (doc.type === 'canvas') {
       if (doc.content?.thumbnail) {
         mediaUrl = doc.content.thumbnail
@@ -120,7 +99,7 @@ export function DocumentGallery({
     } else if (doc.content?.imageUrls && doc.content.imageUrls.length > 0) {
       mediaUrl = doc.content.imageUrls[0]
     }
-    
+
     return {
       id: doc.id,
       originalDocId: doc.id,
@@ -135,8 +114,8 @@ export function DocumentGallery({
     }
   })
 
-  // Filter to show canvas, video, and scenes documents
-  const displayDocuments = flattenedDocuments.filter(item => item.type === "canvas" || item.type === "video" || item.type === "scenes");
+  // Filter to show video and scenes documents (canvas removed)
+  const displayDocuments = flattenedDocuments.filter(item => item.type === "video" || item.type === "scenes");
 
   const handleDeleteClick = (documentId: string) => {
     const flatDoc = flattenedDocuments.find(item => item.id === documentId)
@@ -148,23 +127,23 @@ export function DocumentGallery({
 
   const handleDelete = async () => {
     console.log('GALLERY DELETE: handleDelete started', { deleteDocumentId })
-    
+
     try {
       console.log('GALLERY DELETE: About to call documentService.deleteDocument')
       await documentService.deleteDocument(deleteDocumentId)
       console.log('GALLERY DELETE: Successfully deleted document from Firebase')
-      
+
       // Immediately update state to remove the deleted document
       setDocuments((prev) => {
         const newDocs = prev.filter((doc) => doc.id !== deleteDocumentId)
-        console.log('GALLERY DELETE: Updated documents state', { 
-          oldCount: prev.length, 
+        console.log('GALLERY DELETE: Updated documents state', {
+          oldCount: prev.length,
           newCount: newDocs.length,
-          deletedId: deleteDocumentId 
+          deletedId: deleteDocumentId
         })
         return newDocs
       })
-      
+
       toast.success("Document deleted successfully")
       console.log('GALLERY DELETE: Success toast shown')
     } catch (error) {
@@ -281,9 +260,7 @@ export function DocumentGallery({
     const flatDoc = flattenedDocuments.find(item => item.id === documentId)
     if (!flatDoc) return
     const document = flatDoc.originalDoc
-    if (document?.type === "canvas") {
-      router.push(`/dashboard/canvas/${flatDoc.originalDocId}`)
-    } else if (document?.type === "video" || document?.type === "scenes") {
+    if (document?.type === "video" || document?.type === "scenes") {
       router.push(`/dashboard/videos/${flatDoc.originalDocId}`)
     } else {
       router.push(`/m/${flatDoc.originalDocId}`)
@@ -304,14 +281,6 @@ export function DocumentGallery({
               <h2 className="text-lg font-semibold">Recent</h2>
             </div>
             <div className="flex items-center">
-              <Button
-                onClick={createNewCanvas}
-                size="sm"
-                className="flex items-center gap-2"
-              >
-                <Plus className="h-4 w-4" />
-                New
-              </Button>
             </div>
           </div>
         </div>
@@ -382,11 +351,11 @@ export function DocumentGallery({
       {showDeleteDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           {/* Backdrop - clicking closes dialog */}
-          <div 
-            className="absolute inset-0 bg-black/50" 
+          <div
+            className="absolute inset-0 bg-black/50"
             onClick={() => setShowDeleteDialog(false)}
           />
-          
+
           {/* Dialog Content */}
           <div className="relative bg-background border rounded-lg shadow-lg max-w-md w-full p-6 space-y-4">
             <div className="space-y-2">
@@ -395,7 +364,7 @@ export function DocumentGallery({
                 Are you sure you want to delete this document? This action cannot be undone.
               </p>
             </div>
-            
+
             <div className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 gap-2 sm:gap-0">
               <button
                 onClick={() => setShowDeleteDialog(false)}

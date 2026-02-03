@@ -29,11 +29,6 @@ export default function DashboardPage() {
       mediaUrl: '/assets/images/hero.jpg',
       mediaType: 'image',
       label: 'Enhanced AI voice narration with 50+ new voices'
-    },
-    {
-      mediaUrl: '/assets/videos/2.mp4',
-      mediaType: 'video',
-      label: 'Real-time collaboration on Canvas projects'
     }
   ];
 
@@ -107,13 +102,6 @@ export default function DashboardPage() {
       color: 'text-blue-500'
     },
     {
-      title: 'Canvas',
-      description: 'Design and create visual content',
-      icon: PiPaletteBold,
-      href: '/dashboard/canvas',
-      color: 'text-orange-500'
-    },
-    {
       title: 'Shorts',
       description: 'Generate short videos',
       icon: HiOutlineVideoCamera,
@@ -126,13 +114,6 @@ export default function DashboardPage() {
       icon: IoAlbumsOutline,
       href: '/dashboard/galleries',
       color: 'text-green-500'
-    },
-    {
-      title: 'Templates',
-      description: 'Use pre-made templates',
-      icon: IoLayersOutline,
-      href: '/dashboard/templates',
-      color: 'text-purple-500'
     }
   ]
 
@@ -142,12 +123,12 @@ export default function DashboardPage() {
         <div className="space-y-8">
           {/* Carousel of features */}
           <div className="relative overflow-hidden rounded-lg">
-            <div 
+            <div
               className="flex transition-transform duration-500 ease-in-out"
               style={{ transform: `translateX(-${currentFeatureIndex * 100}%)` }}
             >
               {features.map((feature, index) => (
-                <div 
+                <div
                   key={index}
                   className="min-w-full h-64 relative bg-muted"
                 >
@@ -216,20 +197,18 @@ export default function DashboardPage() {
           </div>
 
           {/* Nav cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {navCards.map((card) => {
               const Icon = card.icon
               return (
                 <Link key={card.href} href={card.href}>
                   <div className="transition-all duration-200 cursor-pointer h-full p-2 rounded-3xl border border-border bg-card">
                     <div className="flex flex-col items-start text-left space-y-3">
-                      <div className={`p-2 rounded-full bg-gradient-to-br ${
-                        card.title === 'Stories' ? 'from-blue-100 to-blue-200' :
-                        card.title === 'Canvas' ? 'from-orange-100 to-orange-200' :
+                      <div className={`p-2 rounded-full bg-gradient-to-br ${card.title === 'Stories' ? 'from-blue-100 to-blue-200' :
                         card.title === 'Shorts' ? 'from-red-100 to-red-200' :
-                        card.title === 'Galleries' ? 'from-green-100 to-green-200' :
-                        'from-purple-100 to-purple-200'
-                      }`}>
+                          card.title === 'Galleries' ? 'from-green-100 to-green-200' :
+                            'from-purple-100 to-purple-200'
+                        }`}>
                         <Icon className={`h-6 w-6 ${card.color}`} />
                       </div>
                       <div>

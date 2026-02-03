@@ -17,25 +17,8 @@ export interface ProductData {
 
 export const productsData: ProductData[] = [
   {
-    id: "canvas",
-    slug: "canvas",
-    title: "Canvas",
-    icon: "🎨",
-    description: "Infinite design workspace for creative projects and visual collaboration.",
-    benefit: "Design without limits",
-    image: "/assets/images/workspace.jpg",
-    href: "/products/canvas",
-    features: [
-      "Infinite canvas workspace",
-      "AI-powered design tools",
-      "Real-time collaboration"
-    ],
-    buttonText: "Start Creating",
-    buttonAction: "/dashboard"
-  },
-  {
     id: "galleries",
-    slug: "galleries", 
+    slug: "galleries",
     title: "Galleries",
     icon: "🖼️",
     description: "Curated collections of AI-generated images for creative projects.",
@@ -53,7 +36,7 @@ export const productsData: ProductData[] = [
   {
     id: "stories",
     slug: "stories",
-    title: "Stories", 
+    title: "Stories",
     icon: "📖",
     description: "AI-powered video storytelling and scene-based content creation.",
     benefit: "Tell compelling stories",
@@ -61,7 +44,7 @@ export const productsData: ProductData[] = [
     href: "/products/stories",
     features: [
       "AI video generation",
-      "Scene-based storytelling", 
+      "Scene-based storytelling",
       "Professional video output"
     ],
     buttonText: "Create Story",

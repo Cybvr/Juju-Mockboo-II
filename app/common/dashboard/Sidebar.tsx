@@ -103,12 +103,6 @@ export function Sidebar({ className, onNavigate, isExpanded = true, onToggle }: 
       active: pathname.startsWith('/dashboard/stories'),
     },
     {
-      label: 'Canvas',
-      icon: PiPaletteBold,
-      href: '/dashboard/canvas',
-      active: pathname.startsWith('/dashboard/canvas'),
-    },
-    {
       label: 'Shorts',
       icon: HiOutlineVideoCamera,
       href: '/dashboard/shorts',
@@ -119,12 +113,6 @@ export function Sidebar({ className, onNavigate, isExpanded = true, onToggle }: 
       icon: IoAlbumsOutline,
       href: '/dashboard/galleries',
       active: pathname.startsWith('/dashboard/galleries'),
-    },
-    {
-      label: 'Templates',
-      icon: IoLayersOutline,
-      href: '/dashboard/templates',
-      active: pathname.startsWith('/dashboard/templates'),
     },
   ];
 
@@ -260,15 +248,15 @@ export function Sidebar({ className, onNavigate, isExpanded = true, onToggle }: 
           <div className="pt-2 border-t w-full">
             {isExpanded ? (
               <div className="flex items-center justify-between px-2 gap-2">
-                 <ProfileDropdown />
-                 <div className="flex items-center gap-1">
-                   <SimpleCreditDisplay />
-                   <Link href="/pricing">
-                     <Button variant="ghost" size="icon" className="h-6 w-6">
-                       <Plus className="h-3 w-3" />
-                     </Button>
-                   </Link>
-                 </div>
+                <ProfileDropdown />
+                <div className="flex items-center gap-1">
+                  <SimpleCreditDisplay />
+                  <Link href="/pricing">
+                    <Button variant="ghost" size="icon" className="h-6 w-6">
+                      <Plus className="h-3 w-3" />
+                    </Button>
+                  </Link>
+                </div>
 
               </div>
             ) : (

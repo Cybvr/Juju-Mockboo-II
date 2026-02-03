@@ -38,7 +38,7 @@ export class DocumentService {
     if (typeof obj !== 'object') {
       return obj;
     }
-    
+
     // Simple JSON parsing to remove non-serializable properties
     return JSON.parse(JSON.stringify(obj));
   }
@@ -55,24 +55,6 @@ export class DocumentService {
     };
     try {
       const finalDoc = this.cleanObjectForFirestore(newDoc);
-      if (finalDoc.content?.canvasData) {
-        finalDoc.content.canvasData = this.cleanObjectForFirestore(finalDoc.content.canvasData, 0, new Set());
-        if (finalDoc.content.canvasData?.objects) {
-          finalDoc.content.canvasData.objects = finalDoc.content.canvasData.objects
-            .map((obj: any) => {
-              if (!obj || typeof obj !== 'object') return null;
-              const cleaned = { ...obj };
-              Object.keys(cleaned).forEach(key => {
-                const value = cleaned[key];
-                if (value && typeof value === 'object' && !Array.isArray(value) && !(value instanceof Date)) {
-                  delete cleaned[key];
-                }
-              });
-              return cleaned;
-            })
-            .filter(obj => obj !== null);
-        }
-      }
       const estimatedSize = JSON.stringify(finalDoc).length;
       if (estimatedSize > 900000) {
         if (finalDoc.content?.imageUrls) {
@@ -310,57 +292,7 @@ export class DocumentService {
     };
   }
 
-  async saveCanvas(userId: string, title: string, canvasData: any, thumbnail?: string): Promise<string> {
-    const documentData = {
-      title: title,
-      content: {
-        canvasData: canvasData,
-        thumbnail: thumbnail,
-        canvasVersion: "1.0"
-      },
-      tags: ["canvas", "design"],
-      type: "canvas" as const,
-      isPublic: false,
-      starred: false,
-      shared: false,
-      category: "Products" as const,
-    }
-    return await this.createDocument(userId, documentData)
-  }
 
-  async createCanvas(userId: string, title: string = "New Canvas"): Promise<string> {
-    const documentData = {
-      title: title,
-      content: {
-        canvasData: {
-          objects: [],
-          background: '#ffffff',
-          width: 800,
-          height: 600,
-          version: '1.0'
-        }
-      },
-      tags: ["canvas", "design"],
-      type: "canvas" as const,
-      isPublic: false,
-      starred: false,
-      shared: false,
-      category: "Products" as const,
-    }
-    return await this.createDocument(userId, documentData)
-  }
-
-  async updateCanvasData(documentId: string, canvasData: any): Promise<void> {
-    // Simple approach like CanvasX - direct JSON storage
-    const cleanData = JSON.parse(JSON.stringify(canvasData));
-    await this.updateDocument(documentId, {
-      content: {
-        canvasData: cleanData,
-        canvasVersion: "1.0"
-      },
-      updatedAt: new Date()
-    })
-  }
 
   async saveChatImage(
     userId: string,

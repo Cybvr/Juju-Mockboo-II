@@ -22,7 +22,6 @@ export default function DashboardLayout({
 
   // Check if current page should hide sidebar
   const shouldHideSidebar = pathname?.includes('/dashboard/images') ||
-    pathname?.includes('/dashboard/canvas') ||
     pathname?.includes('/dashboard/videos')
 
   // Prevent hydration mismatch by not rendering until mounted

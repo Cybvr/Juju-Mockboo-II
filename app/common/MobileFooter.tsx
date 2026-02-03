@@ -43,12 +43,6 @@ export function MobileFooter() {
       active: pathname.startsWith('/dashboard/stories')
     },
     {
-      label: 'Canvas',
-      icon: <PiPaletteBold className="h-5 w-5" />,
-      href: '/dashboard/canvas',
-      active: pathname.startsWith('/dashboard/canvas')
-    },
-    {
       label: 'Shorts',
       icon: <HiOutlineVideoCamera className="h-5 w-5" />,
       href: '/dashboard/shorts',
